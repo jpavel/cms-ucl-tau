@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
 <JobConfiguration JobName="AnalysisJob" OutputLevel="DEBUG">
+	<Library Name="libGenVector" />
+    <Library Name="libGraf" />
+    <Library Name="libPhysics" />
 	<Library Name="libZHtautauAnalysis"/>
 	
 	<Package Name="SFrameCore.par"/>

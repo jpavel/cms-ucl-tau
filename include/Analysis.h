@@ -13,9 +13,11 @@
 // c++ includes
 #include <string>
 #include <vector>
+#include <cmath>
 
 // my classes
 #include "myevent.h"
+#include "TLorentzVector.h"
 
 /**
  *   @short Put short description of class here
@@ -48,6 +50,8 @@ public:
 
    /// Function called for every event
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
+   
+   double deltaR(double eta1, double phi1, double eta2, double phi2);
 
 private:
    //
@@ -61,7 +65,7 @@ private:
 	// histograms
 	TH1* h_el_n;
     TH1* h_el_cut;
-    TH1* cutflow;
+    TH1* h_event_type;
 
 // properties
 	std::string InTreeName;

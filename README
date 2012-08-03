@@ -9,7 +9,7 @@ make
 cd ..
 
 # 3) checkout and compile analysis package
-svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk ZHtautauAnalysis
+svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.2 ZHtautauAnalysis
 cd ZHtautauAnalysis
 make
 

@@ -16,5 +16,7 @@
 #pragma link C++ class Analysis+;
 #pragma link C++ class myevent+;
 #pragma link C++ class myobject+;
+#pragma link C++ class TLorentzVector+;
+//#pragma link C++ class TLorentzVector+;
 
 #endif // __CINT__
