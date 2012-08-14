@@ -241,7 +241,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     m_logger << DEBUG << " There are " << tau.size() << " preselected taus " << SLogger::endmsg;
     
     for (uint i = 0; i < tau.size(); i++) {
-
+ if (m->eventNumber==555767) m_logger << DEBUG << " looping over tau no. " << i << SLogger::endmsg;
+   
 		double tauPt = tau[i].pt;
 		double tauEta = tau[i].eta;
 		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
@@ -255,7 +256,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     
     for(uint i = 0; i < goodTau.size(); i++)
 	{
-		for(uint j = 0; i < Zcand.size(); i++)
+		for(uint j = 0; j < Zcand.size(); j++)
 		{
 			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
 				goodTau.erase(goodTau.begin()+i);
@@ -282,8 +283,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(relIso < 0.15)
 			{
+				m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;	
+				for(uint j=0; j< goodElectron.size() && !muE; j++)
+				{
+					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
+					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+					muE=true;
+					Hcand.push_back(goodMuon[i]);
+					Hcand.push_back(goodElectron[j]);
+					goodMuon.erase(goodMuon.begin()+i);
+				    goodElectron.erase(goodElectron.begin()+j);
+				}
+				
 				m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;	
-				for(uint j=0; j< goodTau.size() && !muTau; j++)
+				for(uint j=0; j< goodTau.size() && !muTau && !muE; j++)
 				{
 					if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
 					if(goodTau[j].discriminationByMuonTight <=0.5) continue;
@@ -332,13 +345,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 					for(uint j=0; j< goodTau.size() && !muTau; j++)
 					{
-						if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
+						if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
 						if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 						if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.1) continue;
 						eTau=true;
 						Hcand.push_back(goodElectron[i]);
 						Hcand.push_back(goodTau[j]);
-						goodElectron.erase(goodMuon.begin()+i);
+						goodElectron.erase(goodElectron.begin()+i);
 					    goodTau.erase(goodTau.begin()+j);
 					}
 				}

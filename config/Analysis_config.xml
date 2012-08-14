@@ -13,7 +13,7 @@
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite" ProofWorkDir="" ProofNodes="-1">
 		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
-			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/output_Ntuples.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/output_Ntuples_ZZJetsTo4L_8TeV-madgraph.root" Lumi="1.0"/>
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
 		</InputData>
