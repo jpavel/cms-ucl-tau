@@ -82,6 +82,26 @@ double Analysis::deltaR(double eta1, double phi1, double eta2, double phi2){
 	return dR;
 }
 
+bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
+	bool passingId=false;
+	
+	if(pt>5. && pt<10. && fabs(eta)<0.8 && value>0.47)
+	passingId=true;
+	if(pt>5. && pt<10. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.004)
+	passingId=true;
+	if(pt>5. && pt<10. && fabs(eta)>=1.479 && value>0.295)
+	passingId=true;
+	
+	if(pt>10. && fabs(eta)<0.8 && value>0.5)
+	passingId=true;
+	if(pt>10. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.12)
+	passingId=true;
+	if(pt>10. && fabs(eta)>=1.479 && value>0.6)
+	passingId=true;
+	//  if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
+	return passingId;
+}
+
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
@@ -127,12 +147,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double ElIsoEcal = electron[i].pfIsoGamma;
 		double ElIsoHcal = electron[i].pfIsoNeutral;
 		double ElIsoPU = electron[i].pfIsoPU;
+		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 
 		double relIso = (ElIsoTrk) / electron[i].pt;
 		if (ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU > 0)
 			relIso = (ElIsoTrk + ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU) / (electron[i].pt);
 
-		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits < 1 && relIso < 0.25)
+		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits < 1 && relIso < 0.25 && elID)
 			goodElectron.push_back(electron[i]);
     }
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
