@@ -12,6 +12,8 @@ Analysis::Analysis()
    SetLogName( GetName() );
    DeclareProperty("InTreeName",InTreeName);
    DeclareProperty("MyPtCut",Ptcut);
+   DeclareProperty("BestMassForZ",BestMassForZ);
+   DeclareProperty("dZvertex", dZvertex);
 }
 
 Analysis::~Analysis() {
@@ -163,6 +165,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Zcand.clear();
 	bool Zmumu = false;
 	bool Zee = false;
+	double dMass = 999.;
+	int Zindex[2] = {-1,-1};
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
@@ -182,18 +186,37 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double mass = cand.M();
 			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
 			if(mass > 71 && mass < 111){ 
-				Zmumu=true; 
+				Zmumu=true;
+				double dM = 999.; 
+				if(BestMassForZ > 0.0){
+					Zmumu=false;
+					dM=fabs(mass-BestMassForZ);
+					if(dM < dMass){
+						Zindex[0]=i;
+						Zindex[1]=j;
+						dMass=dM;
+					}
+				}else{
+					Zindex[0]=i;
+					Zindex[1]=j;
+				}
+			}
+		}
+	}
+			if(Zindex[0] > -1 && Zindex[1] > -1){
+				int i = Zindex[0];
+				int j = Zindex[1];
 				Zcand.push_back(goodMuon[i]);
 				Zcand.push_back(goodMuon[j]);	
 				goodMuon.erase(goodMuon.begin()+i);
 				goodMuon.erase(goodMuon.begin()+j);
+				Zmumu=true;
 			}
-		}
-	}
  m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 	
 	if(!Zmumu)
 	{
+		dMass = 999.;
 		for(uint i = 0; i < goodElectron.size(); i++)
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
@@ -213,15 +236,33 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				double mass = cand.M();
 				m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
 				if(mass > 71 && mass < 111){ 
-					Zee=true; 
+					Zee=true;
+					double dM = 999.; 
+					if(BestMassForZ > 0.0){
+						Zee=false;
+						dM=fabs(mass-BestMassForZ);
+						if(dM < dMass){
+							Zindex[0]=i;
+							Zindex[1]=j;
+							dMass=dM;
+						}
+					}else{
+						Zindex[0]=i;
+						Zindex[1]=j;
+					} 
+					
+				}
+			}
+		}
+				if(Zindex[0] > -1 && Zindex[1] > -1){
+					int i = Zindex[0];
+					int j = Zindex[1];
 					Zcand.push_back(goodElectron[i]);
 					Zcand.push_back(goodElectron[j]);	
 					goodElectron.erase(goodElectron.begin()+i);
 					goodElectron.erase(goodElectron.begin()+j);
-				}
+					Zee=true;
 			}
-	}
-	
 	}
 	
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
@@ -262,7 +303,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     m_logger << DEBUG << " There are " << tau.size() << " preselected taus " << SLogger::endmsg;
     
     for (uint i = 0; i < tau.size(); i++) {
- if (m->eventNumber==555767) m_logger << DEBUG << " looping over tau no. " << i << SLogger::endmsg;
    
 		double tauPt = tau[i].pt;
 		double tauEta = tau[i].eta;
@@ -423,6 +463,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
 			return;
 		 }
+		 
+	// Same vertex check
+	
+	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
+	if(!dZ_expo)
+	{
+		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+		return;
+	}
 
 short event_type = 0;
 

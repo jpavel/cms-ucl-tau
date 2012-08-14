@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
-<JobConfiguration JobName="AnalysisJob" OutputLevel="DEBUG">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -20,6 +20,11 @@
 		<UserConfig>
 		<Item Name="InTreeName" Value="t"/>
         <Item Name="MyPtCut" Value="2000"/>
+			<!-- using lepton pair with the closest mass instead of highest Pt. To switch off use any negative value-->
+        <Item Name="BestMassForZ" Value="91.2" /> 
+        	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
+        <Item Name="dZvertex" Value="0.1" /> 
+        
 		</UserConfig>
 	</Cycle>
 </JobConfiguration>
