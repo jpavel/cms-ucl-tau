@@ -73,6 +73,7 @@ private:
 	double Ptcut;
 	double BestMassForZ;
 	double dZvertex;
+	double bTagValue;
 
 // output variables
 std::vector<float> out_pt;

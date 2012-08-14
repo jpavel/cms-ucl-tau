@@ -24,6 +24,8 @@
         <Item Name="BestMassForZ" Value="91.2" /> 
         	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
         <Item Name="dZvertex" Value="0.1" /> 
+			<!-- Value of b-tag weight for veto -->
+        <Item Name="bTagValue" Value="0.679" />
         
 		</UserConfig>
 	</Cycle>

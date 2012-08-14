@@ -14,6 +14,7 @@ Analysis::Analysis()
    DeclareProperty("MyPtCut",Ptcut);
    DeclareProperty("BestMassForZ",BestMassForZ);
    DeclareProperty("dZvertex", dZvertex);
+   DeclareProperty("bTagValue",bTagValue);
 }
 
 Analysis::~Analysis() {
@@ -59,6 +60,18 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 }
 
 void Analysis::EndInputData( const SInputData& ) throw( SError ) {
+	
+	std::cout << "Event type summary: " << std::endl;
+	std::cout << "Z(mumu)H(mutau)   : " << h_event_type->GetBinContent(1) << std::endl;
+	std::cout << "Z(mumu)H(muE)     : " << h_event_type->GetBinContent(2) << std::endl;
+	std::cout << "Z(mumu)H(Etau)    : " << h_event_type->GetBinContent(3) << std::endl;
+	std::cout << "Z(mumu)H(tautau)  : " << h_event_type->GetBinContent(4) << std::endl;
+	std::cout << "Z(EE)H(mutau)     : " << h_event_type->GetBinContent(5) << std::endl;
+	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << std::endl;
+	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
+	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
+	
+	
 
    return;
 
@@ -472,6 +485,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
 		return;
 	}
+	
+	// b-tag veto
+	bool bTagVeto = false;
+	std::vector<myobject> jet = m->RecPFJetsAK5;
+	for (uint i = 0; i < jet.size() && !bTagVeto; i++) {
+		double jetPt = jet[i].pt;
+		double jetEta = jet[i].eta;
+		double jetPhi = jet[i].phi;
+		double bTag = jet[i].bDiscriminatiors_CSV;
+		if(jetPt > 20 && fabs(jetEta) < 2.4 && bTag > bTagValue){
+			double dR1,dR2,dR3,dR4;
+			dR1=deltaR(jetEta,jetPhi,Zcand[0].eta,Zcand[0].phi);
+			dR2=deltaR(jetEta,jetPhi,Zcand[1].eta,Zcand[1].phi);
+			dR3=deltaR(jetEta,jetPhi,Hcand[0].eta,Hcand[0].phi);
+			dR4=deltaR(jetEta,jetPhi,Hcand[1].eta,Hcand[1].phi);
+			if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ) bTagVeto = true;			
+		}
+	}
+	if(bTagVeto)
+	{
+		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
+		return;
+	}
+	
 
 short event_type = 0;
 
