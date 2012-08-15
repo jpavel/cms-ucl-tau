@@ -42,6 +42,14 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_mu2Z_pt        = Book(TH1D("h_mu2Z_pt","muon2_Pt",200,0,200));
     h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu","Zmumu_mass",100,50,150));
     h_Zpt_mumu       = Book(TH1D("h_Zpt_mumu","Zmumu_pt",200,0,200));
+    
+    h_el1Z_pt        = Book(TH1D("h_el1Z_pt","elon1_Pt",200,0,200));
+    h_el2Z_pt        = Book(TH1D("h_el2Z_pt","elon2_Pt",200,0,200));
+    h_Zmass_elel     = Book(TH1D("h_Zmass_elel","Zelel_mass",100,50,150));
+    h_Zpt_elel       = Book(TH1D("h_Zpt_elel","Zelel_pt",200,0,200));
+    
+    h_n_goodEl		 = Book(TH1D("h_n_goodEl","good electrons;Number of good electrons",10,-0.5,9.5));
+	h_n_goodMu		 = Book(TH1D("h_n_goodMu","good muons;Number of good muons",10,-0.5,9.5));
 
 
 
@@ -155,6 +163,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodMuon.push_back(muon[i]);
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
+	Hist("h_n_goodMu")->Fill(goodMuon.size());
 	
         std::vector<myobject> electron = m->PreSelectedElectrons;
         m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
@@ -178,6 +187,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodElectron.push_back(electron[i]);
     }
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
+	Hist("h_n_goodEl")->Fill(goodElectron.size());
+	
 	
 	// Z compatibility
 	std::vector<myobject> Zcand;
@@ -292,13 +303,26 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 				if(Zindex[0] > -1 && Zindex[1] > -1){
+		            TLorentzVector el1;
+					TLorentzVector el2;
+					TLorentzVector Z;
 					int i = Zindex[0];
 					int j = Zindex[1];
 					Zcand.push_back(goodElectron[i]);
-					Zcand.push_back(goodElectron[j]);	
+					Zcand.push_back(goodElectron[j]);
+		        
+		            el1.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);        
+					el2.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);        
+					Z=el1+el2;	
+				
 					goodElectron.erase(goodElectron.begin()+i);
 					goodElectron.erase(goodElectron.begin()+j);
-					Zee=true;
+					Zee=true;	
+					                                
+					Hist( "h_el1Z_pt" )->Fill(el1.Pt());
+					Hist( "h_el2Z_pt" )->Fill(el2.Pt());
+					Hist( "h_Zmass_elel" )->Fill(Z.M());
+					Hist( "h_Zpt_elel" )->Fill(Z.Pt());
 			}
 	}
 	

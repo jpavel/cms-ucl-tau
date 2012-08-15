@@ -71,6 +71,13 @@ private:
         TH1* h_mu2Z_pt;
         TH1* h_Zmass_mumu;
         TH1* h_Zpt_mumu;
+        TH1* h_el1Z_pt;
+        TH1* h_el2Z_pt;
+        TH1* h_Zmass_elel;
+        TH1* h_Zpt_elel;
+        
+        TH1* h_n_goodMu;
+        TH1* h_n_goodEl;
 
 // properties
 	std::string InTreeName;
