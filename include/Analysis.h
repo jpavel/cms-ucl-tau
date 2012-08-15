@@ -71,13 +71,30 @@ private:
         TH1* h_mu2Z_pt;
         TH1* h_Zmass_mumu;
         TH1* h_Zpt_mumu;
-        TH1* h_el1Z_pt;
-        TH1* h_el2Z_pt;
-        TH1* h_Zmass_elel;
-        TH1* h_Zpt_elel;
-        
-        TH1* h_n_goodMu;
-        TH1* h_n_goodEl;
+        TH1* h_ele1Z_pt;
+        TH1* h_ele2Z_pt;
+        TH1* h_Zmass_ee;
+        TH1* h_Zpt_ee;
+        TH1* h_Zmass;
+        TH1* h_Zpt;
+        TH1* h_eH_eTau_pt;
+        TH1* h_tauH_eTau_pt;
+        TH1* h_H_eTau_pt;
+        TH1* h_H_eTau_mass;
+        TH1* h_muH_muTau_pt;
+        TH1* h_tauH_muTau_pt;
+        TH1* h_H_muTau_pt;
+        TH1* h_H_muTau_mass;
+        TH1* h_muH_muE_pt;
+        TH1* h_eH_muE_pt;
+        TH1* h_H_muE_pt;
+        TH1* h_H_muE_mass;
+        TH1* h_tau1H_tauTau_pt;
+        TH1* h_tau2H_tauTau_pt;
+        TH1* h_H_tauTau_pt;
+        TH1* h_H_tauTau_mass;
+        TH1* h_H_pt;
+        TH1* h_H_mass;
 
 // properties
 	std::string InTreeName;

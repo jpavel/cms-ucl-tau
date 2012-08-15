@@ -35,23 +35,48 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
-    h_el_n           = Book(TH1D("el_n","el_n",50,0,50));
-    h_el_cut         = Book(TH1D("el_cit","el_cut",50,0,50));
-    h_event_type     = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
-    h_mu1Z_pt        = Book(TH1D("h_mu1Z_pt","muon1_Pt",200,0,200));
-    h_mu2Z_pt        = Book(TH1D("h_mu2Z_pt","muon2_Pt",200,0,200));
-    h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu","Zmumu_mass",100,50,150));
-    h_Zpt_mumu       = Book(TH1D("h_Zpt_mumu","Zmumu_pt",200,0,200));
-    
-    h_el1Z_pt        = Book(TH1D("h_el1Z_pt","elon1_Pt",200,0,200));
-    h_el2Z_pt        = Book(TH1D("h_el2Z_pt","elon2_Pt",200,0,200));
-    h_Zmass_elel     = Book(TH1D("h_Zmass_elel","Zelel_mass",100,50,150));
-    h_Zpt_elel       = Book(TH1D("h_Zpt_elel","Zelel_pt",200,0,200));
-    
-    h_n_goodEl		 = Book(TH1D("h_n_goodEl","good electrons;Number of good electrons",10,-0.5,9.5));
-	h_n_goodMu		 = Book(TH1D("h_n_goodMu","good muons;Number of good muons",10,-0.5,9.5));
+    h_el_n              = Book(TH1D("el_n","el_n",50,0,50));
+    h_el_cut            = Book(TH1D("el_cit","el_cut",50,0,50));
+    h_event_type        = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
 
+    //Z->mumu    
+    h_mu1Z_pt           = Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
+    h_mu2Z_pt           = Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));
+    h_Zmass_mumu        = Book(TH1D("h_Zmass_mumu","Zmumu_mass",60,60,120));
+    h_Zpt_mumu          = Book(TH1D("h_Zpt_mumu","Zmumu_pt",300,0,300));
+    //Z->ee    
+    h_ele1Z_pt          = Book(TH1D("h_ele1Z_pt","ele1_Pt",300,0,300));
+    h_ele2Z_pt          = Book(TH1D("h_ele2Z_pt","ele2_Pt",300,0,300));
+    h_Zmass_ee          = Book(TH1D("h_Zmass_ee","Zee_mass",60,60,120));
+    h_Zpt_ee            = Book(TH1D("h_Zpt_ee","Zee_pt",300,0,300));
+    //Z
+    h_Zmass             = Book(TH1D("h_Zmass","Z_mass",60,60,120));
+    h_Zpt               = Book(TH1D("h_Zpt","Z_pt",300,0,300));
 
+    //H->eTau
+    h_eH_eTau_pt        = Book(TH1D("h_eH_eTau_pt","H->e tau, ele pt",100,0,300));
+    h_tauH_eTau_pt      = Book(TH1D("h_tauH_eTau_pt","H->e tau, tau pt",100,0,300));
+    h_H_eTau_pt         = Book(TH1D("h_H_eTau_pt","H->e tau, H pt",100,0,300));
+    h_H_eTau_mass       = Book(TH1D("h_H_eTau_mass","H->e tau, H visible mass",100,0,300));
+    //H->muTau
+    h_muH_muTau_pt      = Book(TH1D("h_muH_muTau_pt","H->mu tau, mu pt",100,0,300));
+    h_tauH_muTau_pt     = Book(TH1D("h_tauH_muTau_pt","H->mu tau, tau pt",100,0,300));
+    h_H_muTau_pt        = Book(TH1D("h_H_muTau_pt","H->mu tau, H pt",100,0,300));
+    h_H_muTau_mass      = Book(TH1D("h_H_muTau_mass","H->mu tau, H visible mass",100,0,300));
+    //H->muE
+    h_muH_muE_pt        = Book(TH1D("h_muH_muE_pt","H->mu e, mu pt",100,0,300));
+    h_eH_muE_pt         = Book(TH1D("h_eH_muE_pt","H->mu e, e pt",100,0,300));
+    h_H_muE_pt          = Book(TH1D("h_H_muE_pt","H->mu e, H pt",100,0,300));
+    h_H_muE_mass        = Book(TH1D("h_H_muE_mass","H->mu e, H visible mass",100,0,300));
+    //H->tauTau
+    h_tau1H_tauTau_pt   = Book(TH1D("h_tau1H_tauTau_pt","H->tau tau, tau1 pt",100,0,300));
+    h_tau2H_tauTau_pt   = Book(TH1D("h_tau2H_tauTau_pt","H->tau tau, tau2 pt",100,0,300));
+    h_H_tauTau_pt       = Book(TH1D("h_H_tauTau_pt","H->tau tau, H pt",100,0,300));
+    h_H_tauTau_mass    = Book(TH1D("h_H_tauTau_mass","H->tau tau, H visible mass",100,0,300));
+    //Higgs
+    h_H_pt           = Book(TH1D("h_H_pt","H pt (all final states)",100,0,300));
+    h_H_mass         = Book(TH1D("h_H_mass","H mass (all final states)",100,0,300));
+ 
 
    DeclareVariable(out_pt,"el_pt");
 
@@ -82,8 +107,6 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << std::endl;
 	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
-	
-        
         std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 	
 
@@ -163,7 +186,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodMuon.push_back(muon[i]);
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
-	Hist("h_n_goodMu")->Fill(goodMuon.size());
 	
         std::vector<myobject> electron = m->PreSelectedElectrons;
         m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
@@ -187,8 +209,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodElectron.push_back(electron[i]);
     }
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
-	Hist("h_n_goodEl")->Fill(goodElectron.size());
-	
 	
 	// Z compatibility
 	std::vector<myobject> Zcand;
@@ -221,12 +241,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                             if(BestMassForZ > 0.0){
                                 Zmumu=false;
                                 dM=fabs(mass-BestMassForZ);
-                                m_logger << VERBOSE <<" dM: "<< dM << SLogger::endmsg;
+                                //std::cout<<"mass: "<<mass<<"dM: "<<dM<<std::endl;        
                                 if(dM < dMass){
 						Zindex[0]=i;
 						Zindex[1]=j;
                                                 dMass=dM;
-                                m_logger << VERBOSE <<" dMass: "<< dMass <<SLogger::endmsg;       
+                                //std::cout<<"mass: "<<mass<<"dMass: "<<dM<<std::endl;        
                                         }
                         }else{
                             Zindex[0]=i;
@@ -238,22 +258,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Zindex[0] > -1 && Zindex[1] > -1){
                                 TLorentzVector muon1;
                                 TLorentzVector muon2;
-                                TLorentzVector Z;
+                                TLorentzVector Zmumu_;
 				int i = Zindex[0];
 				int j = Zindex[1];
 				Zcand.push_back(goodMuon[i]);
 				Zcand.push_back(goodMuon[j]);
                                 muon1.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);        
                                 muon2.SetPxPyPzE(goodMuon[j].px,goodMuon[j].py,goodMuon[j].pz,goodMuon[j].E);        
-                                Z=muon1+muon2;        
+                                Zmumu_=muon1+muon2;        
 				goodMuon.erase(goodMuon.begin()+i);
 				goodMuon.erase(goodMuon.begin()+j);
-                                        m_logger << DEBUG <<"the mass of the Z(mumu) candidate is: " << Z.M()<<std::endl;
 				Zmumu=true;
                                         Hist( "h_mu1Z_pt" )->Fill(muon1.Pt());
                                         Hist( "h_mu2Z_pt" )->Fill(muon2.Pt());
-                                        Hist( "h_Zmass_mumu" )->Fill(Z.M());
-                                        Hist( "h_Zpt_mumu" )->Fill(Z.Pt());
+                                        Hist( "h_Zmass_mumu" )->Fill(Zmumu_.M());
+                                        Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt());
+                                        Hist( "h_Zmass" )->Fill(Zmumu_.M());
+                                        Hist( "h_Zpt" )->Fill(Zmumu_.Pt());
 			}
 
 
@@ -286,13 +307,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(BestMassForZ > 0.0){
 						Zee=false;
 						dM=fabs(mass-BestMassForZ);
-						m_logger << VERBOSE <<" dM: "<< dM << SLogger::endmsg;
 						if(dM < dMass){
 							Zindex[0]=i;
 							Zindex[1]=j;
 							dMass=dM;
-							m_logger << VERBOSE <<" dMass: "<< dMass <<SLogger::endmsg;       
-                      
 						}
 					}else{
 						Zindex[0]=i;
@@ -303,26 +321,25 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 				if(Zindex[0] > -1 && Zindex[1] > -1){
-		            TLorentzVector el1;
-					TLorentzVector el2;
-					TLorentzVector Z;
+                                    TLorentzVector ele1;
+                                    TLorentzVector ele2;
+                                    TLorentzVector Zee_;
 					int i = Zindex[0];
 					int j = Zindex[1];
+                                        ele1.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);        
+                                        ele2.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);        
+                                        Zee_=ele1+ele2;        
 					Zcand.push_back(goodElectron[i]);
-					Zcand.push_back(goodElectron[j]);
-		        
-		            el1.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);        
-					el2.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);        
-					Z=el1+el2;	
-				
+					Zcand.push_back(goodElectron[j]);	
 					goodElectron.erase(goodElectron.begin()+i);
 					goodElectron.erase(goodElectron.begin()+j);
-					Zee=true;	
-					                                
-					Hist( "h_el1Z_pt" )->Fill(el1.Pt());
-					Hist( "h_el2Z_pt" )->Fill(el2.Pt());
-					Hist( "h_Zmass_elel" )->Fill(Z.M());
-					Hist( "h_Zpt_elel" )->Fill(Z.Pt());
+					Zee=true;
+                                        Hist( "h_ele1Z_pt" )->Fill(ele1.Pt());
+                                        Hist( "h_ele2Z_pt" )->Fill(ele2.Pt());
+                                        Hist( "h_Zmass_ee" )->Fill(Zee_.M());
+                                        Hist( "h_Zpt_ee" )->Fill(Zee_.Pt());
+                                        Hist( "h_Zmass" )->Fill(Zee_.M());
+                                        Hist( "h_Zpt" )->Fill(Zee_.Pt());
 			}
 	}
 	
@@ -391,7 +408,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool muTau=false;
 		bool muE = false;
 		std::vector<myobject> Hcand;
-	    Hcand.clear();
+                Hcand.clear();
 		for(uint i = 0; i < goodMuon.size() && !muTau && !muE; i++)
 		{
 			double MuIsoTrk = goodMuon[i].pfIsoCharged;
@@ -406,16 +423,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(relIso < 0.15)
 			{
 				m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;	
-				for(uint j=0; j< goodElectron.size() && !muE; j++)
-				{
-					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
-					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
-					muE=true;
-					Hcand.push_back(goodMuon[i]);
-					Hcand.push_back(goodElectron[j]);
-					goodMuon.erase(goodMuon.begin()+i);
-				    goodElectron.erase(goodElectron.begin()+j);
-				}
+				//for(uint j=0; j< goodElectron.size() && !muE; j++)
+				//{
+				//	if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
+				//	if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+				//	muE=true;
+				//	Hcand.push_back(goodMuon[i]);
+				//	Hcand.push_back(goodElectron[j]);
+				//	goodMuon.erase(goodMuon.begin()+i);
+                                //      goodElectron.erase(goodElectron.begin()+j);
+
+				//}
 				
 				m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;	
 				for(uint j=0; j< goodTau.size() && !muTau && !muE; j++)
@@ -426,8 +444,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					muTau=true;
 					Hcand.push_back(goodMuon[i]);
 					Hcand.push_back(goodTau[j]);
-					goodMuon.erase(goodMuon.begin()+i);
-				    goodTau.erase(goodTau.begin()+j);
+
+                                        TLorentzVector muH_muTau,tauH_muTau,H_muTau;
+                                        muH_muTau.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                        tauH_muTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
+                                        H_muTau = muH_muTau+tauH_muTau;
+                                        Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt());
+                                        Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt());
+                                        Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt());
+                                        Hist( "h_H_muTau_mass" )->Fill(H_muTau.M());
+                                        Hist( "h_H_pt" )->Fill(H_muTau.Pt());
+                                        Hist( "h_H_mass" )->Fill(H_muTau.M());
+                                        
+                                        goodMuon.erase(goodMuon.begin()+i);
+                                        goodTau.erase(goodTau.begin()+j);
+
 				}
 			}else {//muE candidate
 				m_logger << DEBUG << " Checking for muE " << SLogger::endmsg;	
@@ -438,8 +469,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					muE=true;
 					Hcand.push_back(goodMuon[i]);
 					Hcand.push_back(goodElectron[j]);
-					goodMuon.erase(goodMuon.begin()+i);
-				    goodElectron.erase(goodElectron.begin()+j);
+                                        
+                                        TLorentzVector muH_muE,eH_muE,H_muE;
+                                        muH_muE.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                        eH_muE.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
+                                        H_muE = muH_muE+eH_muE;
+                                        Hist( "h_muH_muE_pt" )->Fill(muH_muE.Pt());
+                                        Hist( "h_eH_muE_pt" )->Fill(eH_muE.Pt());
+                                        Hist( "h_H_muE_pt" )->Fill(H_muE.Pt());
+                                        Hist( "h_H_muE_mass" )->Fill(H_muE.M());
+                                        Hist( "h_H_pt" )->Fill(H_muE.Pt());
+                                        Hist( "h_H_mass" )->Fill(H_muE.M());
+					
+                                        goodMuon.erase(goodMuon.begin()+i);
+                                        goodElectron.erase(goodElectron.begin()+j);
 				}
 			}
 		}
@@ -473,8 +516,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						eTau=true;
 						Hcand.push_back(goodElectron[i]);
 						Hcand.push_back(goodTau[j]);
-						goodElectron.erase(goodElectron.begin()+i);
-					    goodTau.erase(goodTau.begin()+j);
+
+                                                TLorentzVector eH_eTau,tauH_eTau,H_eTau;
+                                                eH_eTau.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);
+                                                tauH_eTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
+                                                H_eTau = eH_eTau+tauH_eTau;
+                                                Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt());
+                                                Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt());
+                                                Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt());
+                                                Hist( "h_H_eTau_mass" )->Fill(H_eTau.M());
+                                                Hist( "h_H_pt" )->Fill(H_eTau.Pt());
+                                                Hist( "h_H_mass" )->Fill(H_eTau.M());
+						
+                                                goodElectron.erase(goodElectron.begin()+i);
+                                                goodTau.erase(goodTau.begin()+j);
 					}
 				}
 			}
@@ -504,8 +559,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						tauTau=true;
 						Hcand.push_back(goodTau[i]);
 						Hcand.push_back(goodTau[j]);
-						goodTau.erase(goodTau.begin()+i);
-					    goodTau.erase(goodTau.begin()+j);
+
+                                                TLorentzVector tau1H_tauTau,tau2H_tauTau,H_tauTau;
+                                                tau1H_tauTau.SetPxPyPzE(goodTau[i].px,goodTau[i].py,goodTau[i].pz,goodTau[i].E);
+                                                tau2H_tauTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
+                                                H_tauTau = tau1H_tauTau+tau2H_tauTau;
+                                                Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt());
+                                                Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt());
+                                                Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt());
+                                                Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M());
+                                                Hist( "h_H_pt" )->Fill(H_tauTau.Pt());
+                                                Hist( "h_H_mass" )->Fill(H_tauTau.M());
+						
+                                                goodTau.erase(goodTau.begin()+i);
+                                                goodTau.erase(goodTau.begin()+j);
 					}
 				
 			}
