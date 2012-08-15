@@ -35,9 +35,13 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
-	h_el_n=Book(TH1D("el_n","el_n",50,0,50));
-    h_el_cut=Book(TH1D("el_cit","el_cut",50,0,50));
-    h_event_type=Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
+    h_el_n           = Book(TH1D("el_n","el_n",50,0,50));
+    h_el_cut         = Book(TH1D("el_cit","el_cut",50,0,50));
+    h_event_type     = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
+    h_mu1Z_pt        = Book(TH1D("h_mu1Z_pt ","muon1_Pt",200,0,200));
+    h_mu2Z_pt        = Book(TH1D("h_mu2Z_pt ","muon2_Pt",200,0,200));
+    h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu ","Zmumu_mass",100,0,100));
+    h_Zpt_mumu       = Book(TH1D("h_Zpt_mumu ","Zmumu_pt",200,0,200));
 
 
 
@@ -45,11 +49,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 
 	 h_event_type = Retrieve<TH1D>("h_event_type");
-     h_event_type->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
-     h_event_type->GetXaxis()->SetBinLabel(2,"Z(#mu#mu)H(#mu e)");
-     h_event_type->GetXaxis()->SetBinLabel(3,"Z(#mu#mu)H(e#tau)");
-     h_event_type->GetXaxis()->SetBinLabel(4,"Z(#mu#mu)H(#tau#tau)");
-     h_event_type->GetXaxis()->SetBinLabel(5,"Z(ee)H(#mu#tau)");
+         h_event_type->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
+         h_event_type->GetXaxis()->SetBinLabel(2,"Z(#mu#mu)H(#mu e)");
+         h_event_type->GetXaxis()->SetBinLabel(3,"Z(#mu#mu)H(e#tau)");
+         h_event_type->GetXaxis()->SetBinLabel(4,"Z(#mu#mu)H(#tau#tau)");
+         h_event_type->GetXaxis()->SetBinLabel(5,"Z(ee)H(#mu#tau)");
 	 h_event_type->GetXaxis()->SetBinLabel(6,"Z(ee)H(#mu e)");
 	 h_event_type->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
 	 h_event_type->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
@@ -71,6 +75,8 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 	
+        
+        std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 	
 
    return;
@@ -121,10 +127,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
-	std::vector<myobject> goodMuon;
-    goodMuon.clear();
-    std::vector<myobject> goodElectron;
-    goodElectron.clear();
+        std::vector<myobject> goodMuon;
+        goodMuon.clear();
+        std::vector<myobject> goodElectron;
+        goodElectron.clear();
     
     std::vector<myobject> muon = m->PreSelectedMuons;
     m_logger << VERBOSE << " There are " << muon.size() << " preselected muons " << SLogger::endmsg;
@@ -150,8 +156,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
 	
-	std::vector<myobject> electron = m->PreSelectedElectrons;
-    m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
+        std::vector<myobject> electron = m->PreSelectedElectrons;
+        m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
 
      for (uint i = 0; i < electron.size(); i++) {
 
@@ -178,8 +184,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Zcand.clear();
 	bool Zmumu = false;
 	bool Zee = false;
-	double dMass = 999.;
-	int Zindex[2] = {-1,-1};
+	double dMass=999.0;
+        int Zindex[2] = {-1,-1};
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
@@ -198,33 +204,48 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
 			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-			if(mass > 71 && mass < 111){ 
-				Zmumu=true;
-				double dM = 999.; 
-				if(BestMassForZ > 0.0){
-					Zmumu=false;
-					dM=fabs(mass-BestMassForZ);
-					if(dM < dMass){
+                        if(mass > 71 && mass < 111){
+                            Zmumu=true;
+                            double dM = 999.;
+                            if(BestMassForZ > 0.0){
+                                Zmumu=false;
+                                dM=fabs(mass-BestMassForZ);
+                                std::cout<<"mass: "<<mass<<"dM: "<<dM<<std::endl;        
+                                if(dM < dMass){
 						Zindex[0]=i;
 						Zindex[1]=j;
-						dMass=dM;
-					}
-				}else{
-					Zindex[0]=i;
-					Zindex[1]=j;
-				}
-			}
-		}
-	}
+                                                dMass=dM;
+                                std::cout<<"mass: "<<mass<<"dMass: "<<dM<<std::endl;        
+                                        }
+                        }else{
+                            Zindex[0]=i;
+                            Zindex[1]=j;
+                                }
+                        }
+                 }
+        }
 			if(Zindex[0] > -1 && Zindex[1] > -1){
+                                TLorentzVector muon1;
+                                TLorentzVector muon2;
+                                TLorentzVector Z;
 				int i = Zindex[0];
 				int j = Zindex[1];
 				Zcand.push_back(goodMuon[i]);
-				Zcand.push_back(goodMuon[j]);	
+				Zcand.push_back(goodMuon[j]);
+                                muon1.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);        
+                                muon2.SetPxPyPzE(goodMuon[j].px,goodMuon[j].py,goodMuon[j].pz,goodMuon[j].E);        
+                                Z=muon1+muon2;        
 				goodMuon.erase(goodMuon.begin()+i);
 				goodMuon.erase(goodMuon.begin()+j);
+                                        std::cout<<"the mass of the Z candidate is: " <<Z.M()<<std::endl;
 				Zmumu=true;
+                                        Hist( "h_mu1Z_pt" )->Fill(muon1.Pt());
+                                        Hist( "h_mu2Z_pt" )->Fill(muon2.Pt());
+                                        Hist( "h_Zmass_mumu" )->Fill(Z.M());
+                                        Hist( "h_Zpt_mumu" )->Fill(Z.Pt());
 			}
+
+
  m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 	
 	if(!Zmumu)
@@ -510,7 +531,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 
-short event_type = 0;
+        short event_type = 0;
 
 	if(Zmumu)
 	{
