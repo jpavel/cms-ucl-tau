@@ -38,10 +38,10 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_el_n           = Book(TH1D("el_n","el_n",50,0,50));
     h_el_cut         = Book(TH1D("el_cit","el_cut",50,0,50));
     h_event_type     = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
-    h_mu1Z_pt        = Book(TH1D("h_mu1Z_pt ","muon1_Pt",200,0,200));
-    h_mu2Z_pt        = Book(TH1D("h_mu2Z_pt ","muon2_Pt",200,0,200));
-    h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu ","Zmumu_mass",100,0,100));
-    h_Zpt_mumu       = Book(TH1D("h_Zpt_mumu ","Zmumu_pt",200,0,200));
+    h_mu1Z_pt        = Book(TH1D("h_mu1Z_pt","muon1_Pt",200,0,200));
+    h_mu2Z_pt        = Book(TH1D("h_mu2Z_pt","muon2_Pt",200,0,200));
+    h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu","Zmumu_mass",100,0,100));
+    h_Zpt_mumu       = Book(TH1D("h_Zpt_mumu","Zmumu_pt",200,0,200));
 
 
 
