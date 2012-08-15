@@ -1,0 +1,26 @@
+### installation
+# 1) make sure you have set-up the ROOT environment
+
+# 2) checkout and compile SFRAME
+svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
+cd SFrame
+source setup.sh
+make
+cd ..
+
+# 3) checkout and compile analysis package
+svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.2 ZHtautauAnalysis
+cd ZHtautauAnalysis
+make
+
+# 4) RUN! (change input file defined in Analysis_config.xml appropriatelly)
+cd config
+sframe-main  Analysis_config.xml 
+
+
+########### misc
+##making a tag
+svn copy svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.1 -m "new tag"
+
+## switching to a new tag
+svn switch  svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.3

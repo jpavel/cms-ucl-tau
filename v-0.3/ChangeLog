@@ -1,0 +1,11 @@
+2012-08-14 Pavel Jez <pavel.jez@cern.ch>
+	* bugfix of segmentation fault
+	* adding electron ID
+	* adding Z cand selection according to best mass match
+	* adding common vertex requirement
+	* adding b-tag veto
+	* tag v-0.3
+	
+2012-08-01 Pavel Jez <pavel.jez@cern.ch> 
+	* creating initial tag
+	* tag v-0.1
