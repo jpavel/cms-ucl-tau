@@ -95,6 +95,13 @@ private:
         TH1* h_H_tauTau_mass;
         TH1* h_H_pt;
         TH1* h_H_mass;
+        
+        TH1* h_n_goodEl;
+        TH1* h_n_goodMu;
+        
+        TH1* h_el_relIso;
+        TH1* h_mu_relIso;
+        
 
 // properties
 	std::string InTreeName;

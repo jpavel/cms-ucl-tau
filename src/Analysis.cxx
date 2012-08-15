@@ -76,8 +76,14 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     //Higgs
     h_H_pt           = Book(TH1D("h_H_pt","H pt (all final states)",100,0,300));
     h_H_mass         = Book(TH1D("h_H_mass","H mass (all final states)",100,0,300));
- 
+    
+    // lepton histograms
+    h_n_goodEl		= Book(TH1D("h_n_goodEl","Number of good electrons; good electrons",10,-0.5,9.5));
+	h_n_goodMu		= Book(TH1D("h_n_goodMu","Number of good muons; good muons",10,-0.5,9.5));
 
+	h_el_relIso		= Book(TH1D("h_el_relIso","Relative electron isolation; relIso(el)",100,0.0,1.0));
+	h_mu_relIso		= Book(TH1D("h_mu_relIso","Relative muon isolation; relIso(mu)",100,0.0,1.0));
+   
    DeclareVariable(out_pt,"el_pt");
 
 
@@ -183,10 +189,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (muon[i].pt);
 
 		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && MunHit > 10 && relIso < 0.25)
-			goodMuon.push_back(muon[i]);
+		{
+					goodMuon.push_back(muon[i]);
+					Hist("h_mu_relIso")->Fill(relIso);
+		}
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
-	
+	Hist("h_n_goodMu")->Fill(goodMuon.size());
         std::vector<myobject> electron = m->PreSelectedElectrons;
         m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
 
@@ -206,10 +215,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			relIso = (ElIsoTrk + ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU) / (electron[i].pt);
 
 		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits < 1 && relIso < 0.25 && elID)
+		{
 			goodElectron.push_back(electron[i]);
+			Hist("h_el_relIso")->Fill(relIso);
+		}
     }
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
-	
+	Hist("h_n_goodEl")->Fill(goodElectron.size());
 	// Z compatibility
 	std::vector<myobject> Zcand;
 	Zcand.clear();
