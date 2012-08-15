@@ -40,7 +40,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_event_type     = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
     h_mu1Z_pt        = Book(TH1D("h_mu1Z_pt","muon1_Pt",200,0,200));
     h_mu2Z_pt        = Book(TH1D("h_mu2Z_pt","muon2_Pt",200,0,200));
-    h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu","Zmumu_mass",100,0,100));
+    h_Zmass_mumu     = Book(TH1D("h_Zmass_mumu","Zmumu_mass",100,50,150));
     h_Zpt_mumu       = Book(TH1D("h_Zpt_mumu","Zmumu_pt",200,0,200));
 
 
@@ -210,12 +210,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                             if(BestMassForZ > 0.0){
                                 Zmumu=false;
                                 dM=fabs(mass-BestMassForZ);
-                                std::cout<<"mass: "<<mass<<"dM: "<<dM<<std::endl;        
+                                m_logger << VERBOSE <<" dM: "<< dM << SLogger::endmsg;
                                 if(dM < dMass){
 						Zindex[0]=i;
 						Zindex[1]=j;
                                                 dMass=dM;
-                                std::cout<<"mass: "<<mass<<"dMass: "<<dM<<std::endl;        
+                                m_logger << VERBOSE <<" dMass: "<< dMass <<SLogger::endmsg;       
                                         }
                         }else{
                             Zindex[0]=i;
@@ -237,7 +237,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 Z=muon1+muon2;        
 				goodMuon.erase(goodMuon.begin()+i);
 				goodMuon.erase(goodMuon.begin()+j);
-                                        std::cout<<"the mass of the Z candidate is: " <<Z.M()<<std::endl;
+                                        m_logger << DEBUG <<"the mass of the Z(mumu) candidate is: " << Z.M()<<std::endl;
 				Zmumu=true;
                                         Hist( "h_mu1Z_pt" )->Fill(muon1.Pt());
                                         Hist( "h_mu2Z_pt" )->Fill(muon2.Pt());
@@ -275,10 +275,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(BestMassForZ > 0.0){
 						Zee=false;
 						dM=fabs(mass-BestMassForZ);
+						m_logger << VERBOSE <<" dM: "<< dM << SLogger::endmsg;
 						if(dM < dMass){
 							Zindex[0]=i;
 							Zindex[1]=j;
 							dMass=dM;
+							m_logger << VERBOSE <<" dMass: "<< dMass <<SLogger::endmsg;       
+                      
 						}
 					}else{
 						Zindex[0]=i;
