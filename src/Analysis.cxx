@@ -84,6 +84,9 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_el_relIso		= Book(TH1D("h_el_relIso","Relative electron isolation; relIso(el)",100,0.0,1.0));
 	h_mu_relIso		= Book(TH1D("h_mu_relIso","Relative muon isolation; relIso(mu)",100,0.0,1.0));
    
+    h_n_goodEl_Hcand		= Book(TH1D("h_n_goodEl_Hcand","Number of good electrons; good electrons",10,-0.5,9.5));
+	h_n_goodMu_Hcand		= Book(TH1D("h_n_goodMu_Hcand","Number of good muons; good muons",10,-0.5,9.5));
+    h_n_goodTau_Hcand		= Book(TH1D("h_n_goodTau_Hcand","Number of good taus; good taus",10,-0.5,9.5));
    DeclareVariable(out_pt,"el_pt");
 
 
@@ -371,6 +374,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				goodMuon.erase(goodMuon.begin()+i);
 		}
 	}
+	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());	
 	
 	for(uint i = 0; i < goodElectron.size(); i++)
 	{
@@ -381,7 +385,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
-		
+	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
 		// checking the rest of the event
 		// list of good taus 
 		std::vector<myobject> goodTau;
@@ -415,6 +419,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
     
 	m_logger << DEBUG << " There are " << goodTau.size() << " good taus " << SLogger::endmsg;	
+	Hist("h_n_goodTau_Hcand")->Fill(goodTau.size());	
 	
 		// mutau and emu final states
 		bool muTau=false;

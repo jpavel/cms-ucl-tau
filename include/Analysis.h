@@ -102,6 +102,10 @@ private:
         TH1* h_el_relIso;
         TH1* h_mu_relIso;
         
+        TH1* h_n_goodEl_Hcand;
+        TH1* h_n_goodMu_Hcand;
+        TH1* h_n_goodTau_Hcand;
+        
 
 // properties
 	std::string InTreeName;
