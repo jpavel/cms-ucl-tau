@@ -79,10 +79,10 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     
     // lepton histograms
     h_n_goodEl		= Book(TH1D("h_n_goodEl","Number of good electrons; good electrons",10,-0.5,9.5));
-	h_n_goodMu		= Book(TH1D("h_n_goodMu","Number of good muons; good muons",10,-0.5,9.5));
+    h_n_goodMu		= Book(TH1D("h_n_goodMu","Number of good muons; good muons",10,-0.5,9.5));
 
-	h_el_relIso		= Book(TH1D("h_el_relIso","Relative electron isolation; relIso(el)",100,0.0,1.0));
-	h_mu_relIso		= Book(TH1D("h_mu_relIso","Relative muon isolation; relIso(mu)",100,0.0,1.0));
+    h_el_relIso		= Book(TH1D("h_el_relIso","Relative electron isolation; relIso(el)",100,0.0,1.0));
+    h_mu_relIso		= Book(TH1D("h_mu_relIso","Relative muon isolation; relIso(mu)",100,0.0,1.0));
    
     h_n_goodEl_Hcand		= Book(TH1D("h_n_goodEl_Hcand","Number of good electrons; good electrons",10,-0.5,9.5));
 	h_n_goodMu_Hcand		= Book(TH1D("h_n_goodMu_Hcand","Number of good muons; good muons",10,-0.5,9.5));
@@ -440,17 +440,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(relIso < 0.15)
 			{
 				m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;	
-				//for(uint j=0; j< goodElectron.size() && !muE; j++)
-				//{
-				//	if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
-				//	if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
-				//	muE=true;
-				//	Hcand.push_back(goodMuon[i]);
-				//	Hcand.push_back(goodElectron[j]);
-				//	goodMuon.erase(goodMuon.begin()+i);
-                                //      goodElectron.erase(goodElectron.begin()+j);
+				for(uint j=0; j< goodElectron.size() && !muE; j++)
+				{
+					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
+					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+					muE=true;
+					Hcand.push_back(goodMuon[i]);
+					Hcand.push_back(goodElectron[j]);
+					goodMuon.erase(goodMuon.begin()+i);
+                                        goodElectron.erase(goodElectron.begin()+j);
 
-				//}
+				}
 				
 				m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;	
 				for(uint j=0; j< goodTau.size() && !muTau && !muE; j++)
