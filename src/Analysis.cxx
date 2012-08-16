@@ -63,11 +63,16 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_tauH_muTau_pt     = Book(TH1D("h_tauH_muTau_pt","H->mu tau, tau pt",100,0,300));
     h_H_muTau_pt        = Book(TH1D("h_H_muTau_pt","H->mu tau, H pt",100,0,300));
     h_H_muTau_mass      = Book(TH1D("h_H_muTau_mass","H->mu tau, H visible mass",100,0,300));
-    //H->muE
-    h_muH_muE_pt        = Book(TH1D("h_muH_muE_pt","H->mu e, mu pt",100,0,300));
-    h_eH_muE_pt         = Book(TH1D("h_eH_muE_pt","H->mu e, e pt",100,0,300));
-    h_H_muE_pt          = Book(TH1D("h_H_muE_pt","H->mu e, H pt",100,0,300));
-    h_H_muE_mass        = Book(TH1D("h_H_muE_mass","H->mu e, H visible mass",100,0,300));
+    //H->muE relIso(mu)<0.15
+    h_muH_muE_tightMuIso_pt        = Book(TH1D("h_muH_muE_tightMuIso_pt","H->mu e, mu pt",100,0,300));
+    h_eH_muE_tightMuIso_pt         = Book(TH1D("h_eH_muE_tightMuIso_pt","H->mu e, e pt",100,0,300));
+    h_H_muE_tightMuIso_pt          = Book(TH1D("h_H_muE_tightMuIso_pt","H->mu e, H pt",100,0,300));
+    h_H_muE_tightMuIso_mass        = Book(TH1D("h_H_muE_tightMuIso_mass","H->mu e, H visible mass",100,0,300));
+    //H->muE relIso(mu)<0.25
+    h_muH_muE_looseMuIso_pt        = Book(TH1D("h_muH_muE_looseMuIso_pt","H->mu e, mu pt",100,0,300));
+    h_eH_muE_looseMuIso_pt         = Book(TH1D("h_eH_muE_looseMuIso_pt","H->mu e, e pt",100,0,300));
+    h_H_muE_looseMuIso_pt          = Book(TH1D("h_H_muE_looseMuIso_pt","H->mu e, H pt",100,0,300));
+    h_H_muE_looseMuIso_mass        = Book(TH1D("h_H_muE_looseMuIso_mass","H->mu e, H visible mass",100,0,300));
     //H->tauTau
     h_tau1H_tauTau_pt   = Book(TH1D("h_tau1H_tauTau_pt","H->tau tau, tau1 pt",100,0,300));
     h_tau2H_tauTau_pt   = Book(TH1D("h_tau2H_tauTau_pt","H->tau tau, tau2 pt",100,0,300));
@@ -450,6 +455,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					goodMuon.erase(goodMuon.begin()+i);
                                         goodElectron.erase(goodElectron.begin()+j);
 
+                                        TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
+                                        muH_muE_tightMuIso.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                        eH_muE_tightMuIso.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
+                                        H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
+                                        Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt());
+                                        Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt());
+                                        Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt());
+                                        Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M());
+                                        Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt());
+                                        Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M());
+
 				}
 				
 				m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;	
@@ -487,16 +503,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hcand.push_back(goodMuon[i]);
 					Hcand.push_back(goodElectron[j]);
                                         
-                                        TLorentzVector muH_muE,eH_muE,H_muE;
-                                        muH_muE.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
-                                        eH_muE.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
-                                        H_muE = muH_muE+eH_muE;
-                                        Hist( "h_muH_muE_pt" )->Fill(muH_muE.Pt());
-                                        Hist( "h_eH_muE_pt" )->Fill(eH_muE.Pt());
-                                        Hist( "h_H_muE_pt" )->Fill(H_muE.Pt());
-                                        Hist( "h_H_muE_mass" )->Fill(H_muE.M());
-                                        Hist( "h_H_pt" )->Fill(H_muE.Pt());
-                                        Hist( "h_H_mass" )->Fill(H_muE.M());
+                                        TLorentzVector muH_muE_looseMuIso,eH_muE_looseMuIso,H_muE_looseMuIso;
+                                        muH_muE_looseMuIso.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                        eH_muE_looseMuIso.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
+                                        H_muE_looseMuIso = muH_muE_looseMuIso+eH_muE_looseMuIso;
+                                        Hist( "h_muH_muE_looseMuIso_pt" )->Fill(muH_muE_looseMuIso.Pt());
+                                        Hist( "h_eH_muE_looseMuIso_pt" )->Fill(eH_muE_looseMuIso.Pt());
+                                        Hist( "h_H_muE_looseMuIso_pt" )->Fill(H_muE_looseMuIso.Pt());
+                                        Hist( "h_H_muE_looseMuIso_mass" )->Fill(H_muE_looseMuIso.M());
+                                        Hist( "h_H_pt" )->Fill(H_muE_looseMuIso.Pt());
+                                        Hist( "h_H_mass" )->Fill(H_muE_looseMuIso.M());
 					
                                         goodMuon.erase(goodMuon.begin()+i);
                                         goodElectron.erase(goodElectron.begin()+j);
