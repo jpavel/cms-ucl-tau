@@ -90,9 +90,10 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_mu_relIso		= Book(TH1D("h_mu_relIso","Relative muon isolation; relIso(mu)",100,0.0,1.0));
    
     h_n_goodEl_Hcand		= Book(TH1D("h_n_goodEl_Hcand","Number of good electrons; good electrons",10,-0.5,9.5));
-	h_n_goodMu_Hcand		= Book(TH1D("h_n_goodMu_Hcand","Number of good muons; good muons",10,-0.5,9.5));
+    h_n_goodMu_Hcand		= Book(TH1D("h_n_goodMu_Hcand","Number of good muons; good muons",10,-0.5,9.5));
     h_n_goodTau_Hcand		= Book(TH1D("h_n_goodTau_Hcand","Number of good taus; good taus",10,-0.5,9.5));
-   DeclareVariable(out_pt,"el_pt");
+    
+    DeclareVariable(out_pt,"el_pt");
 
 
 	 h_event_type = Retrieve<TH1D>("h_event_type");
@@ -210,15 +211,34 @@ double Analysis::RelIsoEl(myobject el){
 	return relIso;		
 }
 
+bool Analysis::Trg_MC_12(myevent *m) {
+    map<string, int> myHLT = m->HLT;
+    bool Trigger = false;
+    bool TriggerEle = false;
+    bool TriggerMu = false;
+
+    string doubEle = "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v15";
+    string doubMu = "HLT_Mu17_Mu8_v16";
+    string doubMu2 = "HLT_Mu17_TkMu8_v9";
+
+    for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
+        //cout << ihlt->first << endl;
+        if (ihlt->first == doubEle)
+            TriggerEle = ihlt->second;
+        if (ihlt->first == doubMu || ihlt->first == doubMu2)
+            TriggerMu = ihlt->second;
+        Trigger = TriggerEle || TriggerMu;
+ }                                                                                                                                                                            return Trigger;                                                                                                                                                                        }
+
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
-	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
+    m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
-        std::vector<myobject> goodMuon;
-        goodMuon.clear();
-        std::vector<myobject> goodElectron;
-        goodElectron.clear();
-    
+    if(Trg_MC_12(m)) {
+
+    std::vector<myobject> goodMuon;
+    goodMuon.clear();
+
     std::vector<myobject> muon = m->PreSelectedMuons;
     m_logger << VERBOSE << " There are " << muon.size() << " preselected muons " << SLogger::endmsg;
 
@@ -228,8 +248,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double muEta = muon[i].eta;
 		bool muGlobal = muon[i].isGlobalMuon;
 		bool muTracker = muon[i].isTrackerMuon;
-		
-
 		double relIso = RelIsoMu(muon[i]);
 		
 		bool pfID = PFMuonID(muon[i]);	
@@ -242,6 +260,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
 	Hist("h_n_goodMu")->Fill(goodMuon.size());
+        
+        std::vector<myobject> goodElectron;
+        goodElectron.clear();
         std::vector<myobject> electron = m->PreSelectedElectrons;
         m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
 
@@ -251,7 +272,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double elEta = electron[i].eta;
 		int missingHits = electron[i].numLostHitEleInner;
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
-
 		double relIso = RelIsoEl(electron[i]);
 		
 		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits < 1 && relIso < 0.4 && elID)
@@ -272,7 +292,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
-		if( goodMuon[i].pt < 20 || Zmumu) continue;
+		if(goodMuon[i].pt < 20 || Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.25) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
@@ -408,7 +428,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// Z overlap removal
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
-		for(uint j = 0; i < Zcand.size(); i++)
+		for(uint j = 0; j < Zcand.size(); j++)
 		{
 			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
 				goodMuon.erase(goodMuon.begin()+i);
@@ -418,7 +438,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	for(uint i = 0; i < goodElectron.size(); i++)
 	{
-		for(uint j = 0; i < Zcand.size(); i++)
+		for(uint j = 0; j < Zcand.size(); j++)
 		{
 			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
 				goodElectron.erase(goodElectron.begin()+i);
@@ -426,7 +446,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
-		// checking the rest of the event
+		
+        // checking the rest of the event
 		// list of good taus 
 		std::vector<myobject> goodTau;
 		goodTau.clear();
@@ -464,114 +485,114 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		// mutau and emu final states
 		bool muTau=false;
 		bool muE = false;
-		std::vector<myobject> Hcand;
-                Hcand.clear();
-		for(uint i = 0; i < goodMuon.size() && !muTau && !muE; i++)
-		{
-			
-			double relIso = RelIsoMu(goodMuon[i]);
-			if(relIso > 0.25) continue;
-			
-			if(relIso < 0.15)
-			{
-				m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;	
-				for(uint j=0; j< goodElectron.size() && !muE; j++)
-				{
-					if(RelIsoEl(goodElectron[j]) > 0.25) continue;
-					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
-					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
-					muE=true;
-					Hcand.push_back(goodMuon[i]);
-					Hcand.push_back(goodElectron[j]);
-					goodMuon.erase(goodMuon.begin()+i);
-                                        goodElectron.erase(goodElectron.begin()+j);
+                
+                std::vector<myobject> Hcand;
+                    Hcand.clear();
+                    for(uint i = 0; i < goodMuon.size() && !muTau && !muE; i++)
+                    {
+                            double MuIsoTrk = goodMuon[i].pfIsoCharged;
+                            double MuIsoEcal = goodMuon[i].pfIsoGamma;
+                            double MuIsoHcal = goodMuon[i].pfIsoNeutral;
+                            double MuIsoPU = goodMuon[i].pfIsoPU;
+                            double relIso = (MuIsoTrk) / goodMuon[i].pt;
+                            if (MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU > 0)
+                                relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (goodMuon[i].pt);
+                            if(relIso < 0.15)
+                            {
+                                m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
+                                for(uint j=0; j< goodElectron.size() && !muE; j++)
+                                {
+                                    if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
+                                    if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+                                    muE=true;
+                                    Hcand.push_back(goodMuon[i]);
+                                    Hcand.push_back(goodElectron[j]);
+                                    goodMuon.erase(goodMuon.begin()+i);
+                                    goodElectron.erase(goodElectron.begin()+j);
+                                    TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
+                                    muH_muE_tightMuIso.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                    eH_muE_tightMuIso.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
+                                    H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
+                                    Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt());
+                                    Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt());
+                                    Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt());
+                                    Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M());
+                                    Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt());
+                                    Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M());
 
-                                        TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
-                                        muH_muE_tightMuIso.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
-                                        eH_muE_tightMuIso.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
-                                        H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
-                                        Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt());
-                                        Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt());
-                                        Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt());
-                                        Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M());
-                                        Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt());
-                                        Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M());
+                                }
 
-				}
-				
-				m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;	
-				for(uint j=0; j< goodTau.size() && !muTau && !muE; j++)
-				{
-					if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
-					if(goodTau[j].discriminationByMuonTight <=0.5) continue;
-					if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue; 
-					muTau=true;
-					Hcand.push_back(goodMuon[i]);
-					Hcand.push_back(goodTau[j]);
+                                m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
+                                for(uint j=0; j< goodTau.size() && !muTau && !muE; j++)
+                                {
+                                    if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
+                                    if(goodTau[j].discriminationByMuonTight <=0.5) continue;
+                                    if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+                                    muTau=true;
+                                    Hcand.push_back(goodMuon[i]);
+                                    Hcand.push_back(goodTau[j]);
 
-                                        TLorentzVector muH_muTau,tauH_muTau,H_muTau;
-                                        muH_muTau.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
-                                        tauH_muTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
-                                        H_muTau = muH_muTau+tauH_muTau;
-                                        Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt());
-                                        Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt());
-                                        Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt());
-                                        Hist( "h_H_muTau_mass" )->Fill(H_muTau.M());
-                                        Hist( "h_H_pt" )->Fill(H_muTau.Pt());
-                                        Hist( "h_H_mass" )->Fill(H_muTau.M());
-                                        
-                                        goodMuon.erase(goodMuon.begin()+i);
-                                        goodTau.erase(goodTau.begin()+j);
+                                    TLorentzVector muH_muTau,tauH_muTau,H_muTau;
+                                    muH_muTau.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                    tauH_muTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
+                                    H_muTau = muH_muTau+tauH_muTau;
+                                    Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt());
+                                    Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt());
+                                    Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt());
+                                    Hist( "h_H_muTau_mass" )->Fill(H_muTau.M());
+                                    Hist( "h_H_pt" )->Fill(H_muTau.Pt());
+                                    Hist( "h_H_mass" )->Fill(H_muTau.M());
 
-				}
-			}else {//muE candidate
-				m_logger << DEBUG << " Checking for muE " << SLogger::endmsg;	
-				for(uint j=0; j< goodElectron.size() && !muE; j++)
-				{
-					if(RelIsoEl(goodElectron[j]) > 0.25) continue;
-					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
-					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
-					muE=true;
-					Hcand.push_back(goodMuon[i]);
-					Hcand.push_back(goodElectron[j]);
-                                        
-                                        TLorentzVector muH_muE_looseMuIso,eH_muE_looseMuIso,H_muE_looseMuIso;
-                                        muH_muE_looseMuIso.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
-                                        eH_muE_looseMuIso.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
-                                        H_muE_looseMuIso = muH_muE_looseMuIso+eH_muE_looseMuIso;
-                                        Hist( "h_muH_muE_looseMuIso_pt" )->Fill(muH_muE_looseMuIso.Pt());
-                                        Hist( "h_eH_muE_looseMuIso_pt" )->Fill(eH_muE_looseMuIso.Pt());
-                                        Hist( "h_H_muE_looseMuIso_pt" )->Fill(H_muE_looseMuIso.Pt());
-                                        Hist( "h_H_muE_looseMuIso_mass" )->Fill(H_muE_looseMuIso.M());
-                                        Hist( "h_H_pt" )->Fill(H_muE_looseMuIso.Pt());
-                                        Hist( "h_H_mass" )->Fill(H_muE_looseMuIso.M());
-					
-                                        goodMuon.erase(goodMuon.begin()+i);
-                                        goodElectron.erase(goodElectron.begin()+j);
-				}
-			}
-		}
-		
-		if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;	
-		else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;			
-		else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
-		
-		bool eTau = false;
-		if(!muTau && !muE)
-		{
-			for(uint i = 0; i < goodElectron.size() && !eTau ; i++)
-			{
-				
-				double relIso = RelIsoEl(goodElectron[i]);
-				if (relIso > 0.25) continue;
-				if(relIso < 0.10 && goodElectron[i].numLostHitEleInner < 1)
-				{
-					m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
-					for(uint j=0; j< goodTau.size() && !muTau; j++)
-					{
-						if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
-						if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-						if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.1) continue;
+                                    goodMuon.erase(goodMuon.begin()+i);
+                                    goodTau.erase(goodTau.begin()+j);
+
+                                }
+                            }else {//muE candidate
+                                m_logger << DEBUG << " Checking for muE " << SLogger::endmsg;   
+                                for(uint j=0; j< goodElectron.size() && !muE; j++)
+                                {
+                                    if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
+                                    if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+                                    muE=true;
+                                    Hcand.push_back(goodMuon[i]);
+                                    Hcand.push_back(goodElectron[j]);
+
+                                    TLorentzVector muH_muE_looseMuIso,eH_muE_looseMuIso,H_muE_looseMuIso;
+                                    muH_muE_looseMuIso.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
+                                    eH_muE_looseMuIso.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);
+                                    H_muE_looseMuIso = muH_muE_looseMuIso+eH_muE_looseMuIso;
+                                    Hist( "h_muH_muE_looseMuIso_pt" )->Fill(muH_muE_looseMuIso.Pt());
+                                    Hist( "h_eH_muE_looseMuIso_pt" )->Fill(eH_muE_looseMuIso.Pt());
+                                    Hist( "h_H_muE_looseMuIso_pt" )->Fill(H_muE_looseMuIso.Pt());
+                                    Hist( "h_H_muE_looseMuIso_mass" )->Fill(H_muE_looseMuIso.M());
+                                    Hist( "h_H_pt" )->Fill(H_muE_looseMuIso.Pt());
+                                    Hist( "h_H_mass" )->Fill(H_muE_looseMuIso.M());
+
+                                    goodMuon.erase(goodMuon.begin()+i);
+                                    goodElectron.erase(goodElectron.begin()+j);
+                                }
+                            }
+                    }
+
+                    if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
+                    else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
+                    else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
+                    bool eTau = false;
+                    if(!muTau && !muE)
+                    {
+                        for(uint i = 0; i < goodElectron.size() && !eTau ; i++)
+                        {
+
+                            double relIso = RelIsoEl(goodElectron[i]);
+                            if (relIso > 0.25) continue;
+                            if(relIso < 0.10 && goodElectron[i].numLostHitEleInner < 1)
+                            {
+                                m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
+                                for(uint j=0; j< goodTau.size() && !muTau; j++)
+                                {
+                                    if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
+                                    if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
+                                    if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.1) continue;
 						eTau=true;
 						Hcand.push_back(goodElectron[i]);
 						Hcand.push_back(goodTau[j]);
@@ -703,6 +724,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
  
  
    return;
-
+   //trigger
+    }
 }
 

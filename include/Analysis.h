@@ -56,7 +56,7 @@ public:
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
-
+   bool Trg_MC_12(myevent *m);
 private:
    //
    // Put all your private variables here
