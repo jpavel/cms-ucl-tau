@@ -168,6 +168,22 @@ bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
 	return passingId;
 }
 
+bool Analysis::PFMuonID(myobject mu){
+	
+	if(!mu.isGlobalMuon) return false;
+	if(!mu.isPFMuon) return false;
+	if(mu.normalizedChi2 >= 10.) return false;
+	if(mu.numberOfValidMuonHits <= 0) return false;
+	if(mu.numMatchStation <= 1) return false;
+	if(mu.dxy_in >= 0.2) return false;
+	if(mu.dZ_in >= 1 ) return false;
+	if(mu.intrkLayerpixel <= 0) return false;
+	if(mu.trkLayerMeasure <= 5) return false;
+	
+return true;
+	
+}
+
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
@@ -195,8 +211,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double relIso = (MuIsoTrk) / muon[i].pt;
 		if (MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU > 0)
 			relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (muon[i].pt);
+		bool pfID = PFMuonID(muon[i]);	
 
-		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && MunHit > 10 && relIso < 0.25)
+		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && MunHit > 10 && relIso < 0.25 && pfID)
 		{
 					goodMuon.push_back(muon[i]);
 					Hist("h_mu_relIso")->Fill(relIso);
