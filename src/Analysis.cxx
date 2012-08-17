@@ -121,7 +121,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << std::endl;
 	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
-        std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
+    
 	
 
    return;
