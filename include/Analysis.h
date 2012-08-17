@@ -54,6 +54,8 @@ public:
    double deltaR(double eta1, double phi1, double eta2, double phi2);
    bool EleMVANonTrigId(float pt, float eta, double value);
    bool PFMuonID(myobject mu);
+   double RelIsoMu(myobject mu);
+   double RelIsoEl(myobject el);
 
 private:
    //

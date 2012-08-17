@@ -175,13 +175,39 @@ bool Analysis::PFMuonID(myobject mu){
 	if(mu.normalizedChi2 >= 10.) return false;
 	if(mu.numberOfValidMuonHits <= 0) return false;
 	if(mu.numMatchStation <= 1) return false;
-	if(mu.dxy_in >= 0.2) return false;
-	if(mu.dZ_in >= 1 ) return false;
+	if(mu.dB >= 0.2) return false;
+	if(mu.dZ_in >= 0.5 ) return false;
 	if(mu.intrkLayerpixel <= 0) return false;
 	if(mu.trkLayerMeasure <= 5) return false;
 	
 return true;
 	
+}
+
+double Analysis::RelIsoMu(myobject mu){
+		
+		double MuIsoTrk = mu.pfIsoCharged;
+		double MuIsoEcal = mu.pfIsoGamma;
+		double MuIsoHcal = mu.pfIsoNeutral;
+		double MuIsoPU = mu.pfIsoPU;
+		double relIso = (MuIsoTrk) / mu.pt;
+		if (MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU > 0)
+			relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (mu.pt);
+
+	return relIso;
+}
+
+double Analysis::RelIsoEl(myobject el){
+		double ElIsoTrk = el.pfIsoCharged;
+		double ElIsoEcal = el.pfIsoGamma;
+		double ElIsoHcal = el.pfIsoNeutral;
+		double ElIsoPU = el.pfIsoPU;
+		
+
+		double relIso = (ElIsoTrk) / el.pt;
+		if (ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU > 0)
+			relIso = (ElIsoTrk + ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU) / (el.pt);
+	return relIso;		
 }
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
@@ -202,18 +228,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double muEta = muon[i].eta;
 		bool muGlobal = muon[i].isGlobalMuon;
 		bool muTracker = muon[i].isTrackerMuon;
-		int MunHit = muon[i].numberOfHits;
-		double MuIsoTrk = muon[i].pfIsoCharged;
-		double MuIsoEcal = muon[i].pfIsoGamma;
-		double MuIsoHcal = muon[i].pfIsoNeutral;
-		double MuIsoPU = muon[i].pfIsoPU;
+		
 
-		double relIso = (MuIsoTrk) / muon[i].pt;
-		if (MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU > 0)
-			relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (muon[i].pt);
+		double relIso = RelIsoMu(muon[i]);
+		
 		bool pfID = PFMuonID(muon[i]);	
 
-		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && MunHit > 10 && relIso < 0.25 && pfID)
+		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
 		{
 					goodMuon.push_back(muon[i]);
 					Hist("h_mu_relIso")->Fill(relIso);
@@ -229,17 +250,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double elPt = electron[i].pt;
 		double elEta = electron[i].eta;
 		int missingHits = electron[i].numLostHitEleInner;
-		double ElIsoTrk = electron[i].pfIsoCharged;
-		double ElIsoEcal = electron[i].pfIsoGamma;
-		double ElIsoHcal = electron[i].pfIsoNeutral;
-		double ElIsoPU = electron[i].pfIsoPU;
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 
-		double relIso = (ElIsoTrk) / electron[i].pt;
-		if (ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU > 0)
-			relIso = (ElIsoTrk + ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU) / (electron[i].pt);
-
-		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits < 1 && relIso < 0.25 && elID)
+		double relIso = RelIsoEl(electron[i]);
+		
+		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits < 1 && relIso < 0.4 && elID)
 		{
 			goodElectron.push_back(electron[i]);
 			Hist("h_el_relIso")->Fill(relIso);
@@ -257,11 +272,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
-		if( goodMuon[i].pt < 20 || Zmumu) break;
+		if( goodMuon[i].pt < 20 || Zmumu) continue;
+		if(RelIsoMu(goodMuon[i]) > 0.25) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
 			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
 			
+			if(RelIsoMu(goodMuon[j]) > 0.25) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0) continue;
 			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) continue;
 			
@@ -323,11 +340,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint i = 0; i < goodElectron.size(); i++)
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
-			if( goodElectron[i].pt < 20 || Zee) break;
+			if( goodElectron[i].pt < 20 || Zee) continue;
+			if( RelIsoEl(goodElectron[i]) > 0.25) continue;
 			for(uint j = i+1; j < goodElectron.size() && !Zee; j++)
 			{
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  goodElectron[j].pt << " and charge " << goodElectron[j].charge << SLogger::endmsg;
-				
+				if( RelIsoEl(goodElectron[j]) > 0.25) continue;	
 				if(goodElectron[i].charge*goodElectron[j].charge >=0) continue;
 				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1) continue;
 			
@@ -450,20 +468,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 Hcand.clear();
 		for(uint i = 0; i < goodMuon.size() && !muTau && !muE; i++)
 		{
-			double MuIsoTrk = goodMuon[i].pfIsoCharged;
-			double MuIsoEcal = goodMuon[i].pfIsoGamma;
-			double MuIsoHcal = goodMuon[i].pfIsoNeutral;
-			double MuIsoPU = goodMuon[i].pfIsoPU;
-
-			double relIso = (MuIsoTrk) / goodMuon[i].pt;
-			if (MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU > 0)
-				relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (goodMuon[i].pt);
+			
+			double relIso = RelIsoMu(goodMuon[i]);
+			if(relIso > 0.25) continue;
 			
 			if(relIso < 0.15)
 			{
 				m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;	
 				for(uint j=0; j< goodElectron.size() && !muE; j++)
 				{
+					if(RelIsoEl(goodElectron[j]) > 0.25) continue;
 					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
 					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
 					muE=true;
@@ -514,6 +528,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				m_logger << DEBUG << " Checking for muE " << SLogger::endmsg;	
 				for(uint j=0; j< goodElectron.size() && !muE; j++)
 				{
+					if(RelIsoEl(goodElectron[j]) > 0.25) continue;
 					if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
 					if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
 					muE=true;
@@ -546,15 +561,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		{
 			for(uint i = 0; i < goodElectron.size() && !eTau ; i++)
 			{
-				double ElIsoTrk = goodElectron[i].pfIsoCharged;
-				double ElIsoEcal = goodElectron[i].pfIsoGamma;
-				double ElIsoHcal = goodElectron[i].pfIsoNeutral;
-				double ElIsoPU = goodElectron[i].pfIsoPU;
-	
-				double relIso = (ElIsoTrk) / goodElectron[i].pt;
-				if (ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU > 0)
-					relIso = (ElIsoTrk + ElIsoEcal + ElIsoHcal - 0.5 * ElIsoPU) / (goodElectron[i].pt);
 				
+				double relIso = RelIsoEl(goodElectron[i]);
+				if (relIso > 0.25) continue;
 				if(relIso < 0.10 && goodElectron[i].numLostHitEleInner < 1)
 				{
 					m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
