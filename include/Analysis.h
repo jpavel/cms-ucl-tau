@@ -56,7 +56,7 @@ public:
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
-   bool Trg_MC_12(myevent *m);
+   bool Trg_MC_12(myevent* m);
 private:
    //
    // Put all your private variables here
@@ -65,6 +65,17 @@ private:
 	// input variables
 	
 	myevent *m;
+	
+	std::vector <int> index_number;
+	std::vector <int> evt_number;
+	std::vector <int> run_number;
+	std::vector <int> lumi_number;
+	std::vector <int> evt_type;
+	std::vector <double>  mass_Z;
+	std::vector <double>  mass_H;
+	
+	int compared;
+	
 
 	// histograms
         TH1* h_el_n;
