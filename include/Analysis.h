@@ -75,7 +75,7 @@ private:
 	std::vector <double>  mass_H;
 	
 	int compared;
-	
+	int entries;
 
 	// histograms
         TH1* h_el_n;
@@ -131,6 +131,7 @@ private:
 	double BestMassForZ;
 	double dZvertex;
 	double bTagValue;
+	double maxEvent;
 
 // output variables
 std::vector<float> out_pt;

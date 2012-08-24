@@ -17,6 +17,7 @@ Analysis::Analysis()
    DeclareProperty("BestMassForZ",BestMassForZ);
    DeclareProperty("dZvertex", dZvertex);
    DeclareProperty("bTagValue",bTagValue);
+  
 }
 
 Analysis::~Analysis() {
@@ -172,6 +173,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	  }
 	  
 	  compared=0;
+	  entries=0;
 	
    return;
 
@@ -222,7 +224,7 @@ bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
 	passingId=true;
 	if(pt>5. && pt<10. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.004)
 	passingId=true;
-	if(pt>5. && pt<10. && fabs(eta)>=1.479 && value>0.295)
+	if(pt>5. && pt<10. && fabs(eta)>=1.479 && value>0.294)
 	passingId=true;
 	
 	if(pt>10. && fabs(eta)<0.8 && value>0.5)
@@ -237,17 +239,10 @@ bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
 
 bool Analysis::PFMuonID(myobject mu){
 	
-	if(!mu.isGlobalMuon) return false;
-	if(!mu.isPFMuon) return false;
-	if(mu.normalizedChi2 >= 10.) return false;
-	if(mu.numberOfValidMuonHits <= 0) return false;
-	if(mu.numMatchStation <= 1) return false;
-	if(mu.dB >= 0.2) return false;
-	if(mu.dZ_in >= 0.5 ) return false;
-	if(mu.intrkLayerpixel <= 0) return false;
-	if(mu.trkLayerMeasure <= 5) return false;
-	
-return true;
+	if(mu.isGlobalMuon &&  mu.isPFMuon && mu.normalizedChi2 < 10. && mu.numberOfValidMuonHits > 0 && mu.numMatchStation > 1 && mu.dB < 0.2
+	&& mu.dZ_in < 0.5 && mu.intrkLayerpixel > 0 && mu.trkLayerMeasure > 5) return true;
+	else
+	 return false;
 	
 }
 
@@ -298,7 +293,7 @@ bool Analysis::Trg_MC_12(myevent* m) {
 	}
 	
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
-
+	entries++;
 	bool found_event = false;
     m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	
@@ -307,9 +302,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	uint pos = std::find(evt_number.begin(), evt_number.end(), eNumber) - evt_number.begin();
 	if( pos < evt_number.size())
 	{
-		//~ m_logger << WARNING << " Found idential event no. " << compared << SLogger::endmsg;
-		//~ m_logger << WARNING << m->lumiNumber << " " << m->eventNumber << SLogger::endmsg;
-		//~ m_logger << WARNING << lumi_number[pos] << " " << evt_number[pos] << SLogger::endmsg;
 		found_event = true;
 		compared++;		
 	}
@@ -338,7 +330,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		bool pfID = PFMuonID(muon[i]);	
 
-		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
+		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
 		{
 					goodMuon.push_back(muon[i]);
 					Hist("h_mu_relIso")->Fill(relIso);
@@ -360,7 +352,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 		
-		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
+		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
 		{
 			goodElectron.push_back(electron[i]);
 			Hist("h_el_relIso")->Fill(relIso);
@@ -380,14 +372,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
-		if(goodMuon[i].pt < 20 || Zmumu) continue;
+		if(goodMuon[i].pt < 20. || Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.25) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
 			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
 			
 			if(RelIsoMu(goodMuon[j]) > 0.25) continue;
-			if(goodMuon[i].charge*goodMuon[j].charge >=0) continue;
+			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
 			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) continue;
 			
 			TLorentzVector cand;
@@ -454,7 +446,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  goodElectron[j].pt << " and charge " << goodElectron[j].charge << SLogger::endmsg;
 				if( RelIsoEl(goodElectron[j]) > 0.25) continue;	
-				if(goodElectron[i].charge*goodElectron[j].charge >=0) continue;
+				if(goodElectron[i].charge*goodElectron[j].charge >=0.) continue;
 				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1) continue;
 			
 				TLorentzVector cand;
@@ -510,130 +502,41 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(Zmumu||Zee)
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
-	else if( found_event){
-		m_logger << ERROR << " Z candidate exists but not found! Mass " << mass_Z[pos] << SLogger::endmsg;
-		if(evt_type[pos] <4){  
-			m_logger << ERROR << "MUONS!" << SLogger::endmsg;
-			m_logger << ERROR << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
-			m_logger << ERROR << " There are " << muon.size() << " muons " << SLogger::endmsg;
-			for(uint i = 0; i < goodMuon.size(); i++)
-	{
-		m_logger << WARNING << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
-		if(goodMuon[i].pt < 20 || Zmumu) continue;
-		if(RelIsoMu(goodMuon[i]) > 0.25) continue;
-		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
-		{
-			m_logger << WARNING << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
-			
-			if(RelIsoMu(goodMuon[j]) > 0.25) continue;
-			if(goodMuon[i].charge*goodMuon[j].charge >=0) continue;
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) continue;
-			
-			TLorentzVector cand;
-			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
-								goodMuon[i].py+goodMuon[j].py,
-								goodMuon[i].pz+goodMuon[j].pz,
-								goodMuon[i].E+goodMuon[j].E);
-			double mass = cand.M();
-			m_logger << WARNING << "  -->Candidate mass is " << mass << SLogger::endmsg;
-                        if(mass > 71.2 && mass < 111.2){
-                            Zmumu=true;
-                            double dM = 999.;
-                            if(BestMassForZ > 0.0){
-                                Zmumu=false;
-                                dM=fabs(mass-BestMassForZ);
-                                //std::cout<<"mass: "<<mass<<"dM: "<<dM<<std::endl;        
-                                if(dM < dMass){
-						Zindex[0]=i;
-						Zindex[1]=j;
-                                                dMass=dM;
-                                //std::cout<<"mass: "<<mass<<"dMass: "<<dM<<std::endl;        
-                                        }
-                        }else{
-                            Zindex[0]=i;
-                            Zindex[1]=j;
-                                }
-                        }
-                 }
-        }
-			
-		}
-		else{
-			m_logger << ERROR << "ELECTRONS!" << SLogger::endmsg;
-			m_logger << ERROR << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
-			m_logger << ERROR << " There are " << electron.size() << " electrons " << SLogger::endmsg;
-					dMass = 999.;
-				for(uint i = 0; i < electron.size(); i++)
-				{
-				m_logger << WARNING << " electron n. " << i << " pt: " << electron[i].pt << " eta: " << electron[i].eta
-				<< " iso " <<  RelIsoEl(electron[i]) << " charge" << electron[i].charge << SLogger::endmsg;
-						int missingHits = electron[i].numLostHitEleInner;
-						bool elID = EleMVANonTrigId(electron[i].pt,electron[i].eta,electron[i].Id_mvaNonTrg);
-						m_logger << WARNING << " electron ID " << elID << " hits: " << missingHits << SLogger::endmsg;
-				
-					
-					if( electron[i].pt < 20 || Zee){ m_logger << WARNING << " rejected by pt " << SLogger::endmsg; continue;}
-					if( RelIsoEl(electron[i]) > 0.25){ m_logger << WARNING << " rejected by iso " << SLogger::endmsg; continue;}
-					for(uint j = i+1; j < electron.size() && !Zee; j++)
-					{
-						m_logger << WARNING << " electron n. " << i << " pt: " << electron[j].pt << " eta: " << electron[j].eta
-						<< " iso " <<  RelIsoEl(electron[j]) << " charge" << electron[j].charge << SLogger::endmsg;
-						if( RelIsoEl(electron[j]) > 0.25){ m_logger << WARNING << " rejected by iso " << SLogger::endmsg; continue;}
-						if(electron[i].charge*electron[j].charge >=0){ m_logger << WARNING << " rejected by charge " << SLogger::endmsg; continue;}
-						if(deltaR(electron[i].eta,electron[i].phi,electron[j].eta,electron[j].phi)< 0.1){ m_logger << WARNING << " rejected by overlap " << SLogger::endmsg; continue;}
-					
-						TLorentzVector cand;
-						cand.SetPxPyPzE(electron[i].px+electron[j].px,
-											electron[i].py+electron[j].py,
-											electron[i].pz+electron[j].pz,
-											electron[i].E+electron[j].E);
-						double mass = cand.M();
-						m_logger << WARNING << "  -->Candidate mass is " << mass << SLogger::endmsg;
-						
-						
-						if(mass > 71 && mass < 111){ 
-							Zee=true;
-							double dM = 999.; 
-							if(BestMassForZ > 0.0){
-								Zee=false;
-								dM=fabs(mass-BestMassForZ);
-								if(dM < dMass){
-						m_logger << WARNING << "  -->Best mass!" << mass << SLogger::endmsg;
-									dMass=dM;
-								}
-							}else{
-								Zindex[0]=i;
-								Zindex[1]=j;
-							} 
-							
-						}
-					}
-				}
-			
-		}
-		return;
+	else{
+		if(found_event) std::cout << "WRONG!" <<std::endl;
+			return;
+	
 	}
-	else
-		return;
 	
     	
 	// Z overlap removal
-	for(uint i = 0; i < goodMuon.size(); i++)
+	
+	for(int i = 0; i < goodMuon.size(); i++)
 	{
-		for(uint j = 0; j < Zcand.size(); j++)
+		bool removed = false;
+		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
-				goodMuon.erase(goodMuon.begin()+i);
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.3) 
+			{	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
 		}
 	}
-	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());	
-	for(uint i = 0; i < goodElectron.size(); i++)
+	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());
+	
+	for(int i = 0; i < goodElectron.size(); i++)
 	{
-		for(uint j = 0; j < Zcand.size(); j++)
+		bool removed = false;
+		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
-				goodElectron.erase(goodElectron.begin()+i);
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.3) 
+			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
 		}
+		
+		for(uint j = 0; j < goodMuon.size() && !removed; j++)
+		{
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.3) 
+			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
+		}
+		
 	}
 	m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
@@ -662,14 +565,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodTau.push_back(tau[i]);
     }
     
-    
-    for(uint i = 0; i < goodTau.size(); i++)
+    for(int i = 0; i < goodTau.size(); i++)
 	{
-		for(uint j = 0; j < Zcand.size(); j++)
+		bool removed = false;
+		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
-				goodTau.erase(goodTau.begin()+i);
+			
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.3) 
+			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+			
 		}
+		
+		for(uint j = 0; j < goodMuon.size() && !removed; j++)
+		{
+			
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.3) 
+			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+			
+		}
+		
+		for(uint j = 0; j < goodElectron.size() && !removed; j++)
+		{
+			
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.3) 
+			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+			
+			
+		}
+		
+		
 	}
      int tauCand = 	goodTau.size();
    
@@ -931,40 +855,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 // overlap cleaning
 			
+		bool Ad_lepton = false;	
 		 for(uint i = 0; i < goodMuon.size(); i++)
 				{
-					for(uint j = 0; j < Hcand.size(); j++)
-					{
-						if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[j].eta,Hcand[j].phi)< 0.1) 
-							goodMuon.erase(goodMuon.begin()+i);
-					}
+					  if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
+					  deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1) 
+						Ad_lepton=true;
+					
 				}
 				
 		 for(uint i = 0; i < goodElectron.size(); i++)
 				{
-					for(uint j = 0; j < Hcand.size(); j++)
-					{
-						if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[j].eta,Hcand[j].phi)< 0.1) 
-							goodElectron.erase(goodElectron.begin()+i);
-					}
+						if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
+						deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1)  
+						Ad_lepton=true;
+					
 				}
 				
 		for(uint i = 0; i < goodTau.size(); i++)
 				{
-					for(uint j = 0; j < Hcand.size(); j++)
-					{
-						if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[j].eta,Hcand[j].phi)< 0.1) 
-							goodTau.erase(goodTau.begin()+i);
-					}
+					if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
+						deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1)  
+						Ad_lepton=true;
 				}
 		
 		
 		 
-		 if(goodMuon.size()+goodTau.size()+goodElectron.size()>0) 
+		 if(Ad_lepton) 
 		 {
 				
-			
-			
 			m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
 			 if( found_event){ 
 				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos] << " and mine is " << event_type << SLogger::endmsg;
@@ -1113,7 +1032,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double jetEta = jet[i].eta;
 		double jetPhi = jet[i].phi;
 		double bTag = jet[i].bDiscriminatiors_CSV;
-		if(jetPt > 20 && fabs(jetEta) < 2.4 && bTag > bTagValue){
+		if(jetPt > 20. && fabs(jetEta) < 2.4 && bTag > bTagValue){
 			double dR1,dR2,dR3,dR4;
 			dR1=deltaR(jetEta,jetPhi,Zcand[0].eta,Zcand[0].phi);
 			dR2=deltaR(jetEta,jetPhi,Zcand[1].eta,Zcand[1].phi);
@@ -1156,7 +1075,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		TLorentzVector Zvector;
 		TLorentzVector Hvector;
 		std::cout << " -------------------------------------------------------------------------------- " << std::endl;
-		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << std::endl;;
+		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << " entry " << entries << std::endl;;
 		switch(event_type){
 		case 1: 
 			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
@@ -1247,6 +1166,68 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
             std::cout << " H mass " << Hvector.M() << std::endl;
             break;
     	}	
+		std::cout << "---> Detailed accounts: " << std::endl;
+		std::cout << " ---------------- MUONS ---------------------- " << std::endl;
+		 for (uint i = 0; i < muon.size(); i++) {
+
+		double muPt = muon[i].pt;
+		double muEta = muon[i].eta;
+		bool muGlobal = muon[i].isGlobalMuon;
+		bool muTracker = muon[i].isTrackerMuon;
+		double relIso = RelIsoMu(muon[i]);
+		
+		bool pfID = PFMuonID(muon[i]);	
+		std::cout << " --> no. " << i << " pt "  << muPt << " eta " << muEta << " phi " << muon[i].phi 
+		<< " ID: " << pfID << " iso " << relIso << std::endl; 
+		
+		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
+		{
+					goodMuon.push_back(muon[i]);
+					std::cout << "  ----> GOOD MUON <---- " << std::endl;
+					Hist("h_mu_relIso")->Fill(relIso);
+		}
+		
+    }
+    std::cout << " ---------------- ELECTRONS ---------------------- " << std::endl;
+		
+		for (uint i = 0; i < electron.size(); i++) {
+
+		double elPt = electron[i].pt;
+		double elEta = electron[i].eta;
+		int missingHits = electron[i].numLostHitEleInner;
+		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
+		double relIso = RelIsoEl(electron[i]);
+		std::cout << " --> no. " << i << " pt "  << elPt << " eta " << elEta << " phi " << electron[i].phi 
+		<< " ID: " << elID << " mHits " << missingHits << " iso " << relIso << std::endl; 
+		
+		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
+		{
+			goodElectron.push_back(electron[i]);
+			std::cout << "  ----> GOOD ELECTRON <---- " << std::endl;
+			Hist("h_el_relIso")->Fill(relIso);
+		}
+    }
+		
+	std::cout << " ---------------- TAUS ---------------------- " << std::endl;
+	
+	for (uint i = 0; i < tau.size(); i++) {
+   
+		double tauPt = tau[i].pt;
+		double tauEta = tau[i].eta;
+		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
+		bool LooseMuon = (tau[i].discriminationByMuonLoose > 0.5);
+		bool CombinedIsolation = (tau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
+		
+		if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && CombinedIsolation && DecayMode){
+			goodTau.push_back(tau[i]);
+			std::cout << " --> no. " << i << " pt "  << tauPt << " eta " << tauEta << " phi " << tau[i].phi << std::endl; 
+		}
+		
+    }
+	
+	
+		
 }
  
    return;
