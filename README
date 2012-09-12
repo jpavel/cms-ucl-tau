@@ -24,3 +24,21 @@ svn copy svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tr
 
 ## switching to a new tag
 svn switch  svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.3
+
+##Running at ULB cluster
+ssh m2.iihe.ac.be # connect without password
+source $VO_CMS_SW_DIR/cmsset_default.sh # basic cms environment
+cmsrel CMSSW_5_3_3_patch3 #prepare the CMSSW area
+# Standard stuff
+cd CMSSW_5_3_3_patch3/src/
+cmsenv 
+# checkout and compile SFRAME
+svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
+cd SFrame
+source setup.sh
+make
+cd ..
+
+svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.2 ZHtautauAnalysis
+cd ZHtautauAnalysis
+make
