@@ -64,6 +64,7 @@ public:
     float bDiscriminatiors_CSV,bDiscriminatiors_JP,bDiscriminatiors_TCHPT;
     float jetPt, jetEta, jetPhi;
     float leadChargedParticlePt, leadTrackD0;
+    bool puJetIdLoose, puJetIdMedium, puJetIdTight;
     //    float leadChargedParticlePt, leadNeutralParticlePt, leadParticlePt, leadTrackD0;
     float mva_e_pi, mva_pi_mu, mva_e_mu, hcalEnergy, ecalEnergy, trackRefPt;
     int numChargedParticlesSignalCone, numNeutralHadronsSignalCone, numPhotonsSignalCone, numParticlesSignalCone;
@@ -126,7 +127,7 @@ public:
         float TrgObjectPt_medium ;
         float TrgObjectPhi_medium ;
 
-        
+
     ClassDef(myobject, 1)
 };
 #endif

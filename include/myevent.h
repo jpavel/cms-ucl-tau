@@ -51,6 +51,15 @@ public:
     double RhoCenNeutral;
 double RhoCenCharged;
 double RhoCenNeutralTight;
+ double Rho;
+ 
+ // MET significance matrix                                                                                                                                                                                                    
+ float MET_sigMatrix_00;
+ float MET_sigMatrix_01;
+ float MET_sigMatrix_10;
+ float MET_sigMatrix_11;
+
+
 //double RhoCenCharged;
 
 //%/afs/cern.ch/user/a/abdollah/scratch0/CMSSW_5_2_3_patch3/src/Analysis/NtupleProducer/src/Jet.cc:10:9: error: 'class myevent' has no member named 'RhoCenCharged'
