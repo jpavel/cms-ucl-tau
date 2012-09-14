@@ -214,11 +214,12 @@ bool Analysis::Trg_MC_12(myevent* m) {
     bool TriggerEle = false;
     bool TriggerMu = false;
 
-    string doubEle = "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v15";
-    string doubMu = "HLT_Mu17_Mu8_v16";
-    string doubMu2 = "HLT_Mu17_TkMu8_v9";
+    string doubEle = "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v17";
+    string doubMu = "HLT_Mu17_Mu8_v17";
+    string doubMu2 = "HLT_Mu17_TkMu8_v10";
 
     for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
+	//	std::cout << ihlt->first << std::endl; 
          if (ihlt->first == doubEle)
              TriggerEle = ihlt->second;
          if (ihlt->first == doubMu || ihlt->first == doubMu2)
