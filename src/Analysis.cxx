@@ -17,6 +17,10 @@ Analysis::Analysis()
    DeclareProperty("BestMassForZ",BestMassForZ);
    DeclareProperty("dZvertex", dZvertex);
    DeclareProperty("bTagValue",bTagValue);
+   
+   DeclareProperty("ElectronTriggerName", doubEle);
+   DeclareProperty("MuonTriggerName1", doubMu);
+   DeclareProperty("MuonTriggerName2", doubMu2);
   
 }
 
@@ -214,15 +218,15 @@ bool Analysis::Trg_MC_12(myevent* m) {
     bool TriggerEle = false;
     bool TriggerMu = false;
 
-    string doubEle = "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v17";
-    string doubMu = "HLT_Mu17_Mu8_v17";
-    string doubMu2 = "HLT_Mu17_TkMu8_v10";
-
+    
     for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
 	//	std::cout << ihlt->first << std::endl; 
-         if (ihlt->first == doubEle)
+        size_t foundEl=(ihlt->first).find(doubEle);
+	    size_t foundMu1=(ihlt->first).find(doubMu);
+        size_t foundMu2=(ihlt->first).find(doubMu2);
+		if (foundEl!=string::npos)
              TriggerEle = ihlt->second;
-         if (ihlt->first == doubMu || ihlt->first == doubMu2)
+		if (foundMu1!=string::npos || foundMu2!=string::npos)
              TriggerMu = ihlt->second;
 		}
         Trigger = TriggerEle || TriggerMu;

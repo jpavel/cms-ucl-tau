@@ -26,6 +26,10 @@
         <Item Name="dZvertex" Value="0.1" /> 
 			<!-- Value of b-tag weight for veto -->
         <Item Name="bTagValue" Value="0.679" />
+			<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
+        <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
+		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />
+		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/>
         
 		</UserConfig>
 	</Cycle>

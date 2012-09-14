@@ -126,6 +126,10 @@ private:
 	double dZvertex;
 	double bTagValue;
 	double maxEvent;
+	
+	std::string doubEle;
+    std::string doubMu;
+    std::string doubMu2;
 
 // output variables
 std::vector<float> out_pt;
