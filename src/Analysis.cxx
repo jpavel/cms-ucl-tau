@@ -100,13 +100,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_n_goodMu_Hcand		= Book(TH1D("h_n_goodMu_Hcand","Number of good muons; good muons",10,-0.5,9.5));
     h_n_goodTau_Hcand		= Book(TH1D("h_n_goodTau_Hcand","Number of good taus; good taus",10,-0.5,9.5));
     
-    
-    // mc histograms
-    
-    h_mc_summary			= Book(TH1D("h_mc_summary","MC summary", 7, -0.5,6.5));
-    h_mc_H_mass				= Book(TH1D("h_mc_H_mass","Higgs mass",100,100,150));
-    h_Z_doughter			= Book(TH1D("h_Z_doughter","Z doughters",41, -20.5,20.5));
-    
     DeclareVariable(out_pt,"el_pt");
 
 
@@ -119,16 +112,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	 h_event_type->GetXaxis()->SetBinLabel(6,"Z(ee)H(#mu e)");
 	 h_event_type->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
 	 h_event_type->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
-	
-	h_mc_summary = Retrieve<TH1D>("h_mc_summary");
-	h_mc_summary->GetXaxis()->SetBinLabel(1,"All");
-	h_mc_summary->GetXaxis()->SetBinLabel(2,"Z");
-	h_mc_summary->GetXaxis()->SetBinLabel(3,"Z+H");
-	h_mc_summary->GetXaxis()->SetBinLabel(4,"1+tau");
-	h_mc_summary->GetXaxis()->SetBinLabel(5,"Zll");
-	h_mc_summary->GetXaxis()->SetBinLabel(6,"Zee");
-	h_mc_summary->GetXaxis()->SetBinLabel(7,"Z#mu#mu");
-	
+	 
 	 
 	
 	
@@ -149,15 +133,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
     
 	
-	std::cout << "MC summary	: " << std::endl;
-	std::cout << "All events	: " << h_mc_summary->GetBinContent(1) << std::endl;
-	std::cout << "Z	            : " << h_mc_summary->GetBinContent(2) << std::endl;
-	std::cout << "Z+H	: " << h_mc_summary->GetBinContent(3) << std::endl;
-	std::cout << ">1 tau	: " << h_mc_summary->GetBinContent(4) << std::endl;
-	std::cout << "Z->ll	: " << h_mc_summary->GetBinContent(5) << std::endl;
-	std::cout << "Z->ee	: " << h_mc_summary->GetBinContent(6) << std::endl;
-	std::cout << "Z->mumu	: " << h_mc_summary->GetBinContent(7) << std::endl;
-	
+
    return;
 
 }
@@ -264,157 +240,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	int eNumber = m->eventNumber;
 	
-	bool doMCanalysis = true;
-	std::vector<myobject> gen = m->RecGenParticle;
-	std::vector<myobject> genMuon; genMuon.clear();
-	std::vector<myobject> genElectron; genElectron.clear();
-	std::vector<myobject> genTau; genTau.clear();
-	std::vector<myobject> trueZ; trueZ.clear();
-	std::vector<myobject> trueH; trueH.clear();
-	std::vector<myobject> Htautau; Htautau.clear();
-	
-	
-	double Hmass = 140.;
-	if(doMCanalysis)
-	{
-		bool Zpresent = false;
-		bool MC_Zmumu=false;
-		bool MC_Zee=false;
-		h_mc_summary->Fill(0);
-		 m_logger << VERBOSE << "--> Listing all MC true particles " << SLogger::endmsg;
-		for(uint i =0; i < gen.size(); i++)
-		{
-			m_logger << VERBOSE << i << ": pdgId: " << gen[i].pdgId << " status: " << gen[i].status << " pt: " << gen[i].pt 
-			<< " eta: " << gen[i].eta << " phi: " << gen[i].phi << SLogger::endmsg;
-			if(fabs(gen[i].pdgId)==11 && (gen[i].status==1 || gen[i].status==2))  genElectron.push_back(gen[i]);
-			if(fabs(gen[i].pdgId)==13 && (gen[i].status==1 || gen[i].status==2))  genMuon.push_back(gen[i]);
-			if(fabs(gen[i].pdgId)==15 && (gen[i].status==1 || gen[i].status==2))  genTau.push_back(gen[i]);
-			if(gen[i].pdgId==23 && gen[i].status==2) trueZ.push_back(gen[i]);
-			if(gen[i].pdgId==25 && gen[i].status==2) trueH.push_back(gen[i]);
-			if(gen[i].Gmod_pdgId==23 ) Hist("h_Z_doughter")->Fill(gen[i].pdgId);
-		}
-		m_logger << INFO << " Z: " << trueZ.size() << " MC electrons: " << genElectron.size() << " MC muons: " << genMuon.size() << " MC tau: " << genTau.size() << SLogger::endmsg;          
-		if(trueZ.size() ==0) return;
-		h_mc_summary->Fill(1);
-		if(trueH.size() ==0) return;
-		h_mc_summary->Fill(2);
-		
-		if(genTau.size() > 1){
-			h_mc_summary->Fill(3);
-			double dMass = 999.;
-			int MC_Hindex[2] = {-1,-1};
-			int MC_Zindex[2] = {-1,-1};
-			for(uint i = 0; i < genTau.size(); i++)
-			{
-				TLorentzVector cand1;				
-				cand1.SetPtEtaPhiM(genTau[i].pt,genTau[i].eta,genTau[i].phi,1.77);
-				for(uint j = i+1; j < genTau.size() ; j++)
-				{
-					if(genTau[i].pdgId+genTau[j].pdgId !=0) continue;
-					TLorentzVector cand2;				
-					cand2.SetPtEtaPhiM(genTau[j].pt,genTau[j].eta,genTau[j].phi,1.77);
-					cand2+=cand1;
-										
-					double mass = cand2.M();
-					m_logger << INFO << "mass is " << mass << SLogger::endmsg;
-					double dM=fabs(mass-Hmass);
-                    if(dM < dMass){
-						MC_Hindex[0]=i;
-						MC_Hindex[1]=j;
-                        dMass=dM;				
-					}
-				}				
-			}
-			TLorentzVector H_d1,H_d2,H;				
-				
-			if(MC_Hindex[0]>-1 && MC_Hindex[1]>-1)
-			{
-				int i = MC_Hindex[0];
-				int j = MC_Hindex[1];
-				Htautau.push_back(genTau[i]);
-				Htautau.push_back(genTau[j]);
-				H_d1.SetPtEtaPhiM(genTau[i].pt,genTau[i].eta,genTau[i].phi,1.77);
-				H_d2.SetPtEtaPhiM(genTau[j].pt,genTau[j].eta,genTau[j].phi,1.77);
-				H=H_d1+H_d2;
-				Hist("h_mc_H_mass")->Fill(H.M());
-			}
-		
-			if(genMuon.size() > 1)
-			{
-				dMass=999.;
-				for(uint i = 0; i < genMuon.size(); i++)
-				{
-					if(!(genMuon[i].Gmod_pdgId==23||genMuon[i].mod_pdgId==23) ) continue;
-					TLorentzVector cand1;				
-					cand1.SetPtEtaPhiM(genMuon[i].pt,genMuon[i].eta,genMuon[i].phi,0.106);
-					
-					for(uint j = i+1; j < genMuon.size() ; j++)
-					{
-						if(!(genMuon[j].Gmod_pdgId==23||genMuon[j].mod_pdgId==23) ) continue;	
-						if(genMuon[i].pdgId+genMuon[j].pdgId !=0) continue;
-						TLorentzVector cand2;				
-						cand2.SetPtEtaPhiM(genMuon[j].pt,genMuon[j].eta,genMuon[j].phi,0.106);
-						cand2+=cand1;
-											
-						double mass = cand2.M();
-						m_logger << INFO << "mass is " << mass << SLogger::endmsg;
-						double dM=fabs(mass-91.2);
-	                    if(dM < dMass){
-							MC_Zindex[0]=i;
-							MC_Zindex[1]=j;
-	                        dMass=dM;
-	                        MC_Zmumu=true;				
-						}
-					}				
-				}
-				
-			}
-			
-			if(genElectron.size() > 1)
-			{
-				dMass=999.;
-				for(uint i = 0; i < genElectron.size(); i++)
-				{
-					if(!(genElectron[i].Gmod_pdgId==23||genElectron[i].mod_pdgId==23) ) continue;
-					if(MC_Zmumu){ m_logger << ERROR << "WTF ? " << SLogger::endmsg; continue;}						 
-					TLorentzVector cand1;				
-					cand1.SetPtEtaPhiM(genElectron[i].pt,genElectron[i].eta,genElectron[i].phi,5.1e-4);
-					
-					for(uint j = i+1; j < genElectron.size() ; j++)
-					{
-						if(!(genElectron[j].Gmod_pdgId==23||genElectron[j].mod_pdgId==23) ) continue;	
-						if(genElectron[i].pdgId+genElectron[j].pdgId !=0) continue;
-						TLorentzVector cand2;				
-						cand2.SetPtEtaPhiM(genElectron[j].pt,genElectron[j].eta,genElectron[j].phi,5.1e-4);
-						cand2+=cand1;
-											
-						double mass = cand2.M();
-						m_logger << INFO << "mass is " << mass << SLogger::endmsg;
-						double dM=fabs(mass-91.2);
-	                    if(dM < dMass){
-							MC_Zindex[0]=i;
-							MC_Zindex[1]=j;
-	                        dMass=dM;
-	                        MC_Zee=true;				
-						}
-					}				
-				}
-				
-			}
-			if(MC_Zee || MC_Zmumu) h_mc_summary->Fill(4);
-			if(MC_Zee) h_mc_summary->Fill(5);
-			if(MC_Zmumu) h_mc_summary->Fill(6);
-			
-			
-		
-		
-		}else return;
-	
-	}
 	
 	bool trigPass = Trg_MC_12(m);
-        
-    m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;          
+    m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;
     if(!trigPass)
     {
 		return;

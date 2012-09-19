@@ -118,12 +118,6 @@ private:
         TH1* h_n_goodMu_Hcand;
         TH1* h_n_goodTau_Hcand;
         
-        // mc histograms
-        
-        TH1* h_mc_summary;
-        TH1* h_mc_H_mass;
-        TH1* h_Z_doughter;
-        
 
 // properties
 	std::string InTreeName;
