@@ -70,9 +70,7 @@ private:
 	
 	
 	
-	int compared;
-	int entries;
-
+	
 	// histograms
 	
 	std::vector<int> index_number;
@@ -140,16 +138,13 @@ private:
 	double dZvertex;
 	double bTagValue;
 	double maxEvent;
-	int examinedEvent;
-	
-	double exEvent;
+	bool   syncTest;
 	
 	std::string doubEle;
     std::string doubMu;
     std::string doubMu2;
 
 // output variables
-std::vector<float> out_pt;
 
 
    // Macro adding the functions for dictionary generation

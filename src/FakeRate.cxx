@@ -21,6 +21,7 @@ FakeRate::FakeRate()
    DeclareProperty("ElectronTriggerName", doubEle);
    DeclareProperty("MuonTriggerName1", doubMu);
    DeclareProperty("MuonTriggerName2", doubMu2);
+   DeclareProperty("SynchronizationTest",syncTest);
 }
 
 FakeRate::~FakeRate() {
@@ -104,8 +105,7 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
     h_denom					= Book(TH1D("h_denom", "Denominator", 100,0,100));
 
     
-    DeclareVariable(out_pt,"el_pt");
-
+    
 
 	 h_event_type = Retrieve<TH1D>("h_event_type");
          h_event_type->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
@@ -128,6 +128,7 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	 
 	 std::ifstream myfile;
 	 std::string line;
+     if(syncTest){
      myfile.open ("mmet.txt");
 	 if (myfile.is_open())
 	 {	
@@ -154,6 +155,7 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	    }
 	    myfile.close();
 	  }
+	
 	 index_number.pop_back();
 	evt_number.pop_back();
 	run_number.pop_back();
@@ -164,7 +166,7 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	  {
 		 std::cout << index_number[i] << " " << evt_type[i] << " " << run_number[i] << " " << lumi_number[i] << " " << evt_number[i] << std::endl;		
 	  }
-	 
+	 }
 	 
 	
 	
@@ -297,6 +299,7 @@ bool FakeRate::WZ_Rej(myevent *m, myobject mu) {
        
         double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
         bool tMass = tMass_v < 30.0;
+        if(syncTest)
         std::cout << "    >> MET is " << Met.front().pt <<  " aMass is " << sqrt(pow(Met.front().et + mu.et, 2) - pow(Met.front().px + mu.px, 2) - pow(Met.front().py + mu.py, 2)) << 
 		" and tMass is " << sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi))) << std::endl;
 					
@@ -313,10 +316,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	int eNumber = m->eventNumber;
 	bool foundEvent = false;
 	uint pos = std::find(evt_number.begin(), evt_number.end(), eNumber) - evt_number.begin();
-	if( pos < evt_number.size())
+	if( pos < evt_number.size() && syncTest)
 	{
-		//foundEvent = true;
-		compared++;		
+		foundEvent = true;
 	}
 	
 	if(foundEvent) std::cout << ">>>>>>>>>>>>>>>>> in event " << eNumber << " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " << endl;	
@@ -626,10 +628,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " There are " << goodTau.size() << " good taus " << SLogger::endmsg;	
 	Hist("h_n_goodTau_Hcand")->Fill(goodTau.size());	
 	
-		// mutau and emu final states
+		// mutau final states
 		bool muTau=false;
-		bool muE = true;
-                
+		         
                 std::vector<myobject> Hcand;
                 std::vector<myobject> Fakecand;
 					Fakecand.clear();
@@ -667,12 +668,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                             
                     }
 
-                    //~ if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
-                    //~ else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
-                    //~ else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
+                   
                     bool eTau = false;
-                    muE=false;
-                    if(!muTau && !muE)
+                    if(!muTau)
                     {
                         for(uint i = 0; i < goodElectron.size() ; i++)
                         {
@@ -690,8 +688,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                     if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
                                     if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.3) continue;
 									eTau=true;
-						Hcand.push_back(goodElectron[i]);
-						Hcand.push_back(goodTau[j]);
+									Hcand.push_back(goodElectron[i]);
+									Hcand.push_back(goodTau[j]);
 					                             TLorentzVector eH_eTau,tauH_eTau,H_eTau;
                                                 eH_eTau.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);
                                                 tauH_eTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
@@ -704,49 +702,19 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                                 Hist( "h_H_mass" )->Fill(H_eTau.M());
 					                            goodTau.erase(goodTau.begin()+j); j--;
 					                            if(goodTau.size()==0) i=goodTau.size();
-					                 //std::cout << " tau size is " << goodTau.size() << " and index is " << j << std::endl;           
-								}
+					     		}
 								if(eTau){
 									  goodElectron.erase(goodElectron.begin()+i); i--;
 									  if(goodElectron.size()==0) i=goodElectron.size();	
 								  }
-								//std::cout << " electron size is " << goodElectron.size() << " and index is " << i << std::endl;
 					}
 		
 		 }
-		 if(foundEvent) 
-		 std::cout << " Total fake candidates " << Hcand.size() << std::endl;
-		if(eTau){
-			if(foundEvent) std::cout << "Remaining electrons and taus: " << goodElectron.size() <<  " and " << goodTau.size() << std::endl;
-			for(uint j=0; j< goodTau.size() ; j++)
-			{	
-				if(foundEvent) std::cout << " tau no. 1 pt: " << goodTau[j].pt << " eta " << goodTau[j].eta << " phi " 
-									<< goodTau[j].phi << " charge " << goodTau[j].charge << std::endl;
-				for(uint i = 0; i < goodElectron.size(); i++)
-	            {
-				
-					if(foundEvent) std::cout << "checking other candidates: el " << i << std::endl;
-					if(goodElectron[i].charge*goodTau[j].charge <0) continue;
-					if(foundEvent) std::cout << "checking other candidates: el " << i << std::endl;
-					
-					if(deltaR(Hcand[1].eta,Hcand[1].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.3) continue;
-					if(foundEvent) std::cout << "no overlap " << i << std::endl;
-					
-					Fakecand.push_back(goodElectron[i]);
-				}
-				if(Hcand[0].charge*goodTau[j].charge <0) continue;
-				if(foundEvent) std::cout << "checking other candidates: tau " << j << std::endl;
-			    if(deltaR(Hcand[0].eta,Hcand[0].phi,goodTau[j].eta,goodTau[j].phi)< 0.3) continue;
-				if(foundEvent) std::cout << "no overlap tau " << j << std::endl;	
-				Fakecand.push_back(Hcand[0]);
-			}
+		 if(foundEvent)  std::cout << " Total fake candidates " << Hcand.size() << std::endl;
 		
-		}
-	//	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
-		else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
 		
 		bool tauTau =true;
-		if(!muTau && !muE && !eTau)
+		if(!muTau && !eTau)
 		{
 			for(uint i = 0; i < goodTau.size() && !tauTau ; i++)
 			{
@@ -784,7 +752,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 		tauTau=false;
-		if(Hcand.size()==0 || (!muTau && !muE && !eTau && !tauTau)){ 
+		if(Hcand.size()==0 || (!muTau && !eTau && !tauTau)){ 
 			if(foundEvent) std::cout << " Not selected" << std::endl;
 
 			m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
@@ -792,7 +760,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	//	else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
 		// cross-check
-		if(muTau+muE+eTau+tauTau > 1){
+		if(muTau+eTau+tauTau > 1){
 			 m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
 			 return;
 		 }
@@ -802,12 +770,12 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Zmumu)
 	{
 		if(muTau) event_type = 1;
-		if(muE) event_type = 2;
+		//if(muE) event_type = 2;
 		if(eTau) event_type = 3;
 		if(tauTau) event_type = 4;
 	}else if(Zee){
 		if(muTau) event_type = 5;
-		if(muE) event_type = 6;
+		//if(muE) event_type = 6;
 		if(eTau) event_type = 7;
 		if(tauTau) event_type = 8;
 	}
@@ -855,8 +823,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(foundEvent) 
 	std::cout << " Z-vertex distances are " << fabs(Zcand[0].z_expo - Zcand[1].z_expo) << " " 
 									  << fabs(Zcand[0].z_expo - Hcand[0].z_expo) << " " << fabs(Zcand[0].z_expo - Hcand[1].z_expo) << std::endl;
-	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
-//	 && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
+	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);		
 	bool dZ_expo2 = false;
 	for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
 	 { 
@@ -915,7 +882,6 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(foundEvent) std::cout << " WZ_rej cut" << std::endl;
 	
-	//if(!WZ_Rej(m,Hcand[0])) return; 
 	for(uint i =0; i < Hcand.size(); i+=2)
 	{
 		if(!WZ_Rej(m,Hcand[i])){
@@ -926,21 +892,22 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	
-	//Hist("h_denom")->Fill(Hcand[0].pt);
-	//std::cout <<" type: " << event_type << "event " << m->eventNumber << " in a run " << m->runNumber << std::endl;
+	
 	
 	if(foundEvent) std::cout << " ---> Event " << eNumber << " I have " << Hcand.size()/2 << " candidates " << std::endl;
-	else if(Hcand.size() > 0) std::cout << " ---> Event " << eNumber << " I have " << Hcand.size()/2 << " candidates while Abdollah has NONE " << std::endl;
+	else if(Hcand.size() > 0 && syncTest) std::cout << " ---> Event " << eNumber << " I have " << Hcand.size()/2 << " candidates while Abdollah has NONE " << std::endl;
 	
 	for(uint i =0; i < Hcand.size(); i+=2)
 	{
+		Hist( "h_event_type" )->Fill(event_type);
 		Hist("h_denom")->Fill(Hcand[i].pt);
-		std::cout <<" type: " << event_type << " event " << m->eventNumber << " in a run " << m->runNumber << std::endl;
-		std::cout << " > candidate electron no. " << i/2 << " pt: " << Hcand[i].pt << " eta: " << Hcand[i].eta << " phi: " << 
-		Hcand[i].phi << " ch: " << Hcand[i].charge << " iso " << RelIsoEl(Hcand[i]) << std::endl;
-		std::cout << " > candidate tau no. " << i/2 << " pt: " << Hcand[i+1].pt << " eta: " << Hcand[i+1].eta << " phi: " << 
-		Hcand[i+1].phi << " ch: " << Hcand[i+1].charge << std::endl;
-		
+		if(syncTest){
+			std::cout <<" type: " << event_type << " event " << m->eventNumber << " in a run " << m->runNumber << std::endl;
+			std::cout << " > candidate electron no. " << i/2 << " pt: " << Hcand[i].pt << " eta: " << Hcand[i].eta << " phi: " << 
+				Hcand[i].phi << " ch: " << Hcand[i].charge << " iso " << RelIsoEl(Hcand[i]) << std::endl;
+			std::cout << " > candidate tau no. " << i/2 << " pt: " << Hcand[i+1].pt << " eta: " << Hcand[i+1].eta << " phi: " << 
+				Hcand[i+1].phi << " ch: " << Hcand[i+1].charge << std::endl;
+		}
 	
 	}
 		if(RelIsoEl(Hcand[0]) < 0.25) Hist("h_medium")->Fill(Hcand[0].pt);
@@ -948,16 +915,11 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		
 	
- if(Hcand.size() > 0){
-	Hist( "h_event_type" )->Fill(event_type);
- 
+ if(syncTest && Hcand.size() > 0){
  std::cout << " ----------------------------------------------------------------------------------------" << std::endl;
 }
  
-   return;
-   //trigger
-    
-
+ 
    return;
 
 }

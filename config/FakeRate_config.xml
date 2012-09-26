@@ -34,6 +34,8 @@
         <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
 		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />
 		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/>
+		<Item Name="SynchronizationTest" Value="True" />
+		
 		</UserConfig>
 	</Cycle>
 </JobConfiguration>
