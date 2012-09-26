@@ -21,4 +21,6 @@
 #pragma link C++ class std::vector<std::vector<double> >+;
 //#pragma link C++ class TLorentzVector+;
 
+#pragma link C++ class FakeRate+;
+
 #endif // __CINT__
