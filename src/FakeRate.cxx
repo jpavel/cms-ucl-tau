@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 ClassImp( FakeRate );
 
@@ -45,6 +47,9 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	 h_el_n              = Book(TH1D("el_n","el_n",50,0,50));
     h_el_cut            = Book(TH1D("el_cit","el_cut",50,0,50));
     h_event_type        = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
+	h_event_type_medium = Book(TH1D("h_event_type_medium","Event Type passing iso < 0.25",8,0.5,8.5));
+	h_event_type_tight  = Book(TH1D("h_event_type_tight","Event Type passing iso < 0.1 ",8,0.5,8.5));
+	
 
     //Z->mumu    
     h_mu1Z_pt           = Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
@@ -117,6 +122,62 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	 h_event_type->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
 	 h_event_type->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
 	 
+	  h_event_type_medium = Retrieve<TH1D>("h_event_type_medium");
+         h_event_type_medium->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
+         h_event_type_medium->GetXaxis()->SetBinLabel(2,"Z(#mu#mu)H(#mu e)");
+         h_event_type_medium->GetXaxis()->SetBinLabel(3,"Z(#mu#mu)H(e#tau)");
+         h_event_type_medium->GetXaxis()->SetBinLabel(4,"Z(#mu#mu)H(#tau#tau)");
+         h_event_type_medium->GetXaxis()->SetBinLabel(5,"Z(ee)H(#mu#tau)");
+	 h_event_type_medium->GetXaxis()->SetBinLabel(6,"Z(ee)H(#mu e)");
+	 h_event_type_medium->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
+	 h_event_type_medium->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
+	 
+	  h_event_type_tight = Retrieve<TH1D>("h_event_type_tight");
+         h_event_type_tight->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
+         h_event_type_tight->GetXaxis()->SetBinLabel(2,"Z(#mu#mu)H(#mu e)");
+         h_event_type_tight->GetXaxis()->SetBinLabel(3,"Z(#mu#mu)H(e#tau)");
+         h_event_type_tight->GetXaxis()->SetBinLabel(4,"Z(#mu#mu)H(#tau#tau)");
+         h_event_type_tight->GetXaxis()->SetBinLabel(5,"Z(ee)H(#mu#tau)");
+	 h_event_type_tight->GetXaxis()->SetBinLabel(6,"Z(ee)H(#mu e)");
+	 h_event_type_tight->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
+	 h_event_type_tight->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
+	 
+	 h_denom_types.clear();
+	 for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
+	 {
+		std::stringstream s;
+		s << "h_denom_type_" << i;
+		std::string name = s.str(); 
+		std::stringstream ss;
+		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+		std::string title = ss.str();
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+		h_denom_types.push_back(h_temp);
+	 }
+	 
+	 for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
+	 {
+		std::stringstream s;
+		s << "h_medium_type_" << i;
+		std::string name = s.str(); 
+		std::stringstream ss;
+		ss <<  "Iso < 0.25 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+		std::string title = ss.str();
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+		h_medium_types.push_back(h_temp);
+	 }
+	 
+	 for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
+	 {
+		std::stringstream s;
+		s << "h_tight_type_" << i;
+		std::string name = s.str(); 
+		std::stringstream ss;
+		ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+		std::string title = ss.str();
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+		h_tight_types.push_back(h_temp);
+	 }
 	 
 	 
 	 index_number.clear();
@@ -186,6 +247,27 @@ std::cout << "Event type summary: " << std::endl;
 	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << std::endl;
 	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
+	
+	
+std::cout << "Iso < 0.25 summary: " << std::endl;
+	std::cout << "Z(mumu)H(mutau)   : " << h_event_type_medium->GetBinContent(1) << std::endl;
+	std::cout << "Z(mumu)H(muE)     : " << h_event_type_medium->GetBinContent(2) << std::endl;
+	std::cout << "Z(mumu)H(Etau)    : " << h_event_type_medium->GetBinContent(3) << std::endl;
+	std::cout << "Z(mumu)H(tautau)  : " << h_event_type_medium->GetBinContent(4) << std::endl;
+	std::cout << "Z(EE)H(mutau)     : " << h_event_type_medium->GetBinContent(5) << std::endl;
+	std::cout << "Z(EE)H(muE)       : " << h_event_type_medium->GetBinContent(6) << std::endl;
+	std::cout << "Z(EE)H(Etau)      : " << h_event_type_medium->GetBinContent(7) << std::endl;
+	std::cout << "Z(EE)H(tautau)    : " << h_event_type_medium->GetBinContent(8) << std::endl;	
+	
+std::cout << "Iso < 0.1 summary: " << std::endl;
+	std::cout << "Z(mumu)H(mutau)   : " << h_event_type_tight->GetBinContent(1) << std::endl;
+	std::cout << "Z(mumu)H(muE)     : " << h_event_type_tight->GetBinContent(2) << std::endl;
+	std::cout << "Z(mumu)H(Etau)    : " << h_event_type_tight->GetBinContent(3) << std::endl;
+	std::cout << "Z(mumu)H(tautau)  : " << h_event_type_tight->GetBinContent(4) << std::endl;
+	std::cout << "Z(EE)H(mutau)     : " << h_event_type_tight->GetBinContent(5) << std::endl;
+	std::cout << "Z(EE)H(muE)       : " << h_event_type_tight->GetBinContent(6) << std::endl;
+	std::cout << "Z(EE)H(Etau)      : " << h_event_type_tight->GetBinContent(7) << std::endl;
+	std::cout << "Z(EE)H(tautau)    : " << h_event_type_tight->GetBinContent(8) << std::endl;	
 
 h_medium=Retrieve<TH1D>("h_medium");
 	h_tight=Retrieve<TH1D>("h_tight");
@@ -901,13 +983,24 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		Hist( "h_event_type" )->Fill(event_type);
 		Hist("h_denom")->Fill(Hcand[i].pt);
+		h_denom_types[event_type-1]->Fill(Hcand[i].pt);
+		if(RelIsoEl(Hcand[0]) < 0.25){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
+		if(RelIsoEl(Hcand[0]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
+		
+		
 		if(syncTest){
 			std::cout <<" type: " << event_type << " event " << m->eventNumber << " in a run " << m->runNumber << std::endl;
-			std::cout << " > candidate electron no. " << i/2 << " pt: " << Hcand[i].pt << " eta: " << Hcand[i].eta << " phi: " << 
-				Hcand[i].phi << " ch: " << Hcand[i].charge << " iso " << RelIsoEl(Hcand[i]) << std::endl;
-			std::cout << " > candidate tau no. " << i/2 << " pt: " << Hcand[i+1].pt << " eta: " << Hcand[i+1].eta << " phi: " << 
-				Hcand[i+1].phi << " ch: " << Hcand[i+1].charge << std::endl;
+			if(event_type==3 || event_type==7){
+					std::cout << " > candidate electron no. " << i/2 << " pt: " << Hcand[i].pt << " eta: " << Hcand[i].eta << " phi: " << 
+					Hcand[i].phi << " ch: " << Hcand[i].charge << " iso " << RelIsoEl(Hcand[i]) << std::endl;
+				}else if(event_type==1 || event_type==5){
+					std::cout << " > candidate muon no. " << i/2 << " pt: " << Hcand[i].pt << " eta: " << Hcand[i].eta << " phi: " << 
+					Hcand[i].phi << " ch: " << Hcand[i].charge << " iso " << RelIsoMu(Hcand[i]) << std::endl;
+				}
+				std::cout << " > candidate tau no. " << i/2 << " pt: " << Hcand[i+1].pt << " eta: " << Hcand[i+1].eta << " phi: " << 
+					Hcand[i+1].phi << " ch: " << Hcand[i+1].charge << std::endl;
 		}
+		
 	
 	}
 		if(RelIsoEl(Hcand[0]) < 0.25) Hist("h_medium")->Fill(Hcand[0].pt);

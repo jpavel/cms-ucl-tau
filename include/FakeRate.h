@@ -82,6 +82,9 @@ private:
         TH1* h_el_n;
         TH1* h_el_cut;
         TH1* h_event_type;
+        TH1* h_event_type_medium;
+        TH1* h_event_type_tight;
+        
         TH1* h_mu1Z_pt;
         TH1* h_mu2Z_pt;
         TH1* h_Zmass_mumu;
@@ -128,7 +131,11 @@ private:
         TH1* h_medium;
         TH1* h_tight;
         TH1*  h_denom;
-
+        
+        std::vector<TH1*>  h_denom_types;
+		std::vector<TH1*>  h_medium_types;
+		std::vector<TH1*>  h_tight_types;
+	
         
 
 // properties
