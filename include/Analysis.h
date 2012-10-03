@@ -130,6 +130,8 @@ private:
 	std::string doubEle;
     std::string doubMu;
     std::string doubMu2;
+    
+    bool  antiIso;
 
 // output variables
 std::vector<float> out_pt;

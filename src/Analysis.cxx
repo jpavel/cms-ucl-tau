@@ -21,6 +21,7 @@ Analysis::Analysis()
    DeclareProperty("ElectronTriggerName", doubEle);
    DeclareProperty("MuonTriggerName1", doubMu);
    DeclareProperty("MuonTriggerName2", doubMu2);
+   DeclareProperty("antiIso",antiIso);
   
 }
 
@@ -263,11 +264,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double relIso = RelIsoMu(muon[i]);
 		
 		bool pfID = PFMuonID(muon[i]);	
-
-		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
-		{
-					goodMuon.push_back(muon[i]);
-					Hist("h_mu_relIso")->Fill(relIso);
+		if(!antiIso){
+			if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
+			{
+						goodMuon.push_back(muon[i]);
+						Hist("h_mu_relIso")->Fill(relIso);
+			}
+		}else{
+			if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
+			{
+						goodMuon.push_back(muon[i]);
+						Hist("h_mu_relIso")->Fill(relIso);
+			}
 		}
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
@@ -286,10 +294,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 		
-		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
-		{
-			goodElectron.push_back(electron[i]);
-			Hist("h_el_relIso")->Fill(relIso);
+		if(!antiIso){
+			if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
+			{
+				goodElectron.push_back(electron[i]);
+				Hist("h_el_relIso")->Fill(relIso);
+			}
+		}else{
+			if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && elID)
+			{
+				goodElectron.push_back(electron[i]);
+				Hist("h_el_relIso")->Fill(relIso);
+			}
+		
 		}
     }
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
@@ -493,8 +510,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool CombinedIsolation = (tau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
 		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
 		
-		if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && CombinedIsolation && DecayMode)
-			goodTau.push_back(tau[i]);
+		if(!antiIso){
+			if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && CombinedIsolation && DecayMode)
+				goodTau.push_back(tau[i]);
+		}else{
+			if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
+				goodTau.push_back(tau[i]);
+		}
     }
     
     for(int i = 0; i < goodTau.size(); i++)
@@ -547,14 +569,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                             double relIso = (MuIsoTrk) / goodMuon[i].pt;
                             if (MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU > 0)
                                 relIso = (MuIsoTrk + MuIsoEcal + MuIsoHcal - 0.5 * MuIsoPU) / (goodMuon[i].pt);
-                            if(relIso > 0.25) continue;    
-                            if(relIso < 0.15)
+                            if(relIso > 0.25 && !antiIso) continue;    
+                            if((relIso < 0.15 && !antiIso)|| antiIso)
                             {
                                 m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
                                 for(uint j=0; j< goodElectron.size() && !muE; j++)
                                 {
+                                    if(antiIso && relIso < 0.25) continue;
                                     double relIsoEl = RelIsoEl(goodElectron[j]);
-                                    if(relIsoEl > 0.25) continue;
+                                    if((relIsoEl > 0.25 && !antiIso)||(antiIso && relIsoEl < 0.25)) continue;
                                     if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
                                     if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.3) continue;
                                     muE=true;
@@ -578,6 +601,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
                                 for(uint j=0; j< goodTau.size() && !muTau && !muE; j++)
                                 {
+                                    if(antiIso && relIso < 0.15) continue;
+                                    if(antiIso && goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5) continue;
                                     if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
                                     if(goodTau[j].discriminationByMuonTight <=0.5) continue;
                                     if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.3) continue;
@@ -604,8 +629,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 m_logger << DEBUG << " Checking for muE " << SLogger::endmsg;   
                                 for(uint j=0; j< goodElectron.size() && !muE; j++)
                                 {
+                                    if(antiIso && relIso < 0.25) continue;
                                     double relIsoEl = RelIsoEl(goodElectron[j]);
-                                    if(relIsoEl > 0.25) continue;
+                                    if((relIsoEl > 0.25 && !antiIso) || (relIsoEl < 0.25 && antiIso)) continue;
                                     
                                     if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
                                     if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.3) continue;
@@ -640,18 +666,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                         {
 
                             double relIso = RelIsoEl(goodElectron[i]);
-                            if (relIso > 0.25) continue;
-                            if(relIso < 0.10 && goodElectron[i].numLostHitEleInner < 1)
+                            if (relIso > 0.25 && !antiIso) continue;
+                            if ((!antiIso && relIso < 0.10 && goodElectron[i].numLostHitEleInner < 1) || (antiIso && relIso > 0.1 && goodElectron[i].numLostHitEleInner < 1))
                             {
                                 m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
                                 for(uint j=0; j< goodTau.size() && !eTau; j++)
                                 {
+                                    if(antiIso && goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5) continue;
                                     if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
                                     if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
                                     if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.3) continue;
-						eTau=true;
-						Hcand.push_back(goodElectron[i]);
-						Hcand.push_back(goodTau[j]);
+									eTau=true;
+									Hcand.push_back(goodElectron[i]);
+									Hcand.push_back(goodTau[j]);
 
                                                 TLorentzVector eH_eTau,tauH_eTau,H_eTau;
                                                 eH_eTau.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);
@@ -683,14 +710,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				
 					if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 					if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
-					if(goodTau[i].byTightCombinedIsolationDeltaBetaCorr <=0.5) continue;
+					if(!antiIso && goodTau[i].byTightCombinedIsolationDeltaBetaCorr <=0.5) continue;
+					if(antiIso && goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5) continue;
+					
 					
 					for(uint j=i+1; j< goodTau.size() && !tauTau; j++)
 					{
 						if(goodTau[i].charge*goodTau[j].charge >=0) continue;
 						if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 						if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
-						if(goodTau[j].byTightCombinedIsolationDeltaBetaCorr <=0.5) continue;
+						if(!antiIso && goodTau[j].byTightCombinedIsolationDeltaBetaCorr <=0.5) continue;
+						if(antiIso && goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5) continue;
 						if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.3) continue;
 						tauTau=true;
 						Hcand.push_back(goodTau[i]);
@@ -746,7 +776,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 for(uint i = 0; i < goodMuon.size(); i++)
 				{
 					  if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.3 &&
-					  deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3) 
+					  deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3 && RelIsoMu(goodMuon[i]) < 0.4) 
 						Ad_lepton=true;
 					
 				}
@@ -754,7 +784,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 for(uint i = 0; i < goodElectron.size(); i++)
 				{
 						if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.3 &&
-						deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3)  
+						deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3 && RelIsoEl(goodElectron[i]) < 0.4)  
 						Ad_lepton=true;
 					
 				}
@@ -762,7 +792,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint i = 0; i < goodTau.size(); i++)
 				{
 					if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.3 &&
-						deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3)  
+						deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3 && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
 						Ad_lepton=true;
 				}
 		
