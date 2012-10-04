@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
+#include "Corrector.h"
 
 
 ClassImp( Analysis );
@@ -831,6 +831,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
+	
+	double eff = Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
 	
  if(signal) Hist( "h_event_type" )->Fill(event_type);
  
