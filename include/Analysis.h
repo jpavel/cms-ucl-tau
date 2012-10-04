@@ -142,6 +142,11 @@ private:
     std::string doubMu2;
     
     bool  checkCategories;
+    
+    bool isSimulation;
+    bool is2011;
+    bool is2012_52;
+    bool is2012_53;
 
 // output variables
 std::vector<float> out_pt;

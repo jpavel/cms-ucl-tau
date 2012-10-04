@@ -24,6 +24,10 @@ Analysis::Analysis()
    DeclareProperty("MuonTriggerName1", doubMu);
    DeclareProperty("MuonTriggerName2", doubMu2);
    DeclareProperty("checkCategories",checkCategories);
+   DeclareProperty("isSimulation",isSimulation);
+   DeclareProperty("is2011",is2011);
+   DeclareProperty("is2012_52",is2012_53);
+   DeclareProperty("is2012_53",is2012_52);
   
 }
 
@@ -119,9 +123,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	 
 	// Lumi weights
 	
-	LumiWeights_ = new reweight::LumiReWeighting("/home/jpavel/analysis/CMS/ZHtautau/ZHtautauAnalysis/config/Summer12_PU.root",
-	"/home/jpavel/analysis/CMS/ZHtautau/ZHtautauAnalysis/config/dataPileUpHistogram_True_2012.root","mcPU","pileup");
-	
+	if(!2011) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
+	else LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileupHistogram_True_2011.root","mcPU","pileup");
 	
    return;
 
@@ -244,8 +247,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 	
     m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
-	double MyWeight = LumiWeights_->weight( m->PUInfo_true );
-	std::cout << " my PU is " << m->PUInfo_true  << " and weight " << MyWeight << std::endl;
+	double PUWeight = 1.0;
+	if(isSimulation) PUWeight = LumiWeights_->weight( m->PUInfo_true );
 	int eNumber = m->eventNumber;
 	
 	
@@ -681,8 +684,105 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(eTau) event_type = 7;
 		if(tauTau) event_type = 8;
 	}
-	
+	// efficiency correction;
 	int I = Hindex[0]; int J = Hindex[1];		
+	switch(event_type)
+	{
+		case 2:
+		case 6:
+		        Hcand.push_back(goodMuon[I]);
+				Hcand.push_back(goodElectron[J]);
+				goodMuon.erase(goodMuon.begin()+I);
+				goodElectron.erase(goodElectron.begin()+J);
+				break;
+		case 1:
+		case 5:
+		        Hcand.push_back(goodMuon[I]);
+				Hcand.push_back(goodTau[J]);
+				goodMuon.erase(goodMuon.begin()+I);
+				goodTau.erase(goodTau.begin()+J);
+				break;
+		case 3:
+		case 7:
+		        Hcand.push_back(goodElectron[I]);
+				Hcand.push_back(goodTau[J]);
+				goodElectron.erase(goodElectron.begin()+I);
+				goodTau.erase(goodTau.begin()+J);
+				break;
+		case 4:
+		case 8:
+		        Hcand.push_back(goodTau[I]);
+				Hcand.push_back(goodTau[J]);
+				goodTau.erase(goodTau.begin()+I);
+				goodTau.erase(goodTau.begin()+J-1);
+				break;
+	}
+				
+
+	
+	
+	double corrZlep1,corrZlep2,corrHlep1,corrHlep2;
+	corrZlep1=corrZlep2=corrHlep1=corrHlep2=1.0;
+	if(isSimulation){
+		if(Zmumu)
+		{
+			if(is2012_53){
+				 corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]);
+			 }else if(is2012_52){
+				  corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
+			 }else{
+			 	  corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1]);
+			 }			 
+		}else{
+				if(is2012_53){
+				 corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
+			 }else if(is2012_52){
+				  corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
+			 }else{
+			 	  corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1]);
+			 }			
+		}
+		
+		if(muTau)
+		{
+			if(is2012_53){
+				 corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
+			 }else if(is2012_52){
+				 corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
+			 }else{
+			 	 corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand[0]);
+			 }
+		}else if(eTau){
+			 if(is2012_53){
+				 corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
+			 }else if(is2012_52){
+				 corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
+			 }else{
+			 	 corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand[0]);
+			 }
+		}else if(muE){
+			 if(is2012_53){
+				 corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				 corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+			 }else if(is2012_52){
+				 corrHlep1=Cor_ID_Iso_Mu_Loose_2012(Hcand[0]);
+				 corrHlep2=Cor_ID_Iso_Ele_Loose_2012(Hcand[1]);
+			 }else{
+			 	 corrHlep1=Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
+				 corrHlep2=Cor_ID_Iso_Ele_Loose_2011(Hcand[1]);
+			 }
+		}
+		
+	}
+	
+	double weight = PUWeight*corrZlep1*corrZlep2*corrHlep1*corrHlep2;
+	
 	TLorentzVector eH_eTau,tauH_eTau,H_eTau;
 	TLorentzVector tau1H_tauTau,tau2H_tauTau,H_tauTau;
 	TLorentzVector muH_muTau,tauH_muTau,H_muTau;
@@ -693,57 +793,39 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		case 2:
 		case 6:
-		        Hcand.push_back(goodMuon[I]);
-				Hcand.push_back(goodElectron[J]);
 				muH_muE_tightMuIso.SetPxPyPzE(goodMuon[I].px,goodMuon[I].py,goodMuon[I].pz,goodMuon[I].E);
 				eH_muE_tightMuIso.SetPxPyPzE(goodElectron[J].px,goodElectron[J].py,goodElectron[J].pz,goodElectron[J].E);
 				H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
-				Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt());
-				Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt());
-				Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt());
-				Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M());
-				Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt());
-				Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M());
-				goodMuon.erase(goodMuon.begin()+I);
-				goodElectron.erase(goodElectron.begin()+J);
-				
+				Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt(),weight);
+				Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt(),weight);
+				Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
+				Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M(),weight);
+				Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
+				Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M(),weight);
 				break;
 		 case 1:
 		 case 5:
-				Hcand.push_back(goodMuon[I]);
-				Hcand.push_back(goodTau[J]);
-				
-				
 				muH_muTau.SetPxPyPzE(goodMuon[I].px,goodMuon[I].py,goodMuon[I].pz,goodMuon[I].E);
 				tauH_muTau.SetPxPyPzE(goodTau[J].px,goodTau[J].py,goodTau[J].pz,goodTau[J].E);
 				H_muTau = muH_muTau+tauH_muTau;
-				Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt());
-				Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt());
-				Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt());
-				Hist( "h_H_muTau_mass" )->Fill(H_muTau.M());
-				Hist( "h_H_pt" )->Fill(H_muTau.Pt());
-				Hist( "h_H_mass" )->Fill(H_muTau.M());
-				
-				goodMuon.erase(goodMuon.begin()+I);
-				goodTau.erase(goodTau.begin()+J);
+				Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
+				Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
+				Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt(),weight);
+				Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
+				Hist( "h_H_pt" )->Fill(H_muTau.Pt(),weight);
+				Hist( "h_H_mass" )->Fill(H_muTau.M(),weight);
 				break;
 		case 3:
 		case 7:
-				Hcand.push_back(goodElectron[I]);
-				Hcand.push_back(goodTau[J]);
-	
 				eH_eTau.SetPxPyPzE(goodElectron[I].px,goodElectron[I].py,goodElectron[I].pz,goodElectron[I].E);
 				tauH_eTau.SetPxPyPzE(goodTau[J].px,goodTau[J].py,goodTau[J].pz,goodTau[J].E);
 				H_eTau = eH_eTau+tauH_eTau;
-				Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt());
-				Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt());
-				Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt());
-				Hist( "h_H_eTau_mass" )->Fill(H_eTau.M());
-				Hist( "h_H_pt" )->Fill(H_eTau.Pt());
-				Hist( "h_H_mass" )->Fill(H_eTau.M());
-		
-				goodElectron.erase(goodElectron.begin()+I);
-				goodTau.erase(goodTau.begin()+J);
+				Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
+				Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
+				Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt(),weight);
+				Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
+				Hist( "h_H_pt" )->Fill(H_eTau.Pt(),weight);
+				Hist( "h_H_mass" )->Fill(H_eTau.M(),weight);
 				break;	
 		case 4:
 		case 8:
@@ -753,15 +835,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				tau1H_tauTau.SetPxPyPzE(goodTau[I].px,goodTau[I].py,goodTau[I].pz,goodTau[I].E);
 				tau2H_tauTau.SetPxPyPzE(goodTau[J].px,goodTau[J].py,goodTau[J].pz,goodTau[J].E);
 				H_tauTau = tau1H_tauTau+tau2H_tauTau;
-				Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt());
-				Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt());
-				Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt());
-				Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M());
-				Hist( "h_H_pt" )->Fill(H_tauTau.Pt());
-				Hist( "h_H_mass" )->Fill(H_tauTau.M());
-
-				goodTau.erase(goodTau.begin()+I);
-				goodTau.erase(goodTau.begin()+J-1);
+				Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
+				Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
+				Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt(),weight);
+				Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
+				Hist( "h_H_pt" )->Fill(H_tauTau.Pt(),weight);
+				Hist( "h_H_mass" )->Fill(H_tauTau.M(),weight);
 				break;
 
 	
@@ -832,9 +911,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 	
+	
+	
 	double eff = Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
 	
- if(signal) Hist( "h_event_type" )->Fill(event_type);
+ if(signal) Hist( "h_event_type" )->Fill(event_type,weight);
  
   
    return;

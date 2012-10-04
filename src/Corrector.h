@@ -129,7 +129,7 @@ double Cor_ID_Iso_Ele_Loose_2012(myobject const& a) {
 }
 
 double Cor_ID_Iso_Ele_Tight_2012(myobject const& a) {
-    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 0.922*0.974;
+	if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 0.922*0.974;
     if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.898*1.008;
     if (a.pt > 30 && fabs(a.eta) < 1.479) return 0.964*0.997;
     if (a.pt > 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.958*0.983;

@@ -30,7 +30,13 @@
         <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
 		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />
 		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/>
-        
+
+		<Item Name="checkCategories" Value="true"/>
+		<Item Name="isSimulation" Value="true"/>
+		<Item Name="is2011" Value="false"/>
+		<Item Name="is2012_52" Value="false"/>
+		<Item Name="is2012_53" Value="true"/>
+
 		</UserConfig>
 	</Cycle>
 </JobConfiguration>
