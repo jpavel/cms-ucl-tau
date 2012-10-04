@@ -19,6 +19,10 @@
 #include "myevent.h"
 #include "TLorentzVector.h"
 
+// PU weight
+
+#include "LumiReweightingStandAlone.h"
+
 
 /**
  *   @short Put short description of class here
@@ -118,6 +122,8 @@ private:
         TH1* h_n_goodEl_Hcand;
         TH1* h_n_goodMu_Hcand;
         TH1* h_n_goodTau_Hcand;
+        
+        reweight::LumiReWeighting* LumiWeights_;
         
 
 // properties

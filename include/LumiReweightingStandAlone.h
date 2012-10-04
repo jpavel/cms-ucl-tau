@@ -239,24 +239,40 @@ namespace reweight {
       GenHistName_      ( GenHistName ), 
       DataHistName_     ( DataHistName )
 	{
-	  generatedFile_ = new TFile( generatedFileName_.c_str() ) ; //MC distribution
-	  dataFile_      = new TFile( dataFileName_.c_str() );       //Data distribution
+	
+	  generatedFile_ = TFile::Open( generatedFileName_.c_str() ) ; //MC distribution
+	  dataFile_      = TFile::Open( dataFileName_.c_str() );       //Data distribution
+	  
+	if(!generatedFile_) {
+		std::cerr << "Error: file " << generatedFileName_ << " could not be opened." << std::endl; 
+    }
+	else std::cout << "File " << generatedFileName_ << " succesfully opened!" << std::endl;
+	
+	if(!dataFile_) {
+		std::cerr << "Error: file " << dataFileName_ << " could not be opened." << std::endl; 
+    }
+	else std::cout << "File " << dataFileName_ << " succesfully opened!" << std::endl;
 
-	  Data_distr_ = new TH1(  *(static_cast<TH1*>(dataFile_->Get( DataHistName_.c_str() )->Clone() )) );
-	  MC_distr_ = new TH1(  *(static_cast<TH1*>(generatedFile_->Get( GenHistName_.c_str() )->Clone() )) );
+
+	  Data_distr_ = (TH1D*)dataFile_->Get(DataHistName_.c_str());
+	  MC_distr_ = (TH1D*)generatedFile_->Get(GenHistName_.c_str());
+	  std::cout << "Opening " << DataHistName_ << " and " << GenHistName << std::endl;
+	  
+	  // new TH1(  *(static_cast<TH1*>(dataFile_->Get( DataHistName_.c_str() )->Clone() )) );
+	 // MC_distr_ = new TH1(  *(static_cast<TH1*>(generatedFile_->Get( GenHistName_.c_str() )->Clone() )) );
 
 	  // normalize both histograms first                                                                            
 
 	  Data_distr_->Scale( 1.0/ Data_distr_->Integral() );
 	  MC_distr_->Scale( 1.0/ MC_distr_->Integral() );
 
-	  weights_ = new TH1( *(Data_distr_)) ;
+	  weights_ = new TH1D( *(Data_distr_)) ;
 
 	  // MC * data/MC = data, so the weights are data/MC:
 
 	  weights_->SetName("lumiWeights");
 
-	  TH1* den = new TH1(*(MC_distr_));
+	  TH1D* den = new TH1D(*(MC_distr_));
 
 	  weights_->Divide( den );  // so now the average weight should be 1.0
 
@@ -291,11 +307,11 @@ namespace reweight {
 
 	Int_t NBins = MC_distr.size();
 
-	MC_distr_ = new TH1F("MC_distr","MC dist",NBins,0.0, float(NBins));
-	Data_distr_ = new TH1F("Data_distr","Data dist",NBins,0.0, float(NBins));
+	MC_distr_ = new TH1D("MC_distr","MC dist",NBins,0.0, float(NBins));
+	Data_distr_ = new TH1D("Data_distr","Data dist",NBins,0.0, float(NBins));
 
-	weights_ = new TH1F("luminumer","luminumer",NBins,0.0, float(NBins));
-	TH1* den = new TH1F("lumidenom","lumidenom",NBins,0.0, float(NBins));
+	weights_ = new TH1D("luminumer","luminumer",NBins,0.0, float(NBins));
+	TH1* den = new TH1D("lumidenom","lumidenom",NBins,0.0, float(NBins));
 
 	for(int ibin = 1; ibin<NBins+1; ++ibin ) {
 	  weights_->SetBinContent(ibin, Lumi_distr[ibin-1]);
@@ -1403,11 +1419,11 @@ namespace reweight {
       std::string DataHistName_;
       TFile *generatedFile_;
       TFile *dataFile_;
-      TH1  *weights_;
+      TH1D  *weights_;
 
       //keep copies of normalized distributions:                                                                                  
-      TH1*      MC_distr_;
-      TH1*      Data_distr_;
+      TH1D*      MC_distr_;
+      TH1D*      Data_distr_;
 
       double WeightOOTPU_[25][25];
       double Weight3D_[50][50][50];

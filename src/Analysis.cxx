@@ -6,9 +6,6 @@
 #include <fstream>
 #include <string>
 
-// PU weight
-
-#include "../include/LumiReweightingStandAlone.h"
 
 
 ClassImp( Analysis );
@@ -120,6 +117,10 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	 h_event_type->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
 	 
 	 
+	// Lumi weights
+	
+	LumiWeights_ = new reweight::LumiReWeighting("/home/jpavel/analysis/CMS/ZHtautau/ZHtautauAnalysis/config/Summer12_PU.root",
+	"/home/jpavel/analysis/CMS/ZHtautau/ZHtautauAnalysis/config/dataPileUpHistogram_True_2012.root","mcPU","pileup");
 	
 	
    return;
@@ -243,7 +244,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 	
     m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
-	
+	double MyWeight = LumiWeights_->weight( m->PUInfo_true );
+	std::cout << " my PU is " << m->PUInfo_true  << " and weight " << MyWeight << std::endl;
 	int eNumber = m->eventNumber;
 	
 	
