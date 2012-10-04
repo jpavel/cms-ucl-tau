@@ -19,6 +19,7 @@
 #include "myevent.h"
 #include "TLorentzVector.h"
 
+
 /**
  *   @short Put short description of class here
  *
@@ -131,7 +132,7 @@ private:
     std::string doubMu;
     std::string doubMu2;
     
-    bool  antiIso;
+    bool  checkCategories;
 
 // output variables
 std::vector<float> out_pt;
