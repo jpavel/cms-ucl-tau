@@ -456,7 +456,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_Zmass" )->Fill(Zmumu_.M(),Z_weight);
 			Hist( "h_Zpt" )->Fill(Zmumu_.Pt(),Z_weight);
 			 
-		}else{
+		}else if(Zee){
 				if(is2012_53){
 				 corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
 				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
