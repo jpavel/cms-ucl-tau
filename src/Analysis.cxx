@@ -5,6 +5,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <iomanip>
+
 #include "Corrector.h"
 
 
@@ -21,8 +24,12 @@ Analysis::Analysis()
    DeclareProperty("bTagValue",bTagValue);
    
    DeclareProperty("ElectronTriggerName", doubEle);
+   DeclareProperty("ElectronTriggerName2", doubEle2);
+   
    DeclareProperty("MuonTriggerName1", doubMu);
    DeclareProperty("MuonTriggerName2", doubMu2);
+   DeclareProperty("MuonTriggerName3", doubMu3);
+   
    DeclareProperty("checkCategories",checkCategories);
    DeclareProperty("isSimulation",isSimulation);
    DeclareProperty("is2011",is2011);
@@ -66,6 +73,15 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     //Z
     h_Zmass             = Book(TH1D("h_Zmass","Z_mass",60,60,120));
     h_Zpt               = Book(TH1D("h_Zpt","Z_pt",300,0,300));
+    
+    h_Z_eta				= Book(TH1D("h_Z_eta","H #eta; #eta",100,-3.0,3.0));
+	h_Z_phi				= Book(TH1D("h_Z_phi","H #phi; #phi",64,-3.2,3.2));
+	
+	h_Z_lep1_eta		= Book(TH1D("h_Z_lep1_eta","H #eta; #eta",100,-3.0,3.0));
+	h_Z_lep1_phi		= Book(TH1D("h_Z_lep1_phi","H #phi; #phi",64,-3.2,3.2));	
+	
+	h_Z_lep2_eta		= Book(TH1D("h_Z_lep2_eta","H #eta; #eta",100,-3.0,3.0));
+	h_Z_lep2_phi		= Book(TH1D("h_Z_lep2_phi","H #phi; #phi",64,-3.2,3.2));
 
     //H->eTau
     h_eH_eTau_pt        = Book(TH1D("h_eH_eTau_pt","H->e tau, ele pt",100,0,300));
@@ -96,6 +112,16 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_H_pt           = Book(TH1D("h_H_pt","H pt (all final states)",100,0,300));
     h_H_mass         = Book(TH1D("h_H_mass","H mass (all final states)",100,0,300));
     
+    h_H_eta				= Book(TH1D("h_H_eta","H #eta; #eta",100,-3.0,3.0));
+	h_H_phi				= Book(TH1D("h_H_phi","H #phi; #phi",64,-3.2,3.2));
+	
+	h_H_lep1_eta		= Book(TH1D("h_H_lep1_eta","H #eta; #eta",100,-3.0,3.0));
+	h_H_lep1_phi		= Book(TH1D("h_H_lep1_phi","H #phi; #phi",64,-3.2,3.2));	
+	
+	h_H_lep2_eta		= Book(TH1D("h_H_lep2_eta","H #eta; #eta",100,-3.0,3.0));
+	h_H_lep2_phi		= Book(TH1D("h_H_lep2_phi","H #phi; #phi",64,-3.2,3.2));
+
+    
     // lepton histograms
     h_n_goodEl		= Book(TH1D("h_n_goodEl","Number of good electrons; good electrons",10,-0.5,9.5));
     h_n_goodMu		= Book(TH1D("h_n_goodMu","Number of good muons; good muons",10,-0.5,9.5));
@@ -106,6 +132,18 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_n_goodEl_Hcand		= Book(TH1D("h_n_goodEl_Hcand","Number of good electrons; good electrons",10,-0.5,9.5));
     h_n_goodMu_Hcand		= Book(TH1D("h_n_goodMu_Hcand","Number of good muons; good muons",10,-0.5,9.5));
     h_n_goodTau_Hcand		= Book(TH1D("h_n_goodTau_Hcand","Number of good taus; good taus",10,-0.5,9.5));
+    
+    h_PU_weight				= Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
+    h_nPU_raw				= Book(TH1D("h_nPU_raw","raw PU distribution",50,0,50));
+    h_nPU_reweight			= Book(TH1D("h_nPU_reweight","reweighted PU distribution",50,0,50));
+    
+    h_PF_MET				= Book(TH1D("h_PF_MET","PF MET distribution;PF MET[GeV]",100,0,200));
+    h_PF_MET_selected		= Book(TH1D("h_PF_MET_selected","PF MET distribution;PF MET[GeV]",100,0,200));
+    
+    h_PF_MET_nPU			= Book(TProfile("h_PF_MET_nPU", "PF MET vs number of PU interactions; nPU; PF MET[GeV]",60,0,60));
+    h_PF_MET_nPU_selected	= Book(TProfile("h_PF_MET_nPU_selected", "PF MET vs number of PU interactions; nPU; PF MET[GeV]",60,0,60));
+                      
+    h_Tmass					= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
     
     DeclareVariable(out_pt,"el_pt");
 
@@ -120,11 +158,29 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	 h_event_type->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
 	 h_event_type->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
 	 
+	 h_PF_MET_nPU=Retrieve<TProfile>("h_PF_MET_nPU");
+	 h_PF_MET_nPU_selected=Retrieve<TProfile>("h_PF_MET_nPU_selected");
+	 
+	 
+	  h_H_mass_types.clear();
+	 for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
+	 {
+		std::stringstream s;
+		s << "h_H_mass_type_" << i;
+		std::string name = s.str(); 
+		std::stringstream ss;
+		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
+		std::string title = ss.str();
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+		h_H_mass_types.push_back(h_temp);
+	 }
+	 
 	 
 	// Lumi weights
 	
-	if(!2011) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
-	else LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileupHistogram_True_2011.root","mcPU","pileup");
+	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
+	else if (is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
+	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
 	
    return;
 
@@ -232,32 +288,61 @@ bool Analysis::Trg_MC_12(myevent* m) {
     for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
 	//	std::cout << ihlt->first << std::endl; 
         size_t foundEl=(ihlt->first).find(doubEle);
+        size_t foundEl2=(ihlt->first).find(doubEle2);
+        
 	    size_t foundMu1=(ihlt->first).find(doubMu);
         size_t foundMu2=(ihlt->first).find(doubMu2);
-		if (foundEl!=string::npos)
+		size_t foundMu3=(ihlt->first).find(doubMu3);
+		
+		if (foundEl!=string::npos || foundEl2!=string::npos)
              TriggerEle = ihlt->second;
-		if (foundMu1!=string::npos || foundMu2!=string::npos)
+		if (foundMu1!=string::npos || foundMu2!=string::npos || foundMu3!=string::npos)
              TriggerMu = ihlt->second;
 		}
         Trigger = TriggerEle || TriggerMu;
     return Trigger;    
 	}
 	
+double Analysis::Tmass(myevent *m, myobject mu) {
+				
+        vector<myobject> Met = m->RecPFMet;
+       
+        double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
+        return tMass_v;
+}
+	
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 	
     m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	double PUWeight = 1.0;
-	if(isSimulation) PUWeight = LumiWeights_->weight( m->PUInfo_true );
+	double nPU = 0.0;
+	if(isSimulation){
+		if(!is2011)  nPU = m->PUInfo_true;
+		else nPU = m->PUInfo_Bunch0;
+		PUWeight = LumiWeights_->weight( nPU );
+	}
 	int eNumber = m->eventNumber;
 	
-	
+	Hist("h_PU_weight")->Fill(PUWeight);
+	if(is2011){ 
+		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
+		Hist("h_nPU_reweight")->Fill(m->PUInfo_Bunch0,PUWeight);
+	}else{
+		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
+		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
+	}
+        
 	bool trigPass = Trg_MC_12(m);
     m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;
     if(!trigPass)
     {
 		return;
 	}
+	vector<myobject> Met = m->RecPFMet;
+	
+	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
+	h_PF_MET_nPU->Fill(nPU,Met.front().et,PUWeight);
 	
     std::vector<myobject> goodMuon;
     goodMuon.clear();
@@ -277,12 +362,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
 			{
 						goodMuon.push_back(muon[i]);
-						Hist("h_mu_relIso")->Fill(relIso);
+						Hist("h_mu_relIso")->Fill(relIso,PUWeight);
 			}
 		
     }
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
-	Hist("h_n_goodMu")->Fill(goodMuon.size());
+	Hist("h_n_goodMu")->Fill(goodMuon.size(),PUWeight);
         
         std::vector<myobject> goodElectron;
         goodElectron.clear();
@@ -300,7 +385,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && elID)
 			{
 				goodElectron.push_back(electron[i]);
-				Hist("h_el_relIso")->Fill(relIso);
+				Hist("h_el_relIso")->Fill(relIso,PUWeight);
 			}
 		
 		
@@ -308,7 +393,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
 	int muCandZ = goodMuon.size();
 	int elCandZ = goodElectron.size();
-	Hist("h_n_goodEl")->Fill(goodElectron.size());
+	Hist("h_n_goodEl")->Fill(goodElectron.size(),PUWeight);
 	// Z compatibility
 	std::vector<myobject> Zcand;
 	Zcand.clear();
@@ -428,7 +513,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	double corrZlep1,corrZlep2;
 	corrZlep1=corrZlep2=1.0;
-	double Z_weight = 1.0;
+	double Z_weight = PUWeight;
 	if(isSimulation){
 		if(Zmumu)
 		{
@@ -455,6 +540,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt(),Z_weight);
 			Hist( "h_Zmass" )->Fill(Zmumu_.M(),Z_weight);
 			Hist( "h_Zpt" )->Fill(Zmumu_.Pt(),Z_weight);
+			
+			Hist( "h_Z_eta")->Fill(Zmumu_.Eta(),Z_weight);
+			Hist( "h_Z_phi")->Fill(Zmumu_.Phi(),Z_weight);
+			Hist( "h_Z_lep1_eta")->Fill(muon1.Eta(),Z_weight);
+			Hist( "h_Z_lep1_phi")->Fill(muon1.Phi(),Z_weight);
+			Hist( "h_Z_lep2_eta")->Fill(muon2.Eta(),Z_weight);
+			Hist( "h_Z_lep2_phi")->Fill(muon2.Phi(),Z_weight);
 			 
 		}else if(Zee){
 				if(is2012_53){
@@ -481,6 +573,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_Zpt_ee" )->Fill(Zee_.Pt(),Z_weight);
 			Hist( "h_Zmass" )->Fill(Zee_.M(),Z_weight);
 			Hist( "h_Zpt" )->Fill(Zee_.Pt(),Z_weight);	
+			
+			Hist( "h_Z_eta")->Fill(Zee_.Eta(),Z_weight);
+			Hist( "h_Z_phi")->Fill(Zee_.Phi(),Z_weight);
+			Hist( "h_Z_lep1_eta")->Fill(ele1.Eta(),Z_weight);
+			Hist( "h_Z_lep1_phi")->Fill(ele1.Phi(),Z_weight);
+			Hist( "h_Z_lep2_eta")->Fill(ele2.Eta(),Z_weight);
+			Hist( "h_Z_lep2_phi")->Fill(ele2.Phi(),Z_weight);
 		}
 	}
 	
@@ -819,6 +918,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M(),weight);
 				Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
 				Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M(),weight);
+				Hist( "h_H_eta")->Fill(H_muE_tightMuIso.Eta(),weight);
+				Hist( "h_H_phi")->Fill(H_muE_tightMuIso.Phi(),weight);
+				h_H_mass_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
 				break;
 		 case 1:
 		 case 5:
@@ -831,6 +933,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
 				Hist( "h_H_pt" )->Fill(H_muTau.Pt(),weight);
 				Hist( "h_H_mass" )->Fill(H_muTau.M(),weight);
+				Hist( "h_H_eta")->Fill(H_muTau.Eta(),weight);
+				Hist( "h_H_phi")->Fill(H_muTau.Phi(),weight);
+				h_H_mass_types[event_type-1]->Fill(H_muTau.M(),weight);
 				break;
 		case 3:
 		case 7:
@@ -843,6 +948,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
 				Hist( "h_H_pt" )->Fill(H_eTau.Pt(),weight);
 				Hist( "h_H_mass" )->Fill(H_eTau.M(),weight);
+				Hist( "h_H_eta")->Fill(H_eTau.Eta(),weight);
+				Hist( "h_H_phi")->Fill(H_eTau.Phi(),weight);
+				h_H_mass_types[event_type-1]->Fill(H_eTau.M(),weight);
+			
 				break;	
 		case 4:
 		case 8:
@@ -858,10 +967,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
 				Hist( "h_H_pt" )->Fill(H_tauTau.Pt(),weight);
 				Hist( "h_H_mass" )->Fill(H_tauTau.M(),weight);
+				
+				Hist( "h_H_eta")->Fill(H_tauTau.Eta(),weight);
+				Hist( "h_H_phi")->Fill(H_tauTau.Phi(),weight);
+				h_H_mass_types[event_type-1]->Fill(H_tauTau.M(),weight);
+			
 				break;
 
 	
 	}
+	
+			Hist( "h_H_lep1_eta")->Fill(Hcand[0].eta,weight);
+			Hist( "h_H_lep1_phi")->Fill(Hcand[0].phi,weight);
+			Hist( "h_H_lep2_eta")->Fill(Hcand[1].eta,weight);
+			Hist( "h_H_lep2_phi")->Fill(Hcand[1].phi,weight);
 		 
 		 // overlap cleaning
 			
@@ -928,11 +1047,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 	
+	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
+	h_PF_MET_nPU_selected->Fill(nPU,Met.front().et,weight);
+	double tMass = -100;
+	if(!tauTau)
+	{
+		if(!muE) tMass = Tmass(m,Hcand[0]);
+		else{
+			if(Hcand[0].pt > Hcand[1].pt) tMass = Tmass(m,Hcand[0]);
+			else tMass = Tmass(m,Hcand[1]);
+		}
+		
+		Hist("h_Tmass")->Fill(tMass,weight); 
+	}
 	
 	
-	double eff = Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
-	
- if(signal) Hist( "h_event_type" )->Fill(event_type,weight);
+ //if(signal) // blinding :-) 
+ Hist( "h_event_type" )->Fill(event_type,weight);
  
   
    return;

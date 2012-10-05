@@ -18,6 +18,7 @@
 // my classes
 #include "myevent.h"
 #include "TLorentzVector.h"
+#include "TProfile.h"
 
 // PU weight
 
@@ -63,6 +64,7 @@ public:
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
    bool Trg_MC_12(myevent* m);
+   double Tmass(myevent *m, myobject mu);
    
    
 private:
@@ -93,6 +95,15 @@ private:
         TH1* h_Zpt_ee;
         TH1* h_Zmass;
         TH1* h_Zpt;
+        TH1* h_Z_eta;
+        TH1* h_Z_phi;
+        
+        TH1* h_Z_lep1_eta;
+        TH1* h_Z_lep1_phi;
+        
+        TH1* h_Z_lep2_eta;
+        TH1* h_Z_lep2_phi;
+        
         TH1* h_eH_eTau_pt;
         TH1* h_tauH_eTau_pt;
         TH1* h_H_eTau_pt;
@@ -116,6 +127,16 @@ private:
         TH1* h_H_pt;
         TH1* h_H_mass;
         
+        TH1* h_H_eta;
+        TH1* h_H_phi;
+        
+        TH1* h_H_lep1_eta;
+        TH1* h_H_lep1_phi;
+        
+        TH1* h_H_lep2_eta;
+        TH1* h_H_lep2_phi;
+        
+        
         TH1* h_n_goodEl;
         TH1* h_n_goodMu;
         
@@ -125,6 +146,20 @@ private:
         TH1* h_n_goodEl_Hcand;
         TH1* h_n_goodMu_Hcand;
         TH1* h_n_goodTau_Hcand;
+        
+        TH1* h_PU_weight;
+        TH1* h_nPU_raw;
+        TH1* h_nPU_reweight;
+        
+        TH1* h_PF_MET;
+        TProfile* h_PF_MET_nPU;
+        
+        TH1* h_PF_MET_selected;
+        TProfile* h_PF_MET_nPU_selected;
+                
+        TH1* h_Tmass;
+        
+        std::vector<TH1*>  h_H_mass_types;
         
         reweight::LumiReWeighting* LumiWeights_;
         
@@ -138,8 +173,11 @@ private:
 	double maxEvent;
 	
 	std::string doubEle;
+	std::string doubEle2;
+	
     std::string doubMu;
     std::string doubMu2;
+    std::string doubMu3;
     
     bool  checkCategories;
     
