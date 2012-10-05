@@ -357,25 +357,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                  }
         }
 			if(Zindex[0] > -1 && Zindex[1] > -1){
-                                TLorentzVector muon1;
-                                TLorentzVector muon2;
-                                TLorentzVector Zmumu_;
+              
 				int i = Zindex[0];
 				int j = Zindex[1];
 				Zcand.push_back(goodMuon[i]);
 				Zcand.push_back(goodMuon[j]);
-                                muon1.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);        
-                                muon2.SetPxPyPzE(goodMuon[j].px,goodMuon[j].py,goodMuon[j].pz,goodMuon[j].E);        
-                                Zmumu_=muon1+muon2;        
-				goodMuon.erase(goodMuon.begin()+i);
+            	goodMuon.erase(goodMuon.begin()+i);
 				goodMuon.erase(goodMuon.begin()+j-1);
 				Zmumu=true;
-                                        Hist( "h_mu1Z_pt" )->Fill(muon1.Pt());
-                                        Hist( "h_mu2Z_pt" )->Fill(muon2.Pt());
-                                        Hist( "h_Zmass_mumu" )->Fill(Zmumu_.M());
-                                        Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt());
-                                        Hist( "h_Zmass" )->Fill(Zmumu_.M());
-                                        Hist( "h_Zpt" )->Fill(Zmumu_.Pt());
 			}
 
 
@@ -423,27 +412,78 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 				if(Zindex[0] > -1 && Zindex[1] > -1){
-                                    TLorentzVector ele1;
-                                    TLorentzVector ele2;
-                                    TLorentzVector Zee_;
+                                   
 					int i = Zindex[0];
 					int j = Zindex[1];
-                                        ele1.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);        
-                                        ele2.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);        
-                                        Zee_=ele1+ele2;        
+                        
 					Zcand.push_back(goodElectron[i]);
 					Zcand.push_back(goodElectron[j]);	
 					goodElectron.erase(goodElectron.begin()+i);
 					goodElectron.erase(goodElectron.begin()+j-1);
 					Zee=true;
-                                        Hist( "h_ele1Z_pt" )->Fill(ele1.Pt());
-                                        Hist( "h_ele2Z_pt" )->Fill(ele2.Pt());
-                                        Hist( "h_Zmass_ee" )->Fill(Zee_.M());
-                                        Hist( "h_Zpt_ee" )->Fill(Zee_.Pt());
-                                        Hist( "h_Zmass" )->Fill(Zee_.M());
-                                        Hist( "h_Zpt" )->Fill(Zee_.Pt());
+                                        
 			}
 	}
+	
+	
+	double corrZlep1,corrZlep2;
+	corrZlep1=corrZlep2=1.0;
+	double Z_weight = 1.0;
+	if(isSimulation){
+		if(Zmumu)
+		{
+			if(is2012_53){
+				 corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]);
+			 }else if(is2012_52){
+				  corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
+			 }else{
+			 	  corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1]);
+			 }
+			TLorentzVector muon1;
+			TLorentzVector muon2;
+			TLorentzVector Zmumu_;			
+			muon1.SetPxPyPzE(Zcand[0].px,Zcand[0].py,Zcand[0].pz,Zcand[0].E);        
+			muon2.SetPxPyPzE(Zcand[1].px,Zcand[1].py,Zcand[1].pz,Zcand[1].E);        
+			Zmumu_=muon1+muon2;        
+			 
+			Hist( "h_mu1Z_pt" )->Fill(muon1.Pt(),Z_weight);
+			Hist( "h_mu2Z_pt" )->Fill(muon2.Pt(),Z_weight);
+			Hist( "h_Zmass_mumu" )->Fill(Zmumu_.M(),Z_weight);
+			Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt(),Z_weight);
+			Hist( "h_Zmass" )->Fill(Zmumu_.M(),Z_weight);
+			Hist( "h_Zpt" )->Fill(Zmumu_.Pt(),Z_weight);
+			 
+		}else{
+				if(is2012_53){
+				 corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
+			 }else if(is2012_52){
+				  corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
+			 }else{
+			 	  corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1]);
+			 }
+			 Z_weight = corrZlep1* corrZlep2;		
+			
+			TLorentzVector ele1;
+            TLorentzVector ele2;
+            TLorentzVector Zee_; 
+			ele1.SetPxPyPzE(Zcand[0].px,Zcand[0].py,Zcand[0].pz,Zcand[0].E);        
+			ele2.SetPxPyPzE(Zcand[1].px,Zcand[1].py,Zcand[1].pz,Zcand[1].E);        
+			Zee_=ele1+ele2;
+			Hist( "h_ele1Z_pt" )->Fill(ele1.Pt(),Z_weight);
+			Hist( "h_ele2Z_pt" )->Fill(ele2.Pt(),Z_weight);
+			Hist( "h_Zmass_ee" )->Fill(Zee_.M(),Z_weight);
+			Hist( "h_Zpt_ee" )->Fill(Zee_.Pt(),Z_weight);
+			Hist( "h_Zmass" )->Fill(Zee_.M(),Z_weight);
+			Hist( "h_Zpt" )->Fill(Zee_.Pt(),Z_weight);	
+		}
+	}
+	
 	
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 	
@@ -722,33 +762,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	
 	
-	double corrZlep1,corrZlep2,corrHlep1,corrHlep2;
-	corrZlep1=corrZlep2=corrHlep1=corrHlep2=1.0;
+	double corrHlep1,corrHlep2;
+	corrHlep1=corrHlep2=1.0;
 	if(isSimulation){
-		if(Zmumu)
-		{
-			if(is2012_53){
-				 corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]);
-			 }else if(is2012_52){
-				  corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
-			 }else{
-			 	  corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1]);
-			 }			 
-		}else{
-				if(is2012_53){
-				 corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
-			 }else if(is2012_52){
-				  corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
-			 }else{
-			 	  corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1]);
-			 }			
-		}
 		
 		if(muTau)
 		{
