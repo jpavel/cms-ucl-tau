@@ -909,8 +909,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		case 2:
 		case 6:
-				muH_muE_tightMuIso.SetPxPyPzE(goodMuon[I].px,goodMuon[I].py,goodMuon[I].pz,goodMuon[I].E);
-				eH_muE_tightMuIso.SetPxPyPzE(goodElectron[J].px,goodElectron[J].py,goodElectron[J].pz,goodElectron[J].E);
+				muH_muE_tightMuIso.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+				eH_muE_tightMuIso.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 				H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
 				Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt(),weight);
 				Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt(),weight);
@@ -924,8 +924,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				break;
 		 case 1:
 		 case 5:
-				muH_muTau.SetPxPyPzE(goodMuon[I].px,goodMuon[I].py,goodMuon[I].pz,goodMuon[I].E);
-				tauH_muTau.SetPxPyPzE(goodTau[J].px,goodTau[J].py,goodTau[J].pz,goodTau[J].E);
+				muH_muTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+				tauH_muTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 				H_muTau = muH_muTau+tauH_muTau;
 				Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
 				Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
@@ -939,8 +939,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				break;
 		case 3:
 		case 7:
-				eH_eTau.SetPxPyPzE(goodElectron[I].px,goodElectron[I].py,goodElectron[I].pz,goodElectron[I].E);
-				tauH_eTau.SetPxPyPzE(goodTau[J].px,goodTau[J].py,goodTau[J].pz,goodTau[J].E);
+				eH_eTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+				tauH_eTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 				H_eTau = eH_eTau+tauH_eTau;
 				Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
 				Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
@@ -955,11 +955,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				break;	
 		case 4:
 		case 8:
-				Hcand.push_back(goodTau[I]);
-				Hcand.push_back(goodTau[J]);
-
-				tau1H_tauTau.SetPxPyPzE(goodTau[I].px,goodTau[I].py,goodTau[I].pz,goodTau[I].E);
-				tau2H_tauTau.SetPxPyPzE(goodTau[J].px,goodTau[J].py,goodTau[J].pz,goodTau[J].E);
+				
+				tau1H_tauTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+				tau2H_tauTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 				H_tauTau = tau1H_tauTau+tau2H_tauTau;
 				Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
 				Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
