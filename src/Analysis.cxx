@@ -317,9 +317,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	double PUWeight = 1.0;
 	double nPU = 0.0;
-	if(isSimulation){
-		if(!is2011)  nPU = m->PUInfo_true;
-		else nPU = m->PUInfo_Bunch0;
+	if(!is2011)  nPU = m->PUInfo_true;
+	else nPU = m->PUInfo_Bunch0;
+	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
 	}
 	int eNumber = m->eventNumber;
@@ -527,6 +527,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 	  corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0]);
 				 corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1]);
 			 }
+			  Z_weight = corrZlep1* corrZlep2;	
+		  }else if(Zee){
+				if(is2012_53){
+				 corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
+			 }else if(is2012_52){
+				  corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
+			 }else{
+			 	  corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0]);
+				 corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1]);
+			 }
+			 Z_weight = corrZlep1* corrZlep2;	
+		  }
+	  }
+			
+		if(Zmumu){
 			TLorentzVector muon1;
 			TLorentzVector muon2;
 			TLorentzVector Zmumu_;			
@@ -546,20 +563,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_Z_lep1_eta")->Fill(muon1.Eta(),Z_weight);
 			Hist( "h_Z_lep1_phi")->Fill(muon1.Phi(),Z_weight);
 			Hist( "h_Z_lep2_eta")->Fill(muon2.Eta(),Z_weight);
-			Hist( "h_Z_lep2_phi")->Fill(muon2.Phi(),Z_weight);
-			 
-		}else if(Zee){
-				if(is2012_53){
-				 corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
-			 }else if(is2012_52){
-				  corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
-			 }else{
-			 	  corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0]);
-				 corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1]);
-			 }
-			 Z_weight = corrZlep1* corrZlep2;		
+			Hist( "h_Z_lep2_phi")->Fill(muon2.Phi(),Z_weight);	 
+		}else if( Zee){	
 			
 			TLorentzVector ele1;
             TLorentzVector ele2;
@@ -581,7 +586,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_Z_lep2_eta")->Fill(ele2.Eta(),Z_weight);
 			Hist( "h_Z_lep2_phi")->Fill(ele2.Phi(),Z_weight);
 		}
-	}
+	
 	
 	
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
