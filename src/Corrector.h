@@ -155,6 +155,16 @@ double Cor_ID_Iso_Mu_Loose_2012_53X(myobject const& a) {
     return 1.0;
 }
 
+double Cor_ID_Iso_Mu_Tight_2012_53X(myobject const& a) {
+    if (a.pt > 17 && a.pt < 20 && fabs(a.eta) < 1.6) return 0.997*0.930;
+    if (a.pt > 17 && a.pt < 20 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986*0.929;
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.6) return 0.995*0.977;
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986*0.984;
+    if (a.pt > 30 && fabs(a.eta) < 1.6) return 1.030*1.010;
+    if (a.pt > 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.990*0.997;
+    return 1.0;
+}
+
 double Cor_ID_Iso_Ele_Loose_2012_53X(myobject const& a) {
     if (a.pt > 10 && a.pt <= 15 && fabs(a.eta) >= 0.0 && fabs(a.eta) < 0.8) return 0.7893;
     if (a.pt > 10 && a.pt <= 15 && fabs(a.eta) >= 0.8 && fabs(a.eta) < 1.479) return 0.7952;
@@ -170,7 +180,15 @@ double Cor_ID_Iso_Ele_Loose_2012_53X(myobject const& a) {
     return 1.0;
 }
 
-//no tight for ele and muon
+double Cor_ID_Iso_Ele_Tight_2012_53X(myobject const& a) {
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 0.9126*0.9600;
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.8507*0.9677;
+    if (a.pt > 30 && fabs(a.eta) < 1.479) return 0.9567*0.9858;
+    if (a.pt > 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.9239*0.9942;
+    return 1.0;
+}
+
+
 
 
 Double_t Eff_HLT_Mu17_Mu8_2011_TPfit_RunAB_EtaEta_DATAoverMC(Double_t eta1, Double_t eta2) {
