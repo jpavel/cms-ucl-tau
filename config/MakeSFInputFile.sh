@@ -50,7 +50,7 @@ echo "The full paths to all files are:"
 rm -f temp_input.1
 mv temp_input.1.1 temp_input.1
 
-until [ $total -lt 0 ]
+until [ $total -lt 1 ]
 do
   echo "Total is" $total
   total=`expr $total - ${num_files}`
