@@ -289,10 +289,12 @@ bool Analysis::Trg_MC_12(myevent* m) {
 	//	std::cout << ihlt->first << std::endl; 
         size_t foundEl=(ihlt->first).find(doubEle);
         size_t foundEl2=(ihlt->first).find(doubEle2);
+        if(!is2011) foundEl2=foundEl;
         
 	    size_t foundMu1=(ihlt->first).find(doubMu);
         size_t foundMu2=(ihlt->first).find(doubMu2);
 		size_t foundMu3=(ihlt->first).find(doubMu3);
+		if(!is2011) foundMu3=foundMu2;
 		
 		if (foundEl!=string::npos || foundEl2!=string::npos)
              TriggerEle = ihlt->second;
