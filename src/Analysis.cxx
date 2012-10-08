@@ -33,8 +33,8 @@ Analysis::Analysis()
    DeclareProperty("checkCategories",checkCategories);
    DeclareProperty("isSimulation",isSimulation);
    DeclareProperty("is2011",is2011);
-   DeclareProperty("is2012_52",is2012_53);
-   DeclareProperty("is2012_53",is2012_52);
+   DeclareProperty("is2012_52",is2012_52);
+   DeclareProperty("is2012_53",is2012_53);
   
 }
 
