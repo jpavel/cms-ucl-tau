@@ -17,7 +17,9 @@ rm -f temp_input.*
 input_data=`echo $1`
 output_name=`echo $2`
 num_files=${3}
+config_name=${4}
 
+sframe_dir=$PWD
 # input datasets settings
 ntuple_name=output_Ntuples
 srm_server=dcap://maite.iihe.ac.be
@@ -39,16 +41,22 @@ echo "Total number of input root files is" $total
 counter=0
 
 touch temp_input.1.1
+touch temp_input.1.2
 more temp_input.1 |while read line
 do
   file=`echo $line`
-  echo "${full_path}${file}" >> temp_input.1.1
+  echo "dccp ${full_path}${file} /scratch/${output_name}_input/" >> temp_input.1.1
+  echo "/scratch/${output_name}_input/${file}" >> temp_input.1.2
 done
 
 echo "The full paths to all files are:"
-#more temp_input.1.1
+
 rm -f temp_input.1
 mv temp_input.1.1 temp_input.1
+
+touch SubmitAll.sh
+rm -rf SubmitAll.sh
+touch SubmitAll.sh
 
 until [ $total -lt 0 ]
 do
@@ -57,24 +65,40 @@ do
   echo "Subtracted total is" $total
   counter=`expr $counter + 1`
   head -n ${num_files} temp_input.1 > input_${counter}.1
+  head -n ${num_files} temp_input.1.2 > input_${counter}.2
   tail -n $total temp_input.1 > temp_input_2_${counter}.1
+  tail -n $total temp_input.1.2 > temp_input_2_${counter}.1.2
   rm -f temp_input.1
-  mkdir ${output_name}_job${counter}
   mv temp_input_2_${counter}.1 temp_input.1
-  cp input_${counter}.1 ${output_name}_job${counter}/input.txt
+  rm -f temp_input.1.2
+  mv temp_input_2_${counter}.1.2 temp_input.1.2
+  mkdir ${output_name}_job${counter}
+  cp script.sh ${output_name}_job${counter}/
+  echo "mkdir /scratch/${output_name}_input" >> ${output_name}_job${counter}/script.sh
+  cat  input_${counter}.1 >> ${output_name}_job${counter}/script.sh
   rm -f input_${counter}.1
-#  more temp_input_${counter}.1 | tr '\n' ' ' > temp_input.2
-#  sed -i "s:out:${full_path}bla:g" temp_input.2
-#   sed -i 's/srm -f.ndgf/ftp1.ndgf/g' temp_input.2
-#  touch ${output_name}_${counter}_makeXML.sh
-#  echo -n "sframe_input.py -r -x 1 -d -o ${output_name}_${counter}_input.xml -t ${inTreeName} " >> ${output_name}_${counter}_makeXML.sh
-#  more temp_input.2 >> ${output_name}_${counter}_makeXML.sh
-#  source ${output_name}_${counter}_makeXML.sh
-#  rm -f temp_input.2
+  more input_${counter}.2 | tr '\n' ' ' > temp_input.2
+  rm -f input_${counter}.2 
+  echo "mkdir /scratch/${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/script.sh
+  echo "cd /scratch/${output_name}_${counter}_runDir"    >> ${output_name}_job${counter}/script.sh
+  echo -n "sframe_input.py -r -x 1 -d -o input.xml -t ${inTreeName} " >> ${output_name}_job${counter}/script.sh
+  more temp_input.2 >> ${output_name}_job${counter}/script.sh
+  echo "" >> ${output_name}_job${counter}/script.sh
+  echo "cp ${sframe_dir}/JobConfig.dtd ${sframe_dir}/${config_name} $pwd/*.root ." >> ${output_name}_job${counter}/script.sh
+  echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/script.sh
+  echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/script.sh
+  echo -n "rm -rf " >> ${output_name}_job${counter}/script.sh
+  more temp_input.2 >> ${output_name}_job${counter}/script.sh
+  echo "" >> ${output_name}_job${counter}/script.sh
+  echo "cd /scratch" >>  ${output_name}_job${counter}/script.sh
+  echo "rm -rf ${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/script.sh
+  echo "cd ${output_name}_job${counter}" >> SubmitAll.sh
+  echo "echo \"Submitting job no. ${counter}... \" " >> SubmitAll.sh
+  echo "qsub -q localgrid@cream01 -o script.stdout -e script.stderr script.sh" >> SubmitAll.sh
+  echo "cd .." >> SubmitAll.sh
 done 
 rm -f temp_input*
 rm -f full_path
-#echo "The command now executed will be "
-#more ${output_name}_${counter}_makeXML.sh
-#source ${output_name}_${counter}_makeXML.sh
-#ls | grep .xml | grep ${output_name} > input_${output_name}.txt
+
+chmod +x SubmitAll.sh
+echo "To submit jobs, do ./SubmitAll.sh"
