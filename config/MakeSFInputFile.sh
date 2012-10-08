@@ -12,10 +12,12 @@
 # Important parameters: names of ntuples (without suffix), server name and name of the tree inside ntuples
 
 touch temp_input.1
-rm temp_input.*
+rm -f temp_input.*
 
 input_data=`echo $1`
 output_name=`echo $2`
+num_files=${3}
+
 # input datasets settings
 ntuple_name=output_Ntuples
 srm_server=dcap://maite.iihe.ac.be
@@ -23,12 +25,12 @@ inTreeName=t
 
 full_path=${srm_server}${input_data}/
 touch full_path
-rm full_path
+rm -f full_path
 echo "Full path to data is "${full_path}
 echo ${full_path} >> full_path
 
 touch ${output_name}_makeXML.sh
-rm ${output_name}_*makeXML.sh
+rm -f ${output_name}_*makeXML.sh
 
 
 ls ${input_data} | grep root | sort > temp_input.1 
@@ -44,29 +46,32 @@ do
 done
 
 echo "The full paths to all files are:"
-more temp_input.1.1
+#more temp_input.1.1
+rm -f temp_input.1
 mv temp_input.1.1 temp_input.1
 
 until [ $total -lt 0 ]
 do
   echo "Total is" $total
-  total=`expr $total - 1000`
+  total=`expr $total - ${num_files}`
   echo "Subtracted total is" $total
   counter=`expr $counter + 1`
-  head -n 1000 temp_input.1 > temp_input_${counter}.1
+  head -n ${num_files} temp_input.1 > temp_input_${counter}.1
   tail -n $total temp_input.1 > temp_input_2_${counter}.1
+  rm -f temp_input.1
   mv temp_input_2_${counter}.1 temp_input.1
   more temp_input_${counter}.1 | tr '\n' ' ' > temp_input.2
 #  sed -i "s:out:${full_path}bla:g" temp_input.2
-#   sed -i 's/srm.ndgf/ftp1.ndgf/g' temp_input.2
+#   sed -i 's/srm -f.ndgf/ftp1.ndgf/g' temp_input.2
   touch ${output_name}_${counter}_makeXML.sh
   echo -n "sframe_input.py -r -x 1 -d -o ${output_name}_${counter}_input.xml -t ${inTreeName} " >> ${output_name}_${counter}_makeXML.sh
   more temp_input.2 >> ${output_name}_${counter}_makeXML.sh
-  rm temp_input.2
+  source ${output_name}_${counter}_makeXML.sh
+  rm -f temp_input.2
 done 
-rm temp_input*
+rm -f temp_input*
 
-echo "The command now executed will be "
-more ${output_name}_${counter}_makeXML.sh
-source ${output_name}_${counter}_makeXML.sh
-
+#echo "The command now executed will be "
+#more ${output_name}_${counter}_makeXML.sh
+#source ${output_name}_${counter}_makeXML.sh
+ls | grep .xml | grep ${output_name} > input_${output_name}.txt
