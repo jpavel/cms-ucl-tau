@@ -1067,8 +1067,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 	
- //if(signal) // blinding :-) 
- Hist( "h_event_type" )->Fill(event_type,weight);
+ if(isSimulation)
+ { 
+	if(signal) Hist( "h_event_type" )->Fill(event_type,weight);
+ }else  Hist( "h_event_type" )->Fill(event_type,weight); // blinding 
  
   
    return;
