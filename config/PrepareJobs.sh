@@ -54,11 +54,11 @@ echo "The full paths to all files are:"
 rm -f temp_input.1
 mv temp_input.1.1 temp_input.1
 
-touch SubmitAll.sh
-rm -rf SubmitAll.sh
-touch SubmitAll.sh
+touch SubmitAll_${output_name}.sh
+rm -rf SubmitAll_${output_name}.sh
+touch SubmitAll_${output_name}.sh
 
-until [ $total -lt 0 ]
+until [ $total -lt 1 ]
 do
   echo "Total is" $total
   total=`expr $total - ${num_files}`
@@ -73,32 +73,34 @@ do
   rm -f temp_input.1.2
   mv temp_input_2_${counter}.1.2 temp_input.1.2
   mkdir ${output_name}_job${counter}
-  cp script.sh ${output_name}_job${counter}/
-  echo "mkdir /scratch/${output_name}_input" >> ${output_name}_job${counter}/script.sh
-  cat  input_${counter}.1 >> ${output_name}_job${counter}/script.sh
+  cp script.sh ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "mkdir -p /scratch/${output_name}_input" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  cat  input_${counter}.1 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   rm -f input_${counter}.1
   more input_${counter}.2 | tr '\n' ' ' > temp_input.2
   rm -f input_${counter}.2 
-  echo "mkdir /scratch/${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/script.sh
-  echo "cd /scratch/${output_name}_${counter}_runDir"    >> ${output_name}_job${counter}/script.sh
-  echo -n "sframe_input.py -r -x 1 -d -o input.xml -t ${inTreeName} " >> ${output_name}_job${counter}/script.sh
-  more temp_input.2 >> ${output_name}_job${counter}/script.sh
-  echo "" >> ${output_name}_job${counter}/script.sh
-  echo "cp ${sframe_dir}/JobConfig.dtd ${sframe_dir}/${config_name} $pwd/*.root ." >> ${output_name}_job${counter}/script.sh
-  echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/script.sh
-  echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/script.sh
-  echo -n "rm -rf " >> ${output_name}_job${counter}/script.sh
-  more temp_input.2 >> ${output_name}_job${counter}/script.sh
-  echo "" >> ${output_name}_job${counter}/script.sh
-  echo "cd /scratch" >>  ${output_name}_job${counter}/script.sh
-  echo "rm -rf ${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/script.sh
-  echo "cd ${output_name}_job${counter}" >> SubmitAll.sh
-  echo "echo \"Submitting job no. ${counter}... \" " >> SubmitAll.sh
-  echo "qsub -q localgrid@cream01 -o script.stdout -e script.stderr script.sh" >> SubmitAll.sh
-  echo "cd .." >> SubmitAll.sh
+  echo "mkdir /scratch/${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cd /scratch/${output_name}_${counter}_runDir"    >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo -n "sframe_input.py -r -x 1 -d -o input.xml -t ${inTreeName} " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  more temp_input.2 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cp ${sframe_dir}/JobConfig.dtd ${sframe_dir}/${config_name} ${sframe_dir}/*.root ." >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo -n "rm -rf " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  more temp_input.2 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cd /scratch" >>  ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "rm -rf ${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "echo \"(0) Wrapper finished successfully. Exit code 0\" " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cd ${output_name}_job${counter}" >> SubmitAll_${output_name}.sh
+  echo "echo \"Submitting job no. ${counter}... \" " >> SubmitAll_${output_name}.sh
+  echo "qsub -q localgrid@cream01 -o script.stdout -e script.stderr ${output_name}_${counter}.sh" >> SubmitAll_${output_name}.sh
+  echo "cd .." >> SubmitAll_${output_name}.sh
 done 
 rm -f temp_input*
 rm -f full_path
 
-chmod +x SubmitAll.sh
-echo "To submit jobs, do ./SubmitAll.sh"
+chmod +x SubmitAll_${output_name}.sh
+echo "To submit jobs, do ./SubmitAll_${output_name}.sh"
