@@ -185,6 +185,8 @@ private:
     bool is2011;
     bool is2012_52;
     bool is2012_53;
+    bool vetoMuonTrigger;
+    bool vetoElectronTrigger;
 
 // output variables
 std::vector<float> out_pt;

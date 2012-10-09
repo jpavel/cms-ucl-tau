@@ -45,6 +45,11 @@
 		<Item Name="is2011" Value="false"/>
 		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="true"/>
+		<!--
+		Careful - following options veto one of the trigger paths! To be used only with data and caution
+-->
+		<Item Name="vetoMuonTrigger" Value="false" />
+		<Item Name="vetoElectronTrigger" Value="false" />
  
 		</UserConfig>
 	</Cycle>

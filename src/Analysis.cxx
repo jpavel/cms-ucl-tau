@@ -35,6 +35,8 @@ Analysis::Analysis()
    DeclareProperty("is2011",is2011);
    DeclareProperty("is2012_52",is2012_52);
    DeclareProperty("is2012_53",is2012_53);
+   DeclareProperty("vetoMuonTrigger",vetoMuonTrigger);
+   DeclareProperty("vetoElectronTrigger", vetoElectronTrigger);
   
 }
 
@@ -171,7 +173,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::stringstream ss;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
 		std::string title = ss.str();
-		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),150,0.,150.));
 		h_H_mass_types.push_back(h_temp);
 	 }
 	 
@@ -302,6 +304,8 @@ bool Analysis::Trg_MC_12(myevent* m) {
              TriggerMu = ihlt->second;
 		}
         Trigger = TriggerEle || TriggerMu;
+    if(vetoElectronTrigger && TriggerEle) Trigger = false;
+    if(vetoMuonTrigger && TriggerMu) Trigger = false;    
     return Trigger;    
 	}
 	
