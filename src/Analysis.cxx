@@ -173,7 +173,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::stringstream ss;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
 		std::string title = ss.str();
-		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),150,0.,150.));
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),300,0.,300.));
 		h_H_mass_types.push_back(h_temp);
 	 }
 	 
