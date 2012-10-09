@@ -52,6 +52,7 @@ void Analysis::BeginCycle() throw( SError ) {
 
 void Analysis::EndCycle() throw( SError ) {
 
+std::cout << "(0) Job exit code is 0" << std::endl;
    return;
 
 }
