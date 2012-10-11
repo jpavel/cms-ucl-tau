@@ -81,6 +81,31 @@ private:
 	int compared;
 	int entries;
 
+	// cut-flow
+    TH1* h_TRIGGER;
+    TH1* h_Z_CANDIDATE;
+    TH1* h_H_CANDIDATE_ac;
+    TH1* h_H_CANDIDATE_bc;
+    TH1* h_H_CANDIDATE_fullCorr;
+    TH1* h_EXCLUSIVE_EVENT_TYPE_ac;
+    TH1* h_EXCLUSIVE_EVENT_TYPE_bc;
+    TH1* h_ADD_LEPTONS;
+    TH1* h_SAME_VERTEX;
+    TH1* h_BTAG_VETO;
+    TH1* h_END;
+	// cut-flow weighted
+    TH1* h_TRIGGER_WEIGHT;
+    TH1* h_Z_CANDIDATE_WEIGHT;
+    TH1* h_H_CANDIDATE_ac_WEIGHT;
+    TH1* h_H_CANDIDATE_bc_WEIGHT;
+    TH1* h_EXCLUSIVE_EVENT_TYPE_ac_WEIGHT;
+    TH1* h_EXCLUSIVE_EVENT_TYPE_bc_WEIGHT;
+    TH1* h_H_CANDIDATE_fullCorr_WEIGHT;
+    TH1* h_ADD_LEPTONS_WEIGHT;
+    TH1* h_SAME_VERTEX_WEIGHT;
+    TH1* h_BTAG_VETO_WEIGHT;
+    TH1* h_END_WEIGHT;
+
 	// histograms
         TH1* h_el_n;
         TH1* h_el_cut;
@@ -158,6 +183,8 @@ private:
         TProfile* h_PF_MET_nPU_selected;
 
         TH1* h_nbjets;
+        TH1* h_nbjets_afterVeto;
+        TH1* h_nbjetsVetoed;
         TH1* h_Tmass;
         
         std::vector<TH1*>  h_H_mass_types;
