@@ -1060,13 +1060,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                         
 		}
 	}
+			Hist("h_nbjets")->Fill(count_bJets,weight);
+			Hist("h_nbjets_afterVeto")->Fill(count_bJets_afterVeto,weight);
 	if(bTagVeto)
 	{
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
-			Hist("h_nbjets")->Fill(count_bJets,weight);
-			Hist("h_nbjets_afterVeto")->Fill(count_bJets_afterVeto,weight);
         
 	
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
