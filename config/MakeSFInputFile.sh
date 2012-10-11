@@ -19,7 +19,7 @@ output_name=`echo $2`
 num_files=${3}
 
 # input datasets settings
-ntuple_name=output_Ntuples
+ntuple_name=output_
 srm_server=dcap://maite.iihe.ac.be
 inTreeName=t
 

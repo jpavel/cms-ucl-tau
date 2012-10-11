@@ -145,6 +145,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     
     h_PF_MET_nPU			= Book(TProfile("h_PF_MET_nPU", "PF MET vs number of PU interactions; nPU; PF MET[GeV]",60,0,60));
     h_PF_MET_nPU_selected	= Book(TProfile("h_PF_MET_nPU_selected", "PF MET vs number of PU interactions; nPU; PF MET[GeV]",60,0,60));
+    h_nbjets_beforeCut                    = Book(TH1D("h_nbjets_beforeCut", "# of b-jets before b-tag veto",10,0,10));
+    h_nbjets_afterCut                    = Book(TH1D("h_nbjets_afterCut", "# of b-jets after b-tag veto",10,0,10));
                       
     h_Tmass					= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
     
@@ -1035,8 +1037,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	
 	// b-tag veto
+	
 	bool bTagVeto = false;
 	std::vector<myobject> jet = m->RecPFJetsAK5;
+	Hist("h_nbjets_beforeCut")->Fill(jet.size());
 	for (uint i = 0; i < jet.size() && !bTagVeto; i++) {
 		double jetPt = jet[i].pt;
 		double jetEta = jet[i].eta;
@@ -1059,6 +1063,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 	h_PF_MET_nPU_selected->Fill(nPU,Met.front().et,weight);
+	
+	Hist("h_nbjets_afterCut")->Fill(jet.size());
+	
 	double tMass = -100;
 	if(!tauTau)
 	{

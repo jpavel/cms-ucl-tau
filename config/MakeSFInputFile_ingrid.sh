@@ -17,7 +17,7 @@ rm temp_input.*
 input_data=`echo $1`
 output_name=`echo $2`
 # input datasets settings
-ntuple_name=output_Ntuples
+ntuple_name=output
 #srm_server=dcap://maite.iihe.ac.be
 inTreeName=t
 
@@ -50,21 +50,21 @@ mv temp_input.1.1 temp_input.1
 until [ $total -lt 0 ]
 do
   echo "Total is" $total
-  total=`expr $total - 1000`
+  total=`expr $total - 1`
   echo "Subtracted total is" $total
   counter=`expr $counter + 1`
-  head -n 1000 temp_input.1 > temp_input_${counter}.1
+  head -n 1 temp_input.1 > temp_input_${counter}.1
   tail -n $total temp_input.1 > temp_input_2_${counter}.1
   mv temp_input_2_${counter}.1 temp_input.1
   more temp_input_${counter}.1 | tr '\n' ' ' > temp_input.2
 #  sed -i "s:out:${full_path}bla:g" temp_input.2
 #   sed -i 's/srm.ndgf/ftp1.ndgf/g' temp_input.2
   touch ${output_name}_${counter}_makeXML.sh
-  echo -n "sframe_input.py -r -x 1 -d -o ${output_name}_${counter}_input.xml -t ${inTreeName} " >> ${output_name}_${counter}_makeXML.sh
+echo "<In FileName=\"${full_path}${file}\" Lumi=\"1.0\" />" >> ${output_name}_${counter}_makeXML.sh
   more temp_input.2 >> ${output_name}_${counter}_makeXML.sh
-  rm temp_input.2
+  #rm temp_input.2
 done 
-rm temp_input*
+#rm temp_input*
 
 echo "The command now executed will be "
 more ${output_name}_${counter}_makeXML.sh
