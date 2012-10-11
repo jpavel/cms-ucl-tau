@@ -157,8 +157,7 @@ private:
         TH1* h_PF_MET_selected;
         TProfile* h_PF_MET_nPU_selected;
 
-        TH1* h_nbjets_beforeCut;
-        TH1* h_nbjets_afterCut;
+        TH1* h_nbjets;
         TH1* h_Tmass;
         
         std::vector<TH1*>  h_H_mass_types;
