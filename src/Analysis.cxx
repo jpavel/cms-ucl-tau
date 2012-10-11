@@ -59,8 +59,8 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
-        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",9,0.5,9.5));
-        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",9,0.5,9.5));
+        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",10,0.5,10.5));
+        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",10,0.5,10.5));
 
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
@@ -154,26 +154,28 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(out_pt,"el_pt");
 
         h_cut_flow = Retrieve<TH1D>("h_cut_flow");
-	h_cut_flow->GetXaxis()->SetBinLabel(1, "trigger");
-	h_cut_flow->GetXaxis()->SetBinLabel(2, "Z cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(3, "Exc. Event type BC");
-	h_cut_flow->GetXaxis()->SetBinLabel(4, "Exc. Event type AC");
-	h_cut_flow->GetXaxis()->SetBinLabel(5, "H cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(6, "Add. Leptons");
-	h_cut_flow->GetXaxis()->SetBinLabel(7, "Same Vertex");
-	h_cut_flow->GetXaxis()->SetBinLabel(8, "B-Tag Veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(9, "Final Events");
+	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
+	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
+	h_cut_flow->GetXaxis()->SetBinLabel(3, "Z cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(4, "Exc. Event type BC");
+	h_cut_flow->GetXaxis()->SetBinLabel(5, "Exc. Event type AC");
+	h_cut_flow->GetXaxis()->SetBinLabel(6, "H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(7, "Add. Leptons");
+	h_cut_flow->GetXaxis()->SetBinLabel(8, "Same Vertex");
+	h_cut_flow->GetXaxis()->SetBinLabel(9, "B-Tag Veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(10, "Final Events");
 
         h_cut_flow_weight = Retrieve<TH1D>("h_cut_flow_weight");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(1, "trigger");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(2, "Z cand");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(3, "Exc. Event type BC");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(4, "Exc. Event type AC");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(5, "H cand ");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(6, "Add. Leptons");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(7, "Same Vertex");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(8, "B-Tag Veto");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(9, "Final Events");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(1, "Initial Events");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(2, "trigger");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(3, "Z cand");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(4, "Exc. Event type BC");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(5, "Exc. Event type AC");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(6, "H cand ");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(7, "Add. Leptons");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(8, "Same Vertex");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(9, "B-Tag Veto");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(10, "Final Events");
 
 	h_event_type = Retrieve<TH1D>("h_event_type");
 	h_event_type->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
@@ -362,6 +364,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	}
 
+	h_cut_flow->SetBinContent(1,1);
+	h_cut_flow_weight->SetBinContent(1,PUWeight);
+
 	bool trigPass = Trg_MC_12(m);
 	m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
@@ -369,8 +374,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_cut_flow->SetBinContent(1,1);
-	h_cut_flow_weight->SetBinContent(1,PUWeight);
+	h_cut_flow->SetBinContent(2,1);
+	h_cut_flow_weight->SetBinContent(2,PUWeight);
 
 	vector<myobject> Met = m->RecPFMet;
 
@@ -630,8 +635,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 	
-	h_cut_flow->SetBinContent(2,1);
-	h_cut_flow_weight->SetBinContent(2,Z_weight);
+	h_cut_flow->SetBinContent(3,1);
+	h_cut_flow_weight->SetBinContent(3,Z_weight);
 
 	// Z overlap removal
 
@@ -846,8 +851,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
 	// cross-check
-	h_cut_flow->SetBinContent(3,1);
-	h_cut_flow_weight->SetBinContent(3,Z_weight);
+	h_cut_flow->SetBinContent(4,1);
+	h_cut_flow_weight->SetBinContent(4,Z_weight);
 	
 	if(muTau+muE+eTau+tauTau > 1){
 		m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
@@ -855,8 +860,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_cut_flow->SetBinContent(4,1);
-	h_cut_flow_weight->SetBinContent(4,Z_weight);
+	h_cut_flow->SetBinContent(5,1);
+	h_cut_flow_weight->SetBinContent(5,Z_weight);
 
 	short event_type = 0;
 
@@ -907,8 +912,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 
 
-
-
 	double corrHlep1,corrHlep2;
 	corrHlep1=corrHlep2=1.0;
 	if(isSimulation){
@@ -952,8 +955,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	TLorentzVector muH_muTau,tauH_muTau,H_muTau;
 	TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
 	
-	h_cut_flow->SetBinContent(5,1);
-	h_cut_flow_weight->SetBinContent(5,weight);
+	h_cut_flow->SetBinContent(6,1);
+	h_cut_flow_weight->SetBinContent(6,weight);
 
 	// histograms   
 	switch(event_type)
@@ -1064,8 +1067,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 	
-	h_cut_flow->SetBinContent(6,1);
-	h_cut_flow_weight->SetBinContent(6,weight);
+	h_cut_flow->SetBinContent(7,1);
+	h_cut_flow_weight->SetBinContent(7,weight);
 
 
 	// Same vertex check
@@ -1078,8 +1081,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
 		return;
 	}
-	h_cut_flow->SetBinContent(7,1);
-	h_cut_flow_weight->SetBinContent(7,weight);
+	h_cut_flow->SetBinContent(8,1);
+	h_cut_flow_weight->SetBinContent(8,weight);
 
 
 	// b-tag veto
@@ -1119,8 +1122,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_cut_flow->SetBinContent(8,1);
-	h_cut_flow_weight->SetBinContent(8,weight);
+	h_cut_flow->SetBinContent(9,1);
+	h_cut_flow_weight->SetBinContent(9,weight);
 
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
@@ -1148,8 +1151,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	return;
 
-	h_cut_flow->SetBinContent(9,1);
-	h_cut_flow_weight->SetBinContent(9,weight);
+	h_cut_flow->SetBinContent(10,1);
+	h_cut_flow_weight->SetBinContent(10,weight);
 	//trigger
 
 }
