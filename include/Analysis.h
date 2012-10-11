@@ -191,6 +191,7 @@ private:
     bool is2011;
     bool is2012_52;
     bool is2012_53;
+    bool useTruePileUp;
     bool vetoMuonTrigger;
     bool vetoElectronTrigger;
 
