@@ -59,30 +59,8 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
-	//cut-flow
-	h_TRIGGER                      	= Book(TH1D("h_TRIGGER","# of events after Trigger selection",5,0,5));
-	h_Z_CANDIDATE                  	= Book(TH1D("h_Z_CANDIDATE","# of events after Z selection",5,0,5));
-	h_H_CANDIDATE_ac                  	= Book(TH1D("h_H_CANDIDATE_ac","# of events after H selection",5,0,5));
-	h_H_CANDIDATE_bc                  	= Book(TH1D("h_H_CANDIDATE_bc","# of events before H selection",5,0,5));
-	h_EXCLUSIVE_EVENT_TYPE_ac              = Book(TH1D("h_EXCLUSIVE_EVENT_TYPE_ac","# of events after exlcusive events check",5,0,5));
-	h_EXCLUSIVE_EVENT_TYPE_bc              = Book(TH1D("h_EXCLUSIVE_EVENT_TYPE_bc","# of events before exlcusive events check",5,0,5));
-	h_ADD_LEPTONS                  	= Book(TH1D("h_ADD_LEPTONS","# of events after additional extra leptons check",5,0,5));  
-	h_SAME_VERTEX                  	= Book(TH1D("h_SAME_VERTEX","# of events after same vertex check",5,0,5));
-	h_BTAG_VETO                    	= Book(TH1D("h_BTAG_VETO","# of events after b tag veto",5,0,5));
-	h_END                          	= Book(TH1D("h_END"," !!! THE END !!! ",5,0,5));
-	//cut-flow weighted
-	h_TRIGGER_WEIGHT                      = Book(TH1D("h_TRIGGER_WEIGHT","# of events after Trigger selection",5,0,5));
-	h_Z_CANDIDATE_WEIGHT                  = Book(TH1D("h_Z_CANDIDATE_WEIGHT","# of events after Z selection",5,0,5));
-	h_H_CANDIDATE_ac_WEIGHT                  = Book(TH1D("h_H_CANDIDATE_ac_WEIGHT","# of events after H selection",5,0,5));
-	h_H_CANDIDATE_bc_WEIGHT                  = Book(TH1D("h_H_CANDIDATE_bc_WEIGHT","# of events before H selection",5,0,5));
-	h_H_CANDIDATE_fullCorr_WEIGHT                  	= Book(TH1D("h_H_CANDIDATE_fullCorr_WEIGHT","# of events after H selection (full weighted)",5,0,5));
-	h_EXCLUSIVE_EVENT_TYPE_ac_WEIGHT         = Book(TH1D("h_EXCLUSIVE_EVENT_TYPE_ac_WEIGHT","# of events after exlcusive events check",5,0,5));
-	h_EXCLUSIVE_EVENT_TYPE_bc_WEIGHT         = Book(TH1D("h_EXCLUSIVE_EVENT_TYPE_bc_WEIGHT","# of events before exlcusive events check",5,0,5));
-	h_ADD_LEPTONS_WEIGHT                  = Book(TH1D("h_ADD_LEPTONS_WEIGHT","# of events after additional extra leptons check",5,0,5));
-	h_SAME_VERTEX_WEIGHT                  = Book(TH1D("h_SAME_VERTEX_WEIGHT","# of events after same vertex check",5,0,5));
-	h_BTAG_VETO_WEIGHT                    = Book(TH1D("h_BTAG_VETO_WEIGHT","# of events after b tag veto",5,0,5));
-	h_END_WEIGHT                          = Book(TH1D("h_END_WEIGHT"," !!! THE END !!! ",5,0,5));
-
+        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",9,0.5,9.5));
+        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",9,0.5,9.5));
 
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
@@ -175,6 +153,27 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	DeclareVariable(out_pt,"el_pt");
 
+        h_cut_flow = Retrieve<TH1D>("h_cut_flow");
+	h_cut_flow->GetXaxis()->SetBinLabel(1, "trigger");
+	h_cut_flow->GetXaxis()->SetBinLabel(2, "Z cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(3, "Exc. Event type BC");
+	h_cut_flow->GetXaxis()->SetBinLabel(4, "Exc. Event type AC");
+	h_cut_flow->GetXaxis()->SetBinLabel(5, "H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(6, "Add. Leptons");
+	h_cut_flow->GetXaxis()->SetBinLabel(7, "Same Vertex");
+	h_cut_flow->GetXaxis()->SetBinLabel(8, "B-Tag Veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(9, "Final Events");
+
+        h_cut_flow_weight = Retrieve<TH1D>("h_cut_flow_weight");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(1, "trigger");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(2, "Z cand");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(3, "Exc. Event type BC");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(4, "Exc. Event type AC");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(5, "H cand ");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(6, "Add. Leptons");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(7, "Same Vertex");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(8, "B-Tag Veto");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(9, "Final Events");
 
 	h_event_type = Retrieve<TH1D>("h_event_type");
 	h_event_type->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
@@ -370,8 +369,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_TRIGGER->Fill(1);
-	h_TRIGGER_WEIGHT->Fill(1,PUWeight);
+	h_cut_flow->SetBinContent(1,1);
+	h_cut_flow_weight->SetBinContent(1,PUWeight);
 
 	vector<myobject> Met = m->RecPFMet;
 
@@ -630,9 +629,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	else{
 		return;
 	}
-
-	h_Z_CANDIDATE->Fill(1);
-	h_Z_CANDIDATE_WEIGHT->Fill(1,Z_weight);
+	
+	h_cut_flow->SetBinContent(2,1);
+	h_cut_flow_weight->SetBinContent(2,Z_weight);
 
 	// Z overlap removal
 
@@ -839,21 +838,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 
-	h_H_CANDIDATE_bc->Fill(1);
-	h_H_CANDIDATE_bc_WEIGHT->Fill(1,Z_weight);
-
 	if(Hindex[0] < 0 || Hindex[1] < 0 ||(!muTau && !muE && !eTau && !tauTau)){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 		return;
 	}
 
-	h_H_CANDIDATE_ac->Fill(1);
-	h_H_CANDIDATE_ac_WEIGHT->Fill(1,Z_weight);
 
 	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
 	// cross-check
-	h_EXCLUSIVE_EVENT_TYPE_bc->Fill(1);
-	h_EXCLUSIVE_EVENT_TYPE_bc_WEIGHT->Fill(1,Z_weight);
+	h_cut_flow->SetBinContent(3,1);
+	h_cut_flow_weight->SetBinContent(3,Z_weight);
 	
 	if(muTau+muE+eTau+tauTau > 1){
 		m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
@@ -861,8 +855,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_EXCLUSIVE_EVENT_TYPE_ac->Fill(1);
-	h_EXCLUSIVE_EVENT_TYPE_ac_WEIGHT->Fill(1,Z_weight);
+	h_cut_flow->SetBinContent(4,1);
+	h_cut_flow_weight->SetBinContent(4,Z_weight);
 
 	short event_type = 0;
 
@@ -958,7 +952,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	TLorentzVector muH_muTau,tauH_muTau,H_muTau;
 	TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
 	
-	h_H_CANDIDATE_fullCorr_WEIGHT->Fill(1,weight);
+	h_cut_flow->SetBinContent(5,1);
+	h_cut_flow_weight->SetBinContent(5,weight);
 
 	// histograms   
 	switch(event_type)
@@ -1068,9 +1063,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
 		return;
 	}
+	
+	h_cut_flow->SetBinContent(6,1);
+	h_cut_flow_weight->SetBinContent(6,weight);
 
-	h_ADD_LEPTONS->Fill(1);
-	h_ADD_LEPTONS_WEIGHT->Fill(1,weight);
 
 	// Same vertex check
 
@@ -1082,9 +1078,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
 		return;
 	}
-
-	h_SAME_VERTEX->Fill(1);
-	h_SAME_VERTEX_WEIGHT->Fill(1,weight);
+	h_cut_flow->SetBinContent(7,1);
+	h_cut_flow_weight->SetBinContent(7,weight);
 
 
 	// b-tag veto
@@ -1124,8 +1119,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_BTAG_VETO->Fill(1);
-	h_BTAG_VETO_WEIGHT->Fill(1,weight);
+	h_cut_flow->SetBinContent(8,1);
+	h_cut_flow_weight->SetBinContent(8,weight);
 
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
@@ -1153,9 +1148,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	return;
 
-
-	h_END->Fill(1);
-	h_END_WEIGHT->Fill(1,weight);
+	h_cut_flow->SetBinContent(9,1);
+	h_cut_flow_weight->SetBinContent(9,weight);
 	//trigger
 
 }
