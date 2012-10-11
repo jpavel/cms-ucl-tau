@@ -209,7 +209,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	// Lumi weights
 
 	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
-	else if (is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
+	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
+	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
 
 	return;
@@ -349,7 +350,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	double PUWeight = 1.0;
 	double nPU = 0.0;
-	if(useTruePileUp && is2011)  nPU = m->PUInfo_true;
+	if(useTruePileUp || !is2011)  nPU = m->PUInfo_true;
 	else nPU = m->PUInfo_Bunch0;
 	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
@@ -360,8 +361,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(!useTruePileUp && is2011){ 
 		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_Bunch0,PUWeight);
-	}else
-	if(useTruePileUp && is2011){ 
+	}else{ 
 		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	}
