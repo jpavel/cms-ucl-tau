@@ -44,6 +44,7 @@
 		<Item Name="is2011" Value="true"/>
 		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="false"/>
+		<Item Name="useTruePileUp" Value="false"/>
                 
                 <Item Name="vetoMuonTrigger" Value="true" />
                 <Item Name="vetoElectronTrigger" Value="false" />

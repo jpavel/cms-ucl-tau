@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
 <!-- This config file will run over input defined in input.xml file -->
 <JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
@@ -14,7 +14,7 @@
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
 	       <InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
-                 &grid;
+                 <In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/MC/WH_ZH_TTH_HToTauTau_M-110_lepdecay_7TeV-pythia6-tauola_v2//output_10_1_dq9.root" Lumi="1.0" />
                 <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
 		</InputData>
@@ -42,9 +42,10 @@
 		
 		<Item Name="checkCategories" Value="true"/>
 		<Item Name="isSimulation" Value="true"/>
-		<Item Name="is2011" Value="false"/>
+		<Item Name="is2011" Value="true"/>
 		<Item Name="is2012_52" Value="false"/>
-		<Item Name="is2012_53" Value="true"/>
+		<Item Name="is2012_53" Value="false"/>
+		<Item Name="useTruePileUp" Value="true"/>
 		<!--
 		Careful - following options veto one of the trigger paths! To be used only with data and caution
 -->
