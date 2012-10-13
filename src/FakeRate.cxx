@@ -29,7 +29,11 @@ FakeRate::FakeRate()
    DeclareProperty("SynchronizationTest",syncTest);
    DeclareProperty("vetoMuonTrigger",vetoMuonTrigger);
 		DeclareProperty("vetoElectronTrigger", vetoElectronTrigger);
+		DeclareProperty("isSimulation",isSimulation);
 		DeclareProperty("is2011",is2011);
+		DeclareProperty("is2012_52",is2012_52);
+		DeclareProperty("is2012_53",is2012_53);
+		DeclareProperty("useTruePileUp",useTruePileUp);
 }
 
 FakeRate::~FakeRate() {

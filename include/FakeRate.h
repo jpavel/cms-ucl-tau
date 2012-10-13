@@ -159,7 +159,11 @@ private:
     bool vetoMuonTrigger;
     bool vetoElectronTrigger;
     
+      bool isSimulation;
     bool is2011;
+    bool is2012_52;
+    bool is2012_53;
+    bool useTruePileUp;
 
 // output variables
 
