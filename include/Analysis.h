@@ -19,6 +19,7 @@
 #include "myevent.h"
 #include "TLorentzVector.h"
 #include "TProfile.h"
+#include "TH2.h"
 
 // PU weight
 
@@ -165,7 +166,29 @@ private:
         TH1* h_nbjetsVetoed;
         TH1* h_Tmass;
         
+        TH1* h_signal_pt1;
+        TH1* h_signal_pt2;
+        
+        TH2* h_category0_pt;
+        TH1* h_category1_pt;
+        TH1* h_category2_pt;
+        
+        
         std::vector<TH1*>  h_H_mass_types;
+        std::vector<TH1*> h_signal_pt1_types;
+        std::vector<TH1*> h_signal_pt2_types;
+        
+        std::vector<TH2*> h_category0_pt_types;
+        std::vector<TH1*> h_category1_pt_types;
+        std::vector<TH1*> h_category2_pt_types;
+        
+        
+        TH1* h_Nvertex_NoCut;
+        TH1* h_Nvertex_NoCut_W;
+        TH1* h_Nvertex_AfterZ;
+        TH1* h_Nvertex_AfterZ_W;
+        TH1* h_Nvertex_AfterZH;
+        TH1* h_Nvertex_AfterZH_W;
         
         reweight::LumiReWeighting* LumiWeights_;
         

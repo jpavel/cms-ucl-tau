@@ -152,6 +152,22 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_Tmass				= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
 
+	h_signal_pt1			= Book(TH1D("h_signal_pt1", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
+    h_signal_pt2			= Book(TH1D("h_signal_pt2", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
+    
+    h_category0_pt		= Book(TH2D("h_category0_pt", " Pt distribution in category0 region;P_{T1}[GeV];P_{T2}[GeV]",100,0,100,100,0,100));
+    h_category1_pt		= Book(TH1D("h_category1_pt", " Pt distribution in category1 region; P_{T}[GeV]",100,0,100));
+    h_category2_pt		= Book(TH1D("h_category2_pt", " Pt distribution in category2 region; P_{T}[GeV]",100,0,100));
+    
+    
+
+ h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 100, -0.5,99.5));
+ h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 100, -0.5,99.5));
+ h_Nvertex_AfterZ = Book(TH1D("h_Nvertex_AfterZ","Number of vertices - selected Z", 100, -0.5,99.5));
+ h_Nvertex_AfterZ_W = Book(TH1D("h_Nvertex_AfterZ_W","Number of vertices - selected Z (PU weight)", 100, -0.5,99.5));
+ h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 100, -0.5,99.5));
+ h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 100, -0.5,99.5));
+
 	DeclareVariable(out_pt,"el_pt");
 
         h_cut_flow = Retrieve<TH1D>("h_cut_flow");
@@ -193,15 +209,41 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 
 	h_H_mass_types.clear();
+	h_signal_pt1_types.clear();
+    h_signal_pt2_types.clear();
+        
+    h_category0_pt_types.clear();
+    h_category1_pt_types.clear();
+    h_category2_pt_types.clear();
+        
 	for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
 	{
-		std::stringstream s;
+		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2;
 		s << "h_H_mass_type_" << i;
+		sig_1 << "h_signal_pt1_" << i;
+		sig_2 << "h_signal_pt2_" << i;
+		cat0 << "h_category0_pt_" << i;
+		cat1 << "h_category1_pt_" << i;
+		cat2 << "h_category2_pt_" << i;
+		
 		std::string name = s.str(); 
+		std::string name_sig_1 = sig_1.str(); 
+		std::string name_sig_2 = sig_2.str(); 
+		std::string name_cat0 = cat0.str(); 
+		std::string name_cat1 = cat1.str(); 
+		std::string name_cat2 = cat2.str(); 
+		
 		std::stringstream ss;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
 		std::string title = ss.str();
 		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),300,0.,300.));
+		TH1D* h_signal_temp_pt1			= Book(TH1D("", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
+	    TH1D* h_signal_temp_pt2			= Book(TH1D("h_signal_temp_pt1", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
+	    
+	    TH2D* h_category0_temp_pt		= Book(TH2D("h_category0_temp_pt", " Pt distribution in category0 region;P_{T1}[GeV];P_{T2}[GeV]",100,0,100,100,0,100));
+	    TH1D* h_category1_temp_pt		= Book(TH1D("h_category1_temp_pt", " Pt distribution in category1 region; P_{T}[GeV]",100,0,100));
+	    TH1D* h_category2_temp_pt		= Book(TH1D("h_category2_temp_pt", " Pt distribution in category2 region; P_{T}[GeV]",100,0,100));
+		
 		h_H_mass_types.push_back(h_temp);
 	}
 
@@ -365,9 +407,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	}
+	
+	std::vector<myobject> vertex = m->Vertex;
+	std::vector<myobject> goodVertex;
+	goodVertex.clear();
+	for (uint i = 0; i < vertex.size(); i++) {
+		if (vertex[i].isValid && vertex[i].normalizedChi2 > 0 && vertex[i].ndof > 4 && fabs(vertex[i].z) < 24)
+		goodVertex.push_back(vertex[i]);
+	}
+	short nGoodVx=goodVertex.size();
 
 	h_cut_flow->SetBinContent(1,1);
 	h_cut_flow_weight->SetBinContent(1,PUWeight);
+
+	Hist("h_Nvertex_NoCut")->Fill(nGoodVx);
+	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
 
 	bool trigPass = Trg_MC_12(m);
 	m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;
@@ -639,6 +693,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	h_cut_flow->SetBinContent(3,1);
 	h_cut_flow_weight->SetBinContent(3,Z_weight);
+	
+	Hist("h_Nvertex_AfterZ")->Fill(nGoodVx);
+	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,PUWeight);
 
 	// Z overlap removal
 
@@ -849,6 +906,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 		return;
 	}
+	
+	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
+	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,PUWeight);
 
 
 	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
@@ -961,80 +1021,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_weight->SetBinContent(6,weight);
 
 	// histograms   
-	switch(event_type)
-	{
-		case 2:
-		case 6:
-			muH_muE_tightMuIso.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			eH_muE_tightMuIso.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
-			Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt(),weight);
-			Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt(),weight);
-			Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
-			Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M(),weight);
-			Hist( "h_H_eta")->Fill(H_muE_tightMuIso.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_muE_tightMuIso.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
-			break;
-		case 1:
-		case 5:
-			muH_muTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			tauH_muTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_muTau = muH_muTau+tauH_muTau;
-			Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
-			Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
-			Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt(),weight);
-			Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_muTau.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_muTau.M(),weight);
-			Hist( "h_H_eta")->Fill(H_muTau.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_muTau.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_muTau.M(),weight);
-			break;
-		case 3:
-		case 7:
-			eH_eTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			tauH_eTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_eTau = eH_eTau+tauH_eTau;
-			Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
-			Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
-			Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt(),weight);
-			Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_eTau.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_eTau.M(),weight);
-			Hist( "h_H_eta")->Fill(H_eTau.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_eTau.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_eTau.M(),weight);
-
-			break;	
-		case 4:
-		case 8:
-
-			tau1H_tauTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			tau2H_tauTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_tauTau = tau1H_tauTau+tau2H_tauTau;
-			Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
-			Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
-			Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt(),weight);
-			Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_tauTau.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_tauTau.M(),weight);
-
-			Hist( "h_H_eta")->Fill(H_tauTau.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_tauTau.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_tauTau.M(),weight);
-
-			break;
-
-
-	}
-
-	Hist( "h_H_lep1_eta")->Fill(Hcand[0].eta,weight);
-	Hist( "h_H_lep1_phi")->Fill(Hcand[0].phi,weight);
-	Hist( "h_H_lep2_eta")->Fill(Hcand[1].eta,weight);
-	Hist( "h_H_lep2_phi")->Fill(Hcand[1].phi,weight);
+	
 
 	// overlap cleaning
 
@@ -1151,10 +1138,146 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}else  Hist( "h_event_type" )->Fill(event_type,weight); // blinding 
 
 
-	return;
+	
+	//histograms for selected candidates
+	
+	switch(event_type)
+	{
+		case 2:
+		case 6:
+			muH_muE_tightMuIso.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+			eH_muE_tightMuIso.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
+			H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
+			Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt(),weight);
+			Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt(),weight);
+			Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
+			Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M(),weight);
+			Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
+			Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M(),weight);
+			Hist( "h_H_eta")->Fill(H_muE_tightMuIso.Eta(),weight);
+			Hist( "h_H_phi")->Fill(H_muE_tightMuIso.Phi(),weight);
+			h_H_mass_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
+			
+			if(signal)
+			{
+				Hist("h_signal_pt1")->Fill(Hcand[1].pt);
+				Hist("h_signal_pt2")->Fill(Hcand[0].pt);				
+			}else if(category==1){
+				Hist("h_category1_pt")->Fill(Hcand[1].pt);
+			}else if(category==2){
+				Hist("h_category2_pt")->Fill(Hcand[0].pt);
+			}else if(category==0){
+				Hist("h_category0_pt")->Fill(Hcand[1].pt,Hcand[0].pt);
+			}
+			
+			
+			
+			break;
+		case 1:
+		case 5:
+			muH_muTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+			tauH_muTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
+			H_muTau = muH_muTau+tauH_muTau;
+			Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
+			Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
+			Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt(),weight);
+			Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
+			Hist( "h_H_pt" )->Fill(H_muTau.Pt(),weight);
+			Hist( "h_H_mass" )->Fill(H_muTau.M(),weight);
+			Hist( "h_H_eta")->Fill(H_muTau.Eta(),weight);
+			Hist( "h_H_phi")->Fill(H_muTau.Phi(),weight);
+			h_H_mass_types[event_type-1]->Fill(H_muTau.M(),weight);
+			
+			if(signal)
+			{
+				Hist("h_signal_pt1")->Fill(Hcand[1].pt);
+				Hist("h_signal_pt2")->Fill(Hcand[0].pt);				
+			}else if(category==1){
+				Hist("h_category1_pt")->Fill(Hcand[1].pt);
+			}else if(category==2){
+				Hist("h_category2_pt")->Fill(Hcand[0].pt);
+			}else if(category==0){
+				Hist("h_category0_pt")->Fill(Hcand[1].pt,Hcand[0].pt);
+			}
+			
+			break;
+		case 3:
+		case 7:
+			eH_eTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+			tauH_eTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
+			H_eTau = eH_eTau+tauH_eTau;
+			Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
+			Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
+			Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt(),weight);
+			Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
+			Hist( "h_H_pt" )->Fill(H_eTau.Pt(),weight);
+			Hist( "h_H_mass" )->Fill(H_eTau.M(),weight);
+			Hist( "h_H_eta")->Fill(H_eTau.Eta(),weight);
+			Hist( "h_H_phi")->Fill(H_eTau.Phi(),weight);
+			h_H_mass_types[event_type-1]->Fill(H_eTau.M(),weight);
+			
+			if(signal)
+			{
+				Hist("h_signal_pt1")->Fill(Hcand[1].pt);
+				Hist("h_signal_pt2")->Fill(Hcand[0].pt);				
+			}else if(category==1){
+				Hist("h_category1_pt")->Fill(Hcand[1].pt);
+			}else if(category==2){
+				Hist("h_category2_pt")->Fill(Hcand[0].pt);
+			}else if(category==0){
+				Hist("h_category0_pt")->Fill(Hcand[1].pt,Hcand[0].pt);
+			}	
 
+			break;	
+		case 4:
+		case 8:
+
+			tau1H_tauTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+			tau2H_tauTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
+			H_tauTau = tau1H_tauTau+tau2H_tauTau;
+			Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
+			Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
+			Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt(),weight);
+			Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
+			Hist( "h_H_pt" )->Fill(H_tauTau.Pt(),weight);
+			Hist( "h_H_mass" )->Fill(H_tauTau.M(),weight);
+
+			Hist( "h_H_eta")->Fill(H_tauTau.Eta(),weight);
+			Hist( "h_H_phi")->Fill(H_tauTau.Phi(),weight);
+			h_H_mass_types[event_type-1]->Fill(H_tauTau.M(),weight);
+			
+			
+			if(signal)
+			{
+				Hist("h_signal_pt1")->Fill(Hcand[0].pt);
+				Hist("h_signal_pt2")->Fill(Hcand[1].pt);				
+			}else if(category==1){
+				Hist("h_category1_pt")->Fill(Hcand[0].pt);
+			}else if(category==2){
+				Hist("h_category2_pt")->Fill(Hcand[1].pt);
+			}else if(category==0){
+				Hist("h_category0_pt")->Fill(Hcand[0].pt,Hcand[1].pt);
+			}	
+
+			break;
+
+
+	}
+
+	Hist( "h_H_lep1_eta")->Fill(Hcand[0].eta,weight);
+	Hist( "h_H_lep1_phi")->Fill(Hcand[0].phi,weight);
+	Hist( "h_H_lep2_eta")->Fill(Hcand[1].eta,weight);
+	Hist( "h_H_lep2_phi")->Fill(Hcand[1].phi,weight);
+	
+	
+	
 	h_cut_flow->SetBinContent(10,1);
 	h_cut_flow_weight->SetBinContent(10,weight);
+	
+	
+	
+	return;
+
 	//trigger
 
 }
