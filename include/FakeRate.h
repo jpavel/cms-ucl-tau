@@ -135,6 +135,8 @@ private:
         std::vector<TH1*>  h_denom_types;
 		std::vector<TH1*>  h_medium_types;
 		std::vector<TH1*>  h_tight_types;
+		
+		std::vector<TH1*>  h_H_mass_types;
 	
         
 
@@ -148,8 +150,16 @@ private:
 	bool   syncTest;
 	
 	std::string doubEle;
+	std::string doubEle2;
+	
     std::string doubMu;
     std::string doubMu2;
+    std::string doubMu3;
+    
+    bool vetoMuonTrigger;
+    bool vetoElectronTrigger;
+    
+    bool is2011;
 
 // output variables
 

@@ -21,9 +21,15 @@ FakeRate::FakeRate()
    DeclareProperty("bTagValue",bTagValue);
    
    DeclareProperty("ElectronTriggerName", doubEle);
-   DeclareProperty("MuonTriggerName1", doubMu);
-   DeclareProperty("MuonTriggerName2", doubMu2);
+		DeclareProperty("ElectronTriggerName2", doubEle2);
+
+		DeclareProperty("MuonTriggerName1", doubMu);
+		DeclareProperty("MuonTriggerName2", doubMu2);
+		DeclareProperty("MuonTriggerName3", doubMu3);
    DeclareProperty("SynchronizationTest",syncTest);
+   DeclareProperty("vetoMuonTrigger",vetoMuonTrigger);
+		DeclareProperty("vetoElectronTrigger", vetoElectronTrigger);
+		DeclareProperty("is2011",is2011);
 }
 
 FakeRate::~FakeRate() {
@@ -178,6 +184,24 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
 		h_tight_types.push_back(h_temp);
 	 }
+	 
+	 h_H_mass_types.clear();
+	 for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
+	{
+		std::stringstream s;
+		s << "h_H_mass_type_" << i;
+		
+		std::string name = s.str(); 
+		
+		std::stringstream ss;
+		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
+			
+		std::string title = ss.str();
+		
+		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),300,0.,300.));
+		h_H_mass_types.push_back(h_temp);
+		
+	}
 	 
 	 
 	 index_number.clear();
@@ -354,25 +378,33 @@ double FakeRate::RelIsoEl(myobject el){
 }
 
 bool FakeRate::Trg_MC_12(myevent* m) {
-    map<string, int> myHLT = m->HLT;
-    bool Trigger = false;
-    bool TriggerEle = false;
-    bool TriggerMu = false;
+	map<string, int> myHLT = m->HLT;
+	bool Trigger = false;
+	bool TriggerEle = false;
+	bool TriggerMu = false;
 
-    
-    for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
-	//	std::cout << ihlt->first << std::endl; 
-        size_t foundEl=(ihlt->first).find(doubEle);
-	    size_t foundMu1=(ihlt->first).find(doubMu);
-        size_t foundMu2=(ihlt->first).find(doubMu2);
-		if (foundEl!=string::npos)
-             TriggerEle = ihlt->second;
-		if (foundMu1!=string::npos || foundMu2!=string::npos)
-             TriggerMu = ihlt->second;
-		}
-        Trigger = TriggerEle || TriggerMu;
-    return Trigger;    
+
+	for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
+		//	std::cout << ihlt->first << std::endl; 
+		size_t foundEl=(ihlt->first).find(doubEle);
+		size_t foundEl2=(ihlt->first).find(doubEle2);
+		if(!is2011) foundEl2=foundEl;
+
+		size_t foundMu1=(ihlt->first).find(doubMu);
+		size_t foundMu2=(ihlt->first).find(doubMu2);
+		size_t foundMu3=(ihlt->first).find(doubMu3);
+		if(!is2011) foundMu3=foundMu2;
+
+		if (foundEl!=string::npos || foundEl2!=string::npos)
+			TriggerEle = ihlt->second;
+		if (foundMu1!=string::npos || foundMu2!=string::npos || foundMu3!=string::npos)
+			TriggerMu = ihlt->second;
 	}
+	Trigger = TriggerEle || TriggerMu;
+	if(vetoElectronTrigger && TriggerEle) Trigger = false;
+	if(vetoMuonTrigger && TriggerMu) Trigger = false;    
+	return Trigger;    
+}
 	
 bool FakeRate::WZ_Rej(myevent *m, myobject mu) {
 				
@@ -472,14 +504,14 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
 		if(goodMuon[i].pt < 20. || Zmumu) continue;
-		if(RelIsoMu(goodMuon[i]) > 0.25) continue;
+		if(RelIsoMu(goodMuon[i]) > 0.3) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
 			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
 			
-			if(RelIsoMu(goodMuon[j]) > 0.25) continue;
+			if(RelIsoMu(goodMuon[j]) > 0.3) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.3) continue;
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) continue;
 			
 			TLorentzVector cand;
 			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
@@ -488,7 +520,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
 			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-                        if(mass > 71.2 && mass < 111.2){
+                        if(mass > 60. && mass < 120.){
                             Zmumu=true;
                             double dM = 999.;
                             if(BestMassForZ > 0.0){
@@ -540,13 +572,13 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
 			if( goodElectron[i].pt < 20 || Zee) continue;
-			if( RelIsoEl(goodElectron[i]) > 0.25) continue;
+			if( RelIsoEl(goodElectron[i]) > 0.3) continue;
 			for(uint j = i+1; j < goodElectron.size() && !Zee; j++)
 			{
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  goodElectron[j].pt << " and charge " << goodElectron[j].charge << SLogger::endmsg;
-				if( RelIsoEl(goodElectron[j]) > 0.25) continue;	
+				if( RelIsoEl(goodElectron[j]) > 0.3) continue;	
 				if(goodElectron[i].charge*goodElectron[j].charge >=0.) continue;
-				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.3) continue;
+				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1) continue;
 			
 				TLorentzVector cand;
 				cand.SetPxPyPzE(goodElectron[i].px+goodElectron[j].px,
@@ -555,7 +587,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 									goodElectron[i].E+goodElectron[j].E);
 				double mass = cand.M();
 				m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-				if(mass > 71.2 && mass < 111.2){ 
+				if(mass > 60. && mass < 120.){ 
 					Zee=true;
 					double dM = 999.; 
 					if(BestMassForZ > 0.0){
@@ -618,7 +650,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.3) 
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
 			{	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
 		}
 	}
@@ -629,13 +661,13 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.3) 
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
 			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
 		}
 		
 		for(uint j = 0; j < goodMuon.size() && !removed; j++)
 		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.3) 
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) 
 			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
 		}
 		
@@ -680,30 +712,30 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.3) 
+
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-			
+
 		}
-		
+
 		for(uint j = 0; j < goodMuon.size() && !removed; j++)
 		{
-			
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.3) 
+
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1 && RelIsoMu(goodMuon[j]) < 0.4) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-			
+
 		}
-		
+
 		for(uint j = 0; j < goodElectron.size() && !removed; j++)
 		{
-			
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.3) 
+
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1 && RelIsoEl(goodElectron[j]) < 0.4 ) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-			
-			
+
+
 		}
-		
-		
+
+
 	}
      int tauCand = 	goodTau.size();
    if(foundEvent) cout <<  " There are " << goodTau.size() << " good taus " << std::endl;
@@ -723,7 +755,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								for(uint j=0; j< goodElectron.size() ; j++)
                                 {
                                     if(goodMuon[i].charge*goodElectron[j].charge < 0) continue;
-                                    if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.3) continue;
+                                    if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
                                     eMu=true;
                                     Hcand.push_back(goodElectron[j]);
                                     Hcand.push_back(goodMuon[i]);
@@ -742,7 +774,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 {
                                     if(goodMuon[i].charge*goodTau[j].charge < 0) continue;
                                     if(goodTau[j].discriminationByMuonTight <=0.5) continue;
-                                    if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.3) continue;
+                                    if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
                                     muTau=true;
                                     Hcand.push_back(goodMuon[i]);
                                     Hcand.push_back(goodTau[j]);
@@ -786,7 +818,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                             
                                     if(goodElectron[i].charge*goodTau[j].charge <0) continue;
                                     if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-                                    if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.3) continue;
+                                    if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.1) continue;
 									eTau=true;
 									Hcand.push_back(goodElectron[i]);
 									Hcand.push_back(goodTau[j]);
@@ -831,7 +863,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 						//if(goodTau[j].byTightCombinedIsolationDeltaBetaCorr <=0.5) continue;
 						if(goodTau[j].pt < 10) continue;
-						if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.3) continue;
+						if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.1) continue;
 						tauTau=true;
 						Hcand.push_back(goodTau[i]);
 						Hcand.push_back(goodTau[j]);
@@ -889,21 +921,25 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			std::cout << "There is " << goodMuon.size() << " " << goodElectron.size() << " " << goodTau.size() << " more leptons." << std::endl;
 		bool Ad_lepton = false;	
 		 for(uint i = 0; i < goodMuon.size(); i++)
-				{
-					  if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.3 &&
-					  deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3 ) 
-						Ad_lepton=true;
-					
+			{
+				for(uint j =0; j < Hcand.size(); j+=2){
+					if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> 0.1 &&
+					deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> 0.1 && RelIsoMu(goodMuon[i]) < 0.4) 
+					Ad_lepton=true;
 				}
-		
-			
-		  for(uint i = 0; i < goodElectron.size(); i++)
-				{
-						if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.3 &&
-						deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.3)  
-						Ad_lepton=true;
-					
-				}
+
+			}
+
+		for(uint i = 0; i < goodElectron.size(); i++)
+		{
+			for(uint j =0; j < Hcand.size(); j+=2){				
+				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> 0.1 &&
+				deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> 0.1 && RelIsoEl(goodElectron[i]) < 0.4)  
+				Ad_lepton=true;
+			}
+
+		}
+
 				
 		//~ for(uint i = 0; i < goodTau.size(); i++)
 				//~ {
@@ -969,7 +1005,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			dR3=deltaR(jetEta,jetPhi,Hcand[0].eta,Hcand[0].phi);
 			dR4=deltaR(jetEta,jetPhi,Hcand[1].eta,Hcand[1].phi);
 			bool dR = 1;
-			//for(uint i = 0; i < Hcand.size(); i++) dR*= (deltaR(jetEta,jetPhi,Hcand[i].eta,Hcand[i].phi) > 0.4);	
+			for(uint i = 0; i < Hcand.size(); i++) dR*= (deltaR(jetEta,jetPhi,Hcand[i].eta,Hcand[i].phi) > 0.4);	
 			if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 && dR) 
 			bTagVeto = true;			
 		}
@@ -1007,18 +1043,18 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist("h_denom")->Fill(Hcand[i].pt);
 		h_denom_types[event_type-1]->Fill(Hcand[i].pt);
 		if(eTau){
-			if(RelIsoEl(Hcand[i]) < 0.25){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
+			if(RelIsoEl(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
 			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
 		}
 		if(muTau){
-			if(RelIsoMu(Hcand[i]) < 0.25){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(RelIsoMu(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
+			if(RelIsoMu(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
+			if(RelIsoMu(Hcand[i]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
 		}
 		if(eMu){
-			if(RelIsoEl(Hcand[i]) < 0.25){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
+			if(RelIsoEl(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
 			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(RelIsoMu(Hcand[i+1]) < 0.25){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt); }
-			if(RelIsoMu(Hcand[i+1]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt); }
+			if(RelIsoMu(Hcand[i+1]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt); }
+			if(RelIsoMu(Hcand[i+1]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt); }
 		}
 		if(tauTau){
 			if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
@@ -1052,8 +1088,17 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 	
 	}
-		if(RelIsoEl(Hcand[0]) < 0.25) Hist("h_medium")->Fill(Hcand[0].pt);
+		if(RelIsoEl(Hcand[0]) < 0.3) Hist("h_medium")->Fill(Hcand[0].pt);
 		if(RelIsoEl(Hcand[0]) < 0.10) Hist("h_tight")->Fill(Hcand[0].pt);
+		
+		TLorentzVector Hcand1,Hcand2,H_boson;
+		
+		for(uint i =0;i < Hcand.size(); i+=2){
+			Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
+			Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
+			H_boson = Hcand1+Hcand2;
+			h_H_mass_types[event_type-1]->Fill(H_boson.M());
+		}
 		
 		
 	
