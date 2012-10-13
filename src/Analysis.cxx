@@ -159,7 +159,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_category1_pt		= Book(TH1D("h_category1_pt", " Pt distribution in category1 region; P_{T}[GeV]",100,0,100));
     h_category2_pt		= Book(TH1D("h_category2_pt", " Pt distribution in category2 region; P_{T}[GeV]",100,0,100));
     
-    
+    h_category0_pt		=Retrieve<TH2D>("h_category0_pt");
 
  h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 100, -0.5,99.5));
  h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 100, -0.5,99.5));
@@ -209,6 +209,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 
 	h_H_mass_types.clear();
+	h_H_mass_signal_types.clear();
+	h_H_mass_cat0_types.clear();
+	h_H_mass_cat1_types.clear();
+	h_H_mass_cat2_types.clear();
+	
+	
 	h_signal_pt1_types.clear();
     h_signal_pt2_types.clear();
         
@@ -218,8 +224,13 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         
 	for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
 	{
-		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2;
+		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2;
 		s << "h_H_mass_type_" << i;
+		mass_sig << "h_H_mass_signal_type_" << i;
+		mass_cat0 << "h_H_mass_cat0_type_" << i;
+		mass_cat1 << "h_H_mass_cat1_type_" << i;
+		mass_cat2 << "h_H_mass_cat2_type_" << i;
+		
 		sig_1 << "h_signal_pt1_" << i;
 		sig_2 << "h_signal_pt2_" << i;
 		cat0 << "h_category0_pt_" << i;
@@ -227,6 +238,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		cat2 << "h_category2_pt_" << i;
 		
 		std::string name = s.str(); 
+		std::string name_mass_sig = mass_sig.str(); 
+		std::string name_mass_cat0 = mass_cat0.str(); 
+		std::string name_mass_cat1 = mass_cat1.str(); 
+		std::string name_mass_cat2 = mass_cat2.str(); 
+		
 		std::string name_sig_1 = sig_1.str(); 
 		std::string name_sig_2 = sig_2.str(); 
 		std::string name_cat0 = cat0.str(); 
@@ -235,6 +251,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		
 		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
+		
 		tit_sig_1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_sig_2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
@@ -249,6 +266,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::string title_cat2 = tit_cat2.str();
 		
 		TH1D* h_temp =  Book(TH1D(TString(name),TString(title),300,0.,300.));
+		TH1D* h_mass_sig_temp =  Book(TH1D(TString(name_mass_sig),TString(title),300,0.,300.));
+		TH1D* h_mass_cat0_temp =  Book(TH1D(TString(name_mass_cat0),TString(title),300,0.,300.));
+		TH1D* h_mass_cat1_temp =  Book(TH1D(TString(name_mass_cat1),TString(title),300,0.,300.));
+		TH1D* h_mass_cat2_temp =  Book(TH1D(TString(name_mass_cat2),TString(title),300,0.,300.));
+		
 		TH1D* h_signal_temp_pt1			= Book(TH1D(TString(name_sig_1), TString(title_sig_1),100,0,100));
 	    TH1D* h_signal_temp_pt2			= Book(TH1D(TString(name_sig_2), TString(title_sig_2),100,0,100));
 	    
@@ -257,6 +279,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	    TH1D* h_category2_temp_pt		= Book(TH1D(TString(name_cat2), TString(title_cat2),100,0,100));
 		
 		h_H_mass_types.push_back(h_temp);
+		h_H_mass_signal_types.push_back(h_mass_sig_temp);
+		h_H_mass_cat0_types.push_back(h_mass_cat0_temp);
+		h_H_mass_cat1_types.push_back(h_mass_cat1_temp);
+		h_H_mass_cat2_types.push_back(h_mass_cat2_temp);
+		
 		h_signal_pt1_types.push_back(h_signal_temp_pt1);
 		h_signal_pt2_types.push_back(h_signal_temp_pt2);
         
@@ -1180,20 +1207,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(signal)
 			{
-				Hist("h_signal_pt1")->Fill(Hcand[1].pt);
-				Hist("h_signal_pt2")->Fill(Hcand[0].pt);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt);
-							
+				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
+				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
+				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_signal_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[1].pt);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt);
+				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
+				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat1_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[0].pt);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt);
+				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
+				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat2_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==0){
-				Hist("h_category0_pt")->Fill(Hcand[1].pt,Hcand[0].pt);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt);
+				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_H_mass_cat0_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}
 			
 			
@@ -1218,20 +1248,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(signal)
 			{
-				Hist("h_signal_pt1")->Fill(Hcand[1].pt);
-				Hist("h_signal_pt2")->Fill(Hcand[0].pt);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt);
-							
+				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
+				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
+				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_signal_types[event_type-1]->Fill(H_muTau.M(),weight);					
 			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[1].pt);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt);
+				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
+				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat1_types[event_type-1]->Fill(H_muTau.M(),weight);
 			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[0].pt);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt);
+				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
+				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat2_types[event_type-1]->Fill(H_muTau.M(),weight);
 			}else if(category==0){
-				Hist("h_category0_pt")->Fill(Hcand[1].pt,Hcand[0].pt);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt);
+				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_H_mass_cat0_types[event_type-1]->Fill(H_muTau.M(),weight);
 			}
 			
 			break;
@@ -1252,20 +1285,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(signal)
 			{
-				Hist("h_signal_pt1")->Fill(Hcand[1].pt);
-				Hist("h_signal_pt2")->Fill(Hcand[0].pt);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt);
-							
+				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
+				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
+				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_signal_types[event_type-1]->Fill(H_eTau.M(),weight);				
 			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[1].pt);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt);
+				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
+				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat1_types[event_type-1]->Fill(H_eTau.M(),weight);
 			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[0].pt);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt);
+				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
+				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat2_types[event_type-1]->Fill(H_eTau.M(),weight);
 			}else if(category==0){
-				Hist("h_category0_pt")->Fill(Hcand[1].pt,Hcand[0].pt);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt);
+				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_H_mass_cat0_types[event_type-1]->Fill(H_eTau.M(),weight);
 			}	
 
 			break;	
@@ -1289,20 +1325,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(signal)
 			{
-				Hist("h_signal_pt1")->Fill(Hcand[0].pt);
-				Hist("h_signal_pt2")->Fill(Hcand[1].pt);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[0].pt);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[1].pt);
-							
+				Hist("h_signal_pt1")->Fill(Hcand[0].pt,weight);
+				Hist("h_signal_pt2")->Fill(Hcand[1].pt,weight);	
+				h_signal_pt1_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_pt2_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_signal_types[event_type-1]->Fill(H_tauTau.M(),weight);				
 			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[0].pt);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[0].pt);
+				Hist("h_category1_pt")->Fill(Hcand[0].pt,weight);
+				h_category1_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat1_types[event_type-1]->Fill(H_tauTau.M(),weight);
 			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[1].pt);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[1].pt);
+				Hist("h_category2_pt")->Fill(Hcand[1].pt,weight);
+				h_category2_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat2_types[event_type-1]->Fill(H_tauTau.M(),weight);
 			}else if(category==0){
-				Hist("h_category0_pt")->Fill(Hcand[0].pt,Hcand[1].pt);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[0].pt,Hcand[1].pt);
+				h_category0_pt->Fill(Hcand[0].pt,Hcand[1].pt,weight);
+				h_category0_pt_types[event_type-1]->Fill(Hcand[0].pt,Hcand[1].pt,weight);
+				h_H_mass_cat0_types[event_type-1]->Fill(H_tauTau.M(),weight);
 			}	
 
 			break;

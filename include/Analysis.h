@@ -175,6 +175,12 @@ private:
         
         
         std::vector<TH1*>  h_H_mass_types;
+        std::vector<TH1*>  h_H_mass_signal_types;
+        std::vector<TH1*>  h_H_mass_cat0_types;
+        std::vector<TH1*>  h_H_mass_cat1_types;
+        std::vector<TH1*>  h_H_mass_cat2_types;
+        
+        
         std::vector<TH1*> h_signal_pt1_types;
         std::vector<TH1*> h_signal_pt2_types;
         
