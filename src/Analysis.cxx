@@ -691,8 +691,8 @@ entries++;
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
 			}else{
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1]);
+				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Cor_Trg_Mu_Lead_2011(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Cor_Trg_Mu_SubLead_2011(Zcand[1]);
 			}
 			Z_weight = corrZlep1* corrZlep2;	
 		}else if(Zee){
@@ -703,8 +703,8 @@ entries++;
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
 			}else{
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1]);
+				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Cor_Trg_Ele_Lead_2011(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Cor_Trg_Ele_SubLead_2011(Zcand[1]);
 			}
 			Z_weight = corrZlep1* corrZlep2;	
 		}
