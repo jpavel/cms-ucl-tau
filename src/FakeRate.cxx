@@ -454,6 +454,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
+	if(nGoodVx < 1) return;
+	
 	std::vector<myobject> goodMuon;
 	goodMuon.clear();
 

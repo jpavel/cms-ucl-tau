@@ -60,8 +60,8 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
-        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",10,0.5,10.5));
-        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",10,0.5,10.5));
+        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
+        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
 
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
@@ -180,26 +180,29 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
 	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
-	h_cut_flow->GetXaxis()->SetBinLabel(3, "Z cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(4, "Exc. Event type BC");
-	h_cut_flow->GetXaxis()->SetBinLabel(5, "Exc. Event type AC");
-	h_cut_flow->GetXaxis()->SetBinLabel(6, "H cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(7, "Add. Leptons");
-	h_cut_flow->GetXaxis()->SetBinLabel(8, "Same Vertex");
-	h_cut_flow->GetXaxis()->SetBinLabel(9, "B-Tag Veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(10, "Final Events");
+	h_cut_flow->GetXaxis()->SetBinLabel(3, "good vx");
+	h_cut_flow->GetXaxis()->SetBinLabel(4, "Z cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(5, "Exc. Event type BC");
+	h_cut_flow->GetXaxis()->SetBinLabel(6, "Exc. Event type AC");
+	h_cut_flow->GetXaxis()->SetBinLabel(7, "H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(8, "Add. Leptons");
+	h_cut_flow->GetXaxis()->SetBinLabel(9, "Same Vertex");
+	h_cut_flow->GetXaxis()->SetBinLabel(10, "B-Tag Veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(11, "Final Events");
 
         h_cut_flow_weight = Retrieve<TH1D>("h_cut_flow_weight");
 	h_cut_flow_weight->GetXaxis()->SetBinLabel(1, "Initial Events");
 	h_cut_flow_weight->GetXaxis()->SetBinLabel(2, "trigger");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(3, "Z cand");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(4, "Exc. Event type BC");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(5, "Exc. Event type AC");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(6, "H cand ");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(7, "Add. Leptons");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(8, "Same Vertex");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(9, "B-Tag Veto");
-	h_cut_flow_weight->GetXaxis()->SetBinLabel(10, "Final Events");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(3, "good vx");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(4, "Z cand");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(5, "Exc. Event type BC");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(6, "Exc. Event type AC");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(7, "H cand");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(8, "Add. Leptons");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(9, "Same Vertex");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(10, "B-Tag Veto");
+	h_cut_flow_weight->GetXaxis()->SetBinLabel(11, "Final Events");
+
 
 	h_event_type = Retrieve<TH1D>("h_event_type");
 	h_event_type->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
@@ -481,8 +484,8 @@ entries++;
 		Hist("h_nPU_InfoTrue_W")->Fill(m->PUInfo_true,PUWeight);
 		Hist("h_nPU_Bunch0_W")->Fill(m->PUInfo_Bunch0,PUWeight);
 
-	h_cut_flow->Fill(1,1);
-	h_cut_flow_weight->Fill(1,PUWeight);
+	h_cut_flow->Fill(0.0,1.0);
+	h_cut_flow_weight->Fill(0.0,PUWeight);
 
 	Hist("h_Nvertex_NoCut")->Fill(nGoodVx);
 	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
@@ -494,8 +497,14 @@ entries++;
 		return;
 	}
 
+	h_cut_flow->Fill(1,1);
+	h_cut_flow_weight->Fill(1,PUWeight);
+	
+	if(nGoodVx < 1) return;
+	
 	h_cut_flow->Fill(2,1);
 	h_cut_flow_weight->Fill(2,PUWeight);
+	
 
 	vector<myobject> Met = m->RecPFMet;
 
