@@ -152,25 +152,32 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_Tmass				= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
 
-	h_signal_pt1			= Book(TH1D("h_signal_pt1", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
-    h_signal_pt2			= Book(TH1D("h_signal_pt2", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
-    
-    h_category0_pt		= Book(TH2D("h_category0_pt", " Pt distribution in category0 region;P_{T1}[GeV];P_{T2}[GeV]",100,0,100,100,0,100));
-    h_category1_pt		= Book(TH1D("h_category1_pt", " Pt distribution in category1 region; P_{T}[GeV]",100,0,100));
-    h_category2_pt		= Book(TH1D("h_category2_pt", " Pt distribution in category2 region; P_{T}[GeV]",100,0,100));
-    
-    h_category0_pt		=Retrieve<TH2D>("h_category0_pt");
+        h_nPU_Info                      = Book(TH1D("h_nPU_Info","PU info distribution",50,0,50));
+        h_nPU_InfoTrue                  = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",50,0,50));
+        h_nPU_Bunch0                    = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",50,0,50));
+        h_nPU_Info_W                    = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",50,0,50));
+        h_nPU_InfoTrue_W                = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",50,0,50));
+        h_nPU_Bunch0_W                  = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",50,0,50));
 
- h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 100, -0.5,99.5));
- h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 100, -0.5,99.5));
- h_Nvertex_AfterZ = Book(TH1D("h_Nvertex_AfterZ","Number of vertices - selected Z", 100, -0.5,99.5));
- h_Nvertex_AfterZ_W = Book(TH1D("h_Nvertex_AfterZ_W","Number of vertices - selected Z (PU weight)", 100, -0.5,99.5));
- h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 100, -0.5,99.5));
- h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 100, -0.5,99.5));
+	h_signal_pt1			= Book(TH1D("h_signal_pt1", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
+	h_signal_pt2			= Book(TH1D("h_signal_pt2", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
+
+	h_category0_pt		= Book(TH2D("h_category0_pt", " Pt distribution in category0 region;P_{T1}[GeV];P_{T2}[GeV]",100,0,100,100,0,100));
+	h_category1_pt		= Book(TH1D("h_category1_pt", " Pt distribution in category1 region; P_{T}[GeV]",100,0,100));
+	h_category2_pt		= Book(TH1D("h_category2_pt", " Pt distribution in category2 region; P_{T}[GeV]",100,0,100));
+
+	h_category0_pt		=Retrieve<TH2D>("h_category0_pt");
+
+	h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 50, -0.5,49.5));
+	h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 50, -0.5,49.5));
+	h_Nvertex_AfterZ = Book(TH1D("h_Nvertex_AfterZ","Number of vertices - selected Z", 50, -0.5,49.5));
+	h_Nvertex_AfterZ_W = Book(TH1D("h_Nvertex_AfterZ_W","Number of vertices - selected Z (PU weight)", 50, -0.5,49.5));
+	h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 50, -0.5,49.5));
+	h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 50, -0.5,49.5));
 
 	DeclareVariable(out_pt,"el_pt");
 
-        h_cut_flow = Retrieve<TH1D>("h_cut_flow");
+	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
 	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
 	h_cut_flow->GetXaxis()->SetBinLabel(3, "Z cand");
@@ -434,9 +441,15 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 }
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
-	entries++;
+entries++;
 
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
+
+		Hist("h_nPU_Info")->Fill(m->PUInfo);
+		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
+		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
+
+
 	double PUWeight = 1.0;
 	double nPU = 0.0;
 	if(useTruePileUp || !is2011)  nPU = m->PUInfo_true;
@@ -464,8 +477,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	short nGoodVx=goodVertex.size();
 
-	h_cut_flow->SetBinContent(1,1);
-	h_cut_flow_weight->SetBinContent(1,PUWeight);
+		Hist("h_nPU_Info_W")->Fill(m->PUInfo,PUWeight);
+		Hist("h_nPU_InfoTrue_W")->Fill(m->PUInfo_true,PUWeight);
+		Hist("h_nPU_Bunch0_W")->Fill(m->PUInfo_Bunch0,PUWeight);
+
+	h_cut_flow->Fill(1,1);
+	h_cut_flow_weight->Fill(1,PUWeight);
 
 	Hist("h_Nvertex_NoCut")->Fill(nGoodVx);
 	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
@@ -477,8 +494,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_cut_flow->SetBinContent(2,1);
-	h_cut_flow_weight->SetBinContent(2,PUWeight);
+	h_cut_flow->Fill(2,1);
+	h_cut_flow_weight->Fill(2,PUWeight);
 
 	vector<myobject> Met = m->RecPFMet;
 
@@ -738,11 +755,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 	
-	h_cut_flow->SetBinContent(3,1);
-	h_cut_flow_weight->SetBinContent(3,Z_weight);
+	h_cut_flow->Fill(3,1);
+	h_cut_flow_weight->Fill(3,Z_weight);
 	
 	Hist("h_Nvertex_AfterZ")->Fill(nGoodVx);
-	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,PUWeight);
+	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,Z_weight);
 
 	// Z overlap removal
 
@@ -934,7 +951,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 				bool iso2 = (goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5);
-
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.1) continue;
 				if (iso1 && iso2){ signal = true; muTau=muE=eTau = false; tauTau=true;}
 				else if (!iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;}
@@ -955,13 +971,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
-	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,PUWeight);
+	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,Z_weight);
 
 
 	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
 	// cross-check
-	h_cut_flow->SetBinContent(4,1);
-	h_cut_flow_weight->SetBinContent(4,Z_weight);
+	h_cut_flow->Fill(4,1);
+	h_cut_flow_weight->Fill(4,Z_weight);
 	
 	if(muTau+muE+eTau+tauTau > 1){
 		m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
@@ -969,8 +985,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_cut_flow->SetBinContent(5,1);
-	h_cut_flow_weight->SetBinContent(5,Z_weight);
+	h_cut_flow->Fill(5,1);
+	h_cut_flow_weight->Fill(5,Z_weight);
 
 	short event_type = 0;
 
@@ -1064,8 +1080,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	TLorentzVector muH_muTau,tauH_muTau,H_muTau;
 	TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
 	
-	h_cut_flow->SetBinContent(6,1);
-	h_cut_flow_weight->SetBinContent(6,weight);
+	h_cut_flow->Fill(6,1);
+	h_cut_flow_weight->Fill(6,weight);
 
 	// histograms   
 	
@@ -1103,8 +1119,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 	
-	h_cut_flow->SetBinContent(7,1);
-	h_cut_flow_weight->SetBinContent(7,weight);
+	h_cut_flow->Fill(7,1);
+	h_cut_flow_weight->Fill(7,weight);
 
 
 	// Same vertex check
@@ -1117,8 +1133,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
 		return;
 	}
-	h_cut_flow->SetBinContent(8,1);
-	h_cut_flow_weight->SetBinContent(8,weight);
+	h_cut_flow->Fill(8,1);
+	h_cut_flow_weight->Fill(8,weight);
 
 
 	// b-tag veto
@@ -1158,8 +1174,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}
 
-	h_cut_flow->SetBinContent(9,1);
-	h_cut_flow_weight->SetBinContent(9,weight);
+	h_cut_flow->Fill(9,1);
+	h_cut_flow_weight->Fill(9,weight);
 
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
@@ -1356,8 +1372,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	
 	
-	h_cut_flow->SetBinContent(10,1);
-	h_cut_flow_weight->SetBinContent(10,weight);
+	h_cut_flow->Fill(10,1);
+	h_cut_flow_weight->Fill(10,weight);
 	
 	
 	

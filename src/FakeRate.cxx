@@ -54,9 +54,9 @@ void FakeRate::EndCycle() throw( SError ) {
 
 void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	
-	 h_el_n              = Book(TH1D("el_n","el_n",50,0,50));
-    h_el_cut            = Book(TH1D("el_cit","el_cut",50,0,50));
-    h_event_type        = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
+	h_el_n              = Book(TH1D("el_n","el_n",50,0,50));
+	h_el_cut            = Book(TH1D("el_cit","el_cut",50,0,50));
+	h_event_type        = Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
 	h_event_type_medium = Book(TH1D("h_event_type_medium","Event Type passing iso < 0.25",8,0.5,8.5));
 	h_event_type_tight  = Book(TH1D("h_event_type_tight","Event Type passing iso < 0.1 ",8,0.5,8.5));
 	
@@ -303,7 +303,7 @@ h_medium=Retrieve<TH1D>("h_medium");
 	
 	std::cout << "Medium      : " << h_medium->Integral() << std::endl;
 	std::cout << "Tight    : " << h_tight->Integral() << std::endl;
-    std::cout << "Denom    : " << h_denom->Integral() << std::endl;
+	std::cout << "Denom    : " << h_denom->Integral() << std::endl;
      
    return;
 

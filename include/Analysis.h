@@ -165,6 +165,13 @@ private:
         TH1* h_nbjets_afterVeto;
         TH1* h_nbjetsVetoed;
         TH1* h_Tmass;
+     
+        TH1* h_nPU_Info;
+        TH1* h_nPU_InfoTrue;
+        TH1* h_nPU_Bunch0;
+        TH1* h_nPU_Info_W;
+        TH1* h_nPU_InfoTrue_W;
+        TH1* h_nPU_Bunch0_W;
         
         TH1* h_signal_pt1;
         TH1* h_signal_pt2;
