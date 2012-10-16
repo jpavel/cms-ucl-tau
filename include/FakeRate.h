@@ -18,7 +18,7 @@
 // my classes
 #include "myevent.h"
 #include "TLorentzVector.h"
-
+#include "LumiReweightingStandAlone.h"
 /**
  *   @short Put short description of class here
  *
@@ -138,7 +138,7 @@ private:
 		
 		std::vector<TH1*>  h_H_mass_types;
 	
-        
+          reweight::LumiReWeighting* LumiWeights_;
 
 // properties
 	std::string InTreeName;

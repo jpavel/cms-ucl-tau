@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "Corrector_FR.h"
+
 ClassImp( FakeRate );
 
 FakeRate::FakeRate()
@@ -256,6 +258,14 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 			std::cout << index_number[i] << " " << evt_type[i] << " " << run_number[i] << " " << lumi_number[i] << " " << evt_number[i] << std::endl;		
 		}
 	}
+	
+	
+	// Lumi weights
+
+	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
+	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
+	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
+	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
 
 	return;
 }
@@ -436,7 +446,15 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 
 	if(foundEvent) std::cout << ">>>>>>>>>>>>>>>>> in event " << eNumber << " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " << endl;	
-
+	
+	double PUWeight = 1.0;
+	double nPU = 0.0;
+	if(useTruePileUp || !is2011)  nPU = m->PUInfo_true;
+	else nPU = m->PUInfo_Bunch0;
+	if(isSimulation){	
+		PUWeight = LumiWeights_->weight( nPU );
+	}
+	
 	std::vector<myobject> vertex = m->Vertex;
 	std::vector<myobject> goodVertex;
 	goodVertex.clear();
@@ -475,13 +493,13 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4 && pfID)
 		{
 			goodMuon.push_back(muon[i]);
-			Hist("h_mu_relIso")->Fill(relIso);
+			Hist("h_mu_relIso")->Fill(relIso,PUWeight);
 		}
 	}
 
 	// no isolation to muons applied!
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
-	Hist("h_n_goodMu")->Fill(goodMuon.size());
+	Hist("h_n_goodMu")->Fill(goodMuon.size(),PUWeight);
 
 	std::vector<myobject> goodElectron;
 	goodElectron.clear();
@@ -500,14 +518,14 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if (elPt > 10. && fabs(elEta) < 2.5  && elID && missingHits <=1)
 		{
 			goodElectron.push_back(electron[i]);
-			Hist("h_el_relIso")->Fill(relIso);
+			Hist("h_el_relIso")->Fill(relIso,PUWeight);
 		}
 	}
 	// no isolation to eles applied!
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
 	int muCandZ = goodMuon.size();
 	int elCandZ = goodElectron.size();
-	Hist("h_n_goodEl")->Fill(goodElectron.size());
+	Hist("h_n_goodEl")->Fill(goodElectron.size(),PUWeight);
 	// Z compatibility
 	std::vector<myobject> Zcand;
 	Zcand.clear();
@@ -557,25 +575,14 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	if(Zindex[0] > -1 && Zindex[1] > -1){
-		TLorentzVector muon1;
-		TLorentzVector muon2;
-		TLorentzVector Zmumu_;
 		int i = Zindex[0];
 		int j = Zindex[1];
 		Zcand.push_back(goodMuon[i]);
 		Zcand.push_back(goodMuon[j]);
-		muon1.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);        
-		muon2.SetPxPyPzE(goodMuon[j].px,goodMuon[j].py,goodMuon[j].pz,goodMuon[j].E);        
-		Zmumu_=muon1+muon2;        
 		goodMuon.erase(goodMuon.begin()+i);
 		goodMuon.erase(goodMuon.begin()+j-1);
 		Zmumu=true;
-		Hist( "h_mu1Z_pt" )->Fill(muon1.Pt());
-		Hist( "h_mu2Z_pt" )->Fill(muon2.Pt());
-		Hist( "h_Zmass_mumu" )->Fill(Zmumu_.M());
-		Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt());
-		Hist( "h_Zmass" )->Fill(Zmumu_.M());
-		Hist( "h_Zpt" )->Fill(Zmumu_.Pt());
+	
 	}
 
 
@@ -624,26 +631,83 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 		if(Zindex[0] > -1 && Zindex[1] > -1){
-			TLorentzVector ele1;
-			TLorentzVector ele2;
-			TLorentzVector Zee_;
+			
 			int i = Zindex[0];
 			int j = Zindex[1];
-			ele1.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);        
-			ele2.SetPxPyPzE(goodElectron[j].px,goodElectron[j].py,goodElectron[j].pz,goodElectron[j].E);        
-			Zee_=ele1+ele2;        
+			
 			Zcand.push_back(goodElectron[i]);
 			Zcand.push_back(goodElectron[j]);	
 			goodElectron.erase(goodElectron.begin()+i);
 			goodElectron.erase(goodElectron.begin()+j-1);
 			Zee=true;
-			Hist( "h_ele1Z_pt" )->Fill(ele1.Pt());
-			Hist( "h_ele2Z_pt" )->Fill(ele2.Pt());
-			Hist( "h_Zmass_ee" )->Fill(Zee_.M());
-			Hist( "h_Zpt_ee" )->Fill(Zee_.Pt());
-			Hist( "h_Zmass" )->Fill(Zee_.M());
-			Hist( "h_Zpt" )->Fill(Zee_.Pt());
+		
 		}
+	}
+
+	double corrZlep1,corrZlep2;
+	corrZlep1=corrZlep2=1.0;
+	double Z_weight = PUWeight;
+	if(isSimulation){
+		if(Zmumu)
+		{
+			if(is2012_53){
+				corrZlep1=Cor_FR_ID_Iso_Mu_Loose_2012_53X(Zcand[0]);
+				corrZlep2=Cor_FR_ID_Iso_Mu_Loose_2012_53X(Zcand[1]);
+			}else if(is2012_52){
+				corrZlep1=Cor_FR_ID_Iso_Mu_Loose_2012(Zcand[0]);
+				corrZlep2=Cor_FR_ID_Iso_Mu_Loose_2012(Zcand[1]);
+			}else{
+				corrZlep1=Cor_FR_ID_Iso_Mu_Loose_2011(Zcand[0])*Cor_FR_Trg_Mu_Lead_2011(Zcand[0]);
+				corrZlep2=Cor_FR_ID_Iso_Mu_Loose_2011(Zcand[1])*Cor_FR_Trg_Mu_SubLead_2011(Zcand[1]);
+			}
+			Z_weight *= corrZlep1* corrZlep2;	
+		}else if(Zee){
+			if(is2012_53){
+				corrZlep1=Cor_FR_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
+				corrZlep2=Cor_FR_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
+			}else if(is2012_52){
+				corrZlep1=Cor_FR_ID_Iso_Ele_Loose_2012(Zcand[0]);
+				corrZlep2=Cor_FR_ID_Iso_Ele_Loose_2012(Zcand[1]);
+			}else{
+				corrZlep1=Cor_FR_ID_Iso_Ele_Loose_2011(Zcand[0])*Cor_FR_Trg_Ele_Lead_2011(Zcand[0]);
+				corrZlep2=Cor_FR_ID_Iso_Ele_Loose_2011(Zcand[1])*Cor_FR_Trg_Ele_SubLead_2011(Zcand[1]);
+			}
+			Z_weight *= corrZlep1* corrZlep2;	
+		}
+	}
+	
+	
+	if(Zmumu){
+		TLorentzVector muon1;
+		TLorentzVector muon2;
+		TLorentzVector Zmumu_;			
+		muon1.SetPxPyPzE(Zcand[0].px,Zcand[0].py,Zcand[0].pz,Zcand[0].E);        
+		muon2.SetPxPyPzE(Zcand[1].px,Zcand[1].py,Zcand[1].pz,Zcand[1].E);        
+		Zmumu_=muon1+muon2;        
+
+		Hist( "h_mu1Z_pt" )->Fill(muon1.Pt(),Z_weight);
+		Hist( "h_mu2Z_pt" )->Fill(muon2.Pt(),Z_weight);
+		Hist( "h_Zmass_mumu" )->Fill(Zmumu_.M(),Z_weight);
+		Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt(),Z_weight);
+		Hist( "h_Zmass" )->Fill(Zmumu_.M(),Z_weight);
+		Hist( "h_Zpt" )->Fill(Zmumu_.Pt(),Z_weight);
+
+	
+	}else if( Zee){	
+
+		TLorentzVector ele1;
+		TLorentzVector ele2;
+		TLorentzVector Zee_; 
+		ele1.SetPxPyPzE(Zcand[0].px,Zcand[0].py,Zcand[0].pz,Zcand[0].E);        
+		ele2.SetPxPyPzE(Zcand[1].px,Zcand[1].py,Zcand[1].pz,Zcand[1].E);        
+		Zee_=ele1+ele2;
+		Hist( "h_ele1Z_pt" )->Fill(ele1.Pt(),Z_weight);
+		Hist( "h_ele2Z_pt" )->Fill(ele2.Pt(),Z_weight);
+		Hist( "h_Zmass_ee" )->Fill(Zee_.M(),Z_weight);
+		Hist( "h_Zpt_ee" )->Fill(Zee_.Pt(),Z_weight);
+		Hist( "h_Zmass" )->Fill(Zee_.M(),Z_weight);
+		Hist( "h_Zpt" )->Fill(Zee_.Pt(),Z_weight);	
+
 	}
 
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
@@ -796,17 +860,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hcand.push_back(goodMuon[i]);
 			Hcand.push_back(goodTau[j]);
 
-			TLorentzVector muH_muTau,tauH_muTau,H_muTau;
-			muH_muTau.SetPxPyPzE(goodMuon[i].px,goodMuon[i].py,goodMuon[i].pz,goodMuon[i].E);
-			tauH_muTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
-			H_muTau = muH_muTau+tauH_muTau;
-			Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt());
-			Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt());
-			Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt());
-			Hist( "h_H_muTau_mass" )->Fill(H_muTau.M());
-			Hist( "h_H_pt" )->Fill(H_muTau.Pt());
-			Hist( "h_H_mass" )->Fill(H_muTau.M());
-
+			
 			goodTau.erase(goodTau.begin()+j); j--;
 			if(goodTau.size()==0) i=goodTau.size();
 		}
@@ -839,16 +893,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				eTau=true;
 				Hcand.push_back(goodElectron[i]);
 				Hcand.push_back(goodTau[j]);
-				TLorentzVector eH_eTau,tauH_eTau,H_eTau;
-				eH_eTau.SetPxPyPzE(goodElectron[i].px,goodElectron[i].py,goodElectron[i].pz,goodElectron[i].E);
-				tauH_eTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
-				H_eTau = eH_eTau+tauH_eTau;
-				Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt());
-				Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt());
-				Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt());
-				Hist( "h_H_eTau_mass" )->Fill(H_eTau.M());
-				Hist( "h_H_pt" )->Fill(H_eTau.Pt());
-				Hist( "h_H_mass" )->Fill(H_eTau.M());
+				
 				goodTau.erase(goodTau.begin()+j); j--;
 				if(goodTau.size()==0) i=goodTau.size();
 			}
@@ -886,17 +931,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
 
-				TLorentzVector tau1H_tauTau,tau2H_tauTau,H_tauTau;
-				tau1H_tauTau.SetPxPyPzE(goodTau[i].px,goodTau[i].py,goodTau[i].pz,goodTau[i].E);
-				tau2H_tauTau.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
-				H_tauTau = tau1H_tauTau+tau2H_tauTau;
-				Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt());
-				Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt());
-				Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt());
-				Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M());
-				Hist( "h_H_pt" )->Fill(H_tauTau.Pt());
-				Hist( "h_H_mass" )->Fill(H_tauTau.M());
-
+				
 				goodTau.erase(goodTau.begin()+i);
 				goodTau.erase(goodTau.begin()+j-1);
 
@@ -931,6 +966,46 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(eTau) event_type = 7;
 		if(tauTau) event_type = 8;
 	}
+
+
+	double corrHlep1,corrHlep2;
+	corrHlep1=corrHlep2=1.0;
+	if(isSimulation){
+
+		if(muTau)
+		{
+			if(is2012_53){
+				corrHlep1=Cor_FR_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_52){
+				corrHlep1=Cor_FR_ID_Iso_Mu_Tight_2012(Hcand[0]);
+			}else{
+				corrHlep1=Cor_FR_ID_Iso_Mu_Tight_2011(Hcand[0]);
+			}
+		}else if(eTau){
+			if(is2012_53){
+				corrHlep1=Cor_FR_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_52){
+				corrHlep1=Cor_FR_ID_Iso_Ele_Tight_2012(Hcand[0]);
+			}else{
+				corrHlep1=Cor_FR_ID_Iso_Ele_Tight_2011(Hcand[0]);
+			}
+		}else if(eMu){
+			if(is2012_53){
+				corrHlep1=Cor_FR_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_FR_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+			}else if(is2012_52){
+				corrHlep1=Cor_FR_ID_Iso_Mu_Loose_2012(Hcand[0]);
+				corrHlep2=Cor_FR_ID_Iso_Ele_Loose_2012(Hcand[1]);
+			}else{
+				corrHlep1=Cor_FR_ID_Iso_Mu_Loose_2011(Hcand[0]);
+				corrHlep2=Cor_FR_ID_Iso_Ele_Loose_2011(Hcand[1]);
+			}
+		}
+
+	}
+
+	double weight = PUWeight*corrZlep1*corrZlep2*corrHlep1*corrHlep2;
+	
 
 	// overlap cleaning
 	if(foundEvent) 
@@ -1055,29 +1130,29 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	for(uint i =0; i < Hcand.size(); i+=2)
 	{
-		Hist( "h_event_type" )->Fill(event_type);
+		Hist( "h_event_type" )->Fill(event_type,weight);
 		//all no iso contributions are going into h_denom	
-		Hist("h_denom")->Fill(Hcand[i].pt);
-		h_denom_types[event_type-1]->Fill(Hcand[i].pt);
+		Hist("h_denom")->Fill(Hcand[i].pt,weight);
+		h_denom_types[event_type-1]->Fill(Hcand[i].pt,weight);
 		if(eTau){
-			if(RelIsoEl(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
+			if(RelIsoEl(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
 		}
 		if(muTau){
-			if(RelIsoMu(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(RelIsoMu(Hcand[i]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
+			if(RelIsoMu(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+			if(RelIsoMu(Hcand[i]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
 		}
 		if(eMu){
-			if(RelIsoEl(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(RelIsoMu(Hcand[i+1]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt); }
-			if(RelIsoMu(Hcand[i+1]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt); }
+			if(RelIsoEl(Hcand[i]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+			if(RelIsoMu(Hcand[i+1]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
+			if(RelIsoMu(Hcand[i+1]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
 		}
 		if(tauTau){
-			if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i].pt); }
-			if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt); }
-			if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt); }
+			if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+			if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+			if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
+			if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
 		}
 
 		if(syncTest){
@@ -1105,8 +1180,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 
 	}
-	if(RelIsoEl(Hcand[0]) < 0.3) Hist("h_medium")->Fill(Hcand[0].pt);
-	if(RelIsoEl(Hcand[0]) < 0.10) Hist("h_tight")->Fill(Hcand[0].pt);
+	if(RelIsoEl(Hcand[0]) < 0.3) Hist("h_medium")->Fill(Hcand[0].pt,weight);
+	if(RelIsoEl(Hcand[0]) < 0.10) Hist("h_tight")->Fill(Hcand[0].pt,weight);
 
 	TLorentzVector Hcand1,Hcand2,H_boson;
 
@@ -1114,7 +1189,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
 		Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
 		H_boson = Hcand1+Hcand2;
-		h_H_mass_types[event_type-1]->Fill(H_boson.M());
+		h_H_mass_types[event_type-1]->Fill(H_boson.M(),weight);
 	}
 
 
