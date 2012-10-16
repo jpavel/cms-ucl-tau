@@ -509,7 +509,7 @@ entries++;
 	vector<myobject> Met = m->RecPFMet;
 
 	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
-	h_PF_MET_nPU->Fill(nPU,Met.front().et,PUWeight);
+	h_PF_MET_nPU->Fill(nGoodVx,Met.front().et,PUWeight);
 
 	std::vector<myobject> goodMuon;
 	goodMuon.clear();
@@ -694,7 +694,7 @@ entries++;
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Cor_Trg_Mu_Lead_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Cor_Trg_Mu_SubLead_2011(Zcand[1]);
 			}
-			Z_weight = corrZlep1* corrZlep2;	
+			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
 			if(is2012_53){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
@@ -706,7 +706,7 @@ entries++;
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Cor_Trg_Ele_Lead_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Cor_Trg_Ele_SubLead_2011(Zcand[1]);
 			}
-			Z_weight = corrZlep1* corrZlep2;	
+			Z_weight *= corrZlep1* corrZlep2;	
 		}
 	}
 
@@ -1188,7 +1188,7 @@ entries++;
 
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
-	h_PF_MET_nPU_selected->Fill(nPU,Met.front().et,weight);
+	h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
 
 
 	double tMass = -100;
