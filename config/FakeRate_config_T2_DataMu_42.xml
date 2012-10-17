@@ -12,7 +12,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
     
     <Cycle Name="FakeRate" OutputDirectory="./" PostFix="" TargetLumi="1.0">
-		<InputData Lumi="0.0" NEventsMax="10000" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
 		     &grid;
 			 <InputTree Name="t"/>
 <!--
