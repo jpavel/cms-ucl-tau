@@ -1147,8 +1147,10 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(RelIsoEl(Hcand[i]) < 0.10){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
 			if(RelIsoMu(Hcand[i+1]) < 0.3){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
 			if(RelIsoMu(Hcand[i+1]) < 0.15){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
+			h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
 		}
 		if(tauTau){
+			h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
 			if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
 			if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
 			if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
