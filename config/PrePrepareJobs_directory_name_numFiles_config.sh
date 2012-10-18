@@ -33,7 +33,7 @@ sed -i 's/\///g' temp_input.1
 more temp_input.1 |while read line
 do
   file=`echo $line`
-  echo "source PrepareJobs.sh ${input_data}/${file} ${file} ${num_files} ${config_name}" >> Prepare_${output_name}.sh
+  echo "source PrepareJobs.sh ${input_data}/${file} ${output_name}_${file} ${num_files} ${config_name}" >> Prepare_${output_name}.sh
   echo "echo \"./SubmitAll_${file}.sh\" >> Run_${output_name}.sh" >> Prepare_${output_name}.sh
 done
 #source PrepareJobs.sh /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/MC/ZZJetsTo4L_TuneZ2star_8TeV-madgraph-tauola/ test 50 Analysis_config_T2_MC_53.xml

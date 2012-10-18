@@ -29,7 +29,7 @@
         <Item Name="bTagValue" Value="0.679" />
 			<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
          <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
-		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdT_CaloIsoVL_Ele8_CaloIdT_CaloIsoVL_v" />
+		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
 <!-- 2011 triggers -->		
 <!-- 		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	 -->
 <!-- 		<Item Name="MuonTriggerName2" Value="HLT_Mu13_Mu8_v"/> -->
@@ -47,6 +47,15 @@
 		
 		<Item Name="vetoMuonTrigger" Value="false" />
 		<Item Name="vetoElectronTrigger" Value="false" />
+
+                <!-- Selection cuts -->       
+                <Item Name="Cut_tau_base_Pt" Value="20" />
+                 <Item Name="Cut_tautau_Pt_1" Value="20" />
+               <Item Name="Cut_tautau_Pt_2" Value="20" />
+                <Item Name="Cut_tautau_MVA_iso" Value="false" />
+      
+                <Item Name="AllowTauBOverlap" Value="false" />
+      
  
 		</UserConfig>
 	</Cycle>
