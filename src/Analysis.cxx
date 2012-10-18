@@ -38,6 +38,16 @@ Analysis::Analysis()
 		DeclareProperty("useTruePileUp",useTruePileUp);
 		DeclareProperty("vetoMuonTrigger",vetoMuonTrigger);
 		DeclareProperty("vetoElectronTrigger", vetoElectronTrigger);
+		
+		DeclareProperty("Cut_tau_base_Pt",Cut_tau_base_Pt);
+		DeclareProperty("Cut_tautau_Pt_1",Cut_tautau_Pt_1);
+		DeclareProperty("Cut_tautau_Pt_2",Cut_tautau_Pt_2);
+		DeclareProperty("Cut_tautau_MVA_iso",Cut_tautau_MVA_iso); 	
+		
+		if(Cut_tau_base_Pt< 1e-3) Cut_tau_base_Pt=20;
+		if(Cut_tautau_Pt_1< 1e-3) Cut_tautau_Pt_1=20;
+	    if(Cut_tautau_Pt_2< 1e-3) Cut_tautau_Pt_2=20;
+
 
 	}
 
@@ -311,6 +321,9 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
+
+	
+
 
 	return;
 
@@ -823,7 +836,7 @@ entries++;
 		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
 
 
-		if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
+		if (tauPt > Cut_tau_base_Pt && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
 			goodTau.push_back(tau[i]);
 
 	}
@@ -897,7 +910,7 @@ entries++;
 		if(!checkCategories && !iso1_muTau) continue;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
-			bool iso2 = (goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;                                    
@@ -926,7 +939,7 @@ entries++;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
-				bool iso2 = (goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
 				if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
 				if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.1) continue;
@@ -949,17 +962,18 @@ entries++;
 	{
 		for(uint i = 0; i < goodTau.size() && !signal ; i++)
 		{
-
+			if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
 			if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 			if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
-			bool iso1 = (goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5);
+			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 			if(!checkCategories && !iso1) continue;
 			for(uint j=i+1; j< goodTau.size() && !signal; j++)
 			{
+				if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
 				if(goodTau[i].charge*goodTau[j].charge >=0) continue;
 				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
-				bool iso2 = (goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5);
+				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.1) continue;
 				if (iso1 && iso2){ signal = true; muTau=muE=eTau = false; tauTau=true;}
 				else if (!iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;}

@@ -230,6 +230,13 @@ private:
     bool useTruePileUp;
     bool vetoMuonTrigger;
     bool vetoElectronTrigger;
+    
+    double Cut_tau_base_Pt;
+    double Cut_tautau_Pt_1;
+    double Cut_tautau_Pt_2;
+    bool   Cut_tautau_MVA_iso; 	
+    
+    
 
 // output variables
 std::vector<float> out_pt;
