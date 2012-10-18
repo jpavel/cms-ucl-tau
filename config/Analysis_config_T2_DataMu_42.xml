@@ -54,6 +54,8 @@
 		<Item Name="Cut_tautau_Pt_2" Value="20" />
 		<Item Name="Cut_tautau_MVA_iso" Value="false" />
 		
+		<Item Name="AllowTauBOverlap" Value="false" />
+		
 		</UserConfig>
 	</Cycle>
 </JobConfiguration>

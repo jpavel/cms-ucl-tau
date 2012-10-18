@@ -236,6 +236,7 @@ private:
     double Cut_tautau_Pt_2;
     bool   Cut_tautau_MVA_iso; 	
     
+    bool   AllowTauBOverlap;
     
 
 // output variables

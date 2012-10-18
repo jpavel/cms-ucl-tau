@@ -43,11 +43,13 @@ Analysis::Analysis()
 		DeclareProperty("Cut_tautau_Pt_1",Cut_tautau_Pt_1);
 		DeclareProperty("Cut_tautau_Pt_2",Cut_tautau_Pt_2);
 		DeclareProperty("Cut_tautau_MVA_iso",Cut_tautau_MVA_iso); 	
-		
+		DeclareProperty("AllowTauBOverlap",AllowTauBOverlap);
+
 		if(Cut_tau_base_Pt< 1e-3) Cut_tau_base_Pt=20;
 		if(Cut_tautau_Pt_1< 1e-3) Cut_tautau_Pt_1=20;
 	    if(Cut_tautau_Pt_2< 1e-3) Cut_tautau_Pt_2=20;
-
+	    
+	    
 
 	}
 
@@ -1180,12 +1182,21 @@ entries++;
 			dR2=deltaR(jetEta,jetPhi,Zcand[1].eta,Zcand[1].phi);
 			dR3=deltaR(jetEta,jetPhi,Hcand[0].eta,Hcand[0].phi);
 			dR4=deltaR(jetEta,jetPhi,Hcand[1].eta,Hcand[1].phi);
-			if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ){
-				bTagVeto = true;	
-				count_bJetsVetoed++;
-			}		
-			else count_bJets_afterVeto++;
-
+			if(!AllowTauBOverlap){
+				if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ){
+					bTagVeto = true;	
+					count_bJetsVetoed++;
+				}		
+				else count_bJets_afterVeto++;
+			}else{
+				if(eTau || muTau){
+					if(dR1>0.4 && dR2>0.4 && dR3>0.4 ){ bTagVeto=true; count_bJetsVetoed++;}
+				}else if (tauTau){
+					if(dR1>0.4 && dR2>0.4 ){ bTagVeto=true; count_bJetsVetoed++;}
+				}else if (muE){
+					if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4){ bTagVeto=true; count_bJetsVetoed++;}
+				}
+			}
 		}
 	}
 	Hist("h_nbjets")->Fill(count_bJets,weight);
