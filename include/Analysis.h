@@ -244,6 +244,7 @@ private:
     double Cut_leptau_sumPt;
     double Cut_leplep_sumPt;
     
+    bool IgnoreAdditionalTaus;
 
 // output variables
 std::vector<float> out_pt;

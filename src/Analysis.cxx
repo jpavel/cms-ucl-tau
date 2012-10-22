@@ -49,6 +49,7 @@ Analysis::Analysis()
 		DeclareProperty("Cut_leptau_sumPt",Cut_leptau_sumPt);
 		DeclareProperty("Cut_leplep_sumPt",Cut_leplep_sumPt);
 		DeclareProperty("UseSumPtCut",UseSumPtCut);
+		DeclareProperty("IgnoreAdditionalTaus",IgnoreAdditionalTaus);
 
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=20;
 		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=20;
@@ -305,7 +306,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		
 		TH1D* h_signal_temp_pt1			= Book(TH1D(TString(name_sig_1), TString(title_sig_1),100,0,100));
 		TH1D* h_signal_temp_pt2			= Book(TH1D(TString(name_sig_2), TString(title_sig_2),100,0,100));
-		TH1D* h_signal_temp_SumPt			= Book(TH1D(TString(name_SumPt), TString(title_SumPt),100,0,100));
+		TH1D* h_signal_temp_SumPt			= Book(TH1D(TString(name_SumPt), TString(title_SumPt),300,0,300));
 	    
 	    TH2D* h_category0_temp_pt		= Book(TH2D(TString(name_cat0), TString(title_cat0),100,0,100,100,0,100));
 	    TH1D* h_category1_temp_pt		= Book(TH1D(TString(name_cat1), TString(title_cat1),100,0,100));
@@ -1146,13 +1147,14 @@ entries++;
 
 	}
 
-	for(uint i = 0; i < goodTau.size(); i++)
-	{
-		if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
-				deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1 && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
-			Ad_lepton=true;
+	if(!IgnoreAdditionalTaus){
+		for(uint i = 0; i < goodTau.size(); i++)
+		{
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
+					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1 && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
+				Ad_lepton=true;
+		}
 	}
-	
 
 	if(Ad_lepton) 
 	{			
