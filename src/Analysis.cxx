@@ -243,7 +243,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	
 	h_signal_pt1_types.clear();
-    h_signal_pt2_types.clear();
+	h_signal_pt2_types.clear();
+	h_signal_SumPt_types.clear();
         
     h_category0_pt_types.clear();
     h_category1_pt_types.clear();
@@ -251,7 +252,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         
 	for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
 	{
-		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2;
+		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2,sumPt;
 		s << "h_H_mass_type_" << i;
 		mass_sig << "h_H_mass_signal_type_" << i;
 		mass_cat0 << "h_H_mass_cat0_type_" << i;
@@ -260,6 +261,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		
 		sig_1 << "h_signal_pt1_" << i;
 		sig_2 << "h_signal_pt2_" << i;
+		sumPt << "h_signal_SumPt_" << i;
 		cat0 << "h_category0_pt_" << i;
 		cat1 << "h_category1_pt_" << i;
 		cat2 << "h_category2_pt_" << i;
@@ -272,15 +274,17 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		
 		std::string name_sig_1 = sig_1.str(); 
 		std::string name_sig_2 = sig_2.str(); 
+		std::string name_SumPt = sumPt.str(); 
 		std::string name_cat0 = cat0.str(); 
 		std::string name_cat1 = cat1.str(); 
 		std::string name_cat2 = cat2.str(); 
 		
-		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2;
+		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2,tit_sumPt;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
 		
 		tit_sig_1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_sig_2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+		tit_sumPt << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
 		tit_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
@@ -288,6 +292,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::string title = ss.str();
 		std::string title_sig_1 = tit_sig_1.str(); 
 		std::string title_sig_2 = tit_sig_2.str(); 
+		std::string title_SumPt = tit_sig_2.str(); 
 		std::string title_cat0 = tit_cat0.str(); 
 		std::string title_cat1 = tit_cat1.str(); 
 		std::string title_cat2 = tit_cat2.str();
@@ -299,7 +304,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		TH1D* h_mass_cat2_temp =  Book(TH1D(TString(name_mass_cat2),TString(title),300,0.,300.));
 		
 		TH1D* h_signal_temp_pt1			= Book(TH1D(TString(name_sig_1), TString(title_sig_1),100,0,100));
-	    TH1D* h_signal_temp_pt2			= Book(TH1D(TString(name_sig_2), TString(title_sig_2),100,0,100));
+		TH1D* h_signal_temp_pt2			= Book(TH1D(TString(name_sig_2), TString(title_sig_2),100,0,100));
+		TH1D* h_signal_temp_SumPt			= Book(TH1D(TString(name_SumPt), TString(title_SumPt),100,0,100));
 	    
 	    TH2D* h_category0_temp_pt		= Book(TH2D(TString(name_cat0), TString(title_cat0),100,0,100,100,0,100));
 	    TH1D* h_category1_temp_pt		= Book(TH1D(TString(name_cat1), TString(title_cat1),100,0,100));
@@ -313,6 +319,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		
 		h_signal_pt1_types.push_back(h_signal_temp_pt1);
 		h_signal_pt2_types.push_back(h_signal_temp_pt2);
+		h_signal_SumPt_types.push_back(h_signal_temp_SumPt);
         
 		h_category0_pt_types.push_back(h_category0_temp_pt);
 		h_category1_pt_types.push_back(h_category1_temp_pt);
@@ -1270,6 +1277,7 @@ entries++;
 				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
 				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
 				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
 				h_H_mass_signal_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
@@ -1311,6 +1319,7 @@ entries++;
 				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
 				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
 				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
 				h_H_mass_signal_types[event_type-1]->Fill(H_muTau.M(),weight);					
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
@@ -1348,6 +1357,7 @@ entries++;
 				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
 				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
 				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
 				h_H_mass_signal_types[event_type-1]->Fill(H_eTau.M(),weight);				
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
@@ -1388,6 +1398,7 @@ entries++;
 				Hist("h_signal_pt2")->Fill(Hcand[1].pt,weight);	
 				h_signal_pt1_types[event_type-1]->Fill(Hcand[0].pt,weight);
 				h_signal_pt2_types[event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
 				h_H_mass_signal_types[event_type-1]->Fill(H_tauTau.M(),weight);				
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[0].pt,weight);

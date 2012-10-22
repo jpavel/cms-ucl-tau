@@ -190,6 +190,7 @@ private:
         
         std::vector<TH1*> h_signal_pt1_types;
         std::vector<TH1*> h_signal_pt2_types;
+        std::vector<TH1*> h_signal_SumPt_types;
         
         std::vector<TH2*> h_category0_pt_types;
         std::vector<TH1*> h_category1_pt_types;
