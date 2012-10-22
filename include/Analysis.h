@@ -238,6 +238,11 @@ private:
     
     bool   AllowTauBOverlap;
     
+    bool UseSumPtCut;
+    double Cut_tautau_sumPt;
+    double Cut_leptau_sumPt;
+    double Cut_leplep_sumPt;
+    
 
 // output variables
 std::vector<float> out_pt;

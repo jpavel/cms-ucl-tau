@@ -44,10 +44,15 @@ Analysis::Analysis()
 		DeclareProperty("Cut_tautau_Pt_2",Cut_tautau_Pt_2);
 		DeclareProperty("Cut_tautau_MVA_iso",Cut_tautau_MVA_iso); 	
 		DeclareProperty("AllowTauBOverlap",AllowTauBOverlap);
+		
+		DeclareProperty("Cut_tautau_sumPt",Cut_tautau_sumPt);
+		DeclareProperty("Cut_leptau_sumPt",Cut_leptau_sumPt);
+		DeclareProperty("Cut_leplep_sumPt",Cut_leplep_sumPt);
+		DeclareProperty("UseSumPtCut",UseSumPtCut);
 
-		if(Cut_tau_base_Pt< 1e-3) Cut_tau_base_Pt=20;
-		if(Cut_tautau_Pt_1< 1e-3) Cut_tautau_Pt_1=20;
-	    if(Cut_tautau_Pt_2< 1e-3) Cut_tautau_Pt_2=20;
+		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=20;
+		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=20;
+	    if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=20;
 	    
 	    
 
@@ -896,6 +901,7 @@ entries++;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
 		for(uint j=0; j< goodElectron.size() && !signal; j++)
 		{
+			if(UseSumPtCut && goodMuon[i].pt+goodElectron[j].pt < Cut_leplep_sumPt) continue;
 			bool iso2 = (RelIsoEl(goodElectron[j]) < 0.3);
 			if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
 			if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
@@ -912,6 +918,7 @@ entries++;
 		if(!checkCategories && !iso1_muTau) continue;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
+			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;			
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
@@ -941,6 +948,7 @@ entries++;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
+				if(UseSumPtCut && goodElectron[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;
 				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
 				if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
 				if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
@@ -964,14 +972,15 @@ entries++;
 	{
 		for(uint i = 0; i < goodTau.size() && !signal ; i++)
 		{
-			if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
+			if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
 			if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 			if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
 			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 			if(!checkCategories && !iso1) continue;
 			for(uint j=i+1; j< goodTau.size() && !signal; j++)
 			{
-				if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
+				if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
+				if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
 				if(goodTau[i].charge*goodTau[j].charge >=0) continue;
 				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
