@@ -713,26 +713,26 @@ entries++;
 		if(Zmumu)
 		{
 			if(is2012_53){
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]);
+				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);;
+				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);;
 			}else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
 			}else{
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Cor_Trg_Mu_Lead_2011(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Cor_Trg_Mu_SubLead_2011(Zcand[1]);
+				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Corr_Trg_Mu_2011(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Corr_Trg_Mu_2011(Zcand[1]);
 			}
 			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
 			if(is2012_53){
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]);
+				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);;
+				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);;
 			}else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
 			}else{
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Cor_Trg_Ele_Lead_2011(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Cor_Trg_Ele_SubLead_2011(Zcand[1]);
+				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Corr_Trg_Ele_2011(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Corr_Trg_Ele_2011(Zcand[1]);
 			}
 			Z_weight *= corrZlep1* corrZlep2;	
 		}
