@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "TColor.h"
 
 using namespace std;
 
@@ -49,7 +50,7 @@ int stack_upgrade_42X() {
   //DoubleEle + WZ
   //Double_t weights[nFiles] = {1.00, 0.01054, 0.0392, 0.00047967, 0.44927,0.0009171,0.000136};
   //DoubleEle + WZjets 
- // Double_t weights[nFiles] = {1.00, 0.0004796752, 0.003921881, 0.010544, 0.449278,0.00091718,0.000136};
+  Double_t weights[nFiles] = {1.00, 0.0004796752, 0.003921881, 0.010544, 0.449278,0.00091718,0.000136};
   //DoubleMu + WZ 
   //Double_t weights[nFiles] = {1.00, 0.01054, 0.0392, 0.00047967, 0.44927,0.0009171,0.000136};
   //DoubleMu + WZjets 
@@ -88,23 +89,6 @@ int stack_upgrade_42X() {
 
   TH1F * 		h_1d[nHist1][nFiles];
   TH1F *                signal[nHist1];
-  
-   Double_t weights[nFiles];
-  Double_t xsection[nFiles]={1.0, 0.106, 0.868, 17.32, 3048, 0.0184915, 0.0039508088};
-  
-  
-  
-  const double total_lumi = 4960.0; // pb-1
-  
-  for(int iFile = 0; iFile < nFiles; iFile++)
-	{
-		TH1D * h_pu = (TH1D*)f[iFile]->Get("h_nPU_raw");		
-		std::cout << h_pu->Integral() << std::endl;
-		double lumi = h_pu->Integral()/xsection[iFile];
-		if(iFile > 0) weights[iFile]=total_lumi/lumi;
-		else weights[iFile] = 1.0;
-		std::cout << weights[iFile] << std::endl;
-	}
 
   for(int iFile = 0; iFile < nFiles; iFile++)
   {
@@ -115,6 +99,11 @@ int stack_upgrade_42X() {
 		  if(iHist > 0) h_1d[iHist][iFile]->Rebin(10);
 	  }
   }
+  
+  int ZZ_Color = TColor::GetColor("#99ff99");
+    int WZ_Color = TColor::GetColor("#660099");
+    int TTbar_Color = TColor::GetColor("#cc66cc");
+    int Zjet_Color = TColor::GetColor("#32c3ff");
 
   TCanvas *c1 = new TCanvas("c1","",5,30,650,600);
   //gPad->SetLogy(); 
@@ -140,10 +129,10 @@ int stack_upgrade_42X() {
 		  h_1d[iHist][iFile]->SetLineWidth(0);
 		  h_1d[iHist][iFile]->SetFillStyle(3244);
 
-		  if(iFile == 1){ h_1d[iHist][iFile]->SetFillColor(kMagenta-8);  }
-		  else if(iFile == 2){  h_1d[iHist][iFile]->SetFillColor(kRed); }
-		  else if(iFile == 3){  h_1d[iHist][iFile]->SetFillColor(kGreen); }
-		  else if(iFile == 4){  h_1d[iHist][iFile]->SetFillColor(kAzure+6); }
+		  if(iFile == 1){ h_1d[iHist][iFile]->SetFillColor(ZZ_Color);  }
+		  else if(iFile == 2){  h_1d[iHist][iFile]->SetFillColor(WZ_Color); }
+		  else if(iFile == 3){  h_1d[iHist][iFile]->SetFillColor(TTbar_Color); }
+		  else if(iFile == 4){  h_1d[iHist][iFile]->SetFillColor(Zjet_Color); }
 		  else if(iFile == 5){
 			  signal[iHist]->Add(h_1d[iHist][iFile+1]);
                           signal[iHist]->SetLineColor(kRed); 
