@@ -89,6 +89,7 @@ private:
         TH1* h_el_n;
         TH1* h_el_cut;
         TH1* h_event_type;
+        TH1* h_event_type_raw;
         TH1* h_mu1Z_pt;
         TH1* h_mu2Z_pt;
         TH1* h_Zmass_mumu;

@@ -84,7 +84,9 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
 	h_event_type        	      	= Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
+	h_event_type_raw        	= Book(TH1D("h_event_type_raw","Event Type (no weights)",8,0.5,8.5));
 
+	
 	//Z->mumu    
 	h_mu1Z_pt           		= Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
 	h_mu2Z_pt          		        = Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));
@@ -231,6 +233,16 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_event_type->GetXaxis()->SetBinLabel(6,"Z(ee)H(#mu e)");
 	h_event_type->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
 	h_event_type->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
+	
+		h_event_type_raw = Retrieve<TH1D>("h_event_type_raw");
+	h_event_type_raw->GetXaxis()->SetBinLabel(1,"Z(#mu#mu)H(#mu#tau)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(2,"Z(#mu#mu)H(#mu e)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(3,"Z(#mu#mu)H(e#tau)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(4,"Z(#mu#mu)H(#tau#tau)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(5,"Z(ee)H(#mu#tau)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(6,"Z(ee)H(#mu e)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(7,"Z(ee)H(e#tau)");
+	h_event_type_raw->GetXaxis()->SetBinLabel(8,"Z(ee)H(#tau#tau)");
 
 	h_PF_MET_nPU=Retrieve<TProfile>("h_PF_MET_nPU");
 	h_PF_MET_nPU_selected=Retrieve<TProfile>("h_PF_MET_nPU_selected");
@@ -1249,7 +1261,12 @@ entries++;
 
 	if(isSimulation)
 	{ 
-		if(signal) Hist( "h_event_type" )->Fill(event_type,weight);
+		if(signal){
+			 Hist( "h_event_type" )->Fill(event_type,weight);
+			 Hist( "h_event_type_raw" )->Fill(event_type);
+		 
+		 }
+		
 	}else  Hist( "h_event_type" )->Fill(event_type,weight); // blinding 
 
 
