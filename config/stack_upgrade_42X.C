@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "TColor.h"
 
 using namespace std;
 
@@ -41,6 +42,19 @@ int stack_upgrade_42X() {
   //TString fileNames[nFiles] = {"DoubleEle","TT_42X_TruePU","WZ_42X_TruePU","ZZ_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU","Hww120_42X_TruePU"};
   //DoubleEle + WZjets 
   TString fileNames[nFiles] = {"DoubleEle","ZZ_42X_TruePU","WZjets_42X_TruePU","TT_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU_1","Hww120_42X_TruePU_1"};
+  //DoubleMu + WZ 
+  //TString fileNames[nFiles] = {"DoubleMu","TT_42X_TruePU","WZ_42X_TruePU","ZZ_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU","Hww120_42X_TruePU"};
+  //DoubleMu + WZjets 
+  //TString fileNames[nFiles] = {"DoubleMu","TT_42X_TruePU","WZjets_42X_TruePU","ZZ_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU","Hww120_42X_TruePU"};
+
+  //DoubleEle + WZ
+  //Double_t weights[nFiles] = {1.00, 0.01054, 0.0392, 0.00047967, 0.44927,0.0009171,0.000136};
+  //DoubleEle + WZjets 
+  //Double_t weights[nFiles] = {1.00, 0.0004796752, 0.00351, 0.010544, 0.449278,0.00091718,0.000136};
+ //DoubleMu + WZ 
+  //Double_t weights[nFiles] = {1.00, 0.01054, 0.0392, 0.00047967, 0.44927,0.0009171,0.000136};
+  //DoubleMu + WZjets 
+  //Double_t weights[nFiles] = {1.00, 0.01054, 0.003525, 0.00047967, 0.44927,0.0009171,0.000136};
   
   TFile * f[nFiles];  	
   std::stringstream indexes;  
@@ -67,8 +81,7 @@ int stack_upgrade_42X() {
   //const int nHist1 = 44;
 
 
-  TString histNames1[nHist1] = {"h_Zmass_ee","h_H_mass_type_5","h_H_mass_type_6","h_H_mass_type_7","h_H_mass_type_8",
-                                "h_category_0_1_pt","h_category_0_2_pt","h_category_0_3_pt","h_category_0_4_pt","h_category_0_5_pt","h_category_0_6_pt","h_category_0_7_pt","h_category_0_8_pt","h_category_1_1_pt","h_category_1_2_pt","h_category_1_3_pt","h_category_1_4_pt","h_category_1_5_pt","h_category_1_6_pt","h_category_1_7_pt","h_category_1_8_pt","h_category_2_1_pt","h_category_2_2_pt","h_category_2_3_pt","h_category_2_4_pt","h_category_2_5_pt","h_category_2_6_pt","h_category_2_7_pt","h_category_2_8_pt"};
+  TString histNames1[nHist1] = {"h_Zmass_ee","h_H_mass_type_5","h_H_mass_type_6","h_H_mass_type_7","h_H_mass_type_8"};
   TString histTitles[nHist1] = {"M_{2e}[GeV]","M_{#mu#tau}[GeV]","M_{#mue}[GeV]","M_{e#tau}[GeV]","M_{#tau#tau}[GeV]"};
   TString PaveText[nHist1]	= {"Zee","EEMT","EEME","EEET","EETT"};
   
@@ -82,7 +95,7 @@ int stack_upgrade_42X() {
   
   
   
-  const double total_lumi = 1294.0 +2741.0; // pb-1
+  const double total_lumi = 4934.0; //1294.0 +2741.0; // pb-1
   
   for(int iFile = 0; iFile < nFiles; iFile++)
 	{
@@ -103,6 +116,11 @@ int stack_upgrade_42X() {
 		  if(iHist > 0) h_1d[iHist][iFile]->Rebin(10);
 	  }
   }
+  
+    int ZZ_Color = TColor::GetColor("#99ff99");
+    int WZ_Color = TColor::GetColor("#660099");
+    int TTbar_Color = TColor::GetColor("#cc66cc");
+    int Zjet_Color = TColor::GetColor("#32c3ff");
 
   TCanvas *c1 = new TCanvas("c1","",5,30,650,600);
   //gPad->SetLogy(); 
@@ -128,10 +146,10 @@ int stack_upgrade_42X() {
 		  h_1d[iHist][iFile]->SetLineWidth(0);
 		  h_1d[iHist][iFile]->SetFillStyle(3244);
 
-		  if(iFile == 1){ h_1d[iHist][iFile]->SetFillColor(kMagenta-8);  }
-		  else if(iFile == 2){  h_1d[iHist][iFile]->SetFillColor(kRed); }
-		  else if(iFile == 3){  h_1d[iHist][iFile]->SetFillColor(kGreen); }
-		  else if(iFile == 4){  h_1d[iHist][iFile]->SetFillColor(kAzure+6); }
+		  if(iFile == 1){ h_1d[iHist][iFile]->SetFillColor(ZZ_Color);  }
+		  else if(iFile == 2){  h_1d[iHist][iFile]->SetFillColor(WZ_Color); }
+		  else if(iFile == 3){  h_1d[iHist][iFile]->SetFillColor(TTbar_Color); }
+		  else if(iFile == 4){  h_1d[iHist][iFile]->SetFillColor(Zjet_Color); }
 		  else if(iFile == 5){
 			  signal[iHist]->Add(h_1d[iHist][iFile+1]);
                           signal[iHist]->SetLineColor(kRed); 
@@ -160,7 +178,7 @@ int stack_upgrade_42X() {
 	  leg->AddEntry(h_1d[iHist][4],"Zjet","f");
 	  leg->AddEntry(signal[iHist],"ZH(120)#times 5","f");
 
-TString lumist="4.03 fb^{-1}";
+TString lumist="4.9 fb^{-1}";
   TPaveText *ll = new TPaveText(0.25, 0.95, 0.95, 0.99, "NDC");
   ll->SetTextSize(0.03);
   ll->SetTextFont(62);
