@@ -85,6 +85,16 @@ private:
 	// cut-flow
     TH1* h_cut_flow;
     TH1* h_cut_flow_weight;
+    
+		TH1* h_cut_flow_signal;
+		TH1* h_cut_flow_cat0;
+		TH1* h_cut_flow_cat1;
+		TH1* h_cut_flow_cat2;
+
+		TH1* h_cut_flow_signal_weight;
+		TH1* h_cut_flow_cat0_weight;
+		TH1* h_cut_flow_cat1_weight;
+		TH1* h_cut_flow_cat2_weight;
 	// histograms
         TH1* h_el_n;
         TH1* h_el_cut;
@@ -153,6 +163,7 @@ private:
         TH1* h_n_goodTau_Hcand;
         
         TH1* h_PU_weight;
+        TH1* h_total_weight;
         TH1* h_nPU_raw;
         TH1* h_nPU_reweight;
         
@@ -246,6 +257,9 @@ private:
     double Cut_leplep_sumPt;
     
     bool IgnoreAdditionalTaus;
+    bool IgnoreSF;
+	bool IgnorePUW;
+
 
 // output variables
 std::vector<float> out_pt;

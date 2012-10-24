@@ -50,7 +50,10 @@ Analysis::Analysis()
 		DeclareProperty("Cut_leplep_sumPt",Cut_leplep_sumPt);
 		DeclareProperty("UseSumPtCut",UseSumPtCut);
 		DeclareProperty("IgnoreAdditionalTaus",IgnoreAdditionalTaus);
-
+		DeclareProperty("IgnoreSF",IgnoreSF);
+		DeclareProperty("IgnorePUW",IgnorePUW);
+		
+		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=20;
 		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=20;
 	    if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=20;
@@ -80,7 +83,17 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
         h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
         h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
+        
+        h_cut_flow_signal 				= Book(TH1D("h_cut_flow_signal","Cut Flow signal",4,0.5,4.5));
+		h_cut_flow_cat0					= Book(TH1D("h_cut_flow_cat0","Cut Flow cat0",4,0.5,4.5));
+		h_cut_flow_cat1					= Book(TH1D("h_cut_flow_cat1","Cut Flow cat1",4,0.5,4.5));
+		h_cut_flow_cat2					= Book(TH1D("h_cut_flow_cat2","Cut Flow cat2",4,0.5,4.5));
 
+		h_cut_flow_signal_weight		= Book(TH1D("h_cut_flow_signal_weight","Cut Flow signal",4,0.5,4.5));
+		h_cut_flow_cat0_weight			= Book(TH1D("h_cut_flow_cat0_weight","Cut Flow signal",4,0.5,4.5));
+		h_cut_flow_cat1_weight			= Book(TH1D("h_cut_flow_cat1_weight","Cut Flow signal",4,0.5,4.5));
+		h_cut_flow_cat2_weight			= Book(TH1D("h_cut_flow_cat2_weight","Cut Flow signal",4,0.5,4.5));
+	
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
 	h_event_type        	      	= Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
@@ -158,6 +171,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_n_goodTau_Hcand		= Book(TH1D("h_n_goodTau_Hcand","Number of good taus; good taus",10,-0.5,9.5));
 
 	h_PU_weight			= Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
+	h_total_weight			= Book(TH1D("h_total_weight","Weights distribution",100,0,5));
 	h_nPU_raw			= Book(TH1D("h_nPU_raw","raw PU distribution",50,0,50));
 	h_nPU_reweight			= Book(TH1D("h_nPU_reweight","reweighted PU distribution",50,0,50));
 
@@ -247,6 +261,16 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_PF_MET_nPU=Retrieve<TProfile>("h_PF_MET_nPU");
 	h_PF_MET_nPU_selected=Retrieve<TProfile>("h_PF_MET_nPU_selected");
 
+	h_cut_flow_signal=Retrieve<TH1D>("h_cut_flow_signal");
+	h_cut_flow_cat0=Retrieve<TH1D>("h_cut_flow_cat0");
+	h_cut_flow_cat1=Retrieve<TH1D>("h_cut_flow_cat1");
+	h_cut_flow_cat2=Retrieve<TH1D>("h_cut_flow_cat2");
+	
+	h_cut_flow_signal_weight=Retrieve<TH1D>("h_cut_flow_signal_weight");
+	h_cut_flow_cat0_weight=Retrieve<TH1D>("h_cut_flow_cat0_weight");
+	h_cut_flow_cat1_weight=Retrieve<TH1D>("h_cut_flow_cat1_weight");
+	h_cut_flow_cat2_weight=Retrieve<TH1D>("h_cut_flow_cat2_weight");
+	
 
 	h_H_mass_types.clear();
 	h_H_mass_signal_types.clear();
@@ -499,6 +523,7 @@ entries++;
 	else nPU = m->PUInfo_Bunch0;
 	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
+		if(IgnorePUW) PUWeight = 1.0;
 	}
 	int eNumber = m->eventNumber;
 
@@ -721,7 +746,7 @@ entries++;
 	double corrZlep1,corrZlep2;
 	corrZlep1=corrZlep2=1.0;
 	double Z_weight = PUWeight;
-	if(isSimulation){
+	if(isSimulation && !IgnoreSF){
 		if(Zmumu)
 		{
 			if(is2012_53){
@@ -1033,6 +1058,8 @@ entries++;
 	h_cut_flow->Fill(4,1);
 	h_cut_flow_weight->Fill(4,Z_weight);
 	
+	
+	
 	if(muTau+muE+eTau+tauTau > 1){
 		m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
 		m_logger << ERROR << muTau << muE << eTau << tauTau << " " << eNumber << SLogger::endmsg;			 
@@ -1041,6 +1068,9 @@ entries++;
 
 	h_cut_flow->Fill(5,1);
 	h_cut_flow_weight->Fill(5,Z_weight);
+
+	
+	
 
 	short event_type = 0;
 
@@ -1093,7 +1123,7 @@ entries++;
 
 	double corrHlep1,corrHlep2;
 	corrHlep1=corrHlep2=1.0;
-	if(isSimulation){
+	if(isSimulation && !IgnoreSF){
 
 		if(muTau)
 		{
@@ -1136,6 +1166,17 @@ entries++;
 	
 	h_cut_flow->Fill(6,1);
 	h_cut_flow_weight->Fill(6,weight);
+	
+	if(signal) h_cut_flow_signal->Fill(1,1);
+	else if (category==0) h_cut_flow_cat0->Fill(1,1);
+	else if (category==1) h_cut_flow_cat1->Fill(1,1);
+	else if (category==2) h_cut_flow_cat2->Fill(1,1);
+	
+	if(signal) h_cut_flow_signal_weight->Fill(1,weight);
+	else if (category==0) h_cut_flow_cat0_weight->Fill(1,weight);
+	else if (category==1) h_cut_flow_cat1_weight->Fill(1,weight);
+	else if (category==2) h_cut_flow_cat2_weight->Fill(1,weight);
+
 
 	// histograms   
 	
@@ -1176,6 +1217,16 @@ entries++;
 	
 	h_cut_flow->Fill(7,1);
 	h_cut_flow_weight->Fill(7,weight);
+	
+	if(signal) h_cut_flow_signal->Fill(2,1);
+	else if (category==0) h_cut_flow_cat0->Fill(2,1);
+	else if (category==1) h_cut_flow_cat1->Fill(2,1);
+	else if (category==2) h_cut_flow_cat2->Fill(2,1);
+
+  	if(signal) h_cut_flow_signal_weight->Fill(2,weight);
+	else if (category==0) h_cut_flow_cat0_weight->Fill(2,weight);
+	else if (category==1) h_cut_flow_cat1_weight->Fill(2,weight);
+	else if (category==2) h_cut_flow_cat2_weight->Fill(2,weight);
 
 
 	// Same vertex check
@@ -1190,6 +1241,18 @@ entries++;
 	}
 	h_cut_flow->Fill(8,1);
 	h_cut_flow_weight->Fill(8,weight);
+	
+	if(signal) h_cut_flow_signal->Fill(3,1);
+	else if (category==0) h_cut_flow_cat0->Fill(3,1);
+	else if (category==1) h_cut_flow_cat1->Fill(3,1);
+	else if (category==2) h_cut_flow_cat2->Fill(3,1);
+	
+	if(signal) h_cut_flow_signal_weight->Fill(3,weight);
+	else if (category==0) h_cut_flow_cat0_weight->Fill(3,weight);
+	else if (category==1) h_cut_flow_cat1_weight->Fill(3,weight);
+	else if (category==2) h_cut_flow_cat2_weight->Fill(3,weight);
+
+
 
 
 	// b-tag veto
@@ -1240,6 +1303,16 @@ entries++;
 
 	h_cut_flow->Fill(9,1);
 	h_cut_flow_weight->Fill(9,weight);
+
+	if(signal) h_cut_flow_signal->Fill(4,1);
+	else if (category==0) h_cut_flow_cat0->Fill(4,1);
+	else if (category==1) h_cut_flow_cat1->Fill(4,1);
+	else if (category==2) h_cut_flow_cat2->Fill(4,1);
+
+	if(signal) h_cut_flow_signal_weight->Fill(4,weight);
+	else if (category==0) h_cut_flow_cat0_weight->Fill(4,weight);
+	else if (category==1) h_cut_flow_cat1_weight->Fill(4,weight);
+	else if (category==2) h_cut_flow_cat2_weight->Fill(4,weight);
 
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
@@ -1442,7 +1515,7 @@ entries++;
 	Hist( "h_H_lep1_phi")->Fill(Hcand[0].phi,weight);
 	Hist( "h_H_lep2_eta")->Fill(Hcand[1].eta,weight);
 	Hist( "h_H_lep2_phi")->Fill(Hcand[1].phi,weight);
-	
+	Hist( "h_total_weight")->Fill(weight);
 	
 	
 	h_cut_flow->Fill(10,1);
