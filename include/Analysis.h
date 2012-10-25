@@ -174,7 +174,9 @@ private:
         TProfile* h_PF_MET_nPU_selected;
 
         TH1* h_nbjets;
+        TH1* h_nbjets_signal;
         TH1* h_nbjets_afterVeto;
+        TH1* h_nbjets_afterVeto_signal;   
         TH1* h_nbjetsVetoed;
         TH1* h_Tmass;
      

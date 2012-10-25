@@ -182,6 +182,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_PF_MET_nPU_selected		= Book(TProfile("h_PF_MET_nPU_selected", "PF MET vs number of PU interactions; nPU; PF MET[GeV]",60,0,60));
 	h_nbjets                        = Book(TH1D("h_nbjets", "# of b-jets",10,0,10));
 	h_nbjets_afterVeto              = Book(TH1D("h_nbjets_afterVeto", "# of b-jets remaining after b-tag Veto",10,0,10));
+	h_nbjets_signal                        = Book(TH1D("h_nbjets_signal", "# of b-jets",10,0,10));
+	h_nbjets_afterVeto_signal              = Book(TH1D("h_nbjets_afterVeto_signal", "# of b-jets remaining after b-tag Veto",10,0,10));
 	h_nbjetsVetoed                  = Book(TH1D("h_nbjetsVetoed", "# of b-jets removed from b-tag Veto",10,0,10));
 
 	h_Tmass				= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
@@ -1293,8 +1295,12 @@ entries++;
 		}
 	}
 	Hist("h_nbjets")->Fill(count_bJets,weight);
+	if(signal) Hist("h_nbjets_signal")->Fill(count_bJets,weight);
+	 
 	Hist("h_nbjetsVetoed")->Fill(count_bJetsVetoed,weight);
 	Hist("h_nbjets_afterVeto")->Fill(count_bJets_afterVeto,weight);
+	if(signal)Hist("h_nbjets_afterVeto_signal")->Fill(count_bJets_afterVeto,weight);
+	
 	if(bTagVeto)
 	{
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
