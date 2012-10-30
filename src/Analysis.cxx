@@ -2,11 +2,7 @@
 
 // Local include(s):
 #include "../include/Analysis.h"
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <iomanip>
+
 
 #include "Corrector.h"
 
@@ -52,6 +48,7 @@ Analysis::Analysis()
 		DeclareProperty("IgnoreAdditionalTaus",IgnoreAdditionalTaus);
 		DeclareProperty("IgnoreSF",IgnoreSF);
 		DeclareProperty("IgnorePUW",IgnorePUW);
+		DeclareProperty("printoutEvents",printoutEvents);
 		
 		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=20;
@@ -376,6 +373,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
 
 	
+	if(printoutEvents) log1.open("events.txt");
+	
 
 
 	return;
@@ -394,6 +393,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 
+	if(printoutEvents) log1.close();
 	return;
 
 }
@@ -776,7 +776,7 @@ entries++;
 			Z_weight *= corrZlep1* corrZlep2;	
 		}
 	}
-
+	double Zmass = -100.;
 	if(Zmumu){
 		TLorentzVector muon1;
 		TLorentzVector muon2;
@@ -791,7 +791,7 @@ entries++;
 		Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt(),Z_weight);
 		Hist( "h_Zmass" )->Fill(Zmumu_.M(),Z_weight);
 		Hist( "h_Zpt" )->Fill(Zmumu_.Pt(),Z_weight);
-
+		Zmass=Zmumu_.M();
 		Hist( "h_Z_eta")->Fill(Zmumu_.Eta(),Z_weight);
 		Hist( "h_Z_phi")->Fill(Zmumu_.Phi(),Z_weight);
 		Hist( "h_Z_lep1_eta")->Fill(muon1.Eta(),Z_weight);
@@ -812,7 +812,7 @@ entries++;
 		Hist( "h_Zpt_ee" )->Fill(Zee_.Pt(),Z_weight);
 		Hist( "h_Zmass" )->Fill(Zee_.M(),Z_weight);
 		Hist( "h_Zpt" )->Fill(Zee_.Pt(),Z_weight);	
-
+		Zmass=Zee_.M();
 		Hist( "h_Z_eta")->Fill(Zee_.Eta(),Z_weight);
 		Hist( "h_Z_phi")->Fill(Zee_.Phi(),Z_weight);
 		Hist( "h_Z_lep1_eta")->Fill(ele1.Eta(),Z_weight);
@@ -1351,7 +1351,7 @@ entries++;
 
 	
 	//histograms for selected candidates
-	
+	double Hmass=-100;
 	switch(event_type)
 	{
 		case 2:
@@ -1368,6 +1368,7 @@ entries++;
 			Hist( "h_H_eta")->Fill(H_muE_tightMuIso.Eta(),weight);
 			Hist( "h_H_phi")->Fill(H_muE_tightMuIso.Phi(),weight);
 			h_H_mass_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
+			Hmass=H_muE_tightMuIso.M();
 			
 			if(signal)
 			{
@@ -1409,7 +1410,7 @@ entries++;
 			Hist( "h_H_phi")->Fill(H_muTau.Phi(),weight);
 			h_H_mass_types[event_type-1]->Fill(H_muTau.M(),weight);
 			
-			
+			Hmass=H_muTau.M();
 			
 			if(signal)
 			{
@@ -1448,6 +1449,8 @@ entries++;
 			Hist( "h_H_eta")->Fill(H_eTau.Eta(),weight);
 			Hist( "h_H_phi")->Fill(H_eTau.Phi(),weight);
 			h_H_mass_types[event_type-1]->Fill(H_eTau.M(),weight);
+			
+			Hmass=H_eTau.M();
 			
 			if(signal)
 			{
@@ -1489,6 +1492,7 @@ entries++;
 			Hist( "h_H_phi")->Fill(H_tauTau.Phi(),weight);
 			h_H_mass_types[event_type-1]->Fill(H_tauTau.M(),weight);
 			
+			Hmass=H_tauTau.M();
 			
 			if(signal)
 			{
@@ -1527,7 +1531,11 @@ entries++;
 	h_cut_flow->Fill(10,1);
 	h_cut_flow_weight->Fill(10,weight);
 	
-	
+	if(signal && printoutEvents)
+	{
+		 log1 << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << event_type << " " << Zmass << " " << Hmass << std::endl;
+		 
+	}
 	
 	return;
 

@@ -14,6 +14,11 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
 // my classes
 #include "myevent.h"
@@ -219,6 +224,8 @@ private:
         TH1* h_Nvertex_AfterZH_W;
         
         reweight::LumiReWeighting* LumiWeights_;
+        ofstream log1;
+	
         
 
 // properties
@@ -261,6 +268,8 @@ private:
     bool IgnoreAdditionalTaus;
     bool IgnoreSF;
 	bool IgnorePUW;
+	
+	bool printoutEvents;
 
 
 // output variables
