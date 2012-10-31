@@ -1533,7 +1533,8 @@ entries++;
 	
 	if(signal && printoutEvents)
 	{
-		 log1 << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << event_type << " " << Zmass << " " << Hmass << std::endl;
+		 TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
+		 log1 << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << event_type << " " << Zmass << " " << Hmass << " " << fileName << std::endl;
 		 
 	}
 	
