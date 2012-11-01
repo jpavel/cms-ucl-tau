@@ -58,6 +58,10 @@ public:
    double RelIsoEl(myobject el);
    bool Trg_MC_12(myevent* m);
    bool WZ_Rej(myevent *m, myobject mu);
+   
+   bool isGoodMu(myobject mu);
+   bool isGoodEl(myobject el);
+
 
 private:
    //
