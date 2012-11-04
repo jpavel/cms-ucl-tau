@@ -24,4 +24,6 @@
 
 #pragma link C++ class FakeRate+;
 
+#pragma link C++ class Filter+;
+
 #endif // __CINT__
