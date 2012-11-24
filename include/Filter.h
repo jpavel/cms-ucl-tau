@@ -21,6 +21,8 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
+#include "TLorentzVector.h"
+
 
 /**
  *   @short Put short description of class here
@@ -101,6 +103,9 @@ private:
     double cut_tau_eta;
     
     double cut_dR;
+    double lepton_mass_min;
+    double lepton_mass_max;
+
 
    // Macro adding the functions for dictionary generation
    ClassDef( Filter, 0 );

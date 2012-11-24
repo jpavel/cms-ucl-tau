@@ -35,6 +35,8 @@ Filter::Filter()
 		DeclareProperty("cut_tau_pt",cut_tau_pt);
 		DeclareProperty("cut_tau_eta",cut_tau_eta);
 		DeclareProperty("cut_dR", cut_dR);
+		DeclareProperty("lepton_mass_min", lepton_mass_min);
+		DeclareProperty("lepton_mass_max", lepton_mass_max);
 }
 
 Filter::~Filter() {
@@ -207,59 +209,61 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	
 	bool failDR = false;
-	if(N_MU > 0)
-	{
-		for(uint iMu=0; iMu < N_MU && !failDR; iMu++)
+	if(cut_dR > 0){
+		if(N_MU > 0)
 		{
-			for(uint jMu =iMu+1; jMu < N_MU && !failDR; jMu++)
+			for(uint iMu=0; iMu < N_MU && !failDR; iMu++)
 			{
-				double dR=deltaR(goodMuon[iMu],goodMuon[jMu]);
-				m_logger << VERBOSE << " MuMu: " << iMu << " " << jMu << " :" << dR << SLogger::endmsg;	
-				if(dR < cut_dR) failDR=true;
+				for(uint jMu =iMu+1; jMu < N_MU && !failDR; jMu++)
+				{
+					double dR=deltaR(goodMuon[iMu],goodMuon[jMu]);
+					m_logger << VERBOSE << " MuMu: " << iMu << " " << jMu << " :" << dR << SLogger::endmsg;	
+					if(dR < cut_dR) failDR=true;
+				}
+				
+				for(uint iEl =0; iEl < N_EL && !failDR; iEl++)
+				{
+					double dR=deltaR(goodMuon[iMu],goodElectron[iEl]);
+					m_logger << VERBOSE << " MuEl: " << iMu << " " << iEl << " :" << dR << SLogger::endmsg;	
+					if(dR < cut_dR) failDR=true;
+				}
+				
+				for(uint iTau =0; iTau < N_TAU && !failDR; iTau++)
+				{
+					double dR=deltaR(goodMuon[iMu],goodTau[iTau]);
+					m_logger << VERBOSE << " MuTau: " << iMu << " " << iTau << " :" << dR << SLogger::endmsg;	
+					if(dR < cut_dR) failDR=true;
+				}
 			}
-			
-			for(uint iEl =0; iEl < N_EL && !failDR; iEl++)
-			{
-				double dR=deltaR(goodMuon[iMu],goodElectron[iEl]);
-				m_logger << VERBOSE << " MuEl: " << iMu << " " << iEl << " :" << dR << SLogger::endmsg;	
-				if(dR < cut_dR) failDR=true;
-			}
-			
-			for(uint iTau =0; iTau < N_TAU && !failDR; iTau++)
-			{
-				double dR=deltaR(goodMuon[iMu],goodTau[iTau]);
-				m_logger << VERBOSE << " MuTau: " << iMu << " " << iTau << " :" << dR << SLogger::endmsg;	
-				if(dR < cut_dR) failDR=true;
-			}
-		}
-	}else if(N_EL > 0)
-	{
-		for(uint iEl=0; iEl < N_EL && !failDR; iEl++)
+		}else if(N_EL > 0)
 		{
-			for(uint jEl =iEl+1; jEl < N_EL && !failDR; jEl++)
+			for(uint iEl=0; iEl < N_EL && !failDR; iEl++)
 			{
-				double dR=deltaR(goodElectron[iEl],goodElectron[jEl]);
-				m_logger << VERBOSE << " ElEl: " << iEl << " " << jEl << " :" << dR << SLogger::endmsg;	
-				if(dR < cut_dR) failDR=true;
+				for(uint jEl =iEl+1; jEl < N_EL && !failDR; jEl++)
+				{
+					double dR=deltaR(goodElectron[iEl],goodElectron[jEl]);
+					m_logger << VERBOSE << " ElEl: " << iEl << " " << jEl << " :" << dR << SLogger::endmsg;	
+					if(dR < cut_dR) failDR=true;
+				}
+				
+				for(uint iTau =0; iTau < N_TAU && !failDR; iTau++)
+				{
+					double dR=deltaR(goodElectron[iEl],goodTau[iTau]);
+					m_logger << VERBOSE << " ElTau: " << iEl << " " << iTau << " :" << dR << SLogger::endmsg;	
+					if(dR < cut_dR) failDR=true;
+				}
 			}
-			
-			for(uint iTau =0; iTau < N_TAU && !failDR; iTau++)
-			{
-				double dR=deltaR(goodElectron[iEl],goodTau[iTau]);
-				m_logger << VERBOSE << " ElTau: " << iEl << " " << iTau << " :" << dR << SLogger::endmsg;	
-				if(dR < cut_dR) failDR=true;
-			}
-		}
-	
-	}else if(N_TAU > 0)
-	{
-		for(uint iTau=0; iTau < N_TAU && !failDR; iTau++)
+		
+		}else if(N_TAU > 0)
 		{
-			for(uint jTau =iTau+1; jTau < N_TAU && !failDR; jTau++)
+			for(uint iTau=0; iTau < N_TAU && !failDR; iTau++)
 			{
-				double dR=deltaR(goodTau[iTau],goodTau[jTau]);
-				m_logger << VERBOSE << " TauTau: " << iTau << " " << jTau << " :" << dR << SLogger::endmsg;	
-				if(dR < cut_dR) failDR=true;
+				for(uint jTau =iTau+1; jTau < N_TAU && !failDR; jTau++)
+				{
+					double dR=deltaR(goodTau[iTau],goodTau[jTau]);
+					m_logger << VERBOSE << " TauTau: " << iTau << " " << jTau << " :" << dR << SLogger::endmsg;	
+					if(dR < cut_dR) failDR=true;
+				}
 			}
 		}
 	}
@@ -267,6 +271,25 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(failDR) return;
 	
 	
+	// dMass cut
+	
+	bool passMass = false;
+	
+	for (uint i = 0; i < goodMuon.size() && !passMass; i++) {
+		for (uint j = i+1; j < goodMuon.size() && !passMass; j++) {
+			TLorentzVector cand;
+			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
+					goodMuon[i].py+goodMuon[j].py,
+					goodMuon[i].pz+goodMuon[j].pz,
+					goodMuon[i].E+goodMuon[j].E);
+			double mass = cand.M();
+			if(mass > lepton_mass_min && mass < lepton_mass_max ) passMass=true;
+			if(passMass) m_logger << DEBUG << " Passed mass cut with value " << mass << SLogger::endmsg;
+			else m_logger << VERBOSE << " Failed mass cut with value " << mass << SLogger::endmsg;
+		}
+	}
+	
+	if(!passMass) return;
 	
 	m_logger << INFO << " Passed!" << SLogger::endmsg;
 

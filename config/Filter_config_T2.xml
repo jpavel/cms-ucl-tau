@@ -51,6 +51,8 @@
 		<Item Name="cut_tau_pt" Value="19.0" />
 		<Item Name="cut_tau_eta"  Value="2.3" />
 		<Item Name="cut_dR" Value="-0.09" />
+		 <Item Name="lepton_mass_min" Value="50.0" />
+        <Item Name="lepton_mass_max" Value="150.0" />
         
         
         
