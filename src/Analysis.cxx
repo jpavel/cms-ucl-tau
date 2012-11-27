@@ -79,6 +79,9 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
+        h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 20,0,2));
+        h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 20,0,2));
+
         h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
         h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
         
@@ -375,8 +378,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	
 	if(printoutEvents) log1.open("events.txt");
-	
-
 
 	return;
 
@@ -1531,7 +1532,35 @@ entries++;
 	
 	h_cut_flow->Fill(10,1);
 	h_cut_flow_weight->Fill(10,weight);
-	
+
+        // DeltaR check
+        Hist("h_deltaR")->Fill(deltaR(Hcand[0].eta,Hcand[0].phi,Hcand[1].eta,Hcand[1].phi));
+        Hist("h_deltaR")->Fill(deltaR(Zcand[0].eta,Zcand[0].phi,Zcand[1].eta,Zcand[1].phi));
+        Hist("h_deltaR")->Fill(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[1].eta,Hcand[1].phi));
+        Hist("h_deltaR")->Fill(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[0].eta,Hcand[0].phi));
+        Hist("h_deltaR")->Fill(deltaR(Zcand[1].eta,Zcand[1].eta,Hcand[1].eta,Hcand[1].phi));
+        Hist("h_deltaR")->Fill(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[0].eta,Hcand[0].phi));
+
+        //max DeltaR
+        std::vector<double> deltaRlist;
+        deltaRlist.clear();
+        deltaRlist.push_back(deltaR(Hcand[0].eta,Hcand[0].phi,Hcand[1].eta,Hcand[1].phi));
+        deltaRlist.push_back(deltaR(Zcand[0].eta,Zcand[0].phi,Zcand[1].eta,Zcand[1].phi));
+        deltaRlist.push_back(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[1].eta,Hcand[1].phi));
+        deltaRlist.push_back(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[0].eta,Hcand[0].phi));
+        deltaRlist.push_back(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[1].eta,Hcand[1].phi));
+        deltaRlist.push_back(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[0].eta,Hcand[0].phi));
+
+        double maxDR = deltaRlist[0];
+
+	for(int i = 0; i<deltaRlist.size(); i++)
+	{
+		if(deltaRlist[i] > maxDR)
+			maxDR = deltaRlist[i];
+	}
+        Hist("h_deltaR_max")->Fill(maxDR);
+
+      
 	if(signal && printoutEvents)
 	{
 		 TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
