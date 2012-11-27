@@ -62,7 +62,6 @@ void FakeRate::BeginInputData( const SInputData& ) throw( SError ) {
 	h_event_type_medium = Book(TH1D("h_event_type_medium","Event Type passing iso < 0.25",8,0.5,8.5));
 	h_event_type_tight  = Book(TH1D("h_event_type_tight","Event Type passing iso < 0.1 ",8,0.5,8.5));
 
-
 	//Z->mumu    
 	h_mu1Z_pt           = Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
 	h_mu2Z_pt           = Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));

@@ -231,6 +231,7 @@ private:
 // properties
 	std::string InTreeName;
 	double Ptcut;
+	double maxDeltaR;
 	double BestMassForZ;
 	double dZvertex;
 	double bTagValue;

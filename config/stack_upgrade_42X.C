@@ -41,7 +41,7 @@ int stack_upgrade_42X() {
   //DoubleEle + WZ
   //TString fileNames[nFiles] = {"DoubleEle","TT_42X_TruePU","WZ_42X_TruePU","ZZ_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU","Hww120_42X_TruePU"};
   //DoubleEle + WZjets 
-  TString fileNames[nFiles] = {"DoubleEle","ZZ_42X_TruePU","WZjets_42X_TruePU","TT_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU_1","Hww120_42X_TruePU_1"};
+  TString fileNames[nFiles] = {"data","ZZ_42X_TruePU","WZjets_42X_TruePU","TT_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU_1","Hww120_42X_TruePU_1"};
   //DoubleMu + WZ 
   //TString fileNames[nFiles] = {"DoubleMu","TT_42X_TruePU","WZ_42X_TruePU","ZZ_42X_TruePU","DY_42X_TruePU","Htt120_42X_TruePU","Hww120_42X_TruePU"};
   //DoubleMu + WZjets 
@@ -81,9 +81,10 @@ int stack_upgrade_42X() {
   //const int nHist1 = 44;
 
 
-  TString histNames1[nHist1] = {"h_Zmass_ee","h_H_mass_type_5","h_H_mass_type_6","h_H_mass_type_7","h_H_mass_type_8"};
-  TString histTitles[nHist1] = {"M_{2e}[GeV]","M_{#mu#tau}[GeV]","M_{#mue}[GeV]","M_{e#tau}[GeV]","M_{#tau#tau}[GeV]"};
-  TString PaveText[nHist1]	= {"Zee","EEMT","EEME","EEET","EETT"};
+  TString histNames1[nHist1] = {"h_Zmass","h_H_mass","h_Nvertex_NoCut_W","h_cut_flow_weight","h_H_mass_type_8"};
+  //TString histNames1[nHist1] = {"h_Zmass_ee","h_H_mass_type_5","h_H_mass_type_6","h_H_mass_type_7","h_H_mass_type_8"};
+  TString histTitles[nHist1] = {"M_{ll}[GeV]","M_{H,vis}[GeV]","# of vertex","# of events","M_{#tau#tau}[GeV]"};
+  TString PaveText[nHist1]	= {"Z(ee/mm)","all final states","","","EETT"};
   
   //TString histNames1[nHist1] = {"h_mu1Z_pt", "h_mu2Z_pt", "h_Z_lep1_eta", "h_Z_lep2_eta", "h_Z_lep1_phi", "h_Z_lep2_phi", "h_Zmass_mumu", "h_Zmass_ee","h_Zpt_mumu", "h_Zpt_ee","h_Zmass", "h_Zpt","h_H_mass", "h_H_pt","h_H_eta", "h_H_phi", "h_H_mass_type_1", "h_H_mass_type_2", "h_H_mass_type_3", "h_H_mass_type_4", "h_H_mass_type_5", "h_H_mass_type_6", "h_H_mass_type_7", "h_H_mass_type_8", "h_Tmass","h_H_lep1_eta","h_H_lep2_eta","h_H_lep1_phi","h_H_lep2_phi","h_nbjets","h_nbjets_afterVeto","h_nbjetsVetoed","h_nPU_Info","h_nPU_InfoTrue","h_nPU_Bunch0","h_nPU_Info_W","h_nPU_InfoTrue_W","h_nPU_Bunch0_W","h_Nvertex_NoCut","h_Nvertex_NoCut_W","h_Nvertex_AfterZ","h_Nvertex_AfterZ_W","h_Nvertex_AfterZH","h_Nvertex_AfterZH_W"};
 

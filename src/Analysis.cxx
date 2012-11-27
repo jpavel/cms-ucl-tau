@@ -14,6 +14,7 @@ Analysis::Analysis()
 
 		SetLogName( GetName() );
 		DeclareProperty("InTreeName",InTreeName);
+		DeclareProperty("maxDeltaR",maxDeltaR);
 		DeclareProperty("MyPtCut",Ptcut);
 		DeclareProperty("BestMassForZ",BestMassForZ);
 		DeclareProperty("dZvertex", dZvertex);
@@ -646,7 +647,7 @@ entries++;
 
 			if(RelIsoMu(goodMuon[j]) > 0.3) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) continue;
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR) continue;
 
 			TLorentzVector cand;
 			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
@@ -702,7 +703,7 @@ entries++;
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  goodElectron[j].pt << " and charge " << goodElectron[j].charge << SLogger::endmsg;
 				if( RelIsoEl(goodElectron[j]) > 0.3) continue;	
 				if(goodElectron[i].charge*goodElectron[j].charge >=0.) continue;
-				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1) continue;
+				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR) continue;
 
 				TLorentzVector cand;
 				cand.SetPxPyPzE(goodElectron[i].px+goodElectron[j].px,
@@ -844,7 +845,7 @@ entries++;
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
 		}
 	}
@@ -855,13 +856,13 @@ entries++;
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
 		}
 
 		for(uint j = 0; j < goodMuon.size() && !removed; j++)
 		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1 && RelIsoMu(goodMuon[j]) < 0.4) 
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR && RelIsoMu(goodMuon[j]) < 0.4) 
 			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
 		}
 
@@ -901,7 +902,7 @@ entries++;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
 
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 
 		}
@@ -909,7 +910,7 @@ entries++;
 		for(uint j = 0; j < goodMuon.size() && !removed; j++)
 		{
 
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1 && RelIsoMu(goodMuon[j]) < 0.4) 
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR && RelIsoMu(goodMuon[j]) < 0.4) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 
 		}
@@ -917,7 +918,7 @@ entries++;
 		for(uint j = 0; j < goodElectron.size() && !removed; j++)
 		{
 
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1 && RelIsoEl(goodElectron[j]) < 0.4 ) 
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR && RelIsoEl(goodElectron[j]) < 0.4 ) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 
 
@@ -951,7 +952,7 @@ entries++;
 			if(UseSumPtCut && goodMuon[i].pt+goodElectron[j].pt < Cut_leplep_sumPt) continue;
 			bool iso2 = (RelIsoEl(goodElectron[j]) < 0.3);
 			if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
-			if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;
+			if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< maxDeltaR) continue;
 			if (iso1_muE && iso2){ signal = true; muE=true; muTau = false;}
 			else if (!iso1_muE && iso2  && category < 1){ category = 2; muE=true; muTau = false;}
 			else if ( iso1_muE && !iso2 && category < 1){ category = 1; muE=true; muTau = false;} 
@@ -969,7 +970,7 @@ entries++;
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< 0.1) continue;                                    
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< maxDeltaR) continue;                                    
 			if (iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
 			else if (!iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
 			else if ( iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
@@ -999,7 +1000,7 @@ entries++;
 				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
 				if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
 				if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< 0.1) continue;
+				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< maxDeltaR) continue;
 				if (iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
 				else if (iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
@@ -1032,7 +1033,7 @@ entries++;
 				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
-				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.1) continue;
+				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
 				if (iso1 && iso2){ signal = true; muTau=muE=eTau = false; tauTau=true;}
 				else if (!iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;}
 				else if (iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;} 
@@ -1188,16 +1189,16 @@ entries++;
 	bool Ad_lepton = false;	
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
-		if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
-				deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1 && RelIsoMu(goodMuon[i]) < 0.4) 
+		if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
+				deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoMu(goodMuon[i]) < 0.4) 
 			Ad_lepton=true;
 
 	}
 
 	for(uint i = 0; i < goodElectron.size(); i++)
 	{
-		if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
-				deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1 && RelIsoEl(goodElectron[i]) < 0.4)  
+		if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
+				deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoEl(goodElectron[i]) < 0.4)  
 			Ad_lepton=true;
 
 	}
@@ -1205,8 +1206,8 @@ entries++;
 	if(!IgnoreAdditionalTaus){
 		for(uint i = 0; i < goodTau.size(); i++)
 		{
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> 0.1 &&
-					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> 0.1 && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
+					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
 				Ad_lepton=true;
 		}
 	}
