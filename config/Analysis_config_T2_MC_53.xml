@@ -56,7 +56,7 @@
                 <Item Name="Cut_tautau_MVA_iso" Value="false" />
       
                 <Item Name="AllowTauBOverlap" Value="false" />
-      
+                <Item Name="printoutEvents" Value="true" />
  
 		</UserConfig>
 	</Cycle>

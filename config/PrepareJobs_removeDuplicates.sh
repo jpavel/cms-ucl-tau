@@ -113,6 +113,9 @@ do
   echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "touch events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "tar czvf events.tgz events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cp events.tgz ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo -n "rm -rf " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   more temp_input.2 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "" >> ${output_name}_job${counter}/${output_name}_${counter}.sh

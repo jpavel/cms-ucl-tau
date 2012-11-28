@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
-<JobConfiguration JobName="FilterJob" OutputLevel="VERBOSE">
+<JobConfiguration JobName="FilterJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -12,7 +12,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
     
 	<Cycle Name="Filter" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="10" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
 			  &grid;
 			<InputTree Name="t"/>
 <!--
@@ -38,7 +38,7 @@
 		<Item Name="is2012_53" Value="true"/>
 
 	    <Item Name="vetoMuonTrigger" Value="false" />
-        <Item Name="vetoElectronTrigger" Value="false" />
+            <Item Name="vetoElectronTrigger" Value="false" />
         
         <Item Name="N_ALL" Value="4.0" />
         <Item Name="N_ELMU" Value="-3.0" />
