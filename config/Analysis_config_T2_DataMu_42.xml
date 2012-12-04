@@ -20,7 +20,7 @@
 		</InputData>
 		<UserConfig>
 		<Item Name="InTreeName" Value="t"/>
-        <Item Name="maxDeltaR" Value="0.1"/>
+        <Item Name="maxDeltaR" Value="0.3"/>
         <Item Name="MyPtCut" Value="2000"/>
 			<!-- using lepton pair with the closest mass instead of highest Pt. To switch off use any negative value-->
         <Item Name="BestMassForZ" Value="91.2" /> 

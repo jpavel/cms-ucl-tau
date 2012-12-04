@@ -532,7 +532,6 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4)
 		{
-			
 			if (pfID)
 			{
 				GoodToDenomMuon_assoc_index.push_back(denomMuon.size());
@@ -602,6 +601,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool Zee = false;
 	double dMass=999.0;
 	int Zindex[2] = {-1,-1};
+
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
@@ -656,13 +656,13 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+j-1);
 		DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+denom_i);
 		DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+denom_j-1);
+		denomMuon.erase(denomMuon.begin()+denom_i);
+		denomMuon.erase(denomMuon.begin()+denom_j-1);
 		
 		Zmumu=true;
 	
 	}
 
-
-	m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 
 	if(!Zmumu)
 	{
@@ -722,6 +722,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+j-1);
 			DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+denom_i);
 			DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+denom_j-1);
+			denomElectron.erase(denomElectron.begin()+denom_i);
+			denomElectron.erase(denomElectron.begin()+denom_j-1);
 		
 			
 			Zee=true;
@@ -819,36 +821,43 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	
 				denomMuon.erase(denomMuon.begin()+i); 
+				DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+i);
 				i--;			
 				removed = true;
 				// removal of the same muon as above from the "goodMuon" collection and association indices vectors
-				//~ if (DenomToGoodMuon_assoc_index[i] > -1){
-					 //~ uint goodIndex=DenomToGoodMuon_assoc_index[i];
-					 //~ goodMuon.erase(goodMuon.begin()+goodIndex);
-					 //~ GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+goodIndex);
-					 //~ DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin() +i);
-				//~ }
+				 if (DenomToGoodMuon_assoc_index[i] > -1){
+					  uint goodIndex=DenomToGoodMuon_assoc_index[i];
+					  goodMuon.erase(goodMuon.begin()+goodIndex);
+					  GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+goodIndex);
+				 }
 			}
 		}
 	}
 	Hist("h_n_goodMu_Hcand")->Fill(muon.size());
+	m_logger << INFO << " good electron " << goodElectron.size() << " GoodToDenomEle " << GoodToDenomElectron_assoc_index.size() << SLogger::endmsg;
+	m_logger << INFO << " denom electron " << denomElectron.size() << " DenomToGoodEle " << DenomToGoodElectron_assoc_index.size() << SLogger::endmsg;
 
 	for(int i = 0; i < denomElectron.size(); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
+	m_logger << INFO << "Zcand size " << Zcand.size() <<  SLogger::endmsg;
+	m_logger << INFO << "deltaR " << deltaR(denomElectron[i].eta,denomElectron[i].phi,Zcand[j].eta, Zcand[j].phi) <<  SLogger::endmsg;
 			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,Zcand[j].eta, Zcand[j].phi)< maxDeltaR) 
 			{	
+
 				denomElectron.erase(denomElectron.begin()+i); 
+				DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+i);
 				i--; 
 				removed = true;
-				//~ if (DenomToGoodElectron_assoc_index[i] > -1){
-					 //~ uint goodIndex=DenomToGoodElectron_assoc_index[i];
-					 //~ goodElectron.erase(goodElectron.begin()+goodIndex);
-					 //~ GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
-					 //~ DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
-				//~ }
+                                if(i<0) i=0;
+	m_logger << INFO << DenomToGoodElectron_assoc_index[i] << SLogger::endmsg;
+				 if (DenomToGoodElectron_assoc_index[i] > -1){
+					  uint goodIndex=DenomToGoodElectron_assoc_index[i];
+					  goodElectron.erase(goodElectron.begin()+goodIndex);
+					  GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
+				 }
 			}
 		}
 
@@ -857,14 +866,15 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
 			{	
 				denomElectron.erase(denomElectron.begin()+i); 
+				DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
 				i--; 
 				removed = true;
-				//~ if (DenomToGoodElectron_assoc_index[i] > -1){
-					 //~ uint goodIndex=DenomToGoodElectron_assoc_index[i];
-					 //~ goodElectron.erase(goodElectron.begin()+goodIndex);
-					 //~ GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
-					 //~ DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
-				//~ }
+                                if(i<0) i=0;
+				 if (DenomToGoodElectron_assoc_index[i] > -1){
+					  uint goodIndex=DenomToGoodElectron_assoc_index[i];
+					  goodElectron.erase(goodElectron.begin()+goodIndex);
+					  GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
+				 }
 				
 			}
 			

@@ -90,6 +90,7 @@ private:
 	// cut-flow
     TH1* h_deltaR;
     TH1* h_deltaR_max;
+    TH1* h_deltaR_min;
 
     TH1* h_cut_flow_weight;
     TH1* h_cut_flow;

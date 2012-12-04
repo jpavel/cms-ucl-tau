@@ -79,8 +79,9 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
-        h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 20,0,2));
-        h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 20,0,2));
+        h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
+        h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
+        h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
 
         h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
         h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
@@ -1552,13 +1553,17 @@ entries++;
         deltaRlist.push_back(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[0].eta,Hcand[0].phi));
 
         double maxDR = deltaRlist[0];
+        double minDR = deltaRlist[0];
 
 	for(int i = 0; i<deltaRlist.size(); i++)
 	{
 		if(deltaRlist[i] > maxDR)
 			maxDR = deltaRlist[i];
+		if(minDR > deltaRlist[i])
+			minDR = deltaRlist[i];
 	}
         Hist("h_deltaR_max")->Fill(maxDR);
+        Hist("h_deltaR_min")->Fill(minDR);
 
       
 	if(signal && printoutEvents)
