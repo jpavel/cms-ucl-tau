@@ -822,12 +822,12 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				i--;			
 				removed = true;
 				// removal of the same muon as above from the "goodMuon" collection and association indices vectors
-				if (DenomToGoodMuon_assoc_index[i] > -1){
-					 uint goodIndex=DenomToGoodMuon_assoc_index[i];
-					 goodMuon.erase(goodMuon.begin()+goodIndex);
-					 GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+goodIndex);
-					 DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin() +i);
-				}
+				//~ if (DenomToGoodMuon_assoc_index[i] > -1){
+					 //~ uint goodIndex=DenomToGoodMuon_assoc_index[i];
+					 //~ goodMuon.erase(goodMuon.begin()+goodIndex);
+					 //~ GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+goodIndex);
+					 //~ DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin() +i);
+				//~ }
 			}
 		}
 	}
@@ -843,12 +843,12 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				denomElectron.erase(denomElectron.begin()+i); 
 				i--; 
 				removed = true;
-				if (DenomToGoodElectron_assoc_index[i] > -1){
-					 uint goodIndex=DenomToGoodElectron_assoc_index[i];
-					 goodElectron.erase(goodElectron.begin()+goodIndex);
-					 GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
-					 DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
-				}
+				//~ if (DenomToGoodElectron_assoc_index[i] > -1){
+					 //~ uint goodIndex=DenomToGoodElectron_assoc_index[i];
+					 //~ goodElectron.erase(goodElectron.begin()+goodIndex);
+					 //~ GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
+					 //~ DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
+				//~ }
 			}
 		}
 
@@ -859,12 +859,12 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				denomElectron.erase(denomElectron.begin()+i); 
 				i--; 
 				removed = true;
-				if (DenomToGoodElectron_assoc_index[i] > -1){
-					 uint goodIndex=DenomToGoodElectron_assoc_index[i];
-					 goodElectron.erase(goodElectron.begin()+goodIndex);
-					 GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
-					 DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
-				}
+				//~ if (DenomToGoodElectron_assoc_index[i] > -1){
+					 //~ uint goodIndex=DenomToGoodElectron_assoc_index[i];
+					 //~ goodElectron.erase(goodElectron.begin()+goodIndex);
+					 //~ GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
+					 //~ DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
+				//~ }
 				
 			}
 			
