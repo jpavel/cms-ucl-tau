@@ -168,6 +168,8 @@ private:
     bool is2012_52;
     bool is2012_53;
     bool useTruePileUp;
+    double maxDeltaR;
+	
 
 // output variables
 

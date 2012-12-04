@@ -36,6 +36,8 @@ FakeRate::FakeRate()
 		DeclareProperty("is2012_52",is2012_52);
 		DeclareProperty("is2012_53",is2012_53);
 		DeclareProperty("useTruePileUp",useTruePileUp);
+		DeclareProperty("maxDeltaR",maxDeltaR);
+		
 	}
 
 FakeRate::~FakeRate() {
@@ -506,6 +508,13 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	std::vector<myobject> goodMuon;
 	goodMuon.clear();
+	std::vector<myobject> denomMuon;
+	denomMuon.clear();
+	std::vector<int> DenomToGoodMuon_assoc_index; // indices of good muons
+	DenomToGoodMuon_assoc_index.clear();
+	std::vector<int> GoodToDenomMuon_assoc_index; // indices of denom muons
+	GoodToDenomMuon_assoc_index.clear();
+	
 
 	std::vector<myobject> muon = m->PreSelectedMuons;
 	m_logger << VERBOSE << " There are " << muon.size() << " preselected muons " << SLogger::endmsg;
@@ -520,20 +529,42 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 		bool pfID = PFMuonID(muon[i]);	
 
-		if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4 && pfID)
+		
+		if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4)
 		{
-			goodMuon.push_back(muon[i]);
-			Hist("h_mu_relIso")->Fill(relIso,PUWeight);
+			
+			if (pfID)
+			{
+				GoodToDenomMuon_assoc_index.push_back(denomMuon.size());
+				DenomToGoodMuon_assoc_index.push_back(goodMuon.size());
+				goodMuon.push_back(muon[i]);
+				Hist("h_mu_relIso")->Fill(relIso,PUWeight);								
+			}else{
+				DenomToGoodMuon_assoc_index.push_back(-1);
+			}
+			denomMuon.push_back(muon[i]);
 		}
+		
 	}
 
 	// no isolation to muons applied!
-	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << SLogger::endmsg;
+	m_logger << VERBOSE << " There are " << goodMuon.size() << " good muons " << " and " << denomMuon.size() << " denominator muons" << SLogger::endmsg;
+	
 	Hist("h_n_goodMu")->Fill(goodMuon.size(),PUWeight);
 
 	std::vector<myobject> goodElectron;
 	goodElectron.clear();
+	std::vector<myobject> denomElectron;
+	denomElectron.clear();
+	std::vector<int> DenomToGoodElectron_assoc_index; // indices of good electrons
+	DenomToGoodElectron_assoc_index.clear();
+	std::vector<int> GoodToDenomElectron_assoc_index; // indices of denom electrons
+	GoodToDenomElectron_assoc_index.clear();
+	
+	
 	std::vector<myobject> electron = m->PreSelectedElectrons;
+	
+	
 	if(foundEvent) std::cout <<  " There are " << electron.size() << " preselected electrons " << std::endl;
 	m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
 
@@ -545,14 +576,22 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
-		if (elPt > 10. && fabs(elEta) < 2.5  && elID && missingHits <=1)
+		if (elPt > 10. && fabs(elEta) < 2.5 )
 		{
-			goodElectron.push_back(electron[i]);
-			Hist("h_el_relIso")->Fill(relIso,PUWeight);
+			if(elID && missingHits <=1){
+				GoodToDenomElectron_assoc_index.push_back(denomElectron.size());
+				DenomToGoodElectron_assoc_index.push_back(goodElectron.size());
+				goodElectron.push_back(electron[i]);
+				Hist("h_el_relIso")->Fill(relIso,PUWeight);
+			}else{
+				DenomToGoodElectron_assoc_index.push_back(-1);
+			}
+			denomElectron.push_back(electron[i]);
+			
 		}
 	}
 	// no isolation to eles applied!
-	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons " << SLogger::endmsg;
+	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denominator electrons" << SLogger::endmsg;
 	int muCandZ = goodMuon.size();
 	int elCandZ = goodElectron.size();
 	Hist("h_n_goodEl")->Fill(goodElectron.size(),PUWeight);
@@ -575,7 +614,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 			if(RelIsoMu(goodMuon[j]) > 0.3) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< 0.1) continue;
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR) continue;
 
 			TLorentzVector cand;
 			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
@@ -607,10 +646,17 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Zindex[0] > -1 && Zindex[1] > -1){
 		int i = Zindex[0];
 		int j = Zindex[1];
+		int denom_i = GoodToDenomMuon_assoc_index[i];
+		int denom_j = GoodToDenomMuon_assoc_index[j];		
 		Zcand.push_back(goodMuon[i]);
 		Zcand.push_back(goodMuon[j]);
 		goodMuon.erase(goodMuon.begin()+i);
 		goodMuon.erase(goodMuon.begin()+j-1);
+		GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+i);
+		GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+j-1);
+		DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+denom_i);
+		DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+denom_j-1);
+		
 		Zmumu=true;
 	
 	}
@@ -632,7 +678,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  goodElectron[j].pt << " and charge " << goodElectron[j].charge << SLogger::endmsg;
 				if( RelIsoEl(goodElectron[j]) > 0.3) continue;	
 				if(goodElectron[i].charge*goodElectron[j].charge >=0.) continue;
-				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< 0.1) continue;
+				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR) continue;
 
 				TLorentzVector cand;
 				cand.SetPxPyPzE(goodElectron[i].px+goodElectron[j].px,
@@ -664,11 +710,20 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			int i = Zindex[0];
 			int j = Zindex[1];
+			int denom_i = GoodToDenomElectron_assoc_index[i];
+			int denom_j = GoodToDenomElectron_assoc_index[j];		
+		
 			
 			Zcand.push_back(goodElectron[i]);
 			Zcand.push_back(goodElectron[j]);	
 			goodElectron.erase(goodElectron.begin()+i);
 			goodElectron.erase(goodElectron.begin()+j-1);
+			GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+i);
+			GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+j-1);
+			DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+denom_i);
+			DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+denom_j-1);
+		
+			
 			Zee=true;
 		
 		}
@@ -756,30 +811,63 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	// Z overlap removal
 
-	for(int i = 0; i < muon.size(); i++)
+	for(int i = 0; i < denomMuon.size(); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(muon[i].eta,muon[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
-			{	muon.erase(muon.begin()+i); i--;removed = true;}
+			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
+			{	
+				denomMuon.erase(denomMuon.begin()+i); 
+				i--;			
+				removed = true;
+				// removal of the same muon as above from the "goodMuon" collection and association indices vectors
+				if (DenomToGoodMuon_assoc_index[i] > -1){
+					 uint goodIndex=DenomToGoodMuon_assoc_index[i];
+					 goodMuon.erase(goodMuon.begin()+goodIndex);
+					 GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+goodIndex);
+					 DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin() +i);
+				}
+			}
 		}
 	}
 	Hist("h_n_goodMu_Hcand")->Fill(muon.size());
 
-	for(int i = 0; i < electron.size(); i++)
+	for(int i = 0; i < denomElectron.size(); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-			if(deltaR(electron[i].eta,electron[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
-			{	electron.erase(electron.begin()+i); i--; removed = true;}
+			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,Zcand[j].eta, Zcand[j].phi)< maxDeltaR) 
+			{	
+				denomElectron.erase(denomElectron.begin()+i); 
+				i--; 
+				removed = true;
+				if (DenomToGoodElectron_assoc_index[i] > -1){
+					 uint goodIndex=DenomToGoodElectron_assoc_index[i];
+					 goodElectron.erase(goodElectron.begin()+goodIndex);
+					 GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
+					 DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
+				}
+			}
 		}
 
-		for(uint j = 0; j < muon.size() && !removed; j++)
+		for(uint j = 0; j < denomMuon.size() && !removed; j++)
 		{
-			if(deltaR(electron[i].eta,electron[i].phi,muon[j].eta,muon[j].phi)< 0.1) 
-			{	electron.erase(electron.begin()+i); i--; removed = true;}
+			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
+			{	
+				denomElectron.erase(denomElectron.begin()+i); 
+				i--; 
+				removed = true;
+				if (DenomToGoodElectron_assoc_index[i] > -1){
+					 uint goodIndex=DenomToGoodElectron_assoc_index[i];
+					 goodElectron.erase(goodElectron.begin()+goodIndex);
+					 GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
+					 DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
+				}
+				
+			}
+			
 		}
 
 	}
@@ -791,11 +879,10 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// list of good taus 
 	std::vector<myobject> goodTau;
 	goodTau.clear();
-	int muCand = goodMuon.size();
-	int elCand = electron.size();
-
+	
 
 	std::vector<myobject> tau = m->PreSelectedHPSTaus;
+	
 
 	m_logger << DEBUG << " There are " << tau.size() << " preselected taus " << SLogger::endmsg;
 
@@ -811,44 +898,56 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool ElectronMVA = (tau[i].discriminationByElectronMVA > 0.5);
 		bool TightMuon = (tau[i].discriminationByMuonTight > 0.5);
 		// no isolation, no cut on pt!	
-		if (LooseElectron && LooseMuon && DecayMode && fabs(tauEta) < 2.3){
-			goodTau.push_back(tau[i]);
-			if(foundEvent) std::cout<< "   Putting tau with pt " << tau[i].pt << " phi " <<tau[i].phi 
-				<< " and ID " << LooseElectron << LooseMuon << CombinedIsolation << LooseIsolation << DecayMode << TightMuon << ElectronMVA << std::endl;
+		if(fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode){
+				goodTau.push_back(tau[i]);
+				if(foundEvent) std::cout<< "   Putting tau with pt " << tau[i].pt << " phi " <<tau[i].phi 
+					<< " and ID " << LooseElectron << LooseMuon << CombinedIsolation << LooseIsolation << DecayMode << TightMuon << ElectronMVA << std::endl;
+			
 		}
 	}
 
 	for(int i = 0; i < goodTau.size(); i++)
 	{
 		bool removed = false;
+		
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< 0.1) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta, Zcand[j].phi)< maxDeltaR) 
+			{	
+				goodTau.erase(goodTau.begin()+i); 
+				i--; 
+				removed = true;
+	
+			}
 		}
+		
 
-		for(uint j = 0; j < muon.size() && !removed; j++)
+		for(uint j = 0; j < denomMuon.size() && !removed; j++)
 		{
 
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,muon[j].eta,muon[j].phi)< 0.1 && RelIsoMu(muon[j]) < 0.4) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,muon[j].eta,muon[j].phi)< maxDeltaR && RelIsoMu(muon[j]) < 0.4) 
+			{	
+				goodTau.erase(goodTau.begin()+i); 
+				i--; 
+				removed = true;
+			}
 
 		}
 
-		for(uint j = 0; j < electron.size() && !removed; j++)
+		for(uint j = 0; j < denomElectron.size() && !removed; j++)
 		{
 
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,electron[j].eta,electron[j].phi)< 0.1 && RelIsoEl(electron[j]) < 0.4 ) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,electron[j].eta,electron[j].phi)< maxDeltaR && RelIsoEl(electron[j]) < 0.4 ) 
+			{	
+				goodTau.erase(goodTau.begin()+i); 
+				i--; 
+				removed = true;
+			}
 
 
 		}
-
 
 	}
-	int tauCand = 	goodTau.size();
 	if(foundEvent) cout <<  " There are " << goodTau.size() << " good taus " << std::endl;
 	m_logger << DEBUG << " There are " << goodTau.size() << " good taus " << SLogger::endmsg;	
 	Hist("h_n_goodTau_Hcand")->Fill(goodTau.size());	
@@ -862,36 +961,37 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hcand.clear();
 	m_logger << DEBUG << " Starting muon loop: " << muon.size() << " " << eMu << " " << muTau << SLogger::endmsg;
 	
-	for(uint i = 0; i < muon.size(); i++)
+	for(uint i = 0; i < denomMuon.size(); i++)
 	{
-		m_logger << DEBUG << " Checking for eMu " << muon.size() << " " << i << " " << eMu << " " << muTau << SLogger::endmsg;
-		for(uint j=0; j< electron.size() &&!muTau; j++)
+		m_logger << DEBUG << " Checking for eMu " << denomMuon.size() << " " << i << " " << eMu << " " << muTau << SLogger::endmsg;
+		for(uint j=0; j< denomElectron.size() &&!muTau; j++)
 		{
-			if(muon[i].charge*electron[j].charge < 0) continue;
-			if(deltaR(electron[j].eta,electron[j].phi,muon[i].eta,muon[i].phi)< 0.1) continue;
+			if(denomMuon[i].charge*denomElectron[j].charge < 0) continue;
+			if(deltaR(denomElectron[j].eta,denomElectron[j].phi,denomMuon[i].eta,denomMuon[i].phi)< maxDeltaR) continue;
 			eMu=true;
-			Hcand.push_back(electron[j]);
-			Hcand.push_back(muon[i]);
+			Hcand.push_back(denomElectron[j]);
+			Hcand.push_back(denomMuon[i]);
+			
 
-
-			electron.erase(electron.begin()+j); j--;
-			if(electron.size()==0) j=electron.size();
+			denomElectron.erase(denomElectron.begin()+j); 
+			j--;
+			if(denomElectron.size()==0) j=denomElectron.size();
 		}
 		if(eMu){
 			m_logger << DEBUG << " Found eMu " << muon.size() << " " << i << SLogger::endmsg;
 		
-			muon.erase(muon.begin()+i);i--;
-			if(muon.size()==0) i=muon.size();	
+			denomMuon.erase(denomMuon.begin()+i);i--;
+			if(denomMuon.size()==0) i=denomMuon.size();	
 		}
 
 		m_logger << DEBUG << " Checking for muTau " << muon.size() << " " << i << " " << eMu << " " << muTau << SLogger::endmsg;
 		for(uint j=0; j< goodTau.size() && !eMu ; j++)
 		{
-			if(muon[i].charge*goodTau[j].charge < 0) continue;
+			if(denomMuon[i].charge*goodTau[j].charge < 0) continue;
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,muon[i].eta,muon[i].phi)< 0.1) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,denomMuon[i].eta,denomMuon[i].phi)< maxDeltaR) continue;
 			muTau=true;
-			Hcand.push_back(muon[i]);
+			Hcand.push_back(denomMuon[i]);
 			Hcand.push_back(goodTau[j]);
 
 			
@@ -899,11 +999,11 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(goodTau.size()==0) j=goodTau.size();
 		}
 		if(muTau){
-			m_logger << DEBUG << " Found muTau " << muon.size() << " " << i << SLogger::endmsg;
+			m_logger << DEBUG << " Found muTau " << denomMuon.size() << " " << i << SLogger::endmsg;
 			
-			muon.erase(muon.begin()+i);i--;
+			denomMuon.erase(denomMuon.begin()+i);i--;
 			
-			if(muon.size()==0) i=muon.size();	
+			if(denomMuon.size()==0) i=denomMuon.size();	
 		
 		}
 
@@ -913,11 +1013,11 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool eTau = false;
 	if(!muTau&&!eMu)
 	{
-		for(uint i = 0; i < electron.size() ; i++)
+		for(uint i = 0; i < denomElectron.size() ; i++)
 		{
-			if(foundEvent) std::cout << " electron no. " << i << " pt: " << electron[i].pt << " eta " << electron[i].eta << " phi " 
-				<< electron[i].phi << " charge " << electron[i].charge << std::endl;
-			if( electron[i].numLostHitEleInner > 0) continue;
+			if(foundEvent) std::cout << " denomElectron no. " << i << " pt: " << denomElectron[i].pt << " eta " << denomElectron[i].eta << " phi " 
+				<< denomElectron[i].phi << " charge " << denomElectron[i].charge << std::endl;
+			if( denomElectron[i].numLostHitEleInner > 0) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			eTau = false;
 			for(uint j=0; j< goodTau.size() ; j++)
@@ -925,19 +1025,19 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(foundEvent) std::cout << " tau no. " << j << " pt: " << goodTau[j].pt << " eta " << goodTau[j].eta << " phi " 
 					<< goodTau[j].phi << " charge " << goodTau[j].charge << std::endl;
 
-				if(electron[i].charge*goodTau[j].charge <0) continue;
+				if(denomElectron[i].charge*goodTau[j].charge <0) continue;
 				if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-				if(deltaR(goodTau[j].eta,goodTau[j].phi,electron[i].eta,electron[i].phi)< 0.1) continue;
+				if(deltaR(goodTau[j].eta,goodTau[j].phi,denomElectron[i].eta,denomElectron[i].phi)< maxDeltaR) continue;
 				eTau=true;
-				Hcand.push_back(electron[i]);
+				Hcand.push_back(denomElectron[i]);
 				Hcand.push_back(goodTau[j]);
 				
 				goodTau.erase(goodTau.begin()+j); j--;
 				if(goodTau.size()==0) j=goodTau.size();
 			}
 			if(eTau){
-				electron.erase(electron.begin()+i); i--;
-				if(electron.size()==0) i=electron.size();	
+				denomElectron.erase(denomElectron.begin()+i); i--;
+				if(denomElectron.size()==0) i=denomElectron.size();	
 			}
 		}
 
@@ -964,7 +1064,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 				//if(goodTau[j].byTightCombinedIsolationDeltaBetaCorr <=0.5) continue;
 				if(goodTau[j].pt < 20) continue;
-				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< 0.1) continue;
+				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
 				tauTau=true;
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1047,23 +1147,23 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	// overlap cleaning
 	if(foundEvent) 
-		std::cout << "There is " << goodMuon.size() << " " << electron.size() << " " << goodTau.size() << " more leptons." << std::endl;
+		std::cout << "There is " << goodMuon.size() << " " << denomElectron.size() << " " << goodTau.size() << " more leptons." << std::endl;
 	bool Ad_lepton = false;	
-	for(uint i = 0; i < muon.size(); i++)
+	for(uint i = 0; i < denomMuon.size(); i++)
 	{
 		for(uint j =0; j < Hcand.size(); j+=2){
-			if(deltaR(muon[i].eta,muon[i].phi,Hcand[j].eta,Hcand[j].phi)> 0.1 &&
-					deltaR(muon[i].eta,muon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> 0.1 && isGoodMu(muon[i]) < 0.4) 
+			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
+					deltaR(denomMuon[i].eta,denomMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(denomMuon[i]) < 0.4) 
 				Ad_lepton=true;
 		}
 
 	}
 
-	for(uint i = 0; i < electron.size(); i++)
+	for(uint i = 0; i < denomElectron.size(); i++)
 	{
 		for(uint j =0; j < Hcand.size(); j+=2){				
-			if(deltaR(electron[i].eta,electron[i].phi,Hcand[j].eta,Hcand[j].phi)> 0.1 &&
-					deltaR(electron[i].eta,electron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> 0.1 && RelIsoEl(electron[i]) < 0.4 && isGoodEl(electron[i]))  
+			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
+					deltaR(denomElectron[i].eta,denomElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && RelIsoEl(denomElectron[i]) < 0.4 && isGoodEl(denomElectron[i]))  
 				Ad_lepton=true;
 		}
 

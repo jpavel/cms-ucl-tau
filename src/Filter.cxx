@@ -2,6 +2,7 @@
 
 // Local include(s):
 #include "../include/Filter.h"
+#include <iostream>
 
 ClassImp( Filter );
 
@@ -127,13 +128,20 @@ bool Filter::Trg_MC_12(myevent* m) {
 void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
+	double event_number=1652920;
+	bool printout = false;
+	if(m->eventNumber==event_number) printout=true;
+	if(printout) std::cout << "Here!" << std::endl;
 	
 	bool trigPass = Trg_MC_12(m);
 	m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
+		if(printout) std::cout << "Trigger!" << std::endl;
 		return;
 	}
+	if(printout) std::cout << "Here2!" << std::endl;
+	
 	
 	std::vector<myobject> vertex = m->Vertex;
 	bool goodVertex = false;
@@ -142,7 +150,10 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		goodVertex=true;
 	}
 	
-	if(!goodVertex) return;
+	if(!goodVertex){		
+		if(printout) std::cout << "vertex!" << std::endl;
+		return;
+	}
 	
 	
 	std::vector<myobject> muon = m->PreSelectedMuons;
@@ -204,8 +215,10 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	uint N_TAU=goodTau.size();
 	m_logger << DEBUG << " There are " << N_MU << " muons " << N_EL << " electrons and " << N_TAU << " taus." << SLogger::endmsg;
 
-	if(N_ALL > 0 && (N_MU+N_EL+N_TAU) < N_ALL) return;
-	if(N_ELMU > 0 && (N_MU+N_EL) < N_ELMU) return;
+	if(N_ALL > 0 && (N_MU+N_EL+N_TAU) < N_ALL){		if(printout) std::cout << "N_ALL!" << std::endl; return;}
+	if(N_ELMU > 0 && (N_MU+N_EL) < N_ELMU){		if(printout) std::cout << "N_ELMU!" << std::endl; return;}
+	
+	if(printout) std::cout << "Here3!" << std::endl;
 	
 	
 	bool failDR = false;
@@ -268,7 +281,8 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	
-	if(failDR) return;
+	if(failDR){		if(printout) std::cout << "dR" << std::endl; return;}
+	if(printout) std::cout << "Here4!" << std::endl;
 	
 	
 	// dMass cut
@@ -283,18 +297,38 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					goodMuon[i].pz+goodMuon[j].pz,
 					goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
+			if(printout) std::cout << mass << std::cout;
 			if(mass > lepton_mass_min && mass < lepton_mass_max ) passMass=true;
 			if(passMass) m_logger << DEBUG << " Passed mass cut with value " << mass << SLogger::endmsg;
 			else m_logger << VERBOSE << " Failed mass cut with value " << mass << SLogger::endmsg;
 		}
 	}
 	
-	if(!passMass) return;
+	for (uint i = 0; i < goodElectron.size() && !passMass; i++) {
+		for (uint j = i+1; j < goodElectron.size() && !passMass; j++) {
+			TLorentzVector cand;
+			cand.SetPxPyPzE(goodElectron[i].px+goodElectron[j].px,
+					goodElectron[i].py+goodElectron[j].py,
+					goodElectron[i].pz+goodElectron[j].pz,
+					goodElectron[i].E+goodElectron[j].E);
+			double mass = cand.M();
+			if(printout) std::cout << mass << std::cout;
+			if(mass > lepton_mass_min && mass < lepton_mass_max ) passMass=true;
+			if(passMass) m_logger << DEBUG << " Passed mass cut with value " << mass << SLogger::endmsg;
+			else m_logger << VERBOSE << " Failed mass cut with value " << mass << SLogger::endmsg;
+		}
+	}
+	
+	if(!passMass){		if(printout) std::cout << "Mass" << std::endl; return;}
+	if(printout) std::cout << "Here5!" << std::endl;
 	
 	m_logger << INFO << " Passed!" << SLogger::endmsg;
 
 	out=*m;
 	outTree->Fill();
+	
+	if(printout) std::cout << "Pass!" << std::endl;
+	
 	
    return;
 

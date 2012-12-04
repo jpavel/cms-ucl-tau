@@ -27,7 +27,7 @@
         	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
         <Item Name="dZvertex" Value="0.1" /> 
 			<!-- Value of b-tag weight for veto -->
-        <Item Name="bTagValue" Value="0.679" />
+        <Item Name="bTagValue" Value="0.898" />
 			<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
          <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
 		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
