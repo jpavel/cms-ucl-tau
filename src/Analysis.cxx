@@ -366,7 +366,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		h_category1_pt_types.push_back(h_category1_temp_pt);
 		h_category2_pt_types.push_back(h_category2_temp_pt);
     
-		pass_type.push_back(0);
+		pass_type.push_back(46);
 	}
 
 
@@ -384,7 +384,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	// sync part
 	std::ifstream myfile;
 	 std::string line;
-	myfile.open ("mmtt_ulb.txt");
+	myfile.open ("ulb_in.txt");
 	 if (myfile.is_open())
 	 {	
 	    
@@ -1325,6 +1325,11 @@ entries++;
 	if(!IgnoreAdditionalTaus){
 		for(uint i = 0; i < goodTau.size(); i++)
 		{
+			//if(eNumber==78604) std::cout << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi) << " " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi) << std::endl;/			 
+			//if(eNumber==78604) std::cout << "dZ to 4 HHZZ " << fabs(goodTau[i].z_expo - Hcand[0].z_expo) << " " <<  fabs(goodTau[i].z_expo - Hcand[1].z_expo) << " " 
+			//<< fabs(goodTau[i].z_expo - Zcand[0].z_expo) << " " << fabs(goodTau[i].z_expo - Zcand[1].z_expo) << std::endl;
+			
+			if(fabs(goodTau[i].z_expo - Hcand[0].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Hcand[1].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Zcand[0].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Zcand[1].z_expo) > dZvertex) continue;
 			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
 					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
 				Ad_lepton=true;
@@ -1454,11 +1459,11 @@ entries++;
             break;
         }
 				
-				
-				 std::cout << "-->Additional tau pt " << goodTau[0].pt << " eta " << goodTau[0].eta << " phi " << goodTau[0].phi <<
-				  " AgainstElectronLoose " << LooseElectron  << " AgainstMuonLoose " << LooseMuon << " MediumCombinedIsolation " << CombinedIsolation << 
-				  " DecayModeFinding " << DecayMode << std::endl;
-				 
+				for(uint iTau=0; iTau < goodTau.size(); iTau++){
+				 std::cout << "-->Additional tau pt " << goodTau[iTau].pt << " eta " << goodTau[iTau].eta << " phi " << goodTau[iTau].phi <<
+				  " AgainstElectronLoose " << goodTau[iTau].discriminationByElectronLoose  << " AgainstMuonLoose " << goodTau[iTau].discriminationByMuonLoose << " MediumCombinedIsolation " << goodTau[iTau].byMediumCombinedIsolationDeltaBetaCorr << 
+				  " DecayModeFinding " << goodTau[iTau].discriminationByDecayModeFinding << std::endl;
+				 }
 			 }
 		return;
 	}
@@ -1517,6 +1522,7 @@ entries++;
 		double jetEta = jet[i].eta;
 		double jetPhi = jet[i].phi;
 		double bTag = jet[i].bDiscriminatiors_CSV;
+		//if(eNumber==78536) std::cout << jetPt << " " <<  jetEta << " " << jetPhi << " " <<  bTag << std::endl; //sync
 		if(jetPt > 20. && fabs(jetEta) < 2.4 && bTag > bTagValue){
 			count_bJets++;
 			double dR1,dR2,dR3,dR4;
@@ -1524,6 +1530,8 @@ entries++;
 			dR2=deltaR(jetEta,jetPhi,Zcand[1].eta,Zcand[1].phi);
 			dR3=deltaR(jetEta,jetPhi,Hcand[0].eta,Hcand[0].phi);
 			dR4=deltaR(jetEta,jetPhi,Hcand[1].eta,Hcand[1].phi);
+		//if(eNumber==78536) std::cout << dR1 << " " <<  dR2 << " " << dR3 << " " << dR4 <<  std::endl; //sync
+			
 			if(!AllowTauBOverlap){
 				if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ){
 					bTagVeto = true;	
@@ -1817,12 +1825,12 @@ entries++;
 	{
 		 pass_type[event_type-1]+=1; 
 		 TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-		 std::cout << pass_type[3]<< std::endl;
+		// std::cout << pass_type[3]<< std::endl;
 		// log1 << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << event_type << " " << Zmass << " " << Hmass << " " << fileName << std::endl;
-		 log1 << setiosflags(ios::fixed) << std::setprecision(1) << pass_type[3] << " " << event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass << std::endl;
+		 log1 << setiosflags(ios::fixed) << std::setprecision(1) << event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass << std::endl;
 	}
 	
-	 if (event_type == 4 && !found_event && signal){
+	 if (!found_event && signal){
 	 	  m_logger << ERROR << " My plus of type " << event_type << SLogger::endmsg;
 		TLorentzVector Zvector;
 		TLorentzVector Hvector;
