@@ -379,6 +379,56 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	
 	if(printoutEvents) log1.open("events.txt");
+	
+	
+	// sync part
+	std::ifstream myfile;
+	 std::string line;
+	myfile.open ("zh_sync.txt");
+	 if (myfile.is_open())
+	 {	
+	    
+	    while ( myfile.good() )
+	    {
+	      std::vector<int> tmp_index;
+	      std::vector<double> tmp_mass;
+	      tmp_index.clear();
+	      int i_number;
+		  double number;
+		
+	      myfile >> i_number;
+		  index_number.push_back(i_number);
+		  myfile >> i_number;
+		  evt_type.push_back(i_number);      
+		  myfile >> i_number;
+		  run_number.push_back(i_number);
+		   myfile >> i_number;
+		   lumi_number.push_back(i_number);
+		  myfile >> i_number;
+		  evt_number.push_back(i_number);
+			myfile >> number;
+		   mass_Z.push_back(number);
+			myfile >> number;
+        	mass_H.push_back(number);
+		
+	    }
+	    myfile.close();
+	  }
+	 index_number.pop_back();
+	evt_number.pop_back();
+	run_number.pop_back();
+	lumi_number.pop_back();
+	evt_type.pop_back();
+	mass_Z.pop_back();
+	mass_H.pop_back();
+	  std::cout << index_number.size() << " " << evt_number.size() << " " << run_number.size() << " " << lumi_number.size() << " " << evt_type.size() << 
+	  " " << mass_Z.size() << " " << mass_H.size() << std::endl;
+	  for (uint i =0; i < index_number.size(); i++)
+	  {
+		 std::cout << index_number[i] << " " << evt_type[i] << " " << run_number[i] << " " << lumi_number[i] << " " << evt_number[i] << 
+	  " " << mass_Z[i] << " " << mass_H[i] << std::endl;		
+	  }
+	
 
 	return;
 
