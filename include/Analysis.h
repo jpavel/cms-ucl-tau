@@ -69,7 +69,7 @@ public:
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
-   bool Trg_MC_12(myevent* m);
+   bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
    
    
@@ -89,6 +89,7 @@ private:
 	std::vector <int> evt_type;
 	std::vector <double>  mass_Z;
 	std::vector <double>  mass_H;
+	std::vector <int> pass_type;
 	
 	int compared;
 	int entries;
