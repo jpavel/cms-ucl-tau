@@ -7,7 +7,8 @@
 ClassImp( Filter );
 
 Filter::Filter()
-   : SCycleBase() {
+   : SCycleBase(), m_allEvents( "allEvents", this ) 
+   {
 
    SetLogName( GetName() );
    DeclareProperty("InTreeName",InTreeName);
@@ -62,13 +63,25 @@ void Filter::BeginInputData( const SInputData& ) throw( SError ) {
 	outFile = new TFile("output.root","recreate");
 	outTree = new TTree("t","filtered tree");
 	outTree->Branch("myevent",&out);
+	lumi.open("lumi.csv");
+	
+	current_run=current_lumi=-999;
    return;
 
 }
 
 void Filter::EndInputData( const SInputData& ) throw( SError ) {
+	lumi.close();
 	outTree->Write();
 	outFile->Close();
+	 m_logger << INFO << "Number of all processed events: "
+            << *m_allEvents
+            << SLogger::endmsg;
+     ofstream log1;       
+     log1.open("total.txt");
+     log1 << *m_allEvents << std::endl;
+     log1.close();
+     
    return;
 
 }
@@ -126,7 +139,13 @@ bool Filter::Trg_MC_12(myevent* m) {
 }
 
 void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
-
+	
+	++m_allEvents;
+	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
+		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
+		current_run=m->runNumber;
+		current_lumi=m->lumiNumber;
+	}
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	double event_number=9612;
 	bool printout = false;
