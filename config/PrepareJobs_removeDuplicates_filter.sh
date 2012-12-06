@@ -123,6 +123,8 @@ do
   echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "cp Filter.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cp *.txt ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "cp *.csv ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "srmcp file:////scratch/${output_name}_${counter}_runDir/output.root ${STORAGE}/${output_dir}/output_Ntuples_${counter}_0_abc.root" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
 #  echo "touch events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
 #  echo "tar czvf events.tgz events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
