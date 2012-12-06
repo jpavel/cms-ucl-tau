@@ -825,7 +825,6 @@ entries++;
 	}
 
 
-
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 
 	if(Zmumu||Zee)

@@ -530,9 +530,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool pfID = PFMuonID(muon[i]);	
 
 		
-		if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4)
+		if (muGlobal && muTracker)
 		{
-			if (pfID)
+			if (muPt > 10. && fabs(eMuta) < 2.4 && pfID)
 			{
 				GoodToDenomMuon_assoc_index.push_back(denomMuon.size());
 				DenomToGoodMuon_assoc_index.push_back(goodMuon.size());
@@ -575,9 +575,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
-		if (elPt > 10. && fabs(elEta) < 2.5 )
-		{
-			if(elID && missingHits <=1){
+		//if (elPt > 10. && fabs(elEta) < 2.5 )
+		//{
+			if(elPt > 10. && fabs(elEta) < 2.5 && elID && missingHits <=1){
 				GoodToDenomElectron_assoc_index.push_back(denomElectron.size());
 				DenomToGoodElectron_assoc_index.push_back(goodElectron.size());
 				goodElectron.push_back(electron[i]);
@@ -586,8 +586,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				DenomToGoodElectron_assoc_index.push_back(-1);
 			}
 			denomElectron.push_back(electron[i]);
-			
-		}
+			//}
 	}
 	// no isolation to eles applied!
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denominator electrons" << SLogger::endmsg;
@@ -848,8 +847,6 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				
 				i--; 
 				removed = true;
-                              
-				
 			}
 			
 		}
