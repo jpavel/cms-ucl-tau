@@ -879,7 +879,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool ElectronMVA = (tau[i].discriminationByElectronMVA > 0.5);
 		bool TightMuon = (tau[i].discriminationByMuonTight > 0.5);
 		// no isolation, no cut on pt!	
-		if(fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode){
+		if(LooseElectron && LooseMuon && DecayMode){
+		//if(fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode){
 				goodTau.push_back(tau[i]);
 				if(foundEvent) std::cout<< "   Putting tau with pt " << tau[i].pt << " phi " <<tau[i].phi 
 					<< " and ID " << LooseElectron << LooseMuon << CombinedIsolation << LooseIsolation << DecayMode << TightMuon << ElectronMVA << std::endl;
