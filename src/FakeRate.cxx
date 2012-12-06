@@ -652,10 +652,6 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Zcand.push_back(goodMuon[j]);
 		goodMuon.erase(goodMuon.begin()+i);
 		goodMuon.erase(goodMuon.begin()+j-1);
-		GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+i);
-		GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+j-1);
-		DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+denom_i);
-		DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+denom_j-1);
 		denomMuon.erase(denomMuon.begin()+denom_i);
 		denomMuon.erase(denomMuon.begin()+denom_j-1);
 		
@@ -718,10 +714,6 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Zcand.push_back(goodElectron[j]);	
 			goodElectron.erase(goodElectron.begin()+i);
 			goodElectron.erase(goodElectron.begin()+j-1);
-			GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+i);
-			GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+j-1);
-			DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+denom_i);
-			DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+denom_j-1);
 			denomElectron.erase(denomElectron.begin()+denom_i);
 			denomElectron.erase(denomElectron.begin()+denom_j-1);
 		
@@ -821,15 +813,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	
 				denomMuon.erase(denomMuon.begin()+i); 
-				DenomToGoodMuon_assoc_index.erase(DenomToGoodMuon_assoc_index.begin()+i);
 				i--;			
 				removed = true;
 				// removal of the same muon as above from the "goodMuon" collection and association indices vectors
-				 if (DenomToGoodMuon_assoc_index[i] > -1){
-					  uint goodIndex=DenomToGoodMuon_assoc_index[i];
-					  goodMuon.erase(goodMuon.begin()+goodIndex);
-					  GoodToDenomMuon_assoc_index.erase(GoodToDenomMuon_assoc_index.begin()+goodIndex);
-				 }
 			}
 		}
 	}
@@ -848,16 +834,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{	
 
 				denomElectron.erase(denomElectron.begin()+i); 
-				DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin()+i);
 				i--; 
 				removed = true;
-                                if(i<0) i=0;
-	m_logger << INFO << DenomToGoodElectron_assoc_index[i] << SLogger::endmsg;
-				 if (DenomToGoodElectron_assoc_index[i] > -1){
-					  uint goodIndex=DenomToGoodElectron_assoc_index[i];
-					  goodElectron.erase(goodElectron.begin()+goodIndex);
-					  GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
-				 }
+                         
 			}
 		}
 
@@ -866,15 +845,10 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
 			{	
 				denomElectron.erase(denomElectron.begin()+i); 
-				DenomToGoodElectron_assoc_index.erase(DenomToGoodElectron_assoc_index.begin() +i);
+				
 				i--; 
 				removed = true;
-                                if(i<0) i=0;
-				 if (DenomToGoodElectron_assoc_index[i] > -1){
-					  uint goodIndex=DenomToGoodElectron_assoc_index[i];
-					  goodElectron.erase(goodElectron.begin()+goodIndex);
-					  GoodToDenomElectron_assoc_index.erase(GoodToDenomElectron_assoc_index.begin()+goodIndex);
-				 }
+                              
 				
 			}
 			
