@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="WARNING">
+	<Library Name="libGenVector" />
+    <Library Name="libGraf" />
+    <Library Name="libPhysics" />
+	<Library Name="libZHtautauAnalysis"/>
+	
+	<Package Name="SFrameCore.par"/>
+    <Package Name="SFramePlugIns.par"/>
+    <Package Name="SFrameUser.par"/>
+    <Package Name="ZHtautauAnalysis.par"/>
+	
+	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+<!--
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_90_0_o23.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_92_0_rSV.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_93_0_XFv.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_94_0_QuB.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_98_0_u8o.root" Lumi="1.0"/>
+-->
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples_1.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples.root" Lumi="1.0"/>
+			
+<!--
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/filter/ZHtautauAnalysis/config/output.root" Lumi="1.0"/>
+-->
+
+<!--
+			<In FileName="output.root" Lumi="1.0"/>
+-->
+<!--
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/output_Ntuples_ZZJetsTo4L_8TeV-madgraph.root" Lumi="1.0"/>
+-->
+<!--
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/crab/output_Ntuples_10_0_mwS.root" Lumi="1.0" />
+-->
+
+<!--
+  <In FileName="/home/jpavel/ntuples/CMS/analysis/crab/53x/local/output_1.root" Lumi="1.0"/> 
+-->
+<!--
+42x
+-->
+<!--
+    <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/42X/HToTauTau_M-110/output_10_1_VqM.root" Lumi="1.0"/> 
+-->
+
+            <InputTree Name="t"/>
+             <OutputTree Name="redtree"/>
+		</InputData>
+		<UserConfig>
+		<Item Name="InTreeName" Value="t"/>
+        <Item Name="MyPtCut" Value="2000"/>
+			<!-- using lepton pair with the closest mass instead of highest Pt. To switch off use any negative value-->
+        <Item Name="BestMassForZ" Value="91.2" /> 
+        	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
+        <Item Name="dZvertex" Value="0.1" /> 
+			<!-- Value of b-tag weight for veto -->
+        <Item Name="bTagValue" Value="0.898" />
+        
+        <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
+		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdT_CaloIsoVL_Ele8_CaloIdT_CaloIsoVL_v" />
+<!-- 2011 triggers -->		
+<!--
+		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	
+		<Item Name="MuonTriggerName2" Value="HLT_Mu13_Mu8_v"/>
+-->
+		<Item Name="MuonTriggerName3" Value="HLT_DoubleMu7_v"/>
+
+		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	
+		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/>
+
+		
+		<Item Name="checkCategories" Value="true"/>
+		<Item Name="isSimulation" Value="true"/>
+		<Item Name="is2011" Value="false"/>
+		<Item Name="is2012_52" Value="false"/>
+		<Item Name="is2012_53" Value="true"/>
+
+	    <Item Name="vetoMuonTrigger" Value="false" />
+        <Item Name="vetoElectronTrigger" Value="false" />
+        
+ <!-- Selection cuts -->       
+        <Item Name="Cut_tau_base_Pt" Value="20" />
+		<Item Name="Cut_tautau_Pt_1" Value="30" />
+		<Item Name="Cut_tautau_Pt_2" Value="30" />
+		<Item Name="Cut_tautau_MVA_iso" Value="false" />
+		
+		<Item Name="AllowTauBOverlap" Value="true" />
+        
+        <Item Name="UseSumPtCut" Value="true" />
+		<Item Name="Cut_tautau_sumPt" Value="60" />
+		<Item Name="Cut_leptau_sumPt" Value="45" />
+		<Item Name="Cut_leplep_sumPt" Value="30" />  
+		
+		<Item Name="printoutEvents" Value="true" />
+		<Item Name="maxDeltaR" Value="0.3" />            
+                      
+		</UserConfig>
+	</Cycle>
+</JobConfiguration>

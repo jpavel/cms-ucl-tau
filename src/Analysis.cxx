@@ -702,12 +702,15 @@ entries++;
 	Zcand.clear();
 	bool Zmumu = false;
 	bool Zee = false;
+	bool Zmucand, Zelcand;
+	Zmucand=Zelcand=false;
 	double dMass=999.0;
 	int Zindex[2] = {-1,-1};
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
-		if(goodMuon[i].pt < 20. || Zmumu) continue;
+		//if(goodMuon[i].pt < 20. 
+		if(Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.3) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
@@ -735,24 +738,26 @@ entries++;
 						Zindex[0]=i;
 						Zindex[1]=j;
 						dMass=dM;
-
+						Zmucand=true;
 					}
 				}else{
+					Zmucand=true;
 					Zindex[0]=i;
 					Zindex[1]=j;
 				}
 			}
 		}
 	}
-	if(Zindex[0] > -1 && Zindex[1] > -1){
-
-		int i = Zindex[0];
-		int j = Zindex[1];
-		Zcand.push_back(goodMuon[i]);
-		Zcand.push_back(goodMuon[j]);
-		goodMuon.erase(goodMuon.begin()+i);
-		goodMuon.erase(goodMuon.begin()+j-1);
-		Zmumu=true;
+	if(Zindex[0] > -1 && Zindex[1] > -1 && Zmucand){
+			int i = Zindex[0];
+			int j = Zindex[1];
+		if(goodMuon[i].pt > 20.){
+			Zcand.push_back(goodMuon[i]);
+			Zcand.push_back(goodMuon[j]);
+			goodMuon.erase(goodMuon.begin()+i);
+			goodMuon.erase(goodMuon.begin()+j-1);
+			Zmumu=true;
+		}
 	}
 
 
@@ -764,7 +769,8 @@ entries++;
 		for(uint i = 0; i < goodElectron.size(); i++)
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
-			if( goodElectron[i].pt < 20 || Zee) continue;
+			//if( goodElectron[i].pt < 20 || 
+			if(Zee) continue;
 			if( RelIsoEl(goodElectron[i]) > 0.3) continue;
 			for(uint j = i+1; j < goodElectron.size() && !Zee; j++)
 			{
@@ -790,8 +796,10 @@ entries++;
 							Zindex[0]=i;
 							Zindex[1]=j;
 							dMass=dM;
+							Zelcand=true;
 						}
 					}else{
+						Zelcand=true;
 						Zindex[0]=i;
 						Zindex[1]=j;
 					} 
@@ -799,17 +807,16 @@ entries++;
 				}
 			}
 		}
-		if(Zindex[0] > -1 && Zindex[1] > -1){
-
-			int i = Zindex[0];
-			int j = Zindex[1];
-
-			Zcand.push_back(goodElectron[i]);
-			Zcand.push_back(goodElectron[j]);	
-			goodElectron.erase(goodElectron.begin()+i);
-			goodElectron.erase(goodElectron.begin()+j-1);
-			Zee=true;
-
+		if(Zindex[0] > -1 && Zindex[1] > -1 && Zelcand){
+				int i = Zindex[0];
+				int j = Zindex[1];
+			if(goodElectron[i].pt > 20.){			
+				Zcand.push_back(goodElectron[i]);
+				Zcand.push_back(goodElectron[j]);	
+				goodElectron.erase(goodElectron.begin()+i);
+				goodElectron.erase(goodElectron.begin()+j-1);
+				Zee=true;
+			}
 		}
 	}
 
