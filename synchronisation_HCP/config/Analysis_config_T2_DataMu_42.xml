@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
+<!-- This config file will run over input defined in input.xml file -->
+<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+	<Library Name="libGenVector" />
+    <Library Name="libGraf" />
+    <Library Name="libPhysics" />
+	<Library Name="libZHtautauAnalysis"/>
+	
+	<Package Name="SFrameCore.par"/>
+    <Package Name="SFramePlugIns.par"/>
+    <Package Name="SFrameUser.par"/>
+    <Package Name="ZHtautauAnalysis.par"/>
+	
+	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
+	       <InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+                 &grid;
+                <InputTree Name="t"/>
+             <OutputTree Name="redtree"/>
+		</InputData>
+		<UserConfig>
+		<Item Name="InTreeName" Value="t"/>
+        <Item Name="maxDeltaR" Value="0.3"/>
+        <Item Name="MyPtCut" Value="2000"/>
+			<!-- using lepton pair with the closest mass instead of highest Pt. To switch off use any negative value-->
+        <Item Name="BestMassForZ" Value="91.2" /> 
+        	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
+        <Item Name="dZvertex" Value="0.1" /> 
+			<!-- Value of b-tag weight for veto -->
+        <Item Name="bTagValue" Value="0.898" />
+			<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
+         <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
+		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
+<!-- 2011 triggers -->		
+		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />
+		<Item Name="MuonTriggerName2" Value="HLT_Mu13_Mu8_v"/>
+		<Item Name="MuonTriggerName3" Value="HLT_DoubleMu7_v"/>
+
+<!--  2012 triggers -->
+<!-- 		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	 -->
+<!-- 		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/> -->
+		
+		<Item Name="checkCategories" Value="true"/>
+		<Item Name="isSimulation" Value="false"/>
+		<Item Name="is2011" Value="true"/>
+		<Item Name="is2012_52" Value="false"/>
+		<Item Name="is2012_53" Value="false"/>
+                
+                <Item Name="vetoMuonTrigger" Value="false" />
+                <Item Name="vetoElectronTrigger" Value="false" />
+                
+         <!-- Selection cuts -->       
+        <Item Name="Cut_tau_base_Pt" Value="20" />
+		<Item Name="Cut_tautau_Pt_1" Value="20" />
+		<Item Name="Cut_tautau_Pt_2" Value="20" />
+		<Item Name="Cut_tautau_MVA_iso" Value="false" />
+		
+		<Item Name="AllowTauBOverlap" Value="false" />
+		
+		</UserConfig>
+	</Cycle>
+</JobConfiguration>
