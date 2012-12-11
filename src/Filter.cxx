@@ -7,7 +7,8 @@
 ClassImp( Filter );
 
 Filter::Filter()
-   : SCycleBase() {
+   : SCycleBase(), m_allEvents( "allEvents", this ) 
+   {
 
    SetLogName( GetName() );
    DeclareProperty("InTreeName",InTreeName);
@@ -62,13 +63,25 @@ void Filter::BeginInputData( const SInputData& ) throw( SError ) {
 	outFile = new TFile("output.root","recreate");
 	outTree = new TTree("t","filtered tree");
 	outTree->Branch("myevent",&out);
+	lumi.open("lumi.csv");
+	
+	current_run=current_lumi=-999;
    return;
 
 }
 
 void Filter::EndInputData( const SInputData& ) throw( SError ) {
+	lumi.close();
 	outTree->Write();
 	outFile->Close();
+	 m_logger << INFO << "Number of all processed events: "
+            << *m_allEvents
+            << SLogger::endmsg;
+     ofstream log1;       
+     log1.open("total.txt");
+     log1 << *m_allEvents << std::endl;
+     log1.close();
+     
    return;
 
 }
@@ -103,7 +116,7 @@ bool Filter::Trg_MC_12(myevent* m) {
 	bool TriggerMu = false;
 
 
-	for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
+	for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end() && !TriggerEle && !TriggerMu; ihlt++) {
 		//	std::cout << ihlt->first << std::endl; 
 		size_t foundEl=(ihlt->first).find(doubEle);
 		size_t foundEl2=(ihlt->first).find(doubEle2);
@@ -126,9 +139,15 @@ bool Filter::Trg_MC_12(myevent* m) {
 }
 
 void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
-
+	
+	++m_allEvents;
+	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
+		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
+		current_run=m->runNumber;
+		current_lumi=m->lumiNumber;
+	}
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
-	double event_number=1652920;
+	double event_number=9612;
 	bool printout = false;
 	if(m->eventNumber==event_number) printout=true;
 	if(printout) std::cout << "Here!" << std::endl;
@@ -297,7 +316,7 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					goodMuon[i].pz+goodMuon[j].pz,
 					goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
-			if(printout) std::cout << mass << std::cout;
+			if(printout) std::cout << mass << std::endl;
 			if(mass > lepton_mass_min && mass < lepton_mass_max ) passMass=true;
 			if(passMass) m_logger << DEBUG << " Passed mass cut with value " << mass << SLogger::endmsg;
 			else m_logger << VERBOSE << " Failed mass cut with value " << mass << SLogger::endmsg;
@@ -312,7 +331,7 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					goodElectron[i].pz+goodElectron[j].pz,
 					goodElectron[i].E+goodElectron[j].E);
 			double mass = cand.M();
-			if(printout) std::cout << mass << std::cout;
+			if(printout) std::cout << mass << std::endl;
 			if(mass > lepton_mass_min && mass < lepton_mass_max ) passMass=true;
 			if(passMass) m_logger << DEBUG << " Passed mass cut with value " << mass << SLogger::endmsg;
 			else m_logger << VERBOSE << " Failed mass cut with value " << mass << SLogger::endmsg;
@@ -322,7 +341,7 @@ void Filter::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(!passMass){		if(printout) std::cout << "Mass" << std::endl; return;}
 	if(printout) std::cout << "Here5!" << std::endl;
 	
-	m_logger << INFO << " Passed!" << SLogger::endmsg;
+	m_logger << DEBUG << " Passed!" << SLogger::endmsg;
 
 	out=*m;
 	outTree->Fill();
