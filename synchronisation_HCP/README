@@ -1,0 +1,56 @@
+### installation
+# 1) make sure you have set-up the ROOT environment
+
+# 2) checkout and compile SFRAME
+svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
+cd SFrame
+source setup.sh
+make
+cd ..
+
+# 3) checkout and compile analysis package
+svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.2 ZHtautauAnalysis
+cd ZHtautauAnalysis
+make
+
+# 4) RUN! (change input file defined in Analysis_config.xml appropriatelly)
+cd config
+sframe-main  Analysis_config.xml 
+
+
+########### misc
+##making a tag
+svn copy svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.1 -m "new tag"
+
+## switching to a new tag
+svn switch  svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.3
+
+##################################
+## Running at ULB cluster 
+##################################
+ssh m2.iihe.ac.be # connect without password
+source $VO_CMS_SW_DIR/cmsset_default.sh # basic cms environment
+cmsrel CMSSW_5_3_3_patch3 #prepare the CMSSW area
+# Standard stuff
+cd CMSSW_5_3_3_patch3/src/
+cmsenv 
+# checkout and compile SFRAME
+svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
+cd SFrame
+source setup.sh
+make
+cd ..
+# checkout and compile analysis package
+svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk ZHtautauAnalysis
+cd ZHtautauAnalysis
+make
+
+# make grid proxy (.globus with certificate necesssary at home dir)
+voms-proxy-init --voms cms:/cms/becms
+
+# define input in Analysis_config.xml - If the location is /pnfs/iihe/cms/store/user/jez/ZHTo2TauAna_52x_test0/output_Ntuples_10_1_rCX.root, the input file tag should read
+# <In FileName="dcap://maite.iihe.ac.be/pnfs/iihe/cms/store/user/jez/ZHTo2TauAna_52x_test0/output_Ntuples_10_1_rCX.root"  Lumi="1.0" />
+
+# RUN! 
+cd config
+sframe-main  Analysis_config.xml
