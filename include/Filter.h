@@ -16,11 +16,6 @@
 #include <vector>
 #include <cmath>
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-
 // my includes
 #include "myevent.h"
 #include "TFile.h"
@@ -111,10 +106,6 @@ private:
     double lepton_mass_min;
     double lepton_mass_max;
 
-	ofstream lumi;
-	long current_run;
-	long current_lumi;
-    SSummedVar< Int_t > m_allEvents;
 
    // Macro adding the functions for dictionary generation
    ClassDef( Filter, 0 );

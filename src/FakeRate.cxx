@@ -530,9 +530,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool pfID = PFMuonID(muon[i]);	
 
 		
-		if (muGlobal && muTracker)
+		if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4)
 		{
-			if (muPt > 10. && fabs(eMuta) < 2.4 && pfID)
+			if (pfID)
 			{
 				GoodToDenomMuon_assoc_index.push_back(denomMuon.size());
 				DenomToGoodMuon_assoc_index.push_back(goodMuon.size());
@@ -575,9 +575,9 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
-		//if (elPt > 10. && fabs(elEta) < 2.5 )
-		//{
-			if(elPt > 10. && fabs(elEta) < 2.5 && elID && missingHits <=1){
+		if (elPt > 10. && fabs(elEta) < 2.5 )
+		{
+			if(elID && missingHits <=1){
 				GoodToDenomElectron_assoc_index.push_back(denomElectron.size());
 				DenomToGoodElectron_assoc_index.push_back(goodElectron.size());
 				goodElectron.push_back(electron[i]);
@@ -586,7 +586,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				DenomToGoodElectron_assoc_index.push_back(-1);
 			}
 			denomElectron.push_back(electron[i]);
-			//}
+			
+		}
 	}
 	// no isolation to eles applied!
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denominator electrons" << SLogger::endmsg;
@@ -847,6 +848,8 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				
 				i--; 
 				removed = true;
+                              
+				
 			}
 			
 		}
@@ -879,8 +882,7 @@ void FakeRate::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool ElectronMVA = (tau[i].discriminationByElectronMVA > 0.5);
 		bool TightMuon = (tau[i].discriminationByMuonTight > 0.5);
 		// no isolation, no cut on pt!	
-		if(LooseElectron && LooseMuon && DecayMode){
-		//if(fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode){
+		if(fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode){
 				goodTau.push_back(tau[i]);
 				if(foundEvent) std::cout<< "   Putting tau with pt " << tau[i].pt << " phi " <<tau[i].phi 
 					<< " and ID " << LooseElectron << LooseMuon << CombinedIsolation << LooseIsolation << DecayMode << TightMuon << ElectronMVA << std::endl;

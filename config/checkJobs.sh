@@ -1,1 +1,1 @@
-qstat -u jez localgrid@cream02
+qstat -u jez localgrid@cream01

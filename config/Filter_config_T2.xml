@@ -4,7 +4,6 @@
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
-    <Library Name="libSFramePlugIns" />
 	<Library Name="libZHtautauAnalysis"/>
 	
 	<Package Name="SFrameCore.par"/>

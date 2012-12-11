@@ -379,6 +379,9 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	
 	if(printoutEvents) log1.open("events.txt");
+	
+	
+	
 
 	return;
 
@@ -475,15 +478,15 @@ double Analysis::RelIsoEl(myobject el){
 	return relIso;		
 }
 
-bool Analysis::Trg_MC_12(myevent* m) {
+bool Analysis::Trg_MC_12(myevent* m, bool found) {
 	map<string, int> myHLT = m->HLT;
 	bool Trigger = false;
 	bool TriggerEle = false;
 	bool TriggerMu = false;
 
 
-	for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end(); ihlt++) {
-		//	std::cout << ihlt->first << std::endl; 
+	for (map<string, int> ::iterator ihlt = myHLT.begin(); ihlt != myHLT.end() && !TriggerEle && !TriggerMu; ihlt++) {
+		if(found) std::cout << ihlt->first << std::endl; 
 		size_t foundEl=(ihlt->first).find(doubEle);
 		size_t foundEl2=(ihlt->first).find(doubEle2);
 		if(!is2011) foundEl2=foundEl;
@@ -494,9 +497,16 @@ bool Analysis::Trg_MC_12(myevent* m) {
 		if(!is2011) foundMu3=foundMu2;
 
 		if (foundEl!=string::npos || foundEl2!=string::npos)
-			TriggerEle = ihlt->second;
+			{ 
+				if(found) std::cout << "found trigger! Decision of " << ihlt->first << " is " << ihlt->second << std::endl; // sync
+				TriggerEle = ihlt->second;
+			}
 		if (foundMu1!=string::npos || foundMu2!=string::npos || foundMu3!=string::npos)
-			TriggerMu = ihlt->second;
+			{ 
+				if(found) std::cout << "found trigger! Decision of " << ihlt->first << " is " << ihlt->second << std::endl; // sync
+				TriggerMu = ihlt->second;
+			}
+			
 	}
 	Trigger = TriggerEle || TriggerMu;
 	if(vetoElectronTrigger && TriggerEle) Trigger = false;
@@ -514,7 +524,6 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
-
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
 		Hist("h_nPU_Info")->Fill(m->PUInfo);
@@ -531,7 +540,7 @@ entries++;
 		if(IgnorePUW) PUWeight = 1.0;
 	}
 	int eNumber = m->eventNumber;
-
+	
 	Hist("h_PU_weight")->Fill(PUWeight);
 	if(!useTruePileUp && is2011){ 
 		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
@@ -560,13 +569,13 @@ entries++;
 	Hist("h_Nvertex_NoCut")->Fill(nGoodVx);
 	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
 
-	bool trigPass = Trg_MC_12(m);
+	bool trigPass;
+	trigPass = Trg_MC_12(m,false);
 	m_logger << DEBUG << " Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
 		return;
 	}
-
 	h_cut_flow->Fill(1,1);
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
@@ -636,12 +645,15 @@ entries++;
 	Zcand.clear();
 	bool Zmumu = false;
 	bool Zee = false;
+	bool Zmucand, Zelcand;
+	Zmucand=Zelcand=false;
 	double dMass=999.0;
 	int Zindex[2] = {-1,-1};
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
-		if(goodMuon[i].pt < 20. || Zmumu) continue;
+		//if(goodMuon[i].pt < 20. 
+		if(Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.3) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
@@ -669,24 +681,26 @@ entries++;
 						Zindex[0]=i;
 						Zindex[1]=j;
 						dMass=dM;
-
+						Zmucand=true;
 					}
 				}else{
+					Zmucand=true;
 					Zindex[0]=i;
 					Zindex[1]=j;
 				}
 			}
 		}
 	}
-	if(Zindex[0] > -1 && Zindex[1] > -1){
-
-		int i = Zindex[0];
-		int j = Zindex[1];
-		Zcand.push_back(goodMuon[i]);
-		Zcand.push_back(goodMuon[j]);
-		goodMuon.erase(goodMuon.begin()+i);
-		goodMuon.erase(goodMuon.begin()+j-1);
-		Zmumu=true;
+	if(Zindex[0] > -1 && Zindex[1] > -1 && Zmucand){
+			int i = Zindex[0];
+			int j = Zindex[1];
+		if(goodMuon[i].pt > 20.){
+			Zcand.push_back(goodMuon[i]);
+			Zcand.push_back(goodMuon[j]);
+			goodMuon.erase(goodMuon.begin()+i);
+			goodMuon.erase(goodMuon.begin()+j-1);
+			Zmumu=true;
+		}
 	}
 
 
@@ -698,7 +712,8 @@ entries++;
 		for(uint i = 0; i < goodElectron.size(); i++)
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
-			if( goodElectron[i].pt < 20 || Zee) continue;
+			//if( goodElectron[i].pt < 20 || 
+			if(Zee) continue;
 			if( RelIsoEl(goodElectron[i]) > 0.3) continue;
 			for(uint j = i+1; j < goodElectron.size() && !Zee; j++)
 			{
@@ -724,8 +739,10 @@ entries++;
 							Zindex[0]=i;
 							Zindex[1]=j;
 							dMass=dM;
+							Zelcand=true;
 						}
 					}else{
+						Zelcand=true;
 						Zindex[0]=i;
 						Zindex[1]=j;
 					} 
@@ -733,17 +750,16 @@ entries++;
 				}
 			}
 		}
-		if(Zindex[0] > -1 && Zindex[1] > -1){
-
-			int i = Zindex[0];
-			int j = Zindex[1];
-
-			Zcand.push_back(goodElectron[i]);
-			Zcand.push_back(goodElectron[j]);	
-			goodElectron.erase(goodElectron.begin()+i);
-			goodElectron.erase(goodElectron.begin()+j-1);
-			Zee=true;
-
+		if(Zindex[0] > -1 && Zindex[1] > -1 && Zelcand){
+				int i = Zindex[0];
+				int j = Zindex[1];
+			if(goodElectron[i].pt > 20.){			
+				Zcand.push_back(goodElectron[i]);
+				Zcand.push_back(goodElectron[j]);	
+				goodElectron.erase(goodElectron.begin()+i);
+				goodElectron.erase(goodElectron.begin()+j-1);
+				Zee=true;
+			}
 		}
 	}
 
@@ -825,12 +841,14 @@ entries++;
 	}
 
 
+
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 
 	if(Zmumu||Zee)
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
 	else{
-		return;
+			return;
+	
 	}
 	
 	h_cut_flow->Fill(3,1);
@@ -1207,6 +1225,8 @@ entries++;
 	if(!IgnoreAdditionalTaus){
 		for(uint i = 0; i < goodTau.size(); i++)
 		{
+			
+		//	if(fabs(goodTau[i].z_expo - Hcand[0].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Hcand[1].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Zcand[0].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Zcand[1].z_expo) > dZvertex) continue;
 			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
 					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
 				Ad_lepton=true;
@@ -1279,6 +1299,7 @@ entries++;
 			dR2=deltaR(jetEta,jetPhi,Zcand[1].eta,Zcand[1].phi);
 			dR3=deltaR(jetEta,jetPhi,Hcand[0].eta,Hcand[0].phi);
 			dR4=deltaR(jetEta,jetPhi,Hcand[1].eta,Hcand[1].phi);
+			
 			if(!AllowTauBOverlap){
 				if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ){
 					bTagVeto = true;	
@@ -1349,7 +1370,6 @@ entries++;
 		 }
 		
 	}else  Hist( "h_event_type" )->Fill(event_type,weight); // blinding 
-
 
 	
 	//histograms for selected candidates
@@ -1568,13 +1588,12 @@ entries++;
 	if(signal && printoutEvents)
 	{
 		 TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-		 log1 << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << event_type << " " << Zmass << " " << Hmass << " " << fileName << std::endl;
-		 
+		 log1 << setiosflags(ios::fixed) << std::setprecision(1) << event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass << std::endl;
 	}
+	
 	
 	return;
 
-	//trigger
 
 }
 
