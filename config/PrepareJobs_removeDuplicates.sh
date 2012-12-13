@@ -14,8 +14,9 @@
 touch temp_input.1
 rm -f temp_input.*
 
+time=`date "+%Y%m%d"`
 input_data=`echo $1`
-output_name=`echo $2`
+output_name=${time}_$2
 num_files=${3}
 config_name=${4}
 
@@ -47,9 +48,9 @@ touch toKeep.list
 rm -f toKeep.list
 touch toKeep.list
 
-touch duplicates_${output_name}.list
-rm -f duplicates_${output_name}.list
-touch duplicates_${output_name}.list
+touch ${output_name}_duplicates.list
+rm -f ${output_name}_duplicates.list
+touch ${output_name}_duplicates.list
 
 
 #duplicate removal
@@ -58,7 +59,7 @@ for block in  `seq -s ' ' 1 ${total}`; do
     copies=`more copies.list | wc -l`
     toRemove=`expr $copies - 1`
     if [ $copies -gt 0 ]; then
-      more copies.list | head -n ${toRemove} >> duplicates_${output_name}.list
+      more copies.list | head -n ${toRemove} >> ${output_name}_duplicates.list
       more copies.list | tail -n 1 >> toKeep.list
     fi
     rm -f copies.list
@@ -79,9 +80,9 @@ echo "The full paths to all files are:"
 rm -f temp_input.1
 mv temp_input.1.1 temp_input.1
 
-touch SubmitAll_${output_name}.sh
-rm -rf SubmitAll_${output_name}.sh
-touch SubmitAll_${output_name}.sh
+touch ${output_name}_SubmitAll.sh
+rm -rf ${output_name}_SubmitAll.sh
+touch ${output_name}_SubmitAll.sh
 
 until [ $total -lt 1 ]
 do
@@ -112,6 +113,7 @@ do
   echo "cp ${sframe_dir}/JobConfig.dtd ${sframe_dir}/${config_name} ${sframe_dir}/*.root ." >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "touch events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "tar czvf events.tgz events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
@@ -122,14 +124,14 @@ do
   echo "cd /scratch" >>  ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "rm -rf ${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
   echo "echo \"(0) Wrapper finished successfully. Exit code 0\" " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cd ${output_name}_job${counter}" >> SubmitAll_${output_name}.sh
-  echo "echo \"Submitting job no. ${counter}... \" " >> SubmitAll_${output_name}.sh
-  echo "qsub -q localgrid@cream01 -o script.stdout -e script.stderr ${output_name}_${counter}.sh" >> SubmitAll_${output_name}.sh
-  echo "cd .." >> SubmitAll_${output_name}.sh
+  echo "cd ${output_name}_job${counter}" >> ${output_name}_SubmitAll.sh
+  echo "echo \"Submitting job no. ${counter}... \" " >> ${output_name}_SubmitAll.sh
+  echo "qsub -q localgrid@cream02 -o script.stdout -e script.stderr ${output_name}_${counter}.sh" >> ${output_name}_SubmitAll.sh
+  echo "cd .." >> ${output_name}_SubmitAll.sh
 done 
 rm -f temp_input*
 rm -f full_path
 
-chmod +x SubmitAll_${output_name}.sh
-echo "To submit jobs, do ./SubmitAll_${output_name}.sh"
-echo "Duplicate input files are in duplicates_${output_name}.list"
+chmod +x ${output_name}_SubmitAll.sh
+echo "To submit jobs, do ./${output_name}_SubmitAll.sh"
+echo "Duplicate input files are in ${output_name}_duplicates.list"
