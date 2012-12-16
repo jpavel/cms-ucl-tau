@@ -13,7 +13,7 @@
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
 		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
-			<In FileName="/afs/cern.ch/user/l/lperrini/public/output_Ntuples_ZZJetsTo4L_8TeV-madgraph.root" Lumi="1.0"/>
+			<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_157_1_w5p.root" Lumi="1.0"/>
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
 		</InputData>

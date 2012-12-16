@@ -71,6 +71,9 @@ public:
    double RelIsoEl(myobject el);
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
+   bool WZ_Rej(myevent *m, myobject mu);
+   bool isGoodMu(myobject mu);
+   bool isGoodEl(myobject el);
    
    
 private:
@@ -109,6 +112,8 @@ private:
         TH1* h_el_cut;
         TH1* h_event_type;
         TH1* h_event_type_raw;
+        TH1* h_event_type_medium;
+        TH1* h_event_type_tight;
         TH1* h_mu1Z_pt;
         TH1* h_mu2Z_pt;
         TH1* h_Zmass_mumu;
@@ -203,9 +208,16 @@ private:
         TH1* h_category1_pt;
         TH1* h_category2_pt;
         
-        
-        std::vector<TH1*>  h_H_mass_types;
-        std::vector<TH1*>  h_H_mass_signal_types;
+	TH1* h_medium;
+	TH1* h_tight;
+	TH1*  h_denom;
+
+	std::vector<TH1*>  h_denom_types;
+	std::vector<TH1*>  h_medium_types;
+	std::vector<TH1*>  h_tight_types;
+
+	std::vector<TH1*>  h_H_mass_types;
+	std::vector<TH1*>  h_H_mass_signal_types;
         std::vector<TH1*>  h_H_mass_cat0_types;
         std::vector<TH1*>  h_H_mass_cat1_types;
         std::vector<TH1*>  h_H_mass_cat2_types;
@@ -248,8 +260,8 @@ private:
     std::string doubMu2;
     std::string doubMu3;
     
+    bool switchToFakeRate;
     bool  checkCategories;
-    
     bool isSimulation;
     bool is2011;
     bool is2012_52;
@@ -272,9 +284,9 @@ private:
     
     bool IgnoreAdditionalTaus;
     bool IgnoreSF;
-	bool IgnorePUW;
+    bool IgnorePUW;
 	
-	bool printoutEvents;
+    bool printoutEvents;
 
 
 // output variables
