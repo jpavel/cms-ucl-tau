@@ -11,6 +11,6 @@ for block in  `seq -s ' ' 1 ${max}`; do
     ls -ltrh ${name}_job${block} | grep tgz
     cd ${name}_job${block}
     tar xzvf events.tgz
-    more events.txt
+    more events.txt | wc -l 
     cd ..
 done

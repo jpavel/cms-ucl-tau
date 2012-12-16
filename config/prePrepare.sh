@@ -1,0 +1,1 @@
+source PrePrepareFilterJobs_directory_name_numFiles_config_outDir.sh /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/MC/ 53x_MC 2 Filter_config_T2.xml /pnfs/iihe/cms/store/user/jez/FILTER/ZHttNtuples/53X/MC/
