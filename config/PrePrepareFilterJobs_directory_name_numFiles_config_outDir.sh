@@ -45,9 +45,9 @@ more temp_input.1 |while read line
 do
   file=`echo $line`
   srmmkdir $STORAGE${outDir}/${file}
-  echo "PrepareJobs_removeDuplicates_filter.sh ${input_data}/${file} ${output_name}_${file} 2 ${config_name} ${outDir}/${file}" >> Prepare_${output_name}.sh
+  echo "./PrepareJobs_removeDuplicates_filter.sh ${input_data}/${file} ${output_name}_${file} 2 ${config_name} ${outDir}/${file}" >> Prepare_${output_name}.sh
 #  echo "source PrepareJobs_removeDuplicates.sh ${input_data}/${file} ${output_name}_${file} ${num_files} ${config_name}" >> Prepare_${output_name}.sh
-  echo "echo \"./${output_name}_${file}_SubmitAll.sh\" >> Run_${output_name}.sh" >> Prepare_${output_name}.sh
+  echo "echo \"./${time}_${output_name}_${file}_SubmitAll.sh\" >> Run_${output_name}.sh" >> Prepare_${output_name}.sh
   echo "echo \"source ShowResults_filter.sh ${output_name}_${file}\" >> Show_${output_name}.sh" >> Prepare_${output_name}.sh
   echo "echo \"source MergeOutput_filter.sh ${output_name}_${file} results/${output_name}_${file}\" >> Merge_${output_name}.sh" >> Prepare_${output_name}.sh
   echo "echo \"source CleanResults.sh ${output_name}_${file}\" >> Clean_${output_name}.sh" >> Prepare_${output_name}.sh
