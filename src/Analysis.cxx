@@ -759,24 +759,19 @@ entries++;
 		double relIso = RelIsoMu(muon[i]);
 		bool pfID = PFMuonID(muon[i]);	
 
-		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4)
-		{
-			if (pfID)
+		if ((muGlobal || muTracker) && muPt > 10. && fabs(muEta) < 2.4){
+		
+			if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
 			{
 				GoodToDenomMuon_assoc_index.push_back(denomMuon.size());
 				DenomToGoodMuon_assoc_index.push_back(goodMuon.size());
 				goodMuon.push_back(muon[i]);
-				Hist("h_mu_relIso")->Fill(relIso,PUWeight);                         
-			}else{
-				DenomToGoodMuon_assoc_index.push_back(-1);
+				Hist("h_mu_relIso")->Fill(relIso,PUWeight);
 			}
+                                
 				denomMuon.push_back(muon[i]);
-                }
-
+		}
         }
-
-	//m_logger << DEBUG << " There are " << goodMuon.size() << " good muons " << " and " << GoodToDenomMuon_assoc_index.size() << " goodToDenom muons " << SLogger::endmsg;
-	//m_logger << DEBUG << " There are " << denomMuon.size() << " denom muons " << " and " << DenomToGoodMuon_assoc_index.size() << "denomToGood muons " << SLogger::endmsg;
 
 	Hist("h_n_goodMu")->Fill(goodMuon.size(),PUWeight);
 
@@ -800,7 +795,7 @@ entries++;
 		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
-		if (elPt > 10. && fabs(elEta) < 2.5 )
+		if (elPt > 10. && fabs(elEta) < 2.5)
 		{
 			if(missingHits <=1 && elID){
 				GoodToDenomElectron_assoc_index.push_back(denomElectron.size());
@@ -952,7 +947,6 @@ entries++;
 		}
 	}
 
-
 	double corrZlep1,corrZlep2;
 	corrZlep1=corrZlep2=1.0;
 	double Z_weight = PUWeight;
@@ -1029,15 +1023,12 @@ entries++;
 		Hist( "h_Z_lep2_phi")->Fill(ele2.Phi(),Z_weight);
 	}
 
-
-
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 
 	if(Zmumu||Zee)
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
 	else{
 			return;
-	
 	}
 	
 	h_cut_flow->Fill(3,1);
@@ -1203,6 +1194,7 @@ entries++;
 	int Hindex[2] = {-1,-1};
 	std::vector<myobject> Hcand;
 	Hcand.clear();
+	
 	for(uint i = 0; i < genericMuon.size() && !signal; i++)
 	{
 
@@ -1212,7 +1204,7 @@ entries++;
                 
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muE) continue;}
-		for(uint j=0; j< genericElectron.size() && !signal; j++)
+		for(uint j=0; j < genericElectron.size() && !signal; j++)
 		{
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
@@ -1279,7 +1271,7 @@ entries++;
 			bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
                         if(!switchToFakeRate){		
 			if (!iso1 && !checkCategories) continue;}
-			if(genericElectron[i].numLostHitEleInner > 0) continue;
+			if(genericElectron[i].numLostHitEleInner > 1) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
@@ -1320,8 +1312,6 @@ entries++;
 		{
 			if(switchToFakeRate){
                           if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
-                          m_logger << DEBUG <<  "TAU 1 PT:" << goodTau[i].pt << SLogger::endmsg;
-                          m_logger << DEBUG <<  "*********************** 1:" << Cut_tautau_Pt_1 << SLogger::endmsg;
 			}
 			else{
                         if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
@@ -1335,8 +1325,6 @@ entries++;
 			{
 				if(switchToFakeRate){
                                    if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
-                          m_logger << DEBUG <<  "TAU 2 PT:" << goodTau[j].pt << SLogger::endmsg;
-                          m_logger << DEBUG <<  "*********************** 2:" << Cut_tautau_Pt_2 << SLogger::endmsg;
 				}
 					else{
                                    if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
@@ -1388,7 +1376,6 @@ entries++;
 	h_cut_flow_weight->Fill(4,Z_weight);
 	
 	if(muTau+muE+eTau+tauTau > 1){
-	m_logger << DEBUG << " Checking debug tau 19" << SLogger::endmsg;
 		m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
 		m_logger << ERROR << muTau << muE << eTau << tauTau << " " << eNumber << SLogger::endmsg;			 
 		return;
@@ -1729,17 +1716,17 @@ entries++;
                 Hist("h_denom")->Fill(Hcand[i].pt,weight);
                 h_denom_types[event_type-1]->Fill(Hcand[i].pt,weight);
                 if(eTau){
-                    if(RelIsoEl(Hcand[i]) < 0.25 && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+                    if(RelIsoEl(Hcand[i]) < 0.30 && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
                     if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
                 }
                 if(muTau){
-                    if(RelIsoMu(Hcand[i]) < 0.25 && isGoodMu(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+                    if(RelIsoMu(Hcand[i]) < 0.30 && isGoodMu(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
                     if(RelIsoMu(Hcand[i]) < 0.15 && isGoodMu(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
                 }
                 if(muE){
-                    if(RelIsoEl(Hcand[i]) < 0.3  && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
+                    if(RelIsoEl(Hcand[i]) < 0.30  && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); }
                     if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); }
-                    if(RelIsoMu(Hcand[i+1]) < 0.3 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
+                    if(RelIsoMu(Hcand[i+1]) < 0.30 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
                     if(RelIsoMu(Hcand[i+1]) < 0.15 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); }
                     h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
                 }
