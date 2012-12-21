@@ -74,6 +74,8 @@ public:
    bool WZ_Rej(myevent *m, myobject mu);
    bool isGoodMu(myobject mu);
    bool isGoodEl(myobject el);
+   double fakeTau_tight(double pt);
+   double fakeTau_medium(double pt);
    
    
 private:
@@ -107,6 +109,14 @@ private:
     TH1* h_cut_flow_cat0_weight;
     TH1* h_cut_flow_cat1_weight;
     TH1* h_cut_flow_cat2_weight;
+   
+    TH1* h_cat0_FR_medium;
+    TH1* h_cat1_FR_medium;
+    TH1* h_cat2_FR_medium;
+    TH1* h_cat0_FR_tight;
+    TH1* h_cat1_FR_tight;
+    TH1* h_cat2_FR_tight;
+
 	// histograms
         TH1* h_el_n;
         TH1* h_el_cut;
@@ -252,6 +262,16 @@ private:
 	double dZvertex;
 	double bTagValue;
 	double maxEvent;
+	double p0_tight;
+	double p1_tight;
+	double p2_tight;
+	double p0_medium;
+	double p1_medium;
+	double p2_medium;
+	double FR_MMed;
+	double FR_MTig;
+	double FR_EMed;
+	double FR_ETig;
 	
 	std::string doubEle;
 	std::string doubEle2;

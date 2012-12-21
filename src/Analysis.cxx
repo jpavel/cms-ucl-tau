@@ -19,6 +19,16 @@ Analysis::Analysis()
 		DeclareProperty("BestMassForZ",BestMassForZ);
 		DeclareProperty("dZvertex", dZvertex);
 		DeclareProperty("bTagValue",bTagValue);
+		DeclareProperty("p0_tight",p0_tight);
+		DeclareProperty("p1_tight",p1_tight);
+		DeclareProperty("p2_tight",p2_tight);
+		DeclareProperty("p0_medium",p0_medium);
+		DeclareProperty("p1_medium",p1_medium);
+		DeclareProperty("p2_medium",p2_medium);
+		DeclareProperty("FR_MMed",FR_MMed);
+		DeclareProperty("FR_MTig",FR_MTig);
+		DeclareProperty("FR_EMed",FR_EMed);
+		DeclareProperty("FR_ETig",FR_ETig);
 
 		DeclareProperty("ElectronTriggerName", doubEle);
 		DeclareProperty("ElectronTriggerName2", doubEle2);
@@ -89,6 +99,13 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_cut_flow_cat0_weight				 = Book(TH1D("h_cut_flow_cat0_weight","Cut Flow signal",4,0.5,4.5));
 	h_cut_flow_cat1_weight			 	 = Book(TH1D("h_cut_flow_cat1_weight","Cut Flow signal",4,0.5,4.5));
 	h_cut_flow_cat2_weight			 	 = Book(TH1D("h_cut_flow_cat2_weight","Cut Flow signal",4,0.5,4.5));
+
+	h_cat0_FR_medium 				 = Book(TH1D("h_cat0_FR_medium","cat0 with FR medium corrections",8,0.5,8.5));
+	h_cat1_FR_medium				 = Book(TH1D("h_cat1_FR_medium","cat1 with FR medium corrections",8,0.5,8.5));
+	h_cat2_FR_medium				 = Book(TH1D("h_cat2_FR_medium","cat2 with FR medium corrections",8,0.5,8.5));
+	h_cat0_FR_tight 				 = Book(TH1D("h_cat0_FR_tight","cat0 with FR tight corrections",8,0.5,8.5));
+	h_cat1_FR_tight 				 = Book(TH1D("h_cat1_FR_tight","cat1 with FR tight corrections",8,0.5,8.5));
+	h_cat2_FR_tight 				 = Book(TH1D("h_cat2_FR_tight","cat2 with FR tight corrections",8,0.5,8.5));
 
 	h_el_n              				 = Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            				 = Book(TH1D("el_cit","el_cut",50,0,50));
@@ -333,6 +350,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_cut_flow_cat1_weight=Retrieve<TH1D>("h_cut_flow_cat1_weight");
 	h_cut_flow_cat2_weight=Retrieve<TH1D>("h_cut_flow_cat2_weight");
 	
+	h_cat0_FR_medium=Retrieve<TH1D>("h_cat0_FR_medium");
+	h_cat1_FR_medium=Retrieve<TH1D>("h_cat1_FR_medium");
+	h_cat2_FR_medium=Retrieve<TH1D>("h_cat2_FR_medium");
+	h_cat0_FR_tight=Retrieve<TH1D>("h_cat0_FR_tight");
+	h_cat1_FR_tight=Retrieve<TH1D>("h_cat1_FR_tight");
+	h_cat2_FR_tight=Retrieve<TH1D>("h_cat2_FR_tight");
 
 	h_H_mass_types.clear();
 	h_H_mass_signal_types.clear();
@@ -649,6 +672,20 @@ bool Analysis::isGoodEl(myobject el){
                         return true;
                 }else return false;
 }
+
+double Analysis::fakeTau_tight(double pt) {
+		if (pt<0) return 1.0;
+		else{
+			double f = p0_tight*(TMath::Exp(p1_tight*pt))+p2_tight;
+      		return f;}
+		}
+
+double Analysis::fakeTau_medium(double pt) {
+		if (pt<0) return 1.0;
+		else{
+			double f = p0_medium*(TMath::Exp(p1_medium*pt))+p2_medium;
+      		return f;}
+		}
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
@@ -1038,10 +1075,6 @@ entries++;
 	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,Z_weight);
 
 	// Z overlap removal
-	//m_logger << DEBUG << goodMuon.size() << " good muons before Z overlap removal " << SLogger::endmsg;
-	//m_logger << DEBUG << denomMuon.size() << " denom muons before Z overlap removal " << SLogger::endmsg;
-	//m_logger << DEBUG << goodElectron.size() << " good electrons before Z overlap removal " << SLogger::endmsg;
-	//m_logger << DEBUG << denomElectron.size() << " denom electrons before Z overlap removal " << SLogger::endmsg;
 
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
@@ -1061,8 +1094,6 @@ entries++;
 			{	denomMuon.erase(denomMuon.begin()+i); i--;removed = true;}
 		}
 	}
-	//m_logger << DEBUG << goodMuon.size() << " good muons after Z overlap removal " << SLogger::endmsg;
-	//m_logger << DEBUG << denomMuon.size() << " denom muons after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());
 
 	for(uint i = 0; i < goodElectron.size(); i++)
@@ -1113,11 +1144,6 @@ entries++;
         genericMuon = denomMuon;
         genericElectron = denomElectron;}
         
-
-	//m_logger << DEBUG << " generic muon size " << genericMuon.size() << " good muon size " << goodMuon.size() << SLogger::endmsg;
-	//m_logger << DEBUG << " generic ele size " << genericElectron.size() << " good ele size " << goodElectron.size() << SLogger::endmsg;
-	//m_logger << DEBUG << " generic muon size " << genericMuon.size() << " denom muon size " << denomMuon.size() << SLogger::endmsg;
-	//m_logger << DEBUG << " generic ele size " << genericElectron.size() << " denom ele size " << denomElectron.size() << SLogger::endmsg;
 
 	// checking the rest of the event
 	// list of good taus 
@@ -1177,10 +1203,6 @@ entries++;
 		        }
                }
 	}
-	//m_logger << DEBUG << " after overlap checks " << SLogger::endmsg;
-	//m_logger << DEBUG << " genericElectron.size() " << genericElectron.size()<< SLogger::endmsg;
-	//m_logger << DEBUG << " genericMuon.size() " << genericMuon.size()<< SLogger::endmsg;
-	//m_logger << DEBUG << " goodTau.size() " << goodTau.size()<< SLogger::endmsg;
 
 	int tauCand = 	goodTau.size();
 
@@ -1496,7 +1518,8 @@ entries++;
 	}
 	if(signal) {h_cut_flow_signal_weight->Fill(1,weight);
         }
-	else if (category==0){ h_cut_flow_cat0_weight->Fill(1,weight);
+	else if (category==0){ 
+		h_cut_flow_cat0_weight->Fill(1,weight);
         }
 	else if (category==1) {h_cut_flow_cat1_weight->Fill(1,weight);
         }
@@ -1954,7 +1977,205 @@ entries++;
 	Hist( "h_H_lep2_eta")->Fill(Hcand[1].eta,weight);
 	Hist( "h_H_lep2_phi")->Fill(Hcand[1].phi,weight);
 	Hist( "h_total_weight")->Fill(weight);
-	
+
+        //histogram to estimate the final yield corrected with the FR
+
+        double cat0_weight_medium, cat1_weight_medium, cat2_weight_medium;
+        double cat0_weight_tight, cat1_weight_tight, cat2_weight_tight;
+        double FR_mu_medium = FR_MMed, FR_mu_tight = FR_MTig;
+        double FR_ele_medium = FR_EMed, FR_ele_tight = FR_ETig;
+        double FR_tau_medium, FR_tau_tight;
+        double FR_tau1_medium, FR_tau1_tight;
+        double FR_tau2_medium, FR_tau2_tight;
+
+        switch(event_type){
+        //MMMT
+        case 1:
+        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
+        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
+        h_cat0_FR_medium->Fill(1,weight*cat0_weight_medium);
+        h_cat0_FR_tight->Fill(1,weight*cat0_weight_tight);
+        }
+        else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        h_cat1_FR_medium->Fill(1,weight*cat1_weight_medium);
+        h_cat1_FR_tight->Fill(1,weight*cat1_weight_tight);
+        }
+        else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+        h_cat2_FR_medium->Fill(1,weight*cat2_weight_medium);
+        h_cat2_FR_tight->Fill(1,weight*cat2_weight_tight);
+        }
+        break;
+        //MMEM
+        case 2:
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
+        h_cat0_FR_medium->Fill(2,weight*cat0_weight_medium);
+        h_cat0_FR_tight->Fill(2,weight*cat0_weight_tight);
+        }
+        else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+        h_cat1_FR_medium->Fill(2,weight*cat1_weight_medium);
+        h_cat1_FR_tight->Fill(2,weight*cat1_weight_tight);
+        }
+        else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+        h_cat2_FR_medium->Fill(2,weight*cat2_weight_medium);
+        h_cat2_FR_tight->Fill(2,weight*cat2_weight_tight);
+	}
+        break;
+        //MMET
+        case 3:
+        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
+        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);
+        h_cat0_FR_medium->Fill(3,weight*cat0_weight_medium);
+        h_cat0_FR_tight->Fill(3,weight*cat0_weight_tight);
+        }
+        else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        h_cat1_FR_medium->Fill(3,weight*cat1_weight_medium);
+        h_cat1_FR_tight->Fill(3,weight*cat1_weight_tight);
+        }
+        else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+        h_cat2_FR_medium->Fill(3,weight*cat2_weight_medium);
+        h_cat2_FR_tight->Fill(3,weight*cat2_weight_tight);
+        }
+        break;
+        //MMTT
+        case 4:
+        FR_tau1_medium = fakeTau_medium(Hcand[0].pt);
+        FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
+        FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
+        FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
+        h_cat0_FR_medium->Fill(4,weight*cat0_weight_medium);
+        h_cat0_FR_tight->Fill(4,weight*cat0_weight_tight);
+        }
+        else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
+        h_cat1_FR_medium->Fill(4,weight*cat1_weight_medium);
+        h_cat1_FR_tight->Fill(4,weight*cat1_weight_tight);
+	}
+        else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
+        h_cat2_FR_medium->Fill(4,weight*cat2_weight_medium);
+        h_cat2_FR_tight->Fill(4,weight*cat2_weight_tight);
+        }
+        break;
+        //EEMT
+        case 5:
+        FR_tau_medium = fakeTau_medium(Hcand[0].pt);
+        FR_tau_tight = fakeTau_tight(Hcand[0].pt);
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
+        h_cat0_FR_medium->Fill(5,weight*cat0_weight_medium);
+        h_cat0_FR_tight->Fill(5,weight*cat0_weight_tight);
+	}
+        else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        h_cat1_FR_medium->Fill(5,weight*cat1_weight_medium);
+        h_cat1_FR_tight->Fill(5,weight*cat1_weight_tight);
+        }
+        else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+	h_cat2_FR_medium->Fill(5,weight*cat2_weight_medium);
+	h_cat2_FR_tight->Fill(5,weight*cat2_weight_tight);
+	}
+        break;
+        //EEEM
+        case 6:
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
+	h_cat0_FR_medium->Fill(6,weight*cat0_weight_medium);
+	h_cat0_FR_tight->Fill(6,weight*cat0_weight_tight);
+        }
+        else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+	h_cat1_FR_medium->Fill(6,weight*cat1_weight_medium);
+	h_cat1_FR_tight->Fill(6,weight*cat1_weight_tight);
+	}
+        else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+	h_cat2_FR_medium->Fill(6,weight*cat2_weight_medium);
+	h_cat2_FR_tight->Fill(6,weight*cat2_weight_tight);
+	}
+        break;
+        //EEET
+        case 7:
+        FR_tau_medium = fakeTau_medium(Hcand[0].pt);
+        FR_tau_tight = fakeTau_tight(Hcand[0].pt);
+        if(category==0){
+	cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);	
+	cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);	
+	h_cat0_FR_medium->Fill(7,weight*cat0_weight_medium);
+	h_cat0_FR_tight->Fill(7,weight*cat0_weight_tight);
+        }
+	else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+	h_cat1_FR_medium->Fill(7,weight*cat1_weight_medium);
+	h_cat1_FR_tight->Fill(7,weight*cat1_weight_tight);
+        }
+	else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+	h_cat2_FR_medium->Fill(7,weight*cat2_weight_medium);
+	h_cat2_FR_medium->Fill(7,weight*cat2_weight_tight);
+	}	        
+	break;
+        //EETT
+        case 8:
+        FR_tau1_medium = fakeTau_medium(Hcand[0].pt);
+        FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
+        FR_tau2_medium = fakeTau_medium(Hcand[0].pt);
+        FR_tau2_tight = fakeTau_tight(Hcand[0].pt);
+        if(category==0){
+        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
+        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
+	h_cat0_FR_medium->Fill(8,weight*cat0_weight_medium);
+	h_cat0_FR_tight->Fill(8,weight*cat0_weight_tight);
+        }
+	else if(category==1){
+        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
+        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
+	h_cat1_FR_medium->Fill(8,weight*cat1_weight_medium);
+	h_cat1_FR_tight->Fill(8,weight*cat1_weight_tight);
+
+        }
+	else if(category==2){
+        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
+        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
+	h_cat2_FR_medium->Fill(8,weight*cat2_weight_medium);
+	h_cat2_FR_tight->Fill(8,weight*cat2_weight_tight);
+        }
+	break;
+
+        }	
 	
 	h_cut_flow->Fill(10,1);
 	h_cut_flow_weight->Fill(10,weight);
