@@ -23,3 +23,5 @@ do
 done < <(more ${2}/${1}_total.txt)
 echo $gsum > ${2}/${1}_sumEvents.txt
 echo "Total events processed in filtering "${1}" is "${gsum} 
+echo "converting csv to json"
+csv2json.py ${2}/${1}_lumi.csv --output ${2}/lumi.json

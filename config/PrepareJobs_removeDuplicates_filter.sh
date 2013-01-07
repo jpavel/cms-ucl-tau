@@ -105,40 +105,40 @@ do
   mv temp_input_2_${counter}.1 temp_input.1
   rm -f temp_input.1.2
   mv temp_input_2_${counter}.1.2 temp_input.1.2
-  mkdir ${output_name}_job${counter}
-  cp script.sh ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "export X509_USER_PROXY=${sframe_dir}/myProxy" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "mkdir -p /scratch/${output_name}_input" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  cat  input_${counter}.1 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
+  mkdir -p ${output_name}/job${counter}
+  cp script.sh ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "export X509_USER_PROXY=${sframe_dir}/myProxy" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "mkdir -p /scratch/${output_name}_input" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  cat  input_${counter}.1 >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   rm -f input_${counter}.1
   more input_${counter}.2 | tr '\n' ' ' > temp_input.2
   rm -f input_${counter}.2 
-  echo "mkdir /scratch/${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cd /scratch/${output_name}_${counter}_runDir"    >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo -n "sframe_input.py -r -x 1 -d -o input.xml -t ${inTreeName} " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  more temp_input.2 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cp ${sframe_dir}/JobConfig.dtd ${sframe_dir}/${config_name} ${sframe_dir}/*.root ." >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "sframe_main ${config_name}" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "ls -ltrh" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cp Filter.Data1.Reco.root ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cp *.txt ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cp *.csv ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "srmcp file:////scratch/${output_name}_${counter}_runDir/output.root ${STORAGE}/${output_dir}/output_Ntuples_${counter}_0_abc.root" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-#  echo "touch events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-#  echo "tar czvf events.tgz events.txt" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-#  echo "cp events.tgz ${sframe_dir}/${output_name}_job${counter}/" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo -n "rm -rf " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  more temp_input.2 >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cd /scratch" >>  ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "rm -rf ${output_name}_${counter}_runDir" >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "echo \"(0) Wrapper finished successfully. Exit code 0\" " >> ${output_name}_job${counter}/${output_name}_${counter}.sh
-  echo "cd ${output_name}_job${counter}" >> ${output_name}_SubmitAll.sh
+  echo "mkdir /scratch/${output_name}_${counter}_runDir" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cd /scratch/${output_name}_${counter}_runDir"    >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo -n "sframe_input.py -r -x 1 -d -o input.xml -t ${inTreeName} " >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  more temp_input.2 >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cp ${sframe_dir}/JobConfig.dtd ${sframe_dir}/${config_name} ${sframe_dir}/*.root ." >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "sframe_main ${config_name}" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cp Filter.Data1.Reco.root ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cp *.txt ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cp *.csv ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "srmcp file:////scratch/${output_name}_${counter}_runDir/output.root ${STORAGE}/${output_dir}/output_Ntuples_${counter}_0_abc.root" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+#  echo "touch events.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+#  echo "tar czvf events.tgz events.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+#  echo "cp events.tgz ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo -n "rm -rf " >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  more temp_input.2 >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cd /scratch" >>  ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "rm -rf ${output_name}_${counter}_runDir" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "echo \"(0) Wrapper finished successfully. Exit code 0\" " >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cd ${output_name}/job${counter}" >> ${output_name}_SubmitAll.sh
   echo "echo \"Submitting job no. ${counter}... \" " >> ${output_name}_SubmitAll.sh
   echo "qsub -q localgrid@cream02 -o script.stdout -e script.stderr ${output_name}_${counter}.sh" >> ${output_name}_SubmitAll.sh
-  echo "cd .." >> ${output_name}_SubmitAll.sh
+  echo "cd ../.." >> ${output_name}_SubmitAll.sh
 done 
 rm -f temp_input*
 rm -f full_path
