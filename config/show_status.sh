@@ -1,0 +1,1 @@
+source ShowStatus.sh 20130106_FILTER_Mu_D muon_2012D results_filter/data/ /pnfs/iihe/cms/store/user/jez/FILTER/ZHttNtuples/53X/Data/DoubleMu_Run2012D-PromptReco-v1/ /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/Data/DoubleMu_Run2012D-PromptReco-v1/

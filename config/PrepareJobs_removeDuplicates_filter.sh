@@ -27,9 +27,9 @@ ntuple_name=output_Ntuples
 srm_server=dcap://maite.iihe.ac.be
 inTreeName=t
 
-voms-proxy-init --voms cms:/cms/becms -valid 48:00
+#voms-proxy-init --voms cms:/cms/becms -valid 48:00
 export STORAGE=srm://maite.iihe.ac.be
-cp $X509_USER_PROXY myProxy
+#cp $X509_USER_PROXY myProxy
 
 full_path=${srm_server}${input_data}/
 touch full_path
