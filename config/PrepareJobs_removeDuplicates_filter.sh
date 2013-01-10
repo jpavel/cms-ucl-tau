@@ -61,7 +61,7 @@ rm -f ${output_name}_duplicates.list
 touch ${output_name}_duplicates.list
 
 
-duplicate removal
+# duplicate removal
 for block in  `seq -s ' ' 1 ${total}`; do
     more temp_input.1 |  grep "_${block}_[0-9]\{1,\}_....root" > copies.list
     copies=`more copies.list | wc -l`
