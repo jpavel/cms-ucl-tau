@@ -10,7 +10,8 @@
 ClassImp( Analysis );
 
 Analysis::Analysis()
-	: SCycleBase() {
+	: SCycleBase(), m_allEvents( "allEvents", this ) 
+	{
 
 		SetLogName( GetName() );
 		DeclareProperty("InTreeName",InTreeName);
@@ -380,6 +381,10 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	if(printoutEvents) log1.open("events.txt");
 	
+	lumi.open("lumi.csv");
+	
+	current_run=current_lumi=-999;
+	
 	
 	
 
@@ -400,6 +405,12 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 
 	if(printoutEvents) log1.close();
+	
+	ofstream log2;       
+     log2.open("total.txt");
+     log2 << *m_allEvents << std::endl;
+     log2.close();
+	
 	return;
 
 }
@@ -524,6 +535,14 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
+
+		++m_allEvents;
+	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
+		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
+		current_run=m->runNumber;
+		current_lumi=m->lumiNumber;
+	}
+	
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
 		Hist("h_nPU_Info")->Fill(m->PUInfo);
