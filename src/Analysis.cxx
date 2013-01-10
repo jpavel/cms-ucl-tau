@@ -1253,7 +1253,8 @@ entries++;
 		}
 
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
-		if(!switchToFakeRate && !checkCategories && !iso1_muTau) continue;
+		if(!switchToFakeRate){		
+			if(!checkCategories && !iso1_muTau) continue;}
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
                         //the following switch could be also omitted
@@ -1293,7 +1294,10 @@ entries++;
 			bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
                         if(!switchToFakeRate){		
 			if (!iso1 && !checkCategories) continue;}
-			if(genericElectron[i].numLostHitEleInner > 1) continue;
+                        if(switchToFakeRate){		
+			if(genericElectron[i].numLostHitEleInner > 1) continue;}
+                        else{
+			if(genericElectron[i].numLostHitEleInner > 0) continue;}
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
