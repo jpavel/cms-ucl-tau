@@ -21,6 +21,7 @@ num_files=${3}
 config_name=${4}
 output_dir=${5}
 
+results_dir=${6}
 sframe_dir=$PWD
 # input datasets settings
 ntuple_name=output_Ntuples
@@ -60,20 +61,20 @@ rm -f ${output_name}_duplicates.list
 touch ${output_name}_duplicates.list
 
 
-#duplicate removal
-for block in  `seq -s ' ' 1 ${total}`; do
-    more temp_input.1 |  grep "_${block}_[0-9]\{1,\}_....root" > copies.list
-    copies=`more copies.list | wc -l`
-    toRemove=`expr $copies - 1`
-    if [ $copies -gt 0 ]; then
-      more copies.list | head -n ${toRemove} >> ${output_name}_duplicates.list
-      more copies.list | tail -n 1 >> toKeep.list
-    fi
-    rm -f copies.list
-done
+# duplicate removal
+# for block in  `seq -s ' ' 1 ${total}`; do
+#     more temp_input.1 |  grep "_${block}_[0-9]\{1,\}_....root" > copies.list
+#     copies=`more copies.list | wc -l`
+#     toRemove=`expr $copies - 1`
+#     if [ $copies -gt 0 ]; then
+#       more copies.list | head -n ${toRemove} >> ${output_name}_duplicates.list
+#       more copies.list | tail -n 1 >> toKeep.list
+#     fi
+#     rm -f copies.list
+# done
 
-rm -f temp_input.1
-mv toKeep.list temp_input.1
+# rm -f temp_input.1
+# mv toKeep.list temp_input.1
 
 more temp_input.1 |while read line
 do
@@ -90,6 +91,13 @@ mv temp_input.1.1 temp_input.1
 touch ${output_name}_SubmitAll.sh
 rm -rf ${output_name}_SubmitAll.sh
 touch ${output_name}_SubmitAll.sh
+
+touch ${output_name}_ShowStatus.sh
+rm -rf ${output_name}_ShowStatus.sh
+touch ${output_name}_ShowStatus.sh
+
+echo "source ShowStatus.sh ${output_name} ${output_name} ${results_dir} ${output_dir} ${input_data}" >>  ${output_name}_ShowStatus.sh
+chmod +x ${output_name}_ShowStatus.sh
 
 until [ $total -lt 1 ]
 do
