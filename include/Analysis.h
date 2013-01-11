@@ -93,6 +93,16 @@ private:
 	int entries;
 
 	// cut-flow
+    TH1* h_tau_denominator;
+    TH1* h_tau_num_medium;
+    TH1* h_tau_num_tight;
+    TH1* h_ele_denominator;
+    TH1* h_ele_num_medium;
+    TH1* h_ele_num_tight;
+    TH1* h_muon_denominator;
+    TH1* h_muon_num_medium;
+    TH1* h_muon_num_tight;
+
     TH1* h_deltaR;
     TH1* h_deltaR_max;
     TH1* h_deltaR_min;

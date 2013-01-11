@@ -732,6 +732,8 @@ entries++;
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	}
 
+
+
 	
         //vertex selection
 	std::vector<myobject> vertex = m->Vertex;
@@ -880,7 +882,7 @@ entries++;
 					goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
 			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-			if(mass > 60. && mass < 120.){
+			if(mass > 80. && mass < 100.){
 				Zmumu=true;
 				double dM = 999.;
 				if(BestMassForZ > 0.0){
