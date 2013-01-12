@@ -496,6 +496,22 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
         std::cout << "Z(EE)H(Etau)      : " << h_event_type_tight->GetBinContent(7) << std::endl;
         std::cout << "Z(EE)H(tautau)    : " << h_event_type_tight->GetBinContent(8) << std::endl;
 
+        
+           std::cout << " ******************************************************************* "  << std::endl;
+           std::cout << " genW size: " << genW.size()  << std::endl;
+           std::cout << " genMuFromW size: " << genMuFromW.size()  << std::endl;
+           std::cout << " genEleFromW size: " << genEleFromW.size()  << std::endl;
+           std::cout << " genTauFromW size: " << genTauFromW.size()  << std::endl;
+           std::cout << " sum lepton size: " << genMuFromW.size()+genEleFromW.size()+genTauFromW.size()  << std::endl;
+           std::cout << " ******************************************************************* "  << std::endl;
+           std::cout << " real mu contribution to fake (denominator) " << realMuon_denominator.size()  << std::endl;
+           std::cout << " real mu contribution to fake (num Loose) " << realMuon_numLoose.size()  << std::endl;
+           std::cout << " real mu contribution to fake (num Tight) " << realMuon_numTight.size()  << std::endl;
+           std::cout << " real ele contribution to fake (denominator) " << realEle_denominator.size()  << std::endl;
+           std::cout << " real ele contribution to fake (num Loose) " << realEle_numLoose.size()  << std::endl;
+           std::cout << " real ele contribution to fake (num Tight) " << realEle_numTight.size()  << std::endl;
+
+
         h_medium=Retrieve<TH1D>("h_medium");
         h_tight=Retrieve<TH1D>("h_tight");
         h_denom=Retrieve<TH1D>("h_denom");
@@ -731,8 +747,6 @@ entries++;
 		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	}
-
-
 
 	
         //vertex selection
@@ -1146,6 +1160,7 @@ entries++;
         genericMuon = denomMuon;
         genericElectron = denomElectron;}
         
+
 
 	// checking the rest of the event
 	// list of good taus 

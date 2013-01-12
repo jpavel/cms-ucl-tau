@@ -290,6 +290,21 @@ private:
     std::string doubMu2;
     std::string doubMu3;
     
+        std::vector<myobject> genW;
+        std::vector<myobject> genMuFromW;
+        std::vector<myobject> genEleFromW;
+        std::vector<myobject> genTauFromW;
+        std::vector<myobject> realMuon_denominator;
+        std::vector<myobject> realMuon_numLoose;
+        std::vector<myobject> realMuon_numTight;
+        std::vector<myobject> realEle_denominator;
+        std::vector<myobject> realEle_numLoose;
+        std::vector<myobject> realEle_numTight;
+        //genW.clear();
+        //genEleFromW.clear();
+        //genMuFromW.clear();
+        //genTauFromW.clear();
+    
     bool switchToFakeRate;
     bool  checkCategories;
     bool isSimulation;
