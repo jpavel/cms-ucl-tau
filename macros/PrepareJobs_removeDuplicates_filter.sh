@@ -94,13 +94,13 @@ rm -f ${output_name}_run_filter_all.C
 touch ${output_name}_run_filter_all.C
 
 echo "#include <iostream>" >> ${output_name}_run_filter_all.C
-echo "void ${output_name}_run_filter()" >> ${output_name}_run_filter_all.C
+echo "void run_filter()" >> ${output_name}_run_filter_all.C
 echo "{" >> ${output_name}_run_filter_all.C
 echo "long n_evt=-1;" >> ${output_name}_run_filter_all.C
 echo "TString input=\"/scratch/${output_name}_input/\";" >> ${output_name}_run_filter_all.C
 echo "bool is2011 = ${config_2011};" >> ${output_name}_run_filter_all.C
 echo "bool isFR = ${config_FR};" >> ${output_name}_run_filter_all.C
-cat ${output_name}_run_filter.fragment >> ${output_name}_run_filter_all.C	
+cat  run_filter.fragment >> ${output_name}_run_filter_all.C	
 
 touch ${output_name}_SubmitAll.sh
 rm -rf ${output_name}_SubmitAll.sh
@@ -109,6 +109,8 @@ touch ${output_name}_SubmitAll.sh
 touch ${output_name}_ShowStatus.sh
 rm -rf ${output_name}_ShowStatus.sh
 touch ${output_name}_ShowStatus.sh
+
+cat makeProxy.sh >> ${output_name}_SubmitAll.sh
 
 echo "source ShowStatus.sh ${output_name} ${output_name} ${results_dir} ${output_dir} ${input_data}" >>  ${output_name}_ShowStatus.sh
 chmod +x ${output_name}_ShowStatus.sh
@@ -134,7 +136,8 @@ do
   mkdir -p ${output_name}/job${counter}
   cp script.sh ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "export X509_USER_PROXY=${sframe_dir}/myProxy" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
-  echo "mkdir -p /scratch/${output_name}_input" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "mkdir -p /scratch/${output_name}_input_${counter}" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  sed -i "s/_input/_input_${counter}/g" input_${counter}.*
   cat  input_${counter}.1 >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   rm -f input_${counter}.1
   more input_${counter}.2 | tr '\n' ' ' > temp_input.2
@@ -146,6 +149,7 @@ do
   echo "" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "cp ${sframe_dir}/filter.C ${sframe_dir}/${output_name}/${output_name}_run_filter_all.C ${sframe_dir}/*.h ." >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "cp ${output_name}_run_filter_all.C run_filter.C" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "sed -i 's/_input/_input_${counter}/g' run_filter.C"  >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "rm -f ${output_name}_run_filter_all.C" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "more run_filter.C" >> ${output_name}/job${counter}/${output_name}_${counter}.sh  

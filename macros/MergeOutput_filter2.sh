@@ -2,10 +2,10 @@
 
 mkdir -p ${2}
 pwd=$PWD
-$ROOTSYS/bin/hadd ${2}/${1}_histo.root ${1}/job*/Filter.Data1.Reco.root
+#$ROOTSYS/bin/hadd ${2}/${1}_histo.root ${1}/job*/Filter.Data1.Reco.root
 touch ${2}/${1}_total.txt
 touch ${2}/${1}_lumi.csv
-max=`ls ${1} | wc -l`
+max=`ls ${1} | grep job | wc -l`
 echo "There is ${max} subjobs in task ${1}"
 for block in  `seq -s ' ' 1 ${max}`; do
     cd ${1}/job${block}

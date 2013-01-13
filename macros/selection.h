@@ -1,7 +1,7 @@
 #ifndef selection_H
 #define selection_H
 
-#include "../include/myevent.h"
+#include "myevent.h"
 #include "helper.h"
 
 #include "TLorentzVector.h"

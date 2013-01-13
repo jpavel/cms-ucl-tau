@@ -1,7 +1,7 @@
 #ifndef helper_H
 #define helper_H
 
-#include "../include/myevent.h"
+#include "myevent.h"
 
 #include "TMath.h"
 

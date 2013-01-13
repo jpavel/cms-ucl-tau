@@ -7,7 +7,7 @@ outputDir=${3}
 outputLoc=${4}
 inputLoc=${5}
 
-max=`ls ${task} | wc -l`
+max=`ls ${task} |grep job | wc -l`
 echo "There are ${max} jobs in the task ${task}"
 source ShowResults_filter_error2.sh ${task} 1> results.out 2> results.err
 echo "These jobs need to be re-submitted:"
