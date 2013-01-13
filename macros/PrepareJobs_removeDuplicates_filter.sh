@@ -1,15 +1,18 @@
 #!/bin/bash
 
-# Script to prepare input files for SFrame analysis at ULB cluster. During its run it also checks the accessibility and readability of files and computes the total number of events.
-# Prerequisities: 1) valid grid proxy (voms-proxy-init --voms cms:/cms/becms)  2) Set-up ROOT and SFrame environments
+# Script to prepare input files for filtering of ntuples at ULB cluster. 
 
-# Usage: source MakeSFInputFile.sh <directory with input ntuples> <name of output file with SFrame input>
-# e.g. 
-# source MakeSFInputFile.sh /pnfs/iihe/cms/store/user/jez/ZHTo2TauAna_53x_HToTauTau-140 53x_HToTauTau-140
-#
-# The result would be 53x_HToTauTau-140_input.xml containit config snippet that can be included to SFrame config file 
+# Input parameters: input directory with ntuples,
+#                   name of task (any string), 
+#                   number of input files per job (recommended 1-10, depending on input sample and filtering efficiency), 
+#                   bool switch whether to prepare ntuples for fake rate estimation or not, 
+#                   bool switch whether processing 2011 samples or not (different triggers)
+#                   name of output directory at pnfs
+#                   name of local directory where summary of results will be stored
 
-# Important parameters: names of ntuples (without suffix), server name and name of the tree inside ntuples
+# ex.: 
+# source PrepareJobs_removeDuplicates_filter.sh /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/Data/DoubleElectron_Run2012D-PromptReco-v1/ FILTER3_D_Ele 10 0 0 /pnfs/iihe/cms/store/user/jez/test/newFilter3 results_filter/test 
+
 
 touch temp_input.1
 rm -f temp_input.*

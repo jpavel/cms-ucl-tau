@@ -25,7 +25,7 @@ echo "${finished} jobs produced output"
 saved=`ls ${outputLoc} | wc -l`
 saved_size=`ls -lh ${outputLoc} | head -n 1 | tr -cd [:digit:]`
 input_size=`ls -lh ${inputLoc} | head -n 1 | tr -cd [:digit:]`
-source ~/removeDuplicate.sh ${outputLoc} 1 ${max}
+source removeDuplicate.sh ${outputLoc} 1 ${max}
 ratio=`echo "${saved_size} / ${input_size} * 100" | bc -l | awk '{printf("%04.1f",$1);}'`
 echo "The size of filtered output is ${saved_size} GB (${ratio} %)"
 echo "---------SUMMARY----------"
