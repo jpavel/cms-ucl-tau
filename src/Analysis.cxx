@@ -175,8 +175,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_PU_weight			= Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
 	h_total_weight			= Book(TH1D("h_total_weight","Weights distribution",100,0,5));
-	h_nPU_raw			= Book(TH1D("h_nPU_raw","raw PU distribution",50,0,50));
-	h_nPU_reweight			= Book(TH1D("h_nPU_reweight","reweighted PU distribution",50,0,50));
+	h_nPU_raw			= Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
+	h_nPU_reweight			= Book(TH1D("h_nPU_reweight","reweighted PU distribution",100,0,100));
 
 	h_PF_MET			= Book(TH1D("h_PF_MET","PF MET distribution;PF MET[GeV]",100,0,200));
 	h_PF_MET_selected		= Book(TH1D("h_PF_MET_selected","PF MET distribution;PF MET[GeV]",100,0,200));
@@ -191,12 +191,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_Tmass				= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
 
-        h_nPU_Info                      = Book(TH1D("h_nPU_Info","PU info distribution",50,0,50));
-        h_nPU_InfoTrue                  = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",50,0,50));
-        h_nPU_Bunch0                    = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",50,0,50));
-        h_nPU_Info_W                    = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",50,0,50));
-        h_nPU_InfoTrue_W                = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",50,0,50));
-        h_nPU_Bunch0_W                  = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",50,0,50));
+        h_nPU_Info                      = Book(TH1D("h_nPU_Info","PU info distribution",100,0,100));
+        h_nPU_InfoTrue                  = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",100,0,100));
+        h_nPU_Bunch0                    = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",100,0,100));
+        h_nPU_Info_W                    = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",100,0,100));
+        h_nPU_InfoTrue_W                = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",100,0,100));
+        h_nPU_Bunch0_W                  = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",100,0,100));
 
 	h_signal_pt1			= Book(TH1D("h_signal_pt1", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
 	h_signal_pt2			= Book(TH1D("h_signal_pt2", " Pt distribution in signal region; P_{T}[GeV]",100,0,100));
@@ -207,12 +207,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_category0_pt		=Retrieve<TH2D>("h_category0_pt");
 
-	h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 50, -0.5,49.5));
-	h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 50, -0.5,49.5));
-	h_Nvertex_AfterZ = Book(TH1D("h_Nvertex_AfterZ","Number of vertices - selected Z", 50, -0.5,49.5));
-	h_Nvertex_AfterZ_W = Book(TH1D("h_Nvertex_AfterZ_W","Number of vertices - selected Z (PU weight)", 50, -0.5,49.5));
-	h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 50, -0.5,49.5));
-	h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 50, -0.5,49.5));
+	h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 100,-0.5,99.5));
+	h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 100,-0.5,99.5));
+	h_Nvertex_AfterZ = Book(TH1D("h_Nvertex_AfterZ","Number of vertices - selected Z", 100,-0.5,99.5));
+	h_Nvertex_AfterZ_W = Book(TH1D("h_Nvertex_AfterZ_W","Number of vertices - selected Z (PU weight)", 100,-0.5,99.5));
+	h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 100,-0.5,99.5));
+	h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 100,-0.5,99.5));
 
 	DeclareVariable(out_pt,"el_pt");
 
@@ -376,7 +376,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
 	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
-	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
+	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
 	
 	if(printoutEvents) log1.open("events.txt");
@@ -406,6 +406,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 
 	if(printoutEvents) log1.close();
 	
+	lumi.close();
 	ofstream log2;       
      log2.open("total.txt");
      log2 << *m_allEvents << std::endl;

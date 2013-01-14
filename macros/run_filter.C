@@ -1,7 +1,7 @@
 #include <iostream>
 void run_filter()
 {
-	long n_evt=2000;
+	long n_evt=-1;
 	TString input="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/";
 	bool is2011 = false;
 	bool isFR = false;
