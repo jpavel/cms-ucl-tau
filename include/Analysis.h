@@ -332,6 +332,14 @@ private:
     bool IgnorePUW;
 	
     bool printoutEvents;
+    
+    
+    // bookkeeping variables
+    
+    ofstream lumi;
+	long current_run;
+	long current_lumi;
+	SSummedVar< Int_t > m_allEvents;
 
 
 // output variables
