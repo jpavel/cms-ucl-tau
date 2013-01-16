@@ -380,6 +380,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	
 	if(printoutEvents) log1.open("events.txt");
+	dupl.open("duplicates.txt");
 	
 	lumi.open("lumi.csv");
 	
@@ -405,7 +406,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 
 	if(printoutEvents) log1.close();
-	
+	dupl.close();
 	lumi.close();
 	ofstream log2;       
      log2.open("total.txt");
@@ -538,6 +539,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
 
 		++m_allEvents;
+		
+	if(m->runNumber == 163255 && m->lumiNumber ==  603)
+    {
+         TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
+         dupl << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << fileName << std::endl;
+    }
+    
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
 		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
 		current_run=m->runNumber;

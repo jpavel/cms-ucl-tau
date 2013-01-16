@@ -277,6 +277,7 @@ private:
 	bool printoutEvents;
 	
 	ofstream lumi;
+	ofstream dupl;
 	long current_run;
 	long current_lumi;
 	SSummedVar< Int_t > m_allEvents;
