@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
-<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="DEBUG">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -13,7 +13,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="1000000" Type="Data1" Version="Reco">
 <!--
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_90_0_o23.root" Lumi="1.0"/>
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_92_0_rSV.root" Lumi="1.0"/>
@@ -25,29 +25,11 @@
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples_1.root" Lumi="1.0"/>
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples.root" Lumi="1.0"/>
 -->
-			
-			<In FileName="/home/jpavel/analysis/CMS/ZHtautau/ZHtautauAnalysis/macros/output.root" Lumi="1.0"/>
-
-<!--
-			<In FileName="output.root" Lumi="1.0"/>
--->
-<!--
-				<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/output_Ntuples_ZZJetsTo4L_8TeV-madgraph.root" Lumi="1.0"/>
--->
-<!--
-			<In FileName="/home/jpavel/ntuples/CMS/analysis/crab/output_Ntuples_10_0_mwS.root" Lumi="1.0" />
--->
-
-<!--
-  <In FileName="/home/jpavel/ntuples/CMS/analysis/crab/53x/local/output_1.root" Lumi="1.0"/> 
--->
-<!--
-42x
--->
-<!--
-    <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/42X/HToTauTau_M-110/output_10_1_VqM.root" Lumi="1.0"/> 
--->
-
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1//output_1000_3_gdy.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_209_1_aAJ.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_1038_3_JV9.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_417_3_or4.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_1245_2_tgb.root" Lumi="1.0" />
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
 		</InputData>
@@ -77,15 +59,15 @@
 
 		
 		<Item Name="checkCategories" Value="true"/>
-		<Item Name="isSimulation" Value="true"/>
-		<Item Name="is2011" Value="false"/>
+		<Item Name="isSimulation" Value="false"/>
+		<Item Name="is2011" Value="true"/>
 		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="true"/>
 <!--
 		Careful - following options veto one of the trigger paths! To be used only with data and caution
 -->
 
-	    <Item Name="vetoMuonTrigger" Value="false" />
+	    <Item Name="vetoMuonTrigger" Value="true" />
         <Item Name="vetoElectronTrigger" Value="false" />
         
  <!-- Selection cuts -->       
@@ -103,6 +85,8 @@
 		
 		<Item Name="printoutEvents" Value="true" />
 		<Item Name="maxDeltaR" Value="0.3" />            
+
+
                       
 		</UserConfig>
 	</Cycle>

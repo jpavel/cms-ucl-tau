@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
-<!-- This config file will run over input defined in input.xml file -->
-<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="DEBUG">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
+    <Library Name="libSFramePlugIns" />
 	<Library Name="libZHtautauAnalysis"/>
 	
 	<Package Name="SFrameCore.par"/>
@@ -13,9 +13,24 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-	       <InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
-                 <In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/MC/WH_ZH_TTH_HToTauTau_M-110_lepdecay_7TeV-pythia6-tauola_v2//output_10_1_dq9.root" Lumi="1.0" />
-                <InputTree Name="t"/>
+		<InputData Lumi="0.0" NEventsMax="5000000" Type="Data1" Version="Reco">
+<!--
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_90_0_o23.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_92_0_rSV.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_93_0_XFv.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_94_0_QuB.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_98_0_u8o.root" Lumi="1.0"/>
+-->
+<!--
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples_1.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples.root" Lumi="1.0"/>
+-->
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1//output_1000_3_gdy.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_209_1_aAJ.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_1038_3_JV9.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_417_3_or4.root" Lumi="1.0" />
+<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_1245_2_tgb.root" Lumi="1.0" />
+            <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
 		</InputData>
 		<UserConfig>
@@ -26,40 +41,66 @@
         	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
         <Item Name="dZvertex" Value="0.1" /> 
 			<!-- Value of b-tag weight for veto -->
-        <Item Name="bTagValue" Value="0.679" />
-			<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
-         <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
+        <Item Name="bTagValue" Value="0.898" />
+        	<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
+        <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
 		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
 <!-- 2011 triggers -->		
+<!--
 		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	
 		<Item Name="MuonTriggerName2" Value="HLT_Mu13_Mu8_v"/>
+-->
 		<Item Name="MuonTriggerName3" Value="HLT_DoubleMu7_v"/>
 
-<!-- 2012 triggers
+<!-- 2012 triggers -->
 		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	
 		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/>
--->
+
+
 		
 		<Item Name="checkCategories" Value="true"/>
-		<Item Name="isSimulation" Value="true"/>
+		<Item Name="isSimulation" Value="false"/>
 		<Item Name="is2011" Value="true"/>
 		<Item Name="is2012_52" Value="false"/>
-		<Item Name="is2012_53" Value="false"/>
-		<Item Name="useTruePileUp" Value="true"/>
-		<!--
+		<Item Name="is2012_53" Value="true"/>
+<!--
 		Careful - following options veto one of the trigger paths! To be used only with data and caution
 -->
-		<Item Name="vetoMuonTrigger" Value="false" />
-		<Item Name="vetoElectronTrigger" Value="false" />
-		
-		<!-- Selection cuts -->       
+
+	    <Item Name="vetoMuonTrigger" Value="true" />
+        <Item Name="vetoElectronTrigger" Value="false" />
+        
+ <!-- Selection cuts -->       
         <Item Name="Cut_tau_base_Pt" Value="20" />
 		<Item Name="Cut_tautau_Pt_1" Value="20" />
 		<Item Name="Cut_tautau_Pt_2" Value="20" />
 		<Item Name="Cut_tautau_MVA_iso" Value="false" />
 		
-		<Item Name="AllowTauBOverlap" Value="false" />
- 
+		<Item Name="AllowTauBOverlap" Value="true" />
+                      <Item Name="switchToFakeRate" Value="false"/>
+                        <Item Name="UseSumPtCut" Value="true" />
+
+                        <Item Name="Cut_tautau_Pt_1" Value="20" />
+                        <Item Name="Cut_tautau_Pt_2" Value="20" />
+                        <Item Name="Cut_tautau_MVA_iso" Value="false" />
+                        <Item Name="AllowTauBOverlap" Value="true" />
+                        <Item Name="printoutEvents" Value="true" />
+
+
+
+                       <Item Name="p0_tight" Value="0.5545" />
+                        <Item Name="p1_tight" Value="-0.1639" />
+                        <Item Name="p2_tight" Value="0.005815" />
+                        <Item Name="p0_medium" Value="0.7189" />
+                        <Item Name="p1_medium" Value="-0.1668" />
+                        <Item Name="p2_medium" Value="0.006854" />
+
+                        <Item Name="FR_MMed" Value="0.0379102" />
+                        <Item Name="FR_MTig" Value="0.0216629" />
+                        <Item Name="FR_EMed" Value="0.0321515" />
+                        <Item Name="FR_ETig" Value="0.0139903" />
+
+                      
 		</UserConfig>
 	</Cycle>
 </JobConfiguration>

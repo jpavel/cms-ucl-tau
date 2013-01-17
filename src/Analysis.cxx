@@ -659,7 +659,6 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 	return tMass_v;
 }
 
-// Fake Rate functions
 
 bool Analysis::WZ_Rej(myevent *m, myobject mu) {
 
@@ -705,6 +704,7 @@ bool Analysis::isGoodEl(myobject el){
                 }else return false;
 }
 
+// Fake Rate functions
 double Analysis::fakeTau_tight(double pt) {
 		if (pt<0) return 1.0;
 		else{
@@ -2039,6 +2039,8 @@ entries++;
         case 1:
         FR_tau_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau_tight = fakeTau_tight(Hcand[1].pt);
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
         cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
         cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
@@ -2083,6 +2085,8 @@ entries++;
         case 3:
         FR_tau_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau_tight = fakeTau_tight(Hcand[1].pt);
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
         cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);
         cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);
@@ -2108,6 +2112,10 @@ entries++;
         FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
         FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
         cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
         cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
@@ -2129,8 +2137,10 @@ entries++;
         break;
         //EEMT
         case 5:
-        FR_tau_medium = fakeTau_medium(Hcand[0].pt);
-        FR_tau_tight = fakeTau_tight(Hcand[0].pt);
+        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
+        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
         cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
         cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
@@ -2173,8 +2183,8 @@ entries++;
         break;
         //EEET
         case 7:
-        FR_tau_medium = fakeTau_medium(Hcand[0].pt);
-        FR_tau_tight = fakeTau_tight(Hcand[0].pt);
+        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
+        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
         if(category==0){
 	cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);	
 	cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);	
@@ -2198,8 +2208,13 @@ entries++;
         case 8:
         FR_tau1_medium = fakeTau_medium(Hcand[0].pt);
         FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
-        FR_tau2_medium = fakeTau_medium(Hcand[0].pt);
-        FR_tau2_tight = fakeTau_tight(Hcand[0].pt);
+        FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
+        FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
+
         if(category==0){
         cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
         cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
