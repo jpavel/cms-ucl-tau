@@ -25,11 +25,9 @@
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples_1.root" Lumi="1.0"/>
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/HCP_sync/output_Ntuples.root" Lumi="1.0"/>
 -->
-<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1//output_1000_3_gdy.root" Lumi="1.0" />
-<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_209_1_aAJ.root" Lumi="1.0" />
-<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_1038_3_JV9.root" Lumi="1.0" />
-<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_417_3_or4.root" Lumi="1.0" />
-<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1/output_1245_2_tgb.root" Lumi="1.0" />
+<!--<In FileName="/storage/data/cms/store/user/lperrini/ZHttNtuples/42X/Data/DoubleElectron_Run2011A-16Jan2012_v1//output_1000_3_gdy.root" Lumi="1.0" />-->
+<In FileName="/storage/data/cms/store/user/jez/FakeRateSync/output_Ntuples_1054_1_zzn.root" Lumi="1.0" />
+
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
 		</InputData>
@@ -59,8 +57,8 @@
 
 		
 		<Item Name="checkCategories" Value="true"/>
-		<Item Name="isSimulation" Value="false"/>
-		<Item Name="is2011" Value="true"/>
+		<Item Name="isSimulation" Value="true"/>
+		<Item Name="is2011" Value="false"/>
 		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="true"/>
 <!--
@@ -79,6 +77,7 @@
 		<Item Name="AllowTauBOverlap" Value="true" />
         
         <Item Name="UseSumPtCut" Value="true" />
+        <Item Name="switchToFakeRate" Value="true" />
 		<Item Name="Cut_tautau_sumPt" Value="60" />
 		<Item Name="Cut_leptau_sumPt" Value="45" />
 		<Item Name="Cut_leplep_sumPt" Value="30" />  
