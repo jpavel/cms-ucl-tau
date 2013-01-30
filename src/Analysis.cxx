@@ -245,6 +245,30 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
                 h_denom_types_eta.push_back(h_temp);
         }
+       h_denom_types_centralEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_types_centralEtaRegion.push_back(h_temp);
+        }
+       h_denom_types_externalEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_types_externalEtaRegion.push_back(h_temp);
+        }
 
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
@@ -268,6 +292,28 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
                 h_medium_types_eta.push_back(h_temp);
         }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.25 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_types_centralEtaRegion.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.25 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_types_externalEtaRegion.push_back(h_temp);
+        }
 
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
@@ -283,13 +329,35 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
                 std::stringstream s;
-                s << "h_tight_type_ETA" << i;
+                s << "h_tight_type_ETA_" << i;
                 std::string name = s.str();
                 std::stringstream ss;
                 ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
                 std::string title = ss.str();
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
                 h_tight_types_eta.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_types_centralEtaRegion.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_types_externalEtaRegion.push_back(h_temp);
         }
 
 	h_category0_pt=Retrieve<TH2D>("h_category0_pt");
@@ -1805,31 +1873,133 @@ entries++;
                 Hist("h_denom")->Fill(Hcand[i].pt,weight);
                 h_denom_types[event_type-1]->Fill(Hcand[i].pt,weight);
                 h_denom_types_eta[event_type-1]->Fill(Hcand[i].eta,weight);
+                if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+                h_denom_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+                }
+                if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+                h_denom_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+                }
                 bool isMedium=false;
                 bool isTight=false;
                 if(eTau){
-                    if(RelIsoEl(Hcand[i]) < 0.30 && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true;}
-                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; }
+                    if(RelIsoEl(Hcand[i]) < 0.30 && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true;
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+                        }
+                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; 
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+		    }
                 }
                 if(muTau){
-                    if(RelIsoMu(Hcand[i]) < 0.30 && isGoodMu(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; }
-                    if(RelIsoMu(Hcand[i]) < 0.15 && isGoodMu(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; }
+                    if(RelIsoMu(Hcand[i]) < 0.30 && isGoodMu(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+                    }
+                    if(RelIsoMu(Hcand[i]) < 0.15 && isGoodMu(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+                   }
                 }
                 if(muE){
-                    if(RelIsoEl(Hcand[i]) < 0.30  && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; }
-                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; }
-                    if(RelIsoMu(Hcand[i+1]) < 0.30 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true; }
-                    if(RelIsoMu(Hcand[i+1]) < 0.15 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true; }
+                    if(RelIsoEl(Hcand[i]) < 0.30  && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+                    }
+                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+		    }
+                    if(RelIsoMu(Hcand[i+1]) < 0.30 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true;
+			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
+				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
+				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+		    }
+                    if(RelIsoMu(Hcand[i+1]) < 0.15 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true;
+			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
+				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
+				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+		    }
                     h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
                     h_denom_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight);
+		    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
+			    h_denom_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+		    }
+		    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
+			    h_denom_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+		    }
                 }
                 if(tauTau){
                     h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
                     h_denom_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight);
-                    if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; }
-                    if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; }
-                    if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true; }
-                    if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true; }
+		    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
+			    h_denom_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+		    }
+		    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
+			    h_denom_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+		    }
+                    if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+                    }
+                    if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
+			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
+				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
+				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+			    }
+                    }
+                    if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true;
+			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
+				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
+				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+                    }
+                    if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true; 
+			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
+				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
+				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    }
+		    }
                 }
                 Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
                 Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);

@@ -238,6 +238,12 @@ private:
 	std::vector<TH1*>  h_denom_types_eta;
 	std::vector<TH1*>  h_medium_types_eta;
 	std::vector<TH1*>  h_tight_types_eta;
+	std::vector<TH1*>  h_denom_types_centralEtaRegion;
+	std::vector<TH1*>  h_medium_types_centralEtaRegion;
+	std::vector<TH1*>  h_tight_types_centralEtaRegion;
+	std::vector<TH1*>  h_denom_types_externalEtaRegion;
+	std::vector<TH1*>  h_medium_types_externalEtaRegion;
+	std::vector<TH1*>  h_tight_types_externalEtaRegion;
 
 	std::vector<TH1*>  h_H_mass_types;
 	std::vector<TH1*>  h_H_mass_signal_types;
