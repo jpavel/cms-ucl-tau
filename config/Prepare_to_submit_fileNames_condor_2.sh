@@ -7,7 +7,7 @@ echo ${max}
 cp condor2.cmd.fragment ${1}.cmd
 
 
-echo "transfer_input_files = JobConfig.dtd,${2},Fall11_PU.root,Fall11_PU_observed.root,Summer12_PU.root,Summer12_PU_53X.root,dataPileUpHistogramABCD_True_2012.root,dataPileUpHistogram_Observed_2011.root,dataPileUpHistogram_True_2011.root" >> ${1}.cmd
+echo "transfer_input_files = JobConfig.dtd,${2},Fall11_PU.root,Fall11_PU_observed.root,Summer12_PU.root,Summer12_PU_53X.root,dataPileUpHistogramABCD_True_2012.root,dataPileUpHistogram_Observed_2011.root,dataPileUpHistogram_True_2011.root,input.xml" >> ${1}.cmd
 
 echo "universe       = vanilla" >> ${1}.cmd
 echo "requirements   = (CMSFARM =?= TRUE)" >> ${1}.cmd
