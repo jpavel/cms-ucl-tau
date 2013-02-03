@@ -52,7 +52,7 @@ public:
    virtual void BeginCycle() throw( SError );
    /// Function called at the end of the cycle
    virtual void EndCycle() throw( SError );
-
+   int EventTypeConv(int e_type_in);	
    /// Function called at the beginning of a new input data
    virtual void BeginInputData( const SInputData& ) throw( SError );
    /// Function called after finishing to process an input data
@@ -87,6 +87,34 @@ private:
 	
 	myevent *m;
 	
+	std::vector <int> evt_number;
+	std::vector <int> run_number;
+	std::vector <int> lumi_number;
+	std::vector <int> evt_type;
+	std::vector <double>  mass_Z;
+	std::vector <double>  mass_H;
+	
+	std::vector <int> evt_number_l;
+	std::vector <int> run_number_l;
+	std::vector <int> lumi_number_l;
+	std::vector <int> evt_type_l;
+	std::vector <double>  mass_Z_l;
+	std::vector <double>  mass_H_l;
+	
+	std::vector <int> evt_number_m;
+	std::vector <int> run_number_m;
+	std::vector <int> lumi_number_m;
+	std::vector <int> evt_type_m;
+	std::vector <double>  mass_Z_m;
+	std::vector <double>  mass_H_m;
+	
+	
+	std::vector <int> evt_number_t;
+	std::vector <int> run_number_t;
+	std::vector <int> lumi_number_t;
+	std::vector <int> evt_type_t;
+	std::vector <double>  mass_Z_t;
+	std::vector <double>  mass_H_t;
 	
 	
 	int compared;

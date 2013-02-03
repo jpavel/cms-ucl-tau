@@ -82,6 +82,22 @@ void Analysis::EndCycle() throw( SError ) {
 
 }
 
+int Analysis::EventTypeConv(int e_type_in)
+{
+	switch(e_type_in)
+	{
+		case 1: return 4;
+		case 2: return 3;
+		case 3: return 1;
+		case 4: return 2;
+		case 5: return 8;
+		case 6: return 5;
+		case 7: return 7;
+		case 8: return 6;
+		default: return -1;	
+	}
+}
+
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_deltaR                       			 = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
@@ -559,13 +575,146 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
 	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
-	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogram_True_2012.root","mcPU","pileup");
+	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
 	if(printoutEvents) log1.open("events.txt");
 	
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
+	
+	// sync part
+	std::ifstream myfile;
+	myfile.open ("ulb_in.txt");
+	 if (myfile.is_open())
+	 {	
+	    
+	    while ( myfile.good() )
+	    {
+	      int i_number;
+		  double number;
+		  short my_FR_type=-1; 
+		  myfile >> i_number;
+		  int e_type = i_number/100;
+		  int FR_type = i_number%100;
+		  if(FR_type==1) my_FR_type=0;
+		  else if(FR_type==2) my_FR_type= 3;
+		  else if(FR_type==3 && (e_type%4==1)) my_FR_type= 2;
+		  else my_FR_type= 1;	
+		//  std::cout << i_number << " " << EventTypeConv(e_type) << " " << my_FR_type << std::endl;
+		  switch(my_FR_type){
+			case 0:
+				evt_type.push_back(EventTypeConv(e_type));      
+				myfile >> i_number;
+				run_number.push_back(i_number);
+				myfile >> i_number;
+				lumi_number.push_back(i_number);
+				myfile >> i_number;
+				evt_number.push_back(i_number);
+				myfile >> number;
+				mass_Z.push_back(number);
+				myfile >> number;
+				mass_H.push_back(number);
+				break;
+			case 1:
+				evt_type_l.push_back(EventTypeConv(e_type));      
+				myfile >> i_number;
+				run_number_l.push_back(i_number);
+				myfile >> i_number;
+				lumi_number_l.push_back(i_number);
+				myfile >> i_number;
+				evt_number_l.push_back(i_number);
+				myfile >> number;
+				mass_Z_l.push_back(number);
+				myfile >> number;
+				mass_H_l.push_back(number);
+				break;
+			case 2:
+				evt_type_m.push_back(EventTypeConv(e_type));      
+				myfile >> i_number;
+				run_number_m.push_back(i_number);
+				myfile >> i_number;
+				lumi_number_m.push_back(i_number);
+				myfile >> i_number;
+				evt_number_m.push_back(i_number);
+				myfile >> number;
+				mass_Z_m.push_back(number);
+				myfile >> number;
+				mass_H_m.push_back(number);
+				break;
+			case 3:
+				evt_type_t.push_back(EventTypeConv(e_type));      
+				myfile >> i_number;
+				run_number_t.push_back(i_number);
+				myfile >> i_number;
+				lumi_number_t.push_back(i_number);
+				myfile >> i_number;
+				evt_number_t.push_back(i_number);
+				myfile >> number;
+				mass_Z_t.push_back(number);
+				myfile >> number;
+				mass_H_t.push_back(number);
+				break;
+		  }	
+		  
+		
+	    }
+	    myfile.close();
+	  }
+	//~ evt_number.pop_back();
+	//~ run_number.pop_back();
+	//~ lumi_number.pop_back();
+	//~ evt_type.pop_back();
+	//~ mass_Z.pop_back();
+	//~ mass_H.pop_back();
+	//~ 
+	evt_number_l.pop_back();
+	run_number_l.pop_back();
+	lumi_number_l.pop_back();
+	evt_type_l.pop_back();
+	mass_Z_l.pop_back();
+	mass_H_l.pop_back();
+	//~ 
+	//~ evt_number_m.pop_back();
+	//~ run_number_m.pop_back();
+	//~ lumi_number_m.pop_back();
+	//~ evt_type_m.pop_back();
+	//~ mass_Z_m.pop_back();
+	//~ mass_H_m.pop_back();
+	//~ 
+	//~ evt_number_t.pop_back();
+	//~ run_number_t.pop_back();
+	//~ lumi_number_t.pop_back();
+	//~ evt_type_t.pop_back();
+	//~ mass_Z_t.pop_back();
+	//~ mass_H_t.pop_back();
+	
+	  std::cout << evt_number.size() << " " << run_number.size() << " " << lumi_number.size() << " " << evt_type.size() << 
+	  " " << mass_Z.size() <<  std::endl;
+	  std::cout << evt_number_l.size() << " " << run_number_l.size() << " " << lumi_number_l.size() << " " << evt_type_l.size() << 
+	  " " << mass_Z_l.size() <<  std::endl;
+	  std::cout << evt_number_m.size() << " " << run_number_m.size() << " " << lumi_number_m.size() << " " << evt_type_m.size() << 
+	  " " << mass_Z_m.size() <<  std::endl;	
+	  std::cout << evt_number_t.size() << " " << run_number_t.size() << " " << lumi_number_t.size() << " " << evt_type_t.size() << 
+	  " " << mass_Z_t.size() <<  std::endl;
+	  
+	  std::cout << evt_number.at(evt_number.size()-1) << " " << run_number.at(evt_number.size()-1) << " " << lumi_number.at(evt_number.size()-1) << " " << evt_type.at(evt_number.size()-1) << 
+	  " " << mass_Z.at(evt_number.size()-1) <<  std::endl;
+	  std::cout << evt_number_l.at(evt_number_l.size()-1) << " " << run_number_l.at(evt_number_l.size()-1) << " " << lumi_number_l.at(evt_number_l.size()-1) << " " << evt_type_l.at(evt_number_l.size()-1) << 
+	  " " << mass_Z_l.at(evt_number_l.size()-1) <<  std::endl;
+	  std::cout << evt_number_m.at(evt_number_m.size()-1) << " " << run_number_m.at(evt_number_m.size()-1) << " " << lumi_number_m.at(evt_number_m.size()-1) << " " << evt_type_m.at(evt_number_m.size()-1) << 
+	  " " << mass_Z_m.at(evt_number_m.size()-1) <<  std::endl;	
+	  std::cout << evt_number_t.at(evt_number_t.size()-1) << " " << run_number_t.at(evt_number_t.size()-1) << " " << lumi_number_t.at(evt_number_t.size()-1) << " " << evt_type_t.at(evt_number_t.size()-1) << 
+	  " " << mass_Z_t.at(evt_number_t.size()-1) <<  std::endl;
+	  
+	  //~ std::cout << evt_number.at(evt_number.size()-2) << " " << run_number.at(evt_number.size()-2) << " " << lumi_number.at(evt_number.size()-2) << " " << evt_type.at(evt_number.size()-2) << 
+	  //~ " " << mass_Z.at(evt_number.size()-2) <<  std::endl;
+	  //~ std::cout << evt_number_l.at(evt_number_l.size()-2) << " " << run_number_l.at(evt_number_l.size()-2) << " " << lumi_number_l.at(evt_number_l.size()-2) << " " << evt_type_l.at(evt_number_l.size()-2) << 
+	  //~ " " << mass_Z_l.at(evt_number_l.size()-2) <<  std::endl;
+	  //~ std::cout << evt_number_m.at(evt_number_m.size()-2) << " " << run_number_m.at(evt_number_m.size()-2) << " " << lumi_number_m.at(evt_number_m.size()-2) << " " << evt_type_m.at(evt_number_m.size()-2) << 
+	  //~ " " << mass_Z_m.at(evt_number_m.size()-2) <<  std::endl;	
+	  //~ std::cout << evt_number_t.at(evt_number_t.size()-2) << " " << run_number_t.at(evt_number_t.size()-2) << " " << lumi_number_t.at(evt_number_t.size()-2) << " " << evt_type_t.at(evt_number_t.size()-2) << 
+	  //~ " " << mass_Z_t.at(evt_number_t.size()-2) <<  std::endl;
 	
 	return;
 
@@ -807,8 +956,16 @@ double Analysis::fakeTau_medium(double pt) {
 		}
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
-entries++;
-	
+	entries++;
+			++m_allEvents;
+
+	 // sync part
+	bool found_event = false;
+	bool isLoose = false;
+	bool isMedium = false;
+	bool isTight = false;
+	// end sync
+
 	// bookkepping part
 		++m_allEvents;
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
@@ -851,6 +1008,37 @@ entries++;
 	}
 	int eNumber = m->eventNumber;
 	
+	// sync
+	uint pos = std::find(evt_number.begin(), evt_number.end(), eNumber) - evt_number.begin();
+	if( pos < evt_number.size()  )
+	{
+		found_event = true;
+	}
+	uint pos_l=0,pos_t=0;
+	if(found_event)
+	{
+		uint pos_l = std::find(evt_number_l.begin(), evt_number_l.end(), eNumber) - evt_number_l.begin();
+		if( pos_l < evt_number_l.size() )
+		{
+			isLoose = true;
+		}
+		
+		uint pos_m = std::find(evt_number_m.begin(), evt_number_m.end(), eNumber) - evt_number_m.begin();
+		if( pos_m < evt_number_m.size() )
+		{
+				isMedium = true;
+		}
+		
+		uint pos_t = std::find(evt_number_t.begin(), evt_number_t.end(), eNumber) - evt_number_t.begin();
+		if( pos_t < evt_number_t.size() )
+		{
+			isTight = true;
+		}
+	}
+	
+	
+	// end sync
+	
 	Hist("h_PU_weight")->Fill(PUWeight);
 	if(!useTruePileUp && is2011){ 
 		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
@@ -886,8 +1074,10 @@ entries++;
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
+		if(found_event) m_logger << ERROR << " WRONG TRIGGER" << SLogger::endmsg; // sync
 		return;
 	}
+	if(found_event) m_logger << ERROR << " Found event " << eNumber << " type " << evt_type[pos] << " loose/tight: " << isLoose << "/" << isTight << SLogger::endmsg; // sync
 	h_cut_flow->Fill(1,1);
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
@@ -1273,6 +1463,7 @@ entries++;
         genericElectron = denomElectron;}
         
 
+	
 
 	// checking the rest of the event
 	// list of good taus 
@@ -1518,7 +1709,57 @@ entries++;
 
 	if(Hindex[0] < 0 || Hindex[1] < 0 ||(!muTau && !muE && !eTau && !tauTau)){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
+				// sync begin
+		if( found_event){
+				 m_logger << ERROR << " MISSED H cand of type " << evt_type[pos] << " and mass " << mass_H[pos] << SLogger::endmsg;
+				 m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
+				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
+				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
+				 //~ if(evt_type[pos]==7)
+				 //~ {
+					 //~ TLorentzVector eH_eTau,tauH_eTau,H_eTau;
+                                                //~ eH_eTau.SetPxPyPzE(goodElectron[0].px,goodElectron[0].py,goodElectron[0].pz,goodElectron[0].E);
+                                                //~ tauH_eTau.SetPxPyPzE(goodTau[0].px,goodTau[0].py,goodTau[0].pz,goodTau[0].E);
+                                                //~ H_eTau = eH_eTau+tauH_eTau;
+					//~ m_logger << WARNING << " My mass " << H_eTau.M() << SLogger::endmsg;
+					//~ m_logger << WARNING << "Z is made from " << Zindex[0] << " and " << Zindex[1] << SLogger::endmsg;
+					//~ for(uint i = 0; i < electron.size() && !eTau ; i++)
+                        //~ {
+						//~ 
+                            //~ double relIso = RelIsoEl(electron[i]);
+                            //~ m_logger << WARNING << " good el. no " << i << " relIso " << relIso << " hits " << electron[i].numLostHitEleInner << 
+                            //~ " charge " << electron[i].charge << SLogger::endmsg;
+                            //~ if (relIso > 0.25){m_logger << WARNING << " rej iso"  << SLogger::endmsg; continue;}
+                            //~ if(relIso < 0.10 && electron[i].numLostHitEleInner < 1)
+                            //~ {
+                                //~ m_logger << WARNING << " Checking for eTau " << SLogger::endmsg;	
+                                //~ for(uint j=0; j< goodTau.size() && !muTau; j++)
+                                //~ {
+                                     //~ m_logger << WARNING << " good tau no. " << j << " MVA " << goodTau[j].discriminationByElectronMVA << " hits " << 
+                            //~ " charge " << goodTau[i].charge << " delta R " <<
+                            //~ deltaR(goodTau[j].eta,goodTau[j].phi,electron[i].eta,electron[i].phi) << SLogger::endmsg;
+                            //~ TLorentzVector eH,tauH,H_m;
+                                                //~ eH.SetPxPyPzE(electron[i].px,electron[i].py,electron[i].pz,electron[i].E);
+                                                //~ tauH.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
+                                                //~ H_m = eH+tauH;
+								//~ m_logger << WARNING << " My mass " << H_m.M() << SLogger::endmsg;
+                                    //~ if(electron[i].charge*goodTau[j].charge >=0) continue;
+                                    //~ if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
+                                    //~ if(deltaR(goodTau[j].eta,goodTau[j].phi,electron[i].eta,electron[i].phi)< 0.3) continue;
+									//~ eTau=true;
+								//~ }
+							//~ }
+						//~ }
+				 //~ 
+				 //~ 
+				 //~ }
+				 
+			 }
+		// sync end
+
 		return;
+	}else{
+		if(found_event) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos] << " and mass " << mass_H[pos] << SLogger::endmsg;
 	}
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
@@ -1706,6 +1947,133 @@ entries++;
 	if(Ad_lepton) 
 	{			
 		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
+			if( found_event){ 
+				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos] << " and mine is " << event_type << SLogger::endmsg;
+				  m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
+				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
+				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
+				
+				TLorentzVector H_1,H_2,H_sum;
+                                                H_1.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
+                                                H_2.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
+                                                H_sum = H_1 + H_2;
+				
+				m_logger << WARNING << " My mass " << H_sum.M() << " and his " << mass_H[pos] << SLogger::endmsg;
+					
+				bool LooseElectron = (goodTau[0].discriminationByElectronLoose > 0.5);
+				bool LooseMuon = (goodTau[0].discriminationByMuonLoose > 0.5);
+				bool CombinedIsolation = (goodTau[0].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+				
+				bool DecayMode = (goodTau[0].discriminationByDecayModeFinding > 0.5);
+				
+				bool HLooseElectron = (Hcand[1].discriminationByElectronLoose > 0.5);
+				bool HLooseMuon = (Hcand[1].discriminationByMuonLoose > 0.5);
+				bool HCombinedIsolation = (Hcand[1].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+				
+				bool HDecayMode = (Hcand[1].discriminationByDecayModeFinding > 0.5);
+				TLorentzVector Zvector;
+		        TLorentzVector Hvector;
+			
+				std::cout << " -------------------------------------------------------------------------------- " << std::endl;
+		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << std::endl;;
+		switch(event_type){
+		case 1: 
+			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] <<std::endl;                                    	
+			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+        case 2:
+            std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "El1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+		case 3: 
+			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+			std::cout << "El1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
+			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+        case 4: 
+			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+        case 5: 
+			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+        case 6:
+            std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "El3(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+		case 7: 
+			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+		    std::cout << "El3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
+		    std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+        case 8: 
+			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos] << std::endl;                                    	
+			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos] << std::endl;
+            break;
+        }
+				
+				for(uint iTau=0; iTau < goodTau.size(); iTau++){
+				 std::cout << "-->Additional tau pt " << goodTau[iTau].pt << " eta " << goodTau[iTau].eta << " phi " << goodTau[iTau].phi <<
+				  " AgainstElectronLoose " << goodTau[iTau].discriminationByElectronLoose  << " AgainstMuonLoose " << goodTau[iTau].discriminationByMuonLoose << " MediumCombinedIsolation " << goodTau[iTau].byMediumCombinedIsolationDeltaBetaCorr << 
+				  " DecayModeFinding " << goodTau[iTau].discriminationByDecayModeFinding << std::endl;
+				 }
+			 }
+
 		return;
 	}
 	
@@ -1736,6 +2104,7 @@ entries++;
 	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
 	if(!dZ_expo)
 	{
+		if( found_event) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos] << SLogger::endmsg; // sync 
 		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
 		return;
 	}
@@ -1833,6 +2202,7 @@ entries++;
 
 	if(bTagVeto)
 	{
+		 if( found_event) m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos] << SLogger::endmsg; // sync 
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
@@ -2051,6 +2421,10 @@ entries++;
 		 }
 		
 	}else  Hist( "h_event_type" )->Fill(event_type,weight); // blinding 
+
+		if( found_event && event_type!=evt_type[pos]) {
+	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos] << " and mine is " << event_type << SLogger::endmsg;
+  }
 
 	
 	//histograms for selected candidates
@@ -2477,6 +2851,171 @@ entries++;
 	}
         Hist("h_deltaR_max")->Fill(maxDR);
         Hist("h_deltaR_min")->Fill(minDR);
+        
+    	if( found_event && event_type!=evt_type[pos]) {
+	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos] << " and mine is " << event_type << SLogger::endmsg;
+  }
+    
+    
+    if (!found_event && signal){
+	 	  m_logger << ERROR << " My plus of type " << event_type << SLogger::endmsg;
+		TLorentzVector Zvector;
+		TLorentzVector Hvector;
+		std::cout << " -------------------------------------------------------------------------------- " << std::endl;
+		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << " entry " << entries << std::endl;;
+		switch(event_type){
+		case 1: 
+			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+        case 2:
+            std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "El1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+		case 3: 
+			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "El1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
+			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonLoose " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+        case 4: 
+			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+        case 5: 
+			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+        case 6:
+            std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "El3(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+		case 7: 
+			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+		    std::cout << "El3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
+		    std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonLoose " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
+			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+        case 8: 
+			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
+			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
+			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
+            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
+			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
+			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
+			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
+			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
+            std::cout << " H mass " << Hvector.M() << std::endl;
+            break;
+    	}	
+		std::cout << "---> Detailed accounts: " << std::endl;
+		std::cout << " ---------------- MUONS ---------------------- " << std::endl;
+		 for (uint i = 0; i < muon.size(); i++) {
+
+		double muPt = muon[i].pt;
+		double muEta = muon[i].eta;
+		bool muGlobal = muon[i].isGlobalMuon;
+		bool muTracker = muon[i].isTrackerMuon;
+		double relIso = RelIsoMu(muon[i]);
+		
+		bool pfID = PFMuonID(muon[i]);	
+		std::cout << " --> no. " << i << " pt "  << muPt << " eta " << muEta << " phi " << muon[i].phi 
+		<< " ID: " << pfID << " iso " << relIso << std::endl; 
+		
+		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
+		{
+					goodMuon.push_back(muon[i]);
+					std::cout << "  ----> GOOD MUON <---- " << std::endl;
+					Hist("h_mu_relIso")->Fill(relIso);
+		}
+		
+    }
+    std::cout << " ---------------- ELECTRONS ---------------------- " << std::endl;
+		
+		for (uint i = 0; i < electron.size(); i++) {
+
+		double elPt = electron[i].pt;
+		double elEta = electron[i].eta;
+		int missingHits = electron[i].numLostHitEleInner;
+		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
+		double relIso = RelIsoEl(electron[i]);
+		std::cout << " --> no. " << i << " pt "  << elPt << " eta " << elEta << " phi " << electron[i].phi 
+		<< " ID: " << elID << " mHits " << missingHits << " iso " << relIso << std::endl; 
+		
+		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
+		{
+			goodElectron.push_back(electron[i]);
+			std::cout << "  ----> GOOD ELECTRON <---- " << std::endl;
+			Hist("h_el_relIso")->Fill(relIso);
+		}
+    }
+		
+	std::cout << " ---------------- TAUS ---------------------- " << std::endl;
+	
+	for (uint i = 0; i < tau.size(); i++) {
+   
+		double tauPt = tau[i].pt;
+		double tauEta = tau[i].eta;
+		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
+		bool LooseMuon = (tau[i].discriminationByMuonLoose > 0.5);
+		bool CombinedIsolation = (tau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
+		
+		if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && CombinedIsolation && DecayMode){
+			goodTau.push_back(tau[i]);
+			std::cout << " --> no. " << i << " pt "  << tauPt << " eta " << tauEta << " phi " << tau[i].phi << std::endl; 
+		}
+		
+    }
+	
+	
+		
+}
 
       
 	if(signal && printoutEvents)
