@@ -1073,6 +1073,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if( examineEvent==eNumber) examineThisEvent=true;
 	else examineThisEvent=false;
 	trigPass = Trg_MC_12(m,examineThisEvent);
+	if(examineThisEvent) std::cout << "Examining event " << examineEvent << std::endl;
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
@@ -1384,6 +1385,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	if(Zmumu||Zee)
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
+		if(examineThisEvent) std::cout << " Z mass is " << Zmass << std::endl;
 	else{
 			return;
 	}
@@ -1656,8 +1658,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool tauTau =false;
 	if(!signal)
 	{
+		if(examineThisEvent) std::cout << " Checking tautau " << Zmass << std::endl;
 		for(uint i = 0; i < goodTau.size() && !signal ; i++)
 		{
+			if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
 			if(switchToFakeRate){
                           if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
 			}
@@ -1669,8 +1673,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
                         if(!switchToFakeRate){		
 			if(!checkCategories && !iso1) continue;}
+			if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
 			for(uint j=i+1; j< goodTau.size() && !signal; j++)
 			{
+				if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
 				if(switchToFakeRate){
                                    if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
 				}
@@ -1686,9 +1692,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 }
 				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
+				if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
+			
 				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
-				
+				if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
+			
                                 if (switchToFakeRate){ signal = true; muTau=muE=eTau = false; tauTau=true;
 				}
 				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
