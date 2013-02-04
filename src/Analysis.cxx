@@ -1077,7 +1077,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(found_event) m_logger << ERROR << " WRONG TRIGGER" << SLogger::endmsg; // sync
 		return;
 	}
-	if(found_event) m_logger << ERROR << " Found event " << eNumber << " type " << evt_type[pos] << " loose/tight: " << isLoose << "/" << isTight << SLogger::endmsg; // sync
+	if(found_event) m_logger << ERROR << " Found event " << eNumber << " type " << evt_type[pos] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
 	h_cut_flow->Fill(1,1);
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
