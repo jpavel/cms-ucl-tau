@@ -957,8 +957,7 @@ double Analysis::fakeTau_medium(double pt) {
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
-			++m_allEvents;
-
+		
 	 // sync part
 	bool found_event = false;
 	bool isLoose = false;
