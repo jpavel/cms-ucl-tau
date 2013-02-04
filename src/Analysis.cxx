@@ -1677,6 +1677,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			for(uint j=i+1; j< goodTau.size() && !signal; j++)
 			{
 				if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
+				if(examineThisEvent){
+					TLorentzVector tau1;
+					TLorentzVector tau2;
+					TLorentzVector H_; 
+					tau1.SetPxPyPzE(goodTau[i].px,goodTau[i].py,goodTau[i].pz,goodTau[i].E);        
+					tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
+					H_=tau1+tau2;
+					std::cout << " H candidate mass is " << H_.M() << std::endl;
+				}
+				
+				
 				if(switchToFakeRate){
                      if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
 				}
