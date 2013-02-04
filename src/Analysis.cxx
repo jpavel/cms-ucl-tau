@@ -1382,9 +1382,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 
-	if(Zmumu||Zee)
+	if(Zmumu||Zee){
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
 		if(examineThisEvent) std::cout << " Z mass is " << Zmass << std::endl;
+	}
 	else{
 			return;
 	}
@@ -1639,7 +1640,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
 				
-                                if (switchToFakeRate){ signal = true; muTau=muE=false; eTau=true;}
+                if (switchToFakeRate){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
