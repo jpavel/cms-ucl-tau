@@ -14,7 +14,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="10000" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="20000" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -58,8 +58,8 @@
         
  <!-- Selection cuts -->       
         <Item Name="Cut_tau_base_Pt" Value="20" />
-		<Item Name="Cut_tautau_Pt_1" Value="20" />
-		<Item Name="Cut_tautau_Pt_2" Value="20" />
+		<Item Name="Cut_tautau_Pt_1" Value="10" />
+		<Item Name="Cut_tautau_Pt_2" Value="10" />
 		<Item Name="Cut_tautau_MVA_iso" Value="false" />
 		
 		<Item Name="AllowTauBOverlap" Value="true" />
