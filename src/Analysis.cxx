@@ -1076,7 +1076,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
-		if(found_event) m_logger << ERROR << "ENTRY " << m_allEvents <<": WRONG TRIGGER" << SLogger::endmsg; // sync
+	  if(found_event) m_logger << ERROR << "ENTRY " << m_allEvents <<", event " << eNumber << ":  WRONG TRIGGER" << SLogger::endmsg; // sync
 		return;
 	}
 	if(found_event) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
