@@ -13,7 +13,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="100" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
 <!--
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_90_0_o23.root" Lumi="1.0"/>
 			<In FileName="/home/jpavel/ntuples/CMS/analysis/outPut_DYLL8TeV/output_Ntuples_92_0_rSV.root" Lumi="1.0"/>
