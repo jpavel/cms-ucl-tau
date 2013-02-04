@@ -354,6 +354,7 @@ private:
     bool IgnorePUW;
 	
     bool printoutEvents;
+    double examineEvent;
     
     
     // bookkeeping variables

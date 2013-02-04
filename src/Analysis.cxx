@@ -62,7 +62,7 @@ Analysis::Analysis()
 		DeclareProperty("IgnoreSF",IgnoreSF);
 		DeclareProperty("IgnorePUW",IgnorePUW);
 		DeclareProperty("printoutEvents",printoutEvents);
-		
+		DeclareProperty("examineEvent",examineEvent);
 	}
 
 Analysis::~Analysis() {
@@ -1069,12 +1069,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_Nvertex_NoCut")->Fill(nGoodVx);
 	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
 
-	bool trigPass;
-	trigPass = Trg_MC_12(m,false);
+	bool trigPass,examineThisEvent;
+	if( examineEvent==eNumber) examineThisEvent=true;
+	else examineThisEvent=false;
+	trigPass = Trg_MC_12(m,examineThisEvent);
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
-		if(found_event) m_logger << ERROR << " WRONG TRIGGER" << SLogger::endmsg; // sync
+		if(found_event) m_logger << ERROR << "ENTRY " << m_allEvents <<": WRONG TRIGGER" << SLogger::endmsg; // sync
 		return;
 	}
 	if(found_event) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
