@@ -1658,7 +1658,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool tauTau =false;
 	if(!signal)
 	{
-		if(examineThisEvent) std::cout << " Checking tautau " << Zmass << std::endl;
+		if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
 		for(uint i = 0; i < goodTau.size() && !signal ; i++)
 		{
 			if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
@@ -1678,18 +1678,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{
 				if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
 				if(switchToFakeRate){
-                                   if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
+                     if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
 				}
-					else{
-                                   if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
-				if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
+				else{
+					if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
+					if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
 				}
-                                if(switchToFakeRate){
-				if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
-                                }
-                                else{
-				if(goodTau[i].charge*goodTau[j].charge >= 0) continue;
-                                }
+				if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
+				
+                if(switchToFakeRate){
+					if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
+                }
+                else{
+					if(goodTau[i].charge*goodTau[j].charge >= 0) continue;
+                }
 				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 				if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
