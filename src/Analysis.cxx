@@ -919,7 +919,7 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 		if(verbose) std::cout << " Mu cand no. " << i << std::endl;
 		for(uint j =0; j < Hcand.size(); j+=2){
 			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
-				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
+				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.4) 
 			Ad_lepton=true;
 	   }
 	   if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
@@ -929,7 +929,7 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	{   
 		for(uint j =0; j < Hcand.size(); j+=2){
 			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
-				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
+				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i])  && RelIsoEl(genericElectron[i]) < 0.4)  
 			Ad_lepton=true;
 	   }
 	   if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
