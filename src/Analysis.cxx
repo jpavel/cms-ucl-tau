@@ -1890,6 +1890,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(eTau) event_type = 7;
 		if(tauTau) event_type = 8;
 	}
+	
+	if(event_type!=evt_type[pos] && found_event) m_logger << WARNING << " WRONG type! His is " << evt_type[pos] << " and mine is " << event_type << SLogger::endmsg; 
 	// efficiency correction;
 
 	int I = Hindex[0]; int J = Hindex[1];		
