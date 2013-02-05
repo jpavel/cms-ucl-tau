@@ -1570,7 +1570,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 
 	int tauCand = 	goodTau.size();
-
+	if(examineThisEvent) std::cout << " There are " << tauCand << " tau candidates " << std::endl;
+		
 	Hist("h_n_goodTau_Hcand")->Fill(goodTau.size());	
 
 	// mutau and emu final states
@@ -1585,17 +1586,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < genericMuon.size() && !signal; i++)
 	{
 
+		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
+	
 		double relIso = RelIsoMu(genericMuon[i]);
 		bool iso1_muE = (relIso < 0.3);
 		bool iso1_muTau = (relIso < 0.15);
                 
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muE) continue;}
+			if(examineThisEvent) std::cout << " Checking electrons " << std::endl;
+	
 		for(uint j=0; j < genericElectron.size() && !signal; j++)
 		{
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
                         //Cut_leplep_sumPt is 0
+            if(examineThisEvent) std::cout << " electron no " << j << std::endl;
+	            
 			if(!switchToFakeRate){
 				if(UseSumPtCut && genericMuon[i].pt+genericElectron[j].pt < Cut_leplep_sumPt) continue;}
 			bool iso2 = (RelIsoEl(genericElectron[j]) < 0.3);
