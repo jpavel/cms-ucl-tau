@@ -1916,11 +1916,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow->Fill(4,1);
 	h_cut_flow_weight->Fill(4,Z_weight);
 	
-	if(muTau+muE+eTau+tauTau > 1){
-		m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
-		m_logger << ERROR << muTau << muE << eTau << tauTau << " " << eNumber << SLogger::endmsg;			 
-		return;
-	}
+	//~ if(muTau+muE+eTau+tauTau > 1){
+		//~ m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
+		//~ m_logger << ERROR << muTau << muE << eTau << tauTau << " " << eNumber << SLogger::endmsg;			 
+		//~ return;
+	//~ }
 
 	h_cut_flow->Fill(5,1);
 	h_cut_flow_weight->Fill(5,Z_weight);
@@ -1930,23 +1930,52 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " eTau " << eTau << SLogger::endmsg;
 	m_logger << DEBUG << " tauTau " << tauTau << SLogger::endmsg;
 
-	short event_type = 0;
+	short event_type[3] = {0,0,0};
 
 	if(Zmumu)
 	{
 	m_logger << DEBUG << " event type inside Zmm " << event_type << SLogger::endmsg;
-		if(muTau) event_type = 1;
-		if(muE) event_type = 2;
-		if(eTau) event_type = 3;
-		if(tauTau) event_type = 4;
+		if(tauTau){
+			event_type[0]=4;
+			if(eTau){
+				event_type[1]=3;
+				if(muTau) event_type[2]=1;
+			}else{
+				if(muTau) event_type[1]=1;
+			}
+		}else{
+			if(eTau){
+				event_type[0]=3;
+				if(muTau) event_type[1]=1;
+			}else{
+				if(muTau) event_type[0]=1;
+			}
+		}
 	}else if(Zee){
-		if(muTau) event_type = 5;
-		if(muE) event_type = 6;
-		if(eTau) event_type = 7;
-		if(tauTau) event_type = 8;
+		if(tauTau){
+			event_type[0]=8;
+			if(eTau){
+				event_type[1]=7;
+				if(muTau) event_type[2]=5;
+			}else{
+				if(muTau) event_type[1]=5;
+			}
+		}else{
+			if(eTau){
+				event_type[0]=7;
+				if(muTau) event_type[1]=5;
+			}else{
+				if(muTau) event_type[0]=5;
+			}
+		}
 	}
+		
+		
 	
-	if(event_type!=evt_type[pos[0]] && found_event[0]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg; 
+	if(event_type[0]!=evt_type[pos[0]] && found_event[0]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg; 
+	if(event_type[1]!=evt_type[pos[1]] && found_event[1]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[1]] << " and mine is " << event_type << SLogger::endmsg; 
+	if(event_type[2]!=evt_type[pos[2]] && found_event[2]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[2]] << " and mine is " << event_type << SLogger::endmsg; 
+	
 	// efficiency correction;
 
 	//~ int I = Hindex[0]; int J = Hindex[1];		
@@ -2096,6 +2125,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	    }
         }//close else
+    int Event_type=event_type[0];
+		
 	if(Ad_lepton) 
 	{			
 		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
@@ -2128,7 +2159,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 				std::cout << " -------------------------------------------------------------------------------- " << std::endl;
 		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << std::endl;;
-		switch(event_type){
+		switch(Event_type){
 		case 1: 
 			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
 			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
@@ -2391,135 +2422,135 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
             for(uint i =0; i < Hcand.size(); i+=2)
             {
-                Hist( "h_event_type" )->Fill(event_type,weight);
+                Hist( "h_event_type" )->Fill(Event_type,weight);
                 Hist("h_denom")->Fill(Hcand[i].pt,weight);
-                h_denom_types[event_type-1]->Fill(Hcand[i].pt,weight);
-                h_denom_types_eta[event_type-1]->Fill(Hcand[i].eta,weight);
+                h_denom_types[Event_type-1]->Fill(Hcand[i].pt,weight);
+                h_denom_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight);
                 if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-                h_denom_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+                h_denom_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
                 }
                 if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-                h_denom_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+                h_denom_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
                 }
                 bool isMedium=false;
                 bool isTight=false;
                 if(eTau){
-                    if(RelIsoEl(Hcand[i]) < 0.30 && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true;
+                    if(RelIsoEl(Hcand[i]) < 0.30 && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(Event_type,weight); h_medium_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true;
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
                         }
-                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; 
+                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(Event_type,weight); h_tight_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isTight=true; 
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 		    }
                 }
                 if(muTau){
-                    if(RelIsoMu(Hcand[i]) < 0.30 && isGoodMu(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
+                    if(RelIsoMu(Hcand[i]) < 0.30 && isGoodMu(Hcand[i])){ Hist("h_event_type_medium")->Fill(Event_type,weight); h_medium_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
                     }
-                    if(RelIsoMu(Hcand[i]) < 0.15 && isGoodMu(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
+                    if(RelIsoMu(Hcand[i]) < 0.15 && isGoodMu(Hcand[i])){ Hist("h_event_type_tight")->Fill(Event_type,weight); h_tight_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
                    }
                 }
                 if(muE){
-                    if(RelIsoEl(Hcand[i]) < 0.30  && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
+                    if(RelIsoEl(Hcand[i]) < 0.30  && isGoodEl(Hcand[i])){ Hist("h_event_type_medium")->Fill(Event_type,weight); h_medium_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
                     }
-                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
+                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ Hist("h_event_type_tight")->Fill(Event_type,weight); h_tight_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 		    }
-                    if(RelIsoMu(Hcand[i+1]) < 0.30 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true;
+                    if(RelIsoMu(Hcand[i+1]) < 0.30 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_medium")->Fill(Event_type,weight); h_medium_types[Event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[Event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true;
 			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
-				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_medium_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
-				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_medium_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 		    }
-                    if(RelIsoMu(Hcand[i+1]) < 0.15 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true;
+                    if(RelIsoMu(Hcand[i+1]) < 0.15 && isGoodMu(Hcand[i+1])){ Hist("h_event_type_tight")->Fill(Event_type,weight); h_tight_types[Event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[Event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true;
 			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
-				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_tight_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
-				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_tight_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 		    }
-                    h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
-                    h_denom_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight);
+                    h_denom_types[Event_type-1]->Fill(Hcand[i+1].pt,weight);
+                    h_denom_types_eta[Event_type-1]->Fill(Hcand[i+1].eta,weight);
 		    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
-			    h_denom_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    h_denom_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 		    }
 		    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
-			    h_denom_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    h_denom_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 		    }
                 }
                 if(tauTau){
-                    h_denom_types[event_type-1]->Fill(Hcand[i+1].pt,weight);
-                    h_denom_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight);
+                    h_denom_types[Event_type-1]->Fill(Hcand[i+1].pt,weight);
+                    h_denom_types_eta[Event_type-1]->Fill(Hcand[i+1].eta,weight);
 		    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
-			    h_denom_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    h_denom_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 		    }
 		    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
-			    h_denom_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+			    h_denom_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 		    }
-                    if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
+                    if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(Event_type,weight); h_medium_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_medium_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isMedium=true; 
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_medium_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
                     }
-                    if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
+                    if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(Event_type,weight); h_tight_types[Event_type-1]->Fill(Hcand[i].pt,weight); h_tight_types_eta[Event_type-1]->Fill(Hcand[i].eta,weight); isTight=true;
 			    if(Hcand[i].eta<1.2 && Hcand[i].eta>-1.2){
-				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
 			    if(Hcand[i].eta<-1.2 && Hcand[i].eta>1.2){
-				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i].pt,weight);
+				    h_tight_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i].pt,weight);
 			    }
                     }
-                    if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(event_type,weight); h_medium_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true;
+                    if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_medium")->Fill(Event_type,weight); h_medium_types[Event_type-1]->Fill(Hcand[i+1].pt,weight); h_medium_types_eta[Event_type-1]->Fill(Hcand[i+1].eta,weight); isMedium=true;
 			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
-				    h_medium_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_medium_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
-				    h_medium_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_medium_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
                     }
-                    if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(event_type,weight); h_tight_types[event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true; 
+                    if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ Hist("h_event_type_tight")->Fill(Event_type,weight); h_tight_types[Event_type-1]->Fill(Hcand[i+1].pt,weight); h_tight_types_eta[Event_type-1]->Fill(Hcand[i+1].eta,weight); isTight=true; 
 			    if(Hcand[i+1].eta<1.2 && Hcand[i+1].eta>-1.2){
-				    h_tight_types_centralEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_tight_types_centralEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 			    if(Hcand[i+1].eta<-1.2 && Hcand[i+1].eta>1.2){
-				    h_tight_types_externalEtaRegion[event_type-1]->Fill(Hcand[i+1].pt,weight);
+				    h_tight_types_externalEtaRegion[Event_type-1]->Fill(Hcand[i+1].pt,weight);
 			    }
 		    }
                 }
@@ -2530,7 +2561,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 if(printoutEvents)
 				{
 					TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-					log1 << setiosflags(ios::fixed) << std::setprecision(1) << event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass 
+					log1 << setiosflags(ios::fixed) << std::setprecision(1) << Event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass 
 					<< " " << Hcand[i].pt << " " << Hcand[i+1].pt << " " << isMedium << " " << isTight << " " << std::endl;
 				}
                 
@@ -2545,7 +2576,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
                 Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
                 H_boson = Hcand1+Hcand2;
-                h_H_mass_types[event_type-1]->Fill(H_boson.M(),weight);
+                h_H_mass_types[Event_type-1]->Fill(H_boson.M(),weight);
             }
 
         }//close switch to fake
@@ -2567,21 +2598,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
             if(isSimulation)
             { 
                 if(signal){
-                    Hist( "h_event_type" )->Fill(event_type,weight);
-                    Hist( "h_event_type_raw" )->Fill(event_type);
+                    Hist( "h_event_type" )->Fill(Event_type,weight);
+                    Hist( "h_event_type_raw" )->Fill(Event_type);
 		 
 		 }
 		
-	}else  Hist( "h_event_type" )->Fill(event_type,weight); // blinding 
+	}else  Hist( "h_event_type" )->Fill(Event_type,weight); // blinding 
 
-		if( found_event[0] && event_type!=evt_type[pos[0]]) {
-	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg;
+		if( found_event[0] && Event_type!=evt_type[pos[0]]) {
+	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << Event_type << SLogger::endmsg;
   }
 
 	
 	//histograms for selected candidates
 	double Hmass=-100;
-	switch(event_type)
+	switch(Event_type)
 	{
 		case 2:
 		case 6:
@@ -2596,29 +2627,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M(),weight);
 			Hist( "h_H_eta")->Fill(H_muE_tightMuIso.Eta(),weight);
 			Hist( "h_H_phi")->Fill(H_muE_tightMuIso.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
+			h_H_mass_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
 			Hmass=H_muE_tightMuIso.M();
 			
 			if(signal)
 			{
 				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
 				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
+				h_signal_pt1_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_pt2_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
+				h_H_mass_signal_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat1_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
+				h_category1_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat1_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==2){
 				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat2_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
+				h_category2_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat2_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}else if(category==0){
 				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_H_mass_cat0_types[event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
+				h_category0_pt_types[Event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_H_mass_cat0_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
 			}
 			
 			
@@ -2637,7 +2668,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_H_mass" )->Fill(H_muTau.M(),weight);
 			Hist( "h_H_eta")->Fill(H_muTau.Eta(),weight);
 			Hist( "h_H_phi")->Fill(H_muTau.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_muTau.M(),weight);
+			h_H_mass_types[Event_type-1]->Fill(H_muTau.M(),weight);
 			
 			Hmass=H_muTau.M();
 			
@@ -2645,22 +2676,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{
 				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
 				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[event_type-1]->Fill(H_muTau.M(),weight);					
+				h_signal_pt1_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_pt2_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
+				h_H_mass_signal_types[Event_type-1]->Fill(H_muTau.M(),weight);					
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat1_types[event_type-1]->Fill(H_muTau.M(),weight);
+				h_category1_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat1_types[Event_type-1]->Fill(H_muTau.M(),weight);
 			}else if(category==2){
 				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat2_types[event_type-1]->Fill(H_muTau.M(),weight);
+				h_category2_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat2_types[Event_type-1]->Fill(H_muTau.M(),weight);
 			}else if(category==0){
 				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_H_mass_cat0_types[event_type-1]->Fill(H_muTau.M(),weight);
+				h_category0_pt_types[Event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_H_mass_cat0_types[Event_type-1]->Fill(H_muTau.M(),weight);
 			}
 			
 			break;
@@ -2677,7 +2708,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hist( "h_H_mass" )->Fill(H_eTau.M(),weight);
 			Hist( "h_H_eta")->Fill(H_eTau.Eta(),weight);
 			Hist( "h_H_phi")->Fill(H_eTau.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_eTau.M(),weight);
+			h_H_mass_types[Event_type-1]->Fill(H_eTau.M(),weight);
 			
 			Hmass=H_eTau.M();
 			
@@ -2685,22 +2716,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{
 				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
 				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[event_type-1]->Fill(H_eTau.M(),weight);				
+				h_signal_pt1_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_pt2_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
+				h_H_mass_signal_types[Event_type-1]->Fill(H_eTau.M(),weight);				
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat1_types[event_type-1]->Fill(H_eTau.M(),weight);
+				h_category1_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat1_types[Event_type-1]->Fill(H_eTau.M(),weight);
 			}else if(category==2){
 				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat2_types[event_type-1]->Fill(H_eTau.M(),weight);
+				h_category2_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat2_types[Event_type-1]->Fill(H_eTau.M(),weight);
 			}else if(category==0){
 				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_H_mass_cat0_types[event_type-1]->Fill(H_eTau.M(),weight);
+				h_category0_pt_types[Event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
+				h_H_mass_cat0_types[Event_type-1]->Fill(H_eTau.M(),weight);
 			}	
 
 			break;	
@@ -2719,7 +2750,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 			Hist( "h_H_eta")->Fill(H_tauTau.Eta(),weight);
 			Hist( "h_H_phi")->Fill(H_tauTau.Phi(),weight);
-			h_H_mass_types[event_type-1]->Fill(H_tauTau.M(),weight);
+			h_H_mass_types[Event_type-1]->Fill(H_tauTau.M(),weight);
 			
 			Hmass=H_tauTau.M();
 			
@@ -2727,22 +2758,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{
 				Hist("h_signal_pt1")->Fill(Hcand[0].pt,weight);
 				Hist("h_signal_pt2")->Fill(Hcand[1].pt,weight);	
-				h_signal_pt1_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_pt2_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_SumPt_types[event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[event_type-1]->Fill(H_tauTau.M(),weight);				
+				h_signal_pt1_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_signal_pt2_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
+				h_H_mass_signal_types[Event_type-1]->Fill(H_tauTau.M(),weight);				
 			}else if(category==1){
 				Hist("h_category1_pt")->Fill(Hcand[0].pt,weight);
-				h_category1_pt_types[event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat1_types[event_type-1]->Fill(H_tauTau.M(),weight);
+				h_category1_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
+				h_H_mass_cat1_types[Event_type-1]->Fill(H_tauTau.M(),weight);
 			}else if(category==2){
 				Hist("h_category2_pt")->Fill(Hcand[1].pt,weight);
-				h_category2_pt_types[event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat2_types[event_type-1]->Fill(H_tauTau.M(),weight);
+				h_category2_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
+				h_H_mass_cat2_types[Event_type-1]->Fill(H_tauTau.M(),weight);
 			}else if(category==0){
 				h_category0_pt->Fill(Hcand[0].pt,Hcand[1].pt,weight);
-				h_category0_pt_types[event_type-1]->Fill(Hcand[0].pt,Hcand[1].pt,weight);
-				h_H_mass_cat0_types[event_type-1]->Fill(H_tauTau.M(),weight);
+				h_category0_pt_types[Event_type-1]->Fill(Hcand[0].pt,Hcand[1].pt,weight);
+				h_H_mass_cat0_types[Event_type-1]->Fill(H_tauTau.M(),weight);
 			}	
 
 			break;
@@ -2766,28 +2797,28 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         double FR_tau1_medium, FR_tau1_tight;
         double FR_tau2_medium, FR_tau2_tight;
 
-        switch(event_type){
+        switch(Event_type){
         //MMMT
         case 1:
         FR_tau_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
         h_cat0_FR_medium->Fill(1,weight*cat0_weight_medium);
         h_cat0_FR_tight->Fill(1,weight*cat0_weight_tight);
         }
         else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
         h_cat1_FR_medium->Fill(1,weight*cat1_weight_medium);
         h_cat1_FR_tight->Fill(1,weight*cat1_weight_tight);
         }
         else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
         h_cat2_FR_medium->Fill(1,weight*cat2_weight_medium);
         h_cat2_FR_tight->Fill(1,weight*cat2_weight_tight);
         }
@@ -2795,20 +2826,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         //MMEM
         case 2:
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
         h_cat0_FR_medium->Fill(2,weight*cat0_weight_medium);
         h_cat0_FR_tight->Fill(2,weight*cat0_weight_tight);
         }
         else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
         h_cat1_FR_medium->Fill(2,weight*cat1_weight_medium);
         h_cat1_FR_tight->Fill(2,weight*cat1_weight_tight);
         }
         else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
         h_cat2_FR_medium->Fill(2,weight*cat2_weight_medium);
         h_cat2_FR_tight->Fill(2,weight*cat2_weight_tight);
 	}
@@ -2817,23 +2848,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         case 3:
         FR_tau_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);
         h_cat0_FR_medium->Fill(3,weight*cat0_weight_medium);
         h_cat0_FR_tight->Fill(3,weight*cat0_weight_tight);
         }
         else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
         h_cat1_FR_medium->Fill(3,weight*cat1_weight_medium);
         h_cat1_FR_tight->Fill(3,weight*cat1_weight_tight);
         }
         else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
         h_cat2_FR_medium->Fill(3,weight*cat2_weight_medium);
         h_cat2_FR_tight->Fill(3,weight*cat2_weight_tight);
         }
@@ -2844,25 +2875,25 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
         FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
         h_cat0_FR_medium->Fill(4,weight*cat0_weight_medium);
         h_cat0_FR_tight->Fill(4,weight*cat0_weight_tight);
         }
         else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
         h_cat1_FR_medium->Fill(4,weight*cat1_weight_medium);
         h_cat1_FR_tight->Fill(4,weight*cat1_weight_tight);
 	}
         else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
         h_cat2_FR_medium->Fill(4,weight*cat2_weight_medium);
         h_cat2_FR_tight->Fill(4,weight*cat2_weight_tight);
         }
@@ -2871,23 +2902,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         case 5:
         FR_tau_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
         h_cat0_FR_medium->Fill(5,weight*cat0_weight_medium);
         h_cat0_FR_tight->Fill(5,weight*cat0_weight_tight);
 	}
         else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
         h_cat1_FR_medium->Fill(5,weight*cat1_weight_medium);
         h_cat1_FR_tight->Fill(5,weight*cat1_weight_tight);
         }
         else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
 	h_cat2_FR_medium->Fill(5,weight*cat2_weight_medium);
 	h_cat2_FR_tight->Fill(5,weight*cat2_weight_tight);
 	}
@@ -2895,20 +2926,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         //EEEM
         case 6:
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
 	h_cat0_FR_medium->Fill(6,weight*cat0_weight_medium);
 	h_cat0_FR_tight->Fill(6,weight*cat0_weight_tight);
         }
         else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
 	h_cat1_FR_medium->Fill(6,weight*cat1_weight_medium);
 	h_cat1_FR_tight->Fill(6,weight*cat1_weight_tight);
 	}
         else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
 	h_cat2_FR_medium->Fill(6,weight*cat2_weight_medium);
 	h_cat2_FR_tight->Fill(6,weight*cat2_weight_tight);
 	}
@@ -2918,20 +2949,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         FR_tau_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau_tight = fakeTau_tight(Hcand[1].pt);
         if(category==0){
-	cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);	
-	cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);	
+	cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);	
+	cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);	
 	h_cat0_FR_medium->Fill(7,weight*cat0_weight_medium);
 	h_cat0_FR_tight->Fill(7,weight*cat0_weight_tight);
         }
 	else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
 	h_cat1_FR_medium->Fill(7,weight*cat1_weight_medium);
 	h_cat1_FR_tight->Fill(7,weight*cat1_weight_tight);
         }
 	else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
 	h_cat2_FR_medium->Fill(7,weight*cat2_weight_medium);
 	h_cat2_FR_medium->Fill(7,weight*cat2_weight_tight);
 	}	        
@@ -2942,27 +2973,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
         FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
         FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
-        m_logger << DEBUG << " event_type: " << event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
+        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
 
         if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
-        cat0_weight_tight = (h_category0_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
+        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
+        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
 	h_cat0_FR_medium->Fill(8,weight*cat0_weight_medium);
 	h_cat0_FR_tight->Fill(8,weight*cat0_weight_tight);
         }
 	else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
-        cat1_weight_tight = (h_category1_pt_types[event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
+        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
+        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
 	h_cat1_FR_medium->Fill(8,weight*cat1_weight_medium);
 	h_cat1_FR_tight->Fill(8,weight*cat1_weight_tight);
 
         }
 	else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
-        cat2_weight_tight = (h_category2_pt_types[event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
+        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
+        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
 	h_cat2_FR_medium->Fill(8,weight*cat2_weight_medium);
 	h_cat2_FR_tight->Fill(8,weight*cat2_weight_tight);
         }
@@ -3004,18 +3035,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         Hist("h_deltaR_max")->Fill(maxDR);
         Hist("h_deltaR_min")->Fill(minDR);
         
-    	if( found_event[0] && event_type!=evt_type[pos[0]]) {
-	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg;
+    	if( found_event[0] && Event_type!=evt_type[pos[0]]) {
+	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << Event_type << SLogger::endmsg;
   }
     
     
     if (!found_event[0] && signal){
-	 	  m_logger << ERROR << " My plus of type " << event_type << SLogger::endmsg;
+	 	  m_logger << ERROR << " My plus of type " << Event_type << SLogger::endmsg;
 		TLorentzVector Zvector;
 		TLorentzVector Hvector;
 		std::cout << " -------------------------------------------------------------------------------- " << std::endl;
 		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << " entry " << entries << std::endl;;
-		switch(event_type){
+		switch(Event_type){
 		case 1: 
 			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
 			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
