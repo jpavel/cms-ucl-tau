@@ -1635,7 +1635,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muTau) continue;}
-		for(uint j=0; j< goodTau.size() && !signal && !WZ_Rej(m,genericMuon[i]); j++)
+		for(uint j=0; j< goodTau.size() && !signal && WZ_Rej(m,genericMuon[i]); j++)
 		{
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
@@ -1717,7 +1717,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
 				if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
-				if (WZ_Rej(m,genericElectron[i])) continue;
+				if (!WZ_Rej(m,genericElectron[i])) continue;
 				if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
                 if (switchToFakeRate){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
