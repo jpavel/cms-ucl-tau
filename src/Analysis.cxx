@@ -1553,27 +1553,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		
 		for(uint j = 0; j < genericMuon.size() && !removed; j++)
-		{       if(switchToFakeRate){
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR) 
+		{    
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR && RelIsoMu(genericMuon[j]) < 0.4 && isGoodMu(genericMuon[j])) 
 				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-                        }
-		        else{
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR && RelIsoMu(genericMuon[j]) < 0.4) 
-				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		        }
-                }
+		        
+        }
 
 		for(uint j = 0; j < genericElectron.size() && !removed; j++)
 		{
-                        if(switchToFakeRate){
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR) 
+                        
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR && RelIsoEl(genericElectron[j]) < 0.4 && isGoodEl(genericElectron[j]) ) 
 				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-                        }
-                        else{
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR && RelIsoEl(genericElectron[j]) < 0.4 ) 
-				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		        }
-               }
+		        
+        }
 	}
 	}
 
