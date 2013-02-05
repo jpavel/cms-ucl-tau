@@ -1554,7 +1554,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		for(uint j = 0; j < genericMuon.size() && !removed; j++)
 		{    
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR  ) 
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR 	 ) 
 				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 		        
         }
@@ -1720,7 +1720,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
 	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
 	
-	if(examineThisEvent && signal && eTau) std::cout << "Found etau candidate" << std::endl;
+	if(examineThisEvent && signal && eTau){ std::cout << "Found etau candidate" << std::endl; signal = false; eTau=false;}
 	bool tauTau =false;
 	if(!signal)
 	{
