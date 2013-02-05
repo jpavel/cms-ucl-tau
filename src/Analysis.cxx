@@ -1679,6 +1679,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 		for(uint i = 0; i < genericElectron.size() && !signal ; i++)
 		{
+			if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << std::endl;
 			bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
                         if(!switchToFakeRate){		
 			if (!iso1 && !checkCategories) continue;}
@@ -1686,9 +1687,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(genericElectron[i].numLostHitEleInner > 1) continue;}
                         else{
 			if(genericElectron[i].numLostHitEleInner > 0) continue;}
-			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
+			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
+			
+			if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
+				if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << std::endl;
 				//the following switch could be also omitted
 				//since in the case of switchToFakeRate && UseSumPtCut
 				//Cut_leptau_sumPt is 0
@@ -1703,6 +1707,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 }
                                 if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
+				if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 				
                 if (switchToFakeRate){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
@@ -1711,9 +1716,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
 				else continue;
 				if (WZ_Rej(m,genericElectron[i])) continue;
+				if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
 				Hindex[0]=i;
 				Hindex[1]=j;
-				if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ signal=false; eTau=false;}
+				if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ signal=false; eTau=false;
+				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+				}
 			}
 		}
 	}
