@@ -2253,35 +2253,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	// Same vertex check
 
-        if(!switchToFakeRate){
-	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
-	if(!dZ_expo)
-	{
-		if( found_event[0]) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
-		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-		return;
-	}
-	}
-        else{
-        bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
-        bool dZ_expo2 = false;
-        for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
-        {
-                if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
-                {
-                        Hcand.erase(Hcand.begin()+i);
-                        Hcand.erase(Hcand.begin()+i);
-                        i-=2;
-                        if(Hcand.size()==0) i= Hcand.size();
-                }else dZ_expo2=true;
-        }
-        dZ_expo=dZ_expo && dZ_expo2;
-		if(!dZ_expo)
-		{
-			m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-			return;
-		}
-      }
+        //~ if(!switchToFakeRate){
+	//~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
+	//~ if(!dZ_expo)
+	//~ {
+		//~ if( found_event[0]) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+		//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+		//~ return;
+	//~ }
+	//~ }
+        //~ else{
+        //~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
+        //~ bool dZ_expo2 = false;
+        //~ for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
+        //~ {
+                //~ if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
+                //~ {
+                        //~ Hcand.erase(Hcand.begin()+i);
+                        //~ Hcand.erase(Hcand.begin()+i);
+                        //~ i-=2;
+                        //~ if(Hcand.size()==0) i= Hcand.size();
+                //~ }else dZ_expo2=true;
+        //~ }
+        //~ dZ_expo=dZ_expo && dZ_expo2;
+		//~ if(!dZ_expo)
+		//~ {
+			//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+			//~ return;
+		//~ }
+      //~ }
 
         if(!switchToFakeRate){
 	h_cut_flow->Fill(8,1);
