@@ -2085,25 +2085,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool Ad_lepton = false;
 
         if(switchToFakeRate){
-	//~ for(uint i = 0; i < genericMuon.size(); i++)
-	//~ {   for(uint j =0; j < Hcand.size(); j+=2){
-		//~ if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
-				//~ deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
-			//~ Ad_lepton=true;
-	   //~ }
-        //~ }
-	//~ for(uint i = 0; i < genericElectron.size(); i++)
-	//~ {   for(uint j =0; j < Hcand.size(); j+=2){
-		//~ if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
-				//~ deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
-			//~ Ad_lepton=true;
-	   //~ }
-        //~ }
-        
-        
-        if(examineThisEvent) Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,1);
-        else Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,0);
-        
+	     if(examineThisEvent) Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,1);
+        else Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,0);    
         }
 
         else{
@@ -2285,35 +2268,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	// Same vertex check
 
-        //~ if(!switchToFakeRate){
-	//~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
-	//~ if(!dZ_expo)
-	//~ {
-		//~ if( found_event[0]) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
-		//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-		//~ return;
-	//~ }
-	//~ }
-        //~ else{
-        //~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
-        //~ bool dZ_expo2 = false;
-        //~ for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
-        //~ {
-                //~ if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
-                //~ {
-                        //~ Hcand.erase(Hcand.begin()+i);
-                        //~ Hcand.erase(Hcand.begin()+i);
-                        //~ i-=2;
-                        //~ if(Hcand.size()==0) i= Hcand.size();
-                //~ }else dZ_expo2=true;
-        //~ }
-        //~ dZ_expo=dZ_expo && dZ_expo2;
-		//~ if(!dZ_expo)
-		//~ {
-			//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-			//~ return;
-		//~ }
-      //~ }
+        if(!switchToFakeRate){
+	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
+	if(!dZ_expo)
+	{
+		if( found_event[0]) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+		return;
+	}
+	}
+        else{
+        bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
+        bool dZ_expo2 = false;
+        for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
+        {
+                if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
+                {
+                        Hcand.erase(Hcand.begin()+i);
+                        Hcand.erase(Hcand.begin()+i);
+                        i-=2;
+                        if(Hcand.size()==0) i= Hcand.size();
+                }else dZ_expo2=true;
+        }
+        dZ_expo=dZ_expo && dZ_expo2;
+		if(!dZ_expo)
+		{
+			m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+			return;
+		}
+      }
 
         if(!switchToFakeRate){
 	h_cut_flow->Fill(8,1);
