@@ -1601,7 +1601,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
 	
-	for(uint i = 0; i < genericMuon.size() && !signal; i++)
+	for(uint i = 0; i < genericMuon.size() && !muTau; i++)
 	{
 
 		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
@@ -1653,7 +1653,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muTau) continue;}
-		for(uint j=0; j< goodTau.size() && !signal && WZ_Rej(m,genericMuon[i]); j++)
+		for(uint j=0; j< goodTau.size() && !muTau && WZ_Rej(m,genericMuon[i]); j++)
 		{
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
@@ -1672,7 +1672,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;                                    
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
-			if (switchToFakeRate){ signal = true; muE=false; muTau=true;}
+			if (switchToFakeRate){ signal = true; muTau=true;}
 			else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
 			else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
 			else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
@@ -1684,7 +1684,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
-				signal=false; muTau=false; continue;}
+				muTau=false; continue;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(genericMuon[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1697,167 +1697,163 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
 	bool eTau = false;
-	if(!signal)
+	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
+
+	for(uint i = 0; i < genericElectron.size() && !eTau ; i++)
 	{
-		if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
-	
-		for(uint i = 0; i < genericElectron.size() && !signal ; i++)
+		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << std::endl;
+		bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
+					if(!switchToFakeRate){		
+		if (!iso1 && !checkCategories) continue;}
+					if(switchToFakeRate){		
+		if(genericElectron[i].numLostHitEleInner > 1) continue;}
+					else{
+		if(genericElectron[i].numLostHitEleInner > 0) continue;}
+		m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
+		
+		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
+		for(uint j=0; j< goodTau.size() && !eTau; j++)
 		{
-			if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << std::endl;
-			bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
-                        if(!switchToFakeRate){		
-			if (!iso1 && !checkCategories) continue;}
-                        if(switchToFakeRate){		
-			if(genericElectron[i].numLostHitEleInner > 1) continue;}
-                        else{
-			if(genericElectron[i].numLostHitEleInner > 0) continue;}
-			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
-			
-			if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
-			for(uint j=0; j< goodTau.size() && !signal; j++)
-			{
-				if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << std::endl;
-				if(examineThisEvent){
-					TLorentzVector ele1;
-					TLorentzVector tau2;
-					TLorentzVector H_; 
-					ele1.SetPxPyPzE(genericElectron[i].px,genericElectron[i].py,genericElectron[i].pz,genericElectron[i].E);        
-					tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
-					H_=ele1+tau2;
-					std::cout << " H candidate mass is " << H_.M() << std::endl;
+			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << std::endl;
+			if(examineThisEvent){
+				TLorentzVector ele1;
+				TLorentzVector tau2;
+				TLorentzVector H_; 
+				ele1.SetPxPyPzE(genericElectron[i].px,genericElectron[i].py,genericElectron[i].pz,genericElectron[i].E);        
+				tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
+				H_=ele1+tau2;
+				std::cout << " H candidate mass is " << H_.M() << std::endl;
+			}
+			//the following switch could be also omitted
+			//since in the case of switchToFakeRate && UseSumPtCut
+			//Cut_leptau_sumPt is 0
+						 if(!switchToFakeRate){
+			if(UseSumPtCut && genericElectron[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;}
+			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
+			if(switchToFakeRate){	
+			if(genericElectron[i].charge*goodTau[j].charge < 0) continue;
+			}
+							else{
+			if(genericElectron[i].charge*goodTau[j].charge >= 0) continue;
+							}
+							if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
+			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
+			if (!WZ_Rej(m,genericElectron[i])) continue;
+			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
+			if (switchToFakeRate){ signal = true; eTau=true;}
+			else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
+			else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
+			else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
+			else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
+			else continue;
+			if(!switchToFakeRate){
+				Hindex[0]=i;
+				Hindex[1]=j;
+			}
+			if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ eTau=false;
+				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+				continue;
 				}
-				//the following switch could be also omitted
-				//since in the case of switchToFakeRate && UseSumPtCut
-				//Cut_leptau_sumPt is 0
-                             if(!switchToFakeRate){
-				if(UseSumPtCut && genericElectron[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;}
-				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
-				if(switchToFakeRate){	
-				if(genericElectron[i].charge*goodTau[j].charge < 0) continue;
-				}
-                                else{
-				if(genericElectron[i].charge*goodTau[j].charge >= 0) continue;
-                                }
-                                if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-				if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
-				if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
-				if (!WZ_Rej(m,genericElectron[i])) continue;
-				if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
-                if (switchToFakeRate){ signal = true; muTau=muE=false; eTau=true;}
-				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
-				else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
-				else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
-				else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
-				else continue;
-				if(!switchToFakeRate){
-					Hindex[0]=i;
-					Hindex[1]=j;
-				}
-				if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ signal=false; eTau=false;
-					if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
-					continue;
-					}
-				if(switchToFakeRate && signal){
-					Hcand.push_back(genericElectron[i]);
-					Hcand.push_back(goodTau[j]);
-				}
+			if(switchToFakeRate && signal){
+				Hcand.push_back(genericElectron[i]);
+				Hcand.push_back(goodTau[j]);
 			}
 		}
 	}
+	
 
 	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
 	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
 	
 	if(examineThisEvent && signal && eTau){ std::cout << "Found etau candidate" << std::endl;}
 	bool tauTau =false;
-	if(!signal)
+
+	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
+	for(uint i = 0; i < goodTau.size() && !tauTau ; i++)
 	{
-		if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
-		for(uint i = 0; i < goodTau.size() && !signal ; i++)
+		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
+		if(switchToFakeRate){
+					  if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
+		}
+		else{
+					if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
+		}
+		if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
+		if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
+		bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
+					if(!switchToFakeRate){		
+		if(!checkCategories && !iso1) continue;}
+		if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
+		for(uint j=i+1; j< goodTau.size() && !tauTau; j++)
 		{
-			if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
+			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
+			if(examineThisEvent){
+				TLorentzVector tau1;
+				TLorentzVector tau2;
+				TLorentzVector H_; 
+				tau1.SetPxPyPzE(goodTau[i].px,goodTau[i].py,goodTau[i].pz,goodTau[i].E);        
+				tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
+				H_=tau1+tau2;
+				std::cout << " H candidate mass is " << H_.M() << std::endl;
+			}
+			
+			
 			if(switchToFakeRate){
-                          if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
+				 if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
 			}
 			else{
-                        if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
+				if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
+				if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
 			}
-			if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
-			if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
-			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
-                        if(!switchToFakeRate){		
-			if(!checkCategories && !iso1) continue;}
-			if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
-			for(uint j=i+1; j< goodTau.size() && !signal; j++)
+			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
+			
+			if(switchToFakeRate){
+				if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
+			}
+			else{
+				if(goodTau[i].charge*goodTau[j].charge >= 0) continue;
+			}
+			if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
+			if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
+			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
+		
+			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
+			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
+		
+			if (switchToFakeRate){ signal = true; tauTau=true;}
+			else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
+			}
+			else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
+			}
+			else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;
+			}
+			else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;
+			}
+			else continue;
+			if(!switchToFakeRate)
 			{
-				if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
-				if(examineThisEvent){
-					TLorentzVector tau1;
-					TLorentzVector tau2;
-					TLorentzVector H_; 
-					tau1.SetPxPyPzE(goodTau[i].px,goodTau[i].py,goodTau[i].pz,goodTau[i].E);        
-					tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
-					H_=tau1+tau2;
-					std::cout << " H candidate mass is " << H_.M() << std::endl;
-				}
-				
-				
-				if(switchToFakeRate){
-                     if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
-				}
-				else{
-					if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
-					if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
-				}
-				if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
-				
-                if(switchToFakeRate){
-					if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
-                }
-                else{
-					if(goodTau[i].charge*goodTau[j].charge >= 0) continue;
-                }
-				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
-				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
-				if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
-			
-				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
-				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
-				if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
-			
-                                if (switchToFakeRate){ signal = true; muTau=muE=eTau = false; tauTau=true;
-				}
-				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
-				}
-				else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
-				}
-				else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;
-				}
-				else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;
-				}
-				else continue;
-				if(!switchToFakeRate)
-				{
-					Hindex[0]=i;
-					Hindex[1]=j;
-				}
-				if(signal && AdLepton(genericMuon,genericElectron,goodTau[i],goodTau[j])){ signal=false; tauTau=false;
-					if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
-					continue;
-				}
-				if(switchToFakeRate && signal){
-					Hcand.push_back(goodTau[i]);
-					Hcand.push_back(goodTau[j]);
-				}
-				m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
-				m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
-
+				Hindex[0]=i;
+				Hindex[1]=j;
 			}
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau[i],goodTau[j])){tauTau=false;
+				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+				continue;
+			}
+			if(switchToFakeRate && signal){
+				Hcand.push_back(goodTau[i]);
+				Hcand.push_back(goodTau[j]);
+			}
+			m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
+			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
+
 		}
 	}
+	
 
 	if(examineThisEvent) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
-	if(Hindex[0] < 0 || Hindex[1] < 0 ||(!muTau && !muE && !eTau && !tauTau)){ 
+	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 				// sync begin
 		if( found_event[0]){
