@@ -910,6 +910,27 @@ bool Analysis::WZ_Rej(myevent *m, myobject mu) {
                 return false;
 }
 
+bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand){
+	bool Ad_lepton=false;
+	for(uint i = 0; i < genericMuon.size(); i++)
+	{   
+		for(uint j =0; j < Hcand.size(); j+=2){
+			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
+				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
+			Ad_lepton=true;
+	   }
+    }
+	for(uint i = 0; i < genericElectron.size(); i++)
+	{   
+		for(uint j =0; j < Hcand.size(); j+=2){
+			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
+				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
+			Ad_lepton=true;
+	   }
+	}
+	return Ad_lepton;
+}
+
 bool Analysis::isGoodMu(myobject mu){
 
                 double muPt = mu.pt;
@@ -1931,20 +1952,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool Ad_lepton = false;
 
         if(switchToFakeRate){
-	for(uint i = 0; i < genericMuon.size(); i++)
-	{   for(uint j =0; j < Hcand.size(); j+=2){
-		if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
-				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
-			Ad_lepton=true;
-	   }
-        }
-	for(uint i = 0; i < genericElectron.size(); i++)
-	{   for(uint j =0; j < Hcand.size(); j+=2){
-		if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
-				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
-			Ad_lepton=true;
-	   }
-        }
+	//~ for(uint i = 0; i < genericMuon.size(); i++)
+	//~ {   for(uint j =0; j < Hcand.size(); j+=2){
+		//~ if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
+				//~ deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
+			//~ Ad_lepton=true;
+	   //~ }
+        //~ }
+	//~ for(uint i = 0; i < genericElectron.size(); i++)
+	//~ {   for(uint j =0; j < Hcand.size(); j+=2){
+		//~ if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
+				//~ deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
+			//~ Ad_lepton=true;
+	   //~ }
+        //~ }
+        
+        Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand);
+        
         }
 
         else{

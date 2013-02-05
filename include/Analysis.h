@@ -65,6 +65,7 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
    
    double deltaR(double eta1, double phi1, double eta2, double phi2);
+   bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand);
    bool EleMVANonTrigId(float pt, float eta, double value);
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
