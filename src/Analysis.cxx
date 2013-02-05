@@ -931,6 +931,25 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	return Ad_lepton;
 }
 
+bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2){
+	bool Ad_lepton=false;
+	for(uint i = 0; i < genericMuon.size(); i++)
+	{   
+			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
+				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
+			Ad_lepton=true;
+	   
+    }
+	for(uint i = 0; i < genericElectron.size(); i++)
+	{   
+			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
+				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
+			Ad_lepton=true;
+	   
+	}
+	return Ad_lepton;
+}
+
 bool Analysis::isGoodMu(myobject mu){
 
                 double muPt = mu.pt;
@@ -1595,8 +1614,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			else continue;
 			Hindex[0]=i;
 			Hindex[1]=j;
-		}
+			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
 
+		}
+		
+		
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muTau) continue;}
@@ -1628,6 +1650,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}             
 	}
 
+	if(signal && AdLepton(genericMuon,genericElectron,Hcand)) signal=false;
 	if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
