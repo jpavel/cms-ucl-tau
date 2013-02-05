@@ -1001,6 +1001,14 @@ double Analysis::fakeTau_medium(double pt) {
 			double f = p0_medium*(TMath::Exp(p1_medium*pt))+p2_medium;
       		return f;}
 		}
+		
+double Analysis::PairMass(myobject Hcand1, myobject Hcand2){
+	TLorentzVector H_1,H_2,H_sum;
+    H_1.SetPxPyPzE(Hcand1.px,Hcand1.py,Hcand1.pz,Hcand1.E);
+    H_2.SetPxPyPzE(Hcand2.px,Hcand2.py,Hcand2.pz,Hcand2.E);
+    H_sum = H_1 + H_2;
+	return H_sum.M();
+}
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
@@ -1933,6 +1941,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " tauTau " << tauTau << SLogger::endmsg;
 
 	short event_type[3] = {0,0,0};
+	double Hmass[3] = {0.0,0.0,0.0};
+
+	for(uint i=0; i< Hcand.size()/2; i++)
+	{
+		Hmass[i]=PairMass(Hcand[Hcand.size()-1-2*i],Hcand[Hcand.size()-2-2*i]);
+	}
 
 	if(Zmumu)
 	{
@@ -1942,13 +1956,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(eTau){
 				event_type[1]=3;
 				if(muTau) event_type[2]=1;
+					//~ Hmass[0]=PairMass(Hcand[4],Hcand[5]);
+					//~ Hmass[1]=PairMass(Hcand[2],Hcand[3]);
+					//~ Hmass[2]=PairMass(Hcand[0],Hcand[1]);
+				//~ }else{
+					//~ Hmass[0]=PairMass(Hcand[2],Hcand[3]);
+					//~ Hmass[1]=PairMass(Hcand[0],Hcand[1]);
+				//~ }
 			}else{
 				if(muTau) event_type[1]=1;
+					//~ Hmass[0]=PairMass(Hcand[2],Hcand[3]);
+					//~ Hmass[1]=PairMass(Hcand[0],Hcand[1]);
+				//~ }else{
+					//~ Hmass[0]=PairMass(Hcand[0],Hcand[1]);
+				//~ }
 			}
 		}else{
 			if(eTau){
 				event_type[0]=3;
 				if(muTau) event_type[1]=1;
+					//~ Hmass[0]=PairMass(Hcand[2],Hcand[3]);
+					//~ Hmass[1]=PairMass(Hcand[0],Hcand[1]);
+				//~ }else{
+					//~ Hmass[0]=PairMass(Hcand[0],Hcand[1]);
+				//~ }
 			}else{
 				if(muTau) event_type[0]=1;
 			}
@@ -2373,6 +2404,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 if( found_event[0]) m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
+	}
+	
+	// now we have the cands
+	
+	if(signal && found_event[0]){
+		if(evt_type[pos[0]]==event_type[0] &&  fabs (mass_H[pos[0]] - Hmass[0]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
+		" H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
+		else m_logger << FATAL << "Found MISMATCH: " << 
+		" H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << " vs " << event_type[0] << " " << Hmass[0] << SLogger::endmsg;
+	}
+	if(signal && found_event[1]){
+		if(evt_type[pos[1]]==event_type[1] &&  fabs (mass_H[pos[1]] - Hmass[1]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
+		" H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
+		else m_logger << FATAL << "Found MISMATCH: " << 
+		" H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << " vs " << event_type[1] << " " << Hmass[1] << SLogger::endmsg;
+	}
+	if(signal && found_event[2]){
+		if(evt_type[pos[2]]==event_type[2] &&  fabs (mass_H[pos[2]] - Hmass[2]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
+		" H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
+		else m_logger << FATAL << "Found MISMATCH: " << 
+		" H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << " vs " << event_type[2] << " " << Hmass[2] << SLogger::endmsg;
 	}
 
 	h_cut_flow->Fill(9,1);
