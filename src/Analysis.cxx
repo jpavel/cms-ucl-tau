@@ -1905,6 +1905,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 	}else{
 		if(found_event[0]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
+		if(found_event[1]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
+		if(found_event[2]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
 	}
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
