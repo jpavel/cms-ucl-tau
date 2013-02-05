@@ -1614,6 +1614,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!checkCategories && !iso1_muE) continue;}
 			if(examineThisEvent) std::cout << " Checking electrons " << std::endl;
 	
+		if(!switchToFakeRate){
 		for(uint j=0; j < genericElectron.size() && !signal; j++)
 		{
                         //the following switch could be also omitted
@@ -1642,6 +1643,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hindex[1]=j;
 			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
 
+		}
 		}
 		
 		
@@ -1676,11 +1678,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
 			else if (!switchToFakeRate && !iso1_muTau && !iso2 && category < 0){ category = 0; muE=false; muTau=true;}
 			else continue;
-			Hindex[0]=i;
-			Hindex[1]=j;
+			if(!switchToFakeRate){
+				Hindex[0]=i;
+				Hindex[1]=j;
+			}
 			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
-				signal=false; muTau=false;}
+				signal=false; muTau=false; continue;}
+			if(switchToFakeRate && signal){
+				Hcand.push_back(genericMuon[i]);
+				Hcand.push_back(goodTau[j]);
+			}
 		}             
 	}
 
@@ -1741,10 +1749,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
 				else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
 				else continue;
-				Hindex[0]=i;
-				Hindex[1]=j;
+				if(!switchToFakeRate){
+					Hindex[0]=i;
+					Hindex[1]=j;
+				}
 				if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ signal=false; eTau=false;
-				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+					if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+					continue;
+					}
+				if(switchToFakeRate && signal){
+					Hcand.push_back(genericElectron[i]);
+					Hcand.push_back(goodTau[j]);
 				}
 			}
 		}
@@ -1821,10 +1836,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;
 				}
 				else continue;
-				Hindex[0]=i;
-				Hindex[1]=j;
-	m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
-	m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
+				if(!switchToFakeRate)
+				{
+					Hindex[0]=i;
+					Hindex[1]=j;
+				}
+				if(signal && AdLepton(genericMuon,genericElectron,goodTau[i],goodTau[j])){ signal=false; tauTau=false;
+					if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+					continue;
+				}
+				if(switchToFakeRate && signal){
+					Hcand.push_back(goodTau[i]);
+					Hcand.push_back(goodTau[j]);
+				}
+				m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
+				m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
 
 			}
 		}
