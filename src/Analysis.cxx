@@ -63,6 +63,7 @@ Analysis::Analysis()
 		DeclareProperty("IgnorePUW",IgnorePUW);
 		DeclareProperty("printoutEvents",printoutEvents);
 		DeclareProperty("examineEvent",examineEvent);
+		DeclareProperty("removeTauOverlap",removeTauOverlap);
 	}
 
 Analysis::~Analysis() {
@@ -1541,6 +1542,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 
         //check the overlap
+	if(removeTauOverlap){
 	for(uint i = 0; i < goodTau.size(); i++)
 	{
 		bool removed = false;
@@ -1572,6 +1574,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 		        }
                }
+	}
 	}
 
 	int tauCand = 	goodTau.size();

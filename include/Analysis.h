@@ -358,6 +358,7 @@ private:
 	
     bool printoutEvents;
     double examineEvent;
+    bool removeTauOverlap;
     
     
     // bookkeeping variables
