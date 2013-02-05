@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <!-- This config file will run over input defined in input.xml file -->
-<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="WARNING">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -14,7 +14,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="20000" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="571" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -72,8 +72,8 @@
 		
 		<Item Name="printoutEvents" Value="true" />
 		<Item Name="maxDeltaR" Value="0.3" />            
-                <Item Name="examineEvent" Value="" />
-
+                <Item Name="examineEvent" Value="37713042" />
+                <Item Name="removeTauOverlap" Value="true" />
                       
 		</UserConfig>
 	</Cycle>

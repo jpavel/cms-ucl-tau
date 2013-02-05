@@ -1004,7 +1004,6 @@ double Analysis::fakeTau_medium(double pt) {
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
-		std::cout << "baf" << std::endl;
 	 // sync part
 	bool found_event[3] = {false,false,false};
 	bool isLoose = false;
