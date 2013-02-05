@@ -1004,7 +1004,7 @@ double Analysis::fakeTau_medium(double pt) {
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
-		
+		std::cout << "baf" << std::endl;
 	 // sync part
 	bool found_event[3] = {false,false,false};
 	bool isLoose = false;
@@ -2276,12 +2276,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 }else dZ_expo2=true;
         }
         dZ_expo=dZ_expo && dZ_expo2;
-	if(!dZ_expo)
-	{
-		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-		return;
-	}
-        }
+		if(!dZ_expo)
+		{
+			m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+			return;
+		}
+      }
 
         if(!switchToFakeRate){
 	h_cut_flow->Fill(8,1);
