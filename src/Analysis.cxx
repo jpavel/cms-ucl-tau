@@ -1708,15 +1708,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                                 if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
 				if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
-				
+				if (WZ_Rej(m,genericElectron[i])) continue;
+				if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
                 if (switchToFakeRate){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
 				else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
 				else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
 				else continue;
-				if (WZ_Rej(m,genericElectron[i])) continue;
-				if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
 				Hindex[0]=i;
 				Hindex[1]=j;
 				if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ signal=false; eTau=false;
