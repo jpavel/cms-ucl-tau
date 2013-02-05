@@ -910,16 +910,21 @@ bool Analysis::WZ_Rej(myevent *m, myobject mu) {
                 return false;
 }
 
-bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand){
+bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose){
 	bool Ad_lepton=false;
+	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
+	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
 	for(uint i = 0; i < genericMuon.size(); i++)
 	{   
+		if(verbose) std::cout << " Mu cand no. " << i << std::endl;
 		for(uint j =0; j < Hcand.size(); j+=2){
 			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j].eta,Hcand[j].phi)> maxDeltaR &&
 				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodMu(genericMuon[i]) < 0.4) 
 			Ad_lepton=true;
 	   }
+	   if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
     }
+    if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
 	for(uint i = 0; i < genericElectron.size(); i++)
 	{   
 		for(uint j =0; j < Hcand.size(); j+=2){
@@ -927,6 +932,7 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[j+1].eta,Hcand[j+1].phi)> maxDeltaR && isGoodEl(genericElectron[i]) < 0.4)  
 			Ad_lepton=true;
 	   }
+	   if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	}
 	return Ad_lepton;
 }
@@ -1999,7 +2005,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	   //~ }
         //~ }
         
-        Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand);
+        
+        if(examineThisEvent) Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,1);
+        else Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,0);
         
         }
 
