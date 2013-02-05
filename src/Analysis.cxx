@@ -1635,7 +1635,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muTau) continue;}
-		for(uint j=0; j< goodTau.size() && !signal; j++)
+		for(uint j=0; j< goodTau.size() && !signal && !WZ_Rej(m,genericMuon[i]); j++)
 		{
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
