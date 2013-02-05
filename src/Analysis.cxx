@@ -1693,6 +1693,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
 				if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << std::endl;
+				if(examineThisEvent){
+					TLorentzVector ele1;
+					TLorentzVector tau2;
+					TLorentzVector H_; 
+					ele1.SetPxPyPzE(genericElectron[i].px,genericElectron[i].py,genericElectron[i].pz,genericElectron[i].E);        
+					tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
+					H_=ele1+tau2;
+					std::cout << " H candidate mass is " << H_.M() << std::endl;
+				}
 				//the following switch could be also omitted
 				//since in the case of switchToFakeRate && UseSumPtCut
 				//Cut_leptau_sumPt is 0
