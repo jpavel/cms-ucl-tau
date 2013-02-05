@@ -943,14 +943,14 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	for(uint i = 0; i < genericMuon.size(); i++)
 	{   
 			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
-				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && isGoodMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.4) 
+				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && RelIsoMu(genericMuon[i]) < 0.4) 
 			Ad_lepton=true;
 	   
     }
 	for(uint i = 0; i < genericElectron.size(); i++)
 	{   
 			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
-				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && isGoodEl(genericElectron[i]) && RelIsoEl(genericElectron[i]) < 0.4)  
+				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR  && RelIsoEl(genericElectron[i]) < 0.4)  
 			Ad_lepton=true;
 	   
 	}
