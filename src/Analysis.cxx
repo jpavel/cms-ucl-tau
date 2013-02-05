@@ -1061,12 +1061,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		found_event[0] = true;
 	}
-	pos[1] = std::find(evt_number.begin()+pos[0], evt_number.end(), eNumber) - evt_number.begin();
+	pos[1] = std::find(evt_number.begin()+pos[0]+1, evt_number.end(), eNumber) - evt_number.begin();
 	if( pos[1] < evt_number.size()  )
 	{
 		found_event[1] = true;
 	}
-	pos[2] = std::find(evt_number.begin()+pos[1], evt_number.end(), eNumber) - evt_number.begin();
+	pos[2] = std::find(evt_number.begin()+pos[1]+1, evt_number.end(), eNumber) - evt_number.begin();
 	
 	if( pos[2] < evt_number.size()  )
 	{
