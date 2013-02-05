@@ -1721,7 +1721,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
 	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
 	
-	if(examineThisEvent && signal && eTau){ std::cout << "Found etau candidate" << std::endl; signal = false; eTau=false;}
+	if(examineThisEvent && signal && eTau){ std::cout << "Found etau candidate" << std::endl;}
 	bool tauTau =false;
 	if(!signal)
 	{
