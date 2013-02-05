@@ -1950,38 +1950,38 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(event_type!=evt_type[pos[0]] && found_event[0]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg; 
 	// efficiency correction;
 
-	int I = Hindex[0]; int J = Hindex[1];		
-	switch(event_type)
-	{
-		case 2:
-		case 6:
-			Hcand.push_back(genericMuon[I]);
-			Hcand.push_back(genericElectron[J]);
-			genericMuon.erase(genericMuon.begin()+I);
-			genericElectron.erase(genericElectron.begin()+J);
-			break;
-		case 1:
-		case 5:
-			Hcand.push_back(genericMuon[I]);
-			Hcand.push_back(goodTau[J]);
-			genericMuon.erase(genericMuon.begin()+I);
-			goodTau.erase(goodTau.begin()+J);
-			break;
-		case 3:
-		case 7:
-			Hcand.push_back(genericElectron[I]);
-			Hcand.push_back(goodTau[J]);
-			genericElectron.erase(genericElectron.begin()+I);
-			goodTau.erase(goodTau.begin()+J);
-			break;
-		case 4:
-		case 8:
-			Hcand.push_back(goodTau[I]);
-			Hcand.push_back(goodTau[J]);
-			goodTau.erase(goodTau.begin()+I);
-			goodTau.erase(goodTau.begin()+J-1);
-			break;
-	}
+	//~ int I = Hindex[0]; int J = Hindex[1];		
+	//~ switch(event_type)
+	//~ {
+		//~ case 2:
+		//~ case 6:
+			//~ //Hcand.push_back(genericMuon[I]);
+			//~ //Hcand.push_back(genericElectron[J]);
+			//~ genericMuon.erase(genericMuon.begin()+I);
+			//~ genericElectron.erase(genericElectron.begin()+J);
+			//~ break;
+		//~ case 1:
+		//~ case 5:
+			//~ Hcand.push_back(genericMuon[I]);
+			//~ Hcand.push_back(goodTau[J]);
+			//~ genericMuon.erase(genericMuon.begin()+I);
+			//~ goodTau.erase(goodTau.begin()+J);
+			//~ break;
+		//~ case 3:
+		//~ case 7:
+			//~ Hcand.push_back(genericElectron[I]);
+			//~ Hcand.push_back(goodTau[J]);
+			//~ genericElectron.erase(genericElectron.begin()+I);
+			//~ goodTau.erase(goodTau.begin()+J);
+			//~ break;
+		//~ case 4:
+		//~ case 8:
+			//~ Hcand.push_back(goodTau[I]);
+			//~ Hcand.push_back(goodTau[J]);
+			//~ goodTau.erase(goodTau.begin()+I);
+			//~ goodTau.erase(goodTau.begin()+J-1);
+			//~ break;
+	//~ }
 
 
 	double corrHlep1,corrHlep2;
