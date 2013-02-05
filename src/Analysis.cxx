@@ -1583,6 +1583,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> Hcand;
 	Hcand.clear();
 	
+	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
+	
 	for(uint i = 0; i < genericMuon.size() && !signal; i++)
 	{
 
@@ -1673,6 +1675,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool eTau = false;
 	if(!signal)
 	{
+		if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
+	
 		for(uint i = 0; i < genericElectron.size() && !signal ; i++)
 		{
 			bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
