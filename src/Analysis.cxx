@@ -1620,6 +1620,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
+		if(examineThisEvent) std::cout << " Checking mutau " << std::endl;
+		if(examineThisEvent) std::cout << " Mu candidate i= " << i << " " << genericMuon[i].pt << std::endl;
+			
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muTau) continue;}
 		for(uint j=0; j< goodTau.size() && !signal; j++)
@@ -1627,6 +1630,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
                         //Cut_leptau_sumPt is 0
+			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
+			
 			if(!switchToFakeRate){
 				if(UseSumPtCut && genericMuon[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;}			
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
@@ -1638,7 +1643,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;                                    
-
+			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
 			if (switchToFakeRate){ signal = true; muE=false; muTau=true;}
 			else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
 			else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
@@ -1647,10 +1652,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			else continue;
 			Hindex[0]=i;
 			Hindex[1]=j;
+			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],goodTau[j])){ 
+				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
+				signal=false; muTau=false;}
 		}             
 	}
 
-	if(signal && AdLepton(genericMuon,genericElectron,Hcand)) signal=false;
+	//if(signal && AdLepton(genericMuon,genericElectron,Hcand)) signal=false;
 	if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
@@ -1692,6 +1700,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				else continue;
 				Hindex[0]=i;
 				Hindex[1]=j;
+				if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j])){ signal=false; eTau=false;}
 			}
 		}
 	}
