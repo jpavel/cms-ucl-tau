@@ -1552,20 +1552,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		               {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 		}
 		
-		for(uint j = 0; j < genericMuon.size() && !removed; j++)
-		{    
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR 	 ) 
-				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		        
-        }
-
-		for(uint j = 0; j < genericElectron.size() && !removed; j++)
-		{
-                        
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR ) 
-				{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		        
-        }
+		//~ for(uint j = 0; j < genericMuon.size() && !removed; j++)
+		//~ {    
+			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR 	 ) 
+				//~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+		        //~ 
+        //~ }
+//~ 
+		//~ for(uint j = 0; j < genericElectron.size() && !removed; j++)
+		//~ {
+                        //~ 
+			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR ) 
+				//~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+		        //~ 
+        //~ }
 	}
 	}
 
