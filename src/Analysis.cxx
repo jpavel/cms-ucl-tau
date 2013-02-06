@@ -1776,7 +1776,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j]),verb){ eTau=false;
+			if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j],verb)){ eTau=false;
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 				}
