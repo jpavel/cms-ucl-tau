@@ -938,17 +938,31 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	return Ad_lepton;
 }
 
-bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2){
+bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2,bool verbose){
 	bool Ad_lepton=false;
+	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
+	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
 	for(uint i = 0; i < genericMuon.size(); i++)
 	{   
+			if(verbose) std::cout << " Mu cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			
 			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
 				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR ) 
 			Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
     }
+	 if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	
 	for(uint i = 0; i < genericElectron.size(); i++)
 	{   
+			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+	
+	
 			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
 				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR )  
 			Ad_lepton=true;
@@ -1677,7 +1691,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(genericMuon[i].charge*goodTau[j].charge >= 0) continue;
 			}
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;                                    
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;  
+			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
 			if (switchToFakeRate){ signal = true; muTau=true;}
 			else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
@@ -1708,7 +1723,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	for(uint i = 0; i < genericElectron.size() && !eTau ; i++)
 	{
-		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << std::endl;
+		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
 		bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
 					if(!switchToFakeRate){		
 		if (!iso1 && !checkCategories) continue;}
@@ -1721,7 +1736,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
 		for(uint j=0; j< goodTau.size() && !eTau; j++)
 		{
-			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << std::endl;
+			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent){
 				TLorentzVector ele1;
 				TLorentzVector tau2;
@@ -1743,8 +1758,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 							else{
 			if(genericElectron[i].charge*goodTau[j].charge >= 0) continue;
 							}
-							if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
+			if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
+			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			if (!WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
