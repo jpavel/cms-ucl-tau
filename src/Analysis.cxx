@@ -1895,6 +1895,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) verb=true;
 			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; tauTau=true;}
+			if(eNumber==37678383) std::cout << tauTau << std::endl;
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
