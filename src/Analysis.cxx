@@ -1747,7 +1747,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
 		
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
-		for(uint j=0; j< goodTau.size() && !eTau; j++)
+		for(uint j=0; j< goodTau.size(); j++)
 		{
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent){
