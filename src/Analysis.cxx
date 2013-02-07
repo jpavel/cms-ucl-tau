@@ -1715,7 +1715,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;  
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
-			if (switchToFakeRate){ signal = true; muTau=true;}
 			else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
 			else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
 			else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
@@ -1727,10 +1726,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
-				muTau=false; continue;}
+				continue;}
 				bool verb=false;
 				if(examineThisEvent) verb=true;
-				if(signal && !DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { signal=false; muTau=false;}
+				if(signal && !DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { continue;}
+				if (switchToFakeRate){ signal = true; muTau=true;}
 				if(switchToFakeRate && signal){
 				Hcand.push_back(genericMuon[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1745,7 +1745,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool eTau = false;
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
 
-	for(uint i = 0; i < genericElectron.size() && !eTau ; i++)
+	for(uint i = 0; i < genericElectron.size() ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
 		bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
@@ -1873,7 +1873,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
 		
-			if (switchToFakeRate){ signal = true; tauTau=true;}
 			else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
 			}
 			else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
@@ -1888,13 +1887,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){tauTau=false;
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-			if(signal && !DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { signal=false; tauTau=false;}
+			if(signal && !DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
+			if (switchToFakeRate){ signal = true; tauTau=true;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
