@@ -2006,7 +2006,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
+		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
 		
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
@@ -2039,45 +2039,45 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		//~ Hmass[i]=PairMass(Hcand[Hcand.size()-1-2*i],Hcand[Hcand.size()-2-2*i]);
 	//~ }
 
-	if(Zmumu)
-	{
-		if(tauTau){
-			event_type[0]=4;
-			if(eTau){
-				event_type[1]=3;
-				if(muTau) event_type[2]=1;
-				
-			}else{
-				if(muTau) event_type[1]=1;
-				
-			}
-		}else{
-			if(eTau){
-				event_type[0]=3;
-				if(muTau) event_type[1]=1;
-				
-			}else{
-				if(muTau) event_type[0]=1;
-			}
-		}
-	}else if(Zee){
-		if(tauTau){
-			event_type[0]=8;
-			if(eTau){
-				event_type[1]=7;
-				if(muTau) event_type[2]=5;
-			}else{
-				if(muTau) event_type[1]=5;
-			}
-		}else{
-			if(eTau){
-				event_type[0]=7;
-				if(muTau) event_type[1]=5;
-			}else{
-				if(muTau) event_type[0]=5;
-			}
-		}
-	}
+	//~ if(Zmumu)
+	//~ {
+		//~ if(tauTau){
+			//~ event_type[0]=4;
+			//~ if(eTau){
+				//~ event_type[1]=3;
+				//~ if(muTau) event_type[2]=1;
+				//~ 
+			//~ }else{
+				//~ if(muTau) event_type[1]=1;
+				//~ 
+			//~ }
+		//~ }else{
+			//~ if(eTau){
+				//~ event_type[0]=3;
+				//~ if(muTau) event_type[1]=1;
+				//~ 
+			//~ }else{
+				//~ if(muTau) event_type[0]=1;
+			//~ }
+		//~ }
+	//~ }else if(Zee){
+		//~ if(tauTau){
+			//~ event_type[0]=8;
+			//~ if(eTau){
+				//~ event_type[1]=7;
+				//~ if(muTau) event_type[2]=5;
+			//~ }else{
+				//~ if(muTau) event_type[1]=5;
+			//~ }
+		//~ }else{
+			//~ if(eTau){
+				//~ event_type[0]=7;
+				//~ if(muTau) event_type[1]=5;
+			//~ }else{
+				//~ if(muTau) event_type[0]=5;
+			//~ }
+		//~ }
+	//~ }
 		
 		
 	
