@@ -68,7 +68,8 @@ public:
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    double PairMass(myobject Hcand1, myobject Hcand2);	
-
+   bool DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose=false);
+	
    bool EleMVANonTrigId(float pt, float eta, double value);
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);

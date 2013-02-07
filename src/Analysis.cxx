@@ -973,6 +973,16 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	return Ad_lepton;
 }
 
+bool Analysis::DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose)
+{
+	bool dZ_expo = (fabs(Zcand1.z_expo - Zcand2.z_expo) < dZvertex && fabs(Zcand1.z_expo - Hcand1.z_expo) < dZvertex 
+					&& fabs(Zcand1.z_expo - Hcand2.z_expo) < dZvertex && fabs(Zcand2.z_expo - Hcand1.z_expo) < dZvertex 
+					&& fabs(Zcand2.z_expo - Hcand2.z_expo) < dZvertex && fabs(Hcand1.z_expo - Hcand2.z_expo) < dZvertex);
+    return dZ_expo;		
+	
+
+}
+
 bool Analysis::isGoodMu(myobject mu){
 
                 double muPt = mu.pt;
