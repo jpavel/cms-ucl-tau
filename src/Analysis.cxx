@@ -1724,12 +1724,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j])){ 
+			if(AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
 				continue;}
 				bool verb=false;
 				if(examineThisEvent) verb=true;
-				if(signal && !DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { continue;}
+				if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { continue;}
 				if (switchToFakeRate){ signal = true; muTau=true;}
 				if(switchToFakeRate && signal){
 				Hcand.push_back(genericMuon[i]);
@@ -1799,12 +1799,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
+			if(AdLepton(genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 				}
 			if(examineThisEvent) verb=true;
-			if(signal && !DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { continue;}
+			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; eTau=true;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(genericElectron[i]);
@@ -1887,13 +1887,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){
+			if(AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-			if(signal && !DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
+			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; tauTau=true;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
