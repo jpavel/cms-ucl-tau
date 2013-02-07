@@ -975,9 +975,15 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 
 bool Analysis::DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose)
 {
+	if(verbose) std::cout << "  > Distances are: " <<  fabs(Zcand1.z_expo - Zcand2.z_expo) << " " << fabs(Zcand1.z_expo - Hcand1.z_expo) <<
+					" " << fabs(Zcand1.z_expo - Hcand2.z_expo) << " " << fabs(Zcand2.z_expo - Hcand1.z_expo) <<
+					" " << fabs(Zcand2.z_expo - Hcand2.z_expo) << " " << fabs(Hcand1.z_expo - Hcand2.z_expo) << std::endl;
+					
 	bool dZ_expo = (fabs(Zcand1.z_expo - Zcand2.z_expo) < dZvertex && fabs(Zcand1.z_expo - Hcand1.z_expo) < dZvertex 
 					&& fabs(Zcand1.z_expo - Hcand2.z_expo) < dZvertex && fabs(Zcand2.z_expo - Hcand1.z_expo) < dZvertex 
 					&& fabs(Zcand2.z_expo - Hcand2.z_expo) < dZvertex && fabs(Hcand1.z_expo - Hcand2.z_expo) < dZvertex);
+    
+    if(!dZ_expo) std::cout << "FAILED same vetex cut!" << std::endl;
     return dZ_expo;		
 	
 
@@ -1675,6 +1681,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hindex[0]=i;
 			Hindex[1]=j;
 			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
+			bool verb=false;
+			if(examineThisEvent) verb=true;
+			if(signal && DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
 
 		}
 		}
@@ -1719,7 +1728,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
 				muTau=false; continue;}
-			if(switchToFakeRate && signal){
+				bool verb=false;
+				if(examineThisEvent) verb=true;
+				if(signal && DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
+				if(switchToFakeRate && signal){
 				Hcand.push_back(genericMuon[i]);
 				Hcand.push_back(goodTau[j]);
 			}
@@ -1792,6 +1804,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 				}
+			if(examineThisEvent) verb=true;
+			if(signal && DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(genericElectron[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1878,6 +1892,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
+			bool verb=false;
+			if(examineThisEvent) verb=true;
+			if(signal && DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
