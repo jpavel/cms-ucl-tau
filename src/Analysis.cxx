@@ -1683,7 +1683,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-			if(signal && DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
+			if(signal && !DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
 
 		}
 		}
@@ -1730,7 +1730,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				muTau=false; continue;}
 				bool verb=false;
 				if(examineThisEvent) verb=true;
-				if(signal && DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { signal=false; muTau=false;}
+				if(signal && !DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { signal=false; muTau=false;}
 				if(switchToFakeRate && signal){
 				Hcand.push_back(genericMuon[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1805,7 +1805,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				continue;
 				}
 			if(examineThisEvent) verb=true;
-			if(signal && DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { signal=false; eTau=false;}
+			if(signal && !DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { signal=false; eTau=false;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(genericElectron[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1894,7 +1894,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-			if(signal && DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { signal=false; tauTau=false;}
+			if(signal && !DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { signal=false; tauTau=false;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
