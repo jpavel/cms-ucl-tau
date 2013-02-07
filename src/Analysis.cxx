@@ -938,7 +938,7 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	return Ad_lepton;
 }
 
-bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2,bool verbose){
+bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2,bool verbose){
 	bool Ad_lepton=false;
 	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
 	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
@@ -968,6 +968,19 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 			Ad_lepton=true;
 	   
 	}
+	if(verbose) std::cout << "There are " << goodTau.size() << " additional taus." << std::endl;
+	
+	for(uint i = 0; i < goodTau.size(); i++)
+		{
+			if(verbose) std::cout << " Tau cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
+					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
+				Ad_lepton=true;
+		}
+	
 	return Ad_lepton;
 }
 
@@ -1662,7 +1675,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			else continue;
 			Hindex[0]=i;
 			Hindex[1]=j;
-			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
 
 		}
 		}
@@ -1704,7 +1717,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(signal && AdLepton(genericMuon,genericElectron,genericMuon[i],goodTau[j])){ 
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
 				muTau=false; continue;}
 			if(switchToFakeRate && signal){
@@ -1776,7 +1789,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			if(signal && AdLepton(genericMuon,genericElectron,genericElectron[i],goodTau[j],verb)){ eTau=false;
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ eTau=false;
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 				}
@@ -1862,7 +1875,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau[i],goodTau[j])){tauTau=false;
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){tauTau=false;
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
@@ -1974,30 +1987,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(eTau){
 				event_type[1]=3;
 				if(muTau) event_type[2]=1;
-					//~ Hmass[0]=PairMass(Hcand[4],Hcand[5]);
-					//~ Hmass[1]=PairMass(Hcand[2],Hcand[3]);
-					//~ Hmass[2]=PairMass(Hcand[0],Hcand[1]);
-				//~ }else{
-					//~ Hmass[0]=PairMass(Hcand[2],Hcand[3]);
-					//~ Hmass[1]=PairMass(Hcand[0],Hcand[1]);
-				//~ }
+				
 			}else{
 				if(muTau) event_type[1]=1;
-					//~ Hmass[0]=PairMass(Hcand[2],Hcand[3]);
-					//~ Hmass[1]=PairMass(Hcand[0],Hcand[1]);
-				//~ }else{
-					//~ Hmass[0]=PairMass(Hcand[0],Hcand[1]);
-				//~ }
+				
 			}
 		}else{
 			if(eTau){
 				event_type[0]=3;
 				if(muTau) event_type[1]=1;
-					//~ Hmass[0]=PairMass(Hcand[2],Hcand[3]);
-					//~ Hmass[1]=PairMass(Hcand[0],Hcand[1]);
-				//~ }else{
-					//~ Hmass[0]=PairMass(Hcand[0],Hcand[1]);
-				//~ }
+				
 			}else{
 				if(muTau) event_type[0]=1;
 			}
@@ -2029,39 +2028,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	// efficiency correction;
 
-	//~ int I = Hindex[0]; int J = Hindex[1];		
-	//~ switch(event_type)
-	//~ {
-		//~ case 2:
-		//~ case 6:
-			//~ //Hcand.push_back(genericMuon[I]);
-			//~ //Hcand.push_back(genericElectron[J]);
-			//~ genericMuon.erase(genericMuon.begin()+I);
-			//~ genericElectron.erase(genericElectron.begin()+J);
-			//~ break;
-		//~ case 1:
-		//~ case 5:
-			//~ Hcand.push_back(genericMuon[I]);
-			//~ Hcand.push_back(goodTau[J]);
-			//~ genericMuon.erase(genericMuon.begin()+I);
-			//~ goodTau.erase(goodTau.begin()+J);
-			//~ break;
-		//~ case 3:
-		//~ case 7:
-			//~ Hcand.push_back(genericElectron[I]);
-			//~ Hcand.push_back(goodTau[J]);
-			//~ genericElectron.erase(genericElectron.begin()+I);
-			//~ goodTau.erase(goodTau.begin()+J);
-			//~ break;
-		//~ case 4:
-		//~ case 8:
-			//~ Hcand.push_back(goodTau[I]);
-			//~ Hcand.push_back(goodTau[J]);
-			//~ goodTau.erase(goodTau.begin()+I);
-			//~ goodTau.erase(goodTau.begin()+J-1);
-			//~ break;
-	//~ }
-
+	
 
 	double corrHlep1,corrHlep2;
 	corrHlep1=corrHlep2=1.0;
@@ -2133,32 +2100,32 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	bool Ad_lepton = false;
 
-        if(switchToFakeRate){
-	     if(examineThisEvent) Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,1);
-        else Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,0);    
-        }
-
-        else{
-	for(uint i = 0; i < genericMuon.size(); i++)
-	{
-		if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoMu(genericMuon[i]) < 0.4) 
-			Ad_lepton=true;
-	}
-
-	for(uint i = 0; i < genericElectron.size(); i++)
-	{
-		if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoEl(genericElectron[i]) < 0.4)  
-			Ad_lepton=true;
-	}
-	if(!IgnoreAdditionalTaus){
-		for(uint i = 0; i < goodTau.size(); i++)
-		{
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
-					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
-				Ad_lepton=true;
-		}
-	    }
-        }//close else
+        //~ if(switchToFakeRate){
+	     //~ if(examineThisEvent) Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,1);
+        //~ else Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,0);    
+        //~ }
+//~ 
+        //~ else{
+	//~ for(uint i = 0; i < genericMuon.size(); i++)
+	//~ {
+		//~ if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoMu(genericMuon[i]) < 0.4) 
+			//~ Ad_lepton=true;
+	//~ }
+//~ 
+	//~ for(uint i = 0; i < genericElectron.size(); i++)
+	//~ {
+		//~ if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoEl(genericElectron[i]) < 0.4)  
+			//~ Ad_lepton=true;
+	//~ }
+	//~ if(!IgnoreAdditionalTaus){
+		//~ for(uint i = 0; i < goodTau.size(); i++)
+		//~ {
+			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
+					//~ deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
+				//~ Ad_lepton=true;
+		//~ }
+	    //~ }
+        //~ }//close else
     int Event_type=event_type[0];
 		
 	if(Ad_lepton) 
