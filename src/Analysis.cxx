@@ -1893,6 +1893,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
+			if(eNumber==37678383) std::cout << DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], 0) << std::endl;
 			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; tauTau=true;}
 			if(eNumber==37678383) std::cout << tauTau << std::endl;
