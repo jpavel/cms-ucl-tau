@@ -2014,6 +2014,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
 	}
+	if(examineThisEvent) std::cout << "First : " << event_type[0] << " " << Hmass[0] << std::endl;
 	
 	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==3 || Hcand_type[i]==7);i++)
 	{
