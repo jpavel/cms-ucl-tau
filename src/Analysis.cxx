@@ -2003,7 +2003,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << Hcand_type[0] << Hcand_type[1] << std::endl;
 	
-	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==4 || Hcand_type[i]==8) ;i++)
+	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
