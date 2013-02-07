@@ -1872,16 +1872,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
+			if(eNumber==37678383) std::cout << "here" << std::endl;
 		
-			else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
-			}
-			else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
-			}
-			else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;
-			}
-			else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;
-			}
-			else continue;
+			//~ else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
+			//~ }
+			//~ else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
+			//~ }
+			//~ else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;
+			//~ }
+			//~ else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;
+			//~ }
+			//~ else continue;
 			if(!switchToFakeRate)
 			{
 				Hindex[0]=i;
