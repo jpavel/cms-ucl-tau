@@ -2037,9 +2037,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		
 	
-	if(event_type[0]!=evt_type[pos[0]] && found_event[0]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg; 
-	if(event_type[1]!=evt_type[pos[1]] && found_event[1]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[1]] << " and mine is " << event_type << SLogger::endmsg; 
-	if(event_type[2]!=evt_type[pos[2]] && found_event[2]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[2]] << " and mine is " << event_type << SLogger::endmsg; 
+	if(event_type[0]!=evt_type[pos[0]] && found_event[0]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[0]] << " and mine is " << event_type[0] << SLogger::endmsg; 
+	if(event_type[1]!=evt_type[pos[1]] && found_event[1]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[1]] << " and mine is " << event_type[1] << SLogger::endmsg; 
+	if(event_type[2]!=evt_type[pos[2]] && found_event[2]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[2]] << " and mine is " << event_type[2] << SLogger::endmsg; 
 	
 	// efficiency correction;
 
