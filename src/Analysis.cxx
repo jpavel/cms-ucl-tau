@@ -1887,6 +1887,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
+			if(eNumber==37678383) std::cout << AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j]) << std::endl;
 			if(AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
