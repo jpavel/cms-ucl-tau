@@ -2001,7 +2001,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	event_type.clear();
 	Hmass.clear();
 	
-	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << std::endl;
+	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << Hcand_type[0] << Hcand_type[1] << std::endl;
 	
 	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==4 || Hcand_type[i]==8) ;i++)
 	{
@@ -2015,17 +2015,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hmass.push_back(mass);
 	}
 	
-	for(uint i=0; i< Hcand_type.size();i++)
+	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==3 || Hcand_type[i]==7);i++)
 	{
-		if(Hcand_type[i]!=3 || Hcand_type[i]!=7) continue;
+		//if(Hcand_type[i]!=3 || Hcand_type[i]!=7) continue;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
 		Hmass.push_back(mass);
 	}
 	
-	for(uint i=0; i< Hcand_type.size();i++)
+	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==1 || Hcand_type[i]==5);i++)
 	{
-		if(Hcand_type[i]!=1 || Hcand_type[i]!=5) continue;
+		//if(Hcand_type[i]!=1 || Hcand_type[i]!=5) continue;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
 		Hmass.push_back(mass);
