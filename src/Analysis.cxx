@@ -1905,7 +1905,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	
-
+	if(evt_type[pos[0]]==37678383) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(examineThisEvent) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
