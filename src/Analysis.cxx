@@ -2001,11 +2001,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	event_type.clear();
 	Hmass.clear();
 	
+	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << std::endl;
+	
 	for(uint i=0; i< Hcand_type.size();i++)
 	{
+		if(examineThisEvent) std::cout << " Type number " << i << std::endl;
 		if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
+		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
 	}
 	
@@ -2179,7 +2184,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     int Event_type=event_type[0];
 		
 	if(Ad_lepton) 
-	{			
+		{			
 		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
 			if( found_event[0]){ 
 				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos[0]] << " and mine is " << event_type[0] << SLogger::endmsg;
