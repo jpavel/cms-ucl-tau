@@ -968,18 +968,7 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 			Ad_lepton=true;
 	   
 	}
-	if(verbose) std::cout << "There are " << goodTau.size() << " additional taus." << std::endl;
 	
-	for(uint i = 0; i < goodTau.size(); i++)
-		{
-			if(verbose) std::cout << " Tau cand no. " << i << std::endl;
-			if(verbose) std::cout << " Distance to 1st is " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
-			if(verbose) std::cout << " Distance to 2nd is " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-			
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
-					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
-				Ad_lepton=true;
-		}
 	
 	return Ad_lepton;
 }
