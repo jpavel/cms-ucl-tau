@@ -1715,10 +1715,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;  
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
-			else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
-			else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
-			else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
-			else if (!switchToFakeRate && !iso1_muTau && !iso2 && category < 0){ category = 0; muE=false; muTau=true;}
+			//~ else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
+			//~ else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
+			//~ else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
+			//~ else if (!switchToFakeRate && !iso1_muTau && !iso2 && category < 0){ category = 0; muE=false; muTau=true;}
 			else continue;
 			if(!switchToFakeRate){
 				Hindex[0]=i;
@@ -1788,11 +1788,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			if (!WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
-			else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
-			else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
-			else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
-			else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
-			else continue;
+			//~ else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
+			//~ else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
+			//~ else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
+			//~ else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
+			//~ else continue;
 			if(!switchToFakeRate){
 				Hindex[0]=i;
 				Hindex[1]=j;
@@ -1872,8 +1872,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
-			if(eNumber==37678383) std::cout << "here" << std::endl;
-		
+			
 			//~ else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
 			//~ }
 			//~ else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
@@ -1888,17 +1887,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(eNumber==37678383) std::cout << AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j]) << std::endl;
 			if(AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-			if(eNumber==37678383) std::cout << DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], 0) << std::endl;
 			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; tauTau=true;}
-			if(eNumber==37678383) std::cout << tauTau << std::endl;
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
@@ -1909,7 +1905,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	
-	if(eNumber==37678383) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(examineThisEvent) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
