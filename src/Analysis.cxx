@@ -1636,7 +1636,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	short category = -1;       
 	int Hindex[2] = {-1,-1};
 	std::vector<myobject> Hcand;
+	std::vector<int> Hcand_type;
 	Hcand.clear();
+	Hcand_type.clear();
 	
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
 	
@@ -1734,6 +1736,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(switchToFakeRate && signal){
 				Hcand.push_back(genericMuon[i]);
 				Hcand.push_back(goodTau[j]);
+				if(Zmumu) Hcand_type.push_back(1);
+				else if(Zee) Hcand_type.push_back(5);
 			}
 		}             
 	}
@@ -1809,6 +1813,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(switchToFakeRate && signal){
 				Hcand.push_back(genericElectron[i]);
 				Hcand.push_back(goodTau[j]);
+				if(Zmumu) Hcand_type.push_back(3);
+				else if(Zee) Hcand_type.push_back(7);
 			}
 		}
 	}
@@ -1898,6 +1904,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(switchToFakeRate && signal){
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
+				if(Zmumu) Hcand_type.push_back(4);
+				else if(Zee) Hcand_type.push_back(8);
 			}
 			m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
 			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
@@ -1906,6 +1914,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 	if(examineThisEvent) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
+	if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
 	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 				// sync begin
@@ -1986,17 +1995,43 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " eTau " << eTau << SLogger::endmsg;
 	m_logger << DEBUG << " tauTau " << tauTau << SLogger::endmsg;
 
-	short event_type[3] = {0,0,0};
-	double Hmass[3] = {0.0,0.0,0.0};
-
-	for(uint i=0; i< Hcand.size()/2; i++)
+	//short event_type[3] = {0,0,0};
+	std::vector<int> event_type;
+	std::vector<double> Hmass;//[3] = {0.0,0.0,0.0};
+	event_type.clear();
+	Hmass.clear();
+	
+	for(uint i=0; i< Hcand_type.size();i++)
 	{
-		Hmass[i]=PairMass(Hcand[Hcand.size()-1-2*i],Hcand[Hcand.size()-2-2*i]);
+		if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
+		event_type.push_back(Hcand_type[i]);
+		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		Hmass.push_back(mass);
 	}
+	
+	for(uint i=0; i< Hcand_type.size();i++)
+	{
+		if(Hcand_type[i]!=3 || Hcand_type[i]!=7) continue;
+		event_type.push_back(Hcand_type[i]);
+		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		Hmass.push_back(mass);
+	}
+	
+	for(uint i=0; i< Hcand_type.size();i++)
+	{
+		if(Hcand_type[i]!=1 || Hcand_type[i]!=5) continue;
+		event_type.push_back(Hcand_type[i]);
+		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		Hmass.push_back(mass);
+	}
+	
+	//~ for(uint i=0; i< Hcand.size()/2; i++)
+	//~ {
+		//~ Hmass[i]=PairMass(Hcand[Hcand.size()-1-2*i],Hcand[Hcand.size()-2-2*i]);
+	//~ }
 
 	if(Zmumu)
 	{
-	m_logger << DEBUG << " event type inside Zmm " << event_type << SLogger::endmsg;
 		if(tauTau){
 			event_type[0]=4;
 			if(eTau){
@@ -2147,7 +2182,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{			
 		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
 			if( found_event[0]){ 
-				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos[0]] << " and mine is " << event_type << SLogger::endmsg;
+				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos[0]] << " and mine is " << event_type[0] << SLogger::endmsg;
 				  m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
 				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
 				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
@@ -3241,7 +3276,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(signal && printoutEvents)
 	{
 		 TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-		 log1 << setiosflags(ios::fixed) << std::setprecision(1) << event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass << std::endl;
+		 log1 << setiosflags(ios::fixed) << std::setprecision(1) << event_type[0] << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass << std::endl;
 	}
 	
         }//close else (analysis case)
