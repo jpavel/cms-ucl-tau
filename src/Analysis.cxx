@@ -2003,10 +2003,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << std::endl;
 	
-	for(uint i=0; i< Hcand_type.size();i++)
+	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==4 || Hcand_type[i]==8) ;i++)
 	{
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
+		
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
