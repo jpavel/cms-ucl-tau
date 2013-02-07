@@ -2005,7 +2005,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	for(uint i=0; i< Hcand_type.size();i++)
 	{
-		if(examineThisEvent) std::cout << " Type number " << i << std::endl;
+		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
@@ -2031,7 +2031,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 	//~ for(uint i=0; i< Hcand.size()/2; i++)
-	//~ {
+	//~ {	
 		//~ Hmass[i]=PairMass(Hcand[Hcand.size()-1-2*i],Hcand[Hcand.size()-2-2*i]);
 	//~ }
 
