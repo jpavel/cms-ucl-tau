@@ -983,7 +983,7 @@ bool Analysis::DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobje
 					&& fabs(Zcand1.z_expo - Hcand2.z_expo) < dZvertex && fabs(Zcand2.z_expo - Hcand1.z_expo) < dZvertex 
 					&& fabs(Zcand2.z_expo - Hcand2.z_expo) < dZvertex && fabs(Hcand1.z_expo - Hcand2.z_expo) < dZvertex);
     
-    if(!dZ_expo) std::cout << "FAILED same vetex cut!" << std::endl;
+    if(!dZ_expo && verbose) std::cout << "FAILED same vertex cut!" << std::endl;
     return dZ_expo;		
 	
 
@@ -1788,7 +1788,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			if (!WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
-			if (switchToFakeRate){ signal = true; eTau=true;}
 			else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
 			else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
 			else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
@@ -1800,12 +1799,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ eTau=false;
+			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 				}
 			if(examineThisEvent) verb=true;
-			if(signal && !DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { signal=false; eTau=false;}
+			if(signal && !DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { continue;}
+			if (switchToFakeRate){ signal = true; eTau=true;}
 			if(switchToFakeRate && signal){
 				Hcand.push_back(genericElectron[i]);
 				Hcand.push_back(goodTau[j]);
