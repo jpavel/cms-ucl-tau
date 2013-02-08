@@ -948,8 +948,10 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
 			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
 			if(verbose) std::cout << " Is good? " << isGoodMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoMu(genericMuon[i]) << std::endl;
+	
 			
-			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodMu(genericMuon[i]) &&
+			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.4 &&
 				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR ) 
 			Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
@@ -963,9 +965,9 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
 			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
 			if(verbose) std::cout << " Is good? " << isGoodEl(genericElectron[i]) << std::endl;
-			
+			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
 	
-			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodEl(genericElectron[i]) &&
+			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodEl(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.4 &&
 				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR )  
 			Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
@@ -984,7 +986,7 @@ bool Analysis::DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobje
 					
 	bool dZ_expo = (fabs(Zcand1.z_expo - Zcand2.z_expo) < dZvertex && fabs(Zcand1.z_expo - Hcand1.z_expo) < dZvertex 
 					&& fabs(Zcand1.z_expo - Hcand2.z_expo) < dZvertex && fabs(Zcand2.z_expo - Hcand1.z_expo) < dZvertex 
-					&& fabs(Zcand2.z_expo - Hcand2.z_expo) < dZvertex && fabs(Hcand1.z_expo - Hcand2.z_expo) < dZvertex);
+					&& fabs(Zcand2.z_expo - Hcand2.z_expo) < dZvertex);// && fabs(Hcand1.z_expo - Hcand2.z_expo) < dZvertex);
     
     if(!dZ_expo && verbose) std::cout << "FAILED same vertex cut!" << std::endl;
     return dZ_expo;		
@@ -1048,10 +1050,11 @@ double Analysis::PairMass(myobject Hcand1, myobject Hcand2){
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 	 // sync part
-	bool found_event[3] = {false,false,false};
+	std::vector<bool> found_event; //{false,false,false};
 	bool isLoose = false;
 	bool isMedium = false;
 	bool isTight = false;
+	found_event.clear();
 	// end sync
 
 	// bookkepping part
@@ -1097,26 +1100,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	int eNumber = m->eventNumber;
 	
 	// sync
-	uint pos[3]; 
-	pos[0] = std::find(evt_number.begin(), evt_number.end(), eNumber) - evt_number.begin();
-	if( pos[0] < evt_number.size()  )
+	std::vector<uint> pos;
+	pos.clear();
+	uint pos_helper=0; 
+	pos_helper = std::find(evt_number.begin(), evt_number.end(), eNumber) - evt_number.begin();
+	for(uint i=0; pos_helper < evt_number.size(); i++ )
 	{
-		found_event[0] = true;
+		found_event.push_back(true);
+		pos.push_back(pos_helper);
+		pos_helper = std::find(evt_number.begin()+pos[i]+1, evt_number.end(), eNumber) - evt_number.begin();
 	}
-	pos[1] = std::find(evt_number.begin()+pos[0]+1, evt_number.end(), eNumber) - evt_number.begin();
-	if( pos[1] < evt_number.size()  )
-	{
-		found_event[1] = true;
-	}
-	pos[2] = std::find(evt_number.begin()+pos[1]+1, evt_number.end(), eNumber) - evt_number.begin();
-	
-	if( pos[2] < evt_number.size()  )
-	{
-		found_event[2] = true;
-	}
-	
+	//~ pos[1] = std::find(evt_number.begin()+pos[0]+1, evt_number.end(), eNumber) - evt_number.begin();
+	//~ if( pos[1] < evt_number.size()  )
+	//~ {
+		//~ found_event[1] = true;
+	//~ }
+	//~ pos[2] = std::find(evt_number.begin()+pos[1]+1, evt_number.end(), eNumber) - evt_number.begin();
+	//~ 
+	//~ if( pos[2] < evt_number.size()  )
+	//~ {
+		//~ found_event[2] = true;
+	//~ }
+	if(found_event.size()!=pos.size()) m_logger << FATAL << "Sync info reading mismatch" << SLogger::endmsg; // sync
 	uint pos_l=0,pos_t=0;
-	if(found_event[0])
+	if(found_event.size()>0)
 	{
 		uint pos_l = std::find(evt_number_l.begin(), evt_number_l.end(), eNumber) - evt_number_l.begin();
 		if( pos_l < evt_number_l.size() )
@@ -1178,13 +1185,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
-	  if(found_event[0]) m_logger << ERROR << "ENTRY " << m_allEvents <<", event " << eNumber << ":  WRONG TRIGGER" << SLogger::endmsg; // sync
+	  if(found_event.size()>0) m_logger << ERROR << "ENTRY " << m_allEvents <<", event " << eNumber << ":  WRONG TRIGGER" << SLogger::endmsg; // sync
 		return;
 	}
-	if(found_event[0]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[0]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
-	if(found_event[1]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[1]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
-	if(found_event[2]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[2]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
-	
+	for(uint i = 0; i < found_event.size(); i++){
+		if(found_event[i]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[i]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
+	}
+	//~ if(found_event[1]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[1]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
+	//~ if(found_event[2]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[2]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
+	//~ 
 	h_cut_flow->Fill(1,1);
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
@@ -1940,7 +1949,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 				// sync begin
-		if( found_event[0]){
+		if( found_event.size()>0){
 				 m_logger << FATAL << " MISSED H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
 				 m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
 				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
@@ -1989,9 +1998,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 		return;
 	}else{
-		if(found_event[0]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
-		if(found_event[1]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
-		if(found_event[2]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
+		for(uint i =0; i < found_event.size(); i++)
+		{
+			if(found_event[i]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << SLogger::endmsg;
+		
+		}
+		//~ if(found_event[1]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
+		//~ if(found_event[2]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
 	}
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
@@ -2069,10 +2082,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 		
 		
+	for(uint i=0; i < found_event.size(); i++)
+	{
+		if(event_type[i]!=evt_type[pos[i]] && found_event[i]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[i]] << " and mine is " << event_type[i] << SLogger::endmsg; 
 	
-	if(event_type[0]!=evt_type[pos[0]] && found_event[0]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[0]] << " and mine is " << event_type[0] << SLogger::endmsg; 
-	if(event_type[1]!=evt_type[pos[1]] && found_event[1]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[1]] << " and mine is " << event_type[1] << SLogger::endmsg; 
-	if(event_type[2]!=evt_type[pos[2]] && found_event[2]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[2]] << " and mine is " << event_type[2] << SLogger::endmsg; 
+	}
+	//~ if(event_type[1]!=evt_type[pos[1]] && found_event[1]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[1]] << " and mine is " << event_type[1] << SLogger::endmsg; 
+	//~ if(event_type[2]!=evt_type[pos[2]] && found_event[2]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[2]] << " and mine is " << event_type[2] << SLogger::endmsg; 
 	
 	// efficiency correction;
 
@@ -2179,7 +2195,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Ad_lepton) 
 		{			
 		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
-			if( found_event[0]){ 
+			if( found_event.size()>0){ 
 				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos[0]] << " and mine is " << event_type[0] << SLogger::endmsg;
 				  m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
 				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
@@ -2332,35 +2348,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	// Same vertex check
 
-        if(!switchToFakeRate){
-	bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
-	if(!dZ_expo)
-	{
-		if( found_event[0]) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
-		m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-		return;
-	}
-	}
-        else{
-        bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
-        bool dZ_expo2 = false;
-        for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
-        {
-                if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
-                {
-                        Hcand.erase(Hcand.begin()+i);
-                        Hcand.erase(Hcand.begin()+i);
-                        i-=2;
-                        if(Hcand.size()==0) i= Hcand.size();
-                }else dZ_expo2=true;
-        }
-        dZ_expo=dZ_expo && dZ_expo2;
-		if(!dZ_expo)
-		{
-			m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-			return;
-		}
-      }
+        //~ if(!switchToFakeRate){
+	//~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
+	//~ if(!dZ_expo)
+	//~ {
+		//~ if( found_event.size()>0) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+		//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+		//~ return;
+	//~ }
+	//~ }
+        //~ else{
+        //~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
+        //~ bool dZ_expo2 = false;
+        //~ for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
+        //~ {
+                //~ if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
+                //~ {
+                        //~ Hcand.erase(Hcand.begin()+i);
+                        //~ Hcand.erase(Hcand.begin()+i);
+                        //~ i-=2;
+                        //~ if(Hcand.size()==0) i= Hcand.size();
+                //~ }else dZ_expo2=true;
+        //~ }
+        //~ dZ_expo=dZ_expo && dZ_expo2;
+		//~ if(!dZ_expo)
+		//~ {
+			//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
+			//~ return;
+		//~ }
+      //~ }
 
         if(!switchToFakeRate){
 	h_cut_flow->Fill(8,1);
@@ -2434,31 +2450,33 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	if(bTagVeto)
 	{
-		 if( found_event[0]) m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+		 if( found_event.size()>0) m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
 	
 	// now we have the cands
 	
-	if(signal && found_event[0]){
-		if(evt_type[pos[0]]==event_type[0] &&  fabs (mass_H[pos[0]] - Hmass[0]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
-		" H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
-		else m_logger << FATAL << "Found MISMATCH: " << 
-		" H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << " vs " << event_type[0] << " " << Hmass[0] << SLogger::endmsg;
+	if(signal && found_event.size()>0){
+		for(uint i=0; i < found_event.size(); i++){
+			if(evt_type[pos[i]]==event_type[i] &&  fabs (mass_H[pos[i]] - Hmass[i]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
+			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << SLogger::endmsg;
+			else m_logger << FATAL << "Found MISMATCH: " << 
+			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << " vs " << event_type[i] << " " << Hmass[i] << SLogger::endmsg;
+		}
 	}
-	if(signal && found_event[1]){
-		if(evt_type[pos[1]]==event_type[1] &&  fabs (mass_H[pos[1]] - Hmass[1]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
-		" H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
-		else m_logger << FATAL << "Found MISMATCH: " << 
-		" H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << " vs " << event_type[1] << " " << Hmass[1] << SLogger::endmsg;
-	}
-	if(signal && found_event[2]){
-		if(evt_type[pos[2]]==event_type[2] &&  fabs (mass_H[pos[2]] - Hmass[2]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
-		" H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
-		else m_logger << FATAL << "Found MISMATCH: " << 
-		" H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << " vs " << event_type[2] << " " << Hmass[2] << SLogger::endmsg;
-	}
+	//~ if(signal && found_event[1]){
+		//~ if(evt_type[pos[1]]==event_type[1] &&  fabs (mass_H[pos[1]] - Hmass[1]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
+		//~ " H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
+		//~ else m_logger << FATAL << "Found MISMATCH: " << 
+		//~ " H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << " vs " << event_type[1] << " " << Hmass[1] << SLogger::endmsg;
+	//~ }
+	//~ if(signal && found_event[2]){
+		//~ if(evt_type[pos[2]]==event_type[2] &&  fabs (mass_H[pos[2]] - Hmass[2]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
+		//~ " H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
+		//~ else m_logger << FATAL << "Found MISMATCH: " << 
+		//~ " H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << " vs " << event_type[2] << " " << Hmass[2] << SLogger::endmsg;
+	//~ }
 
 	h_cut_flow->Fill(9,1);
 	h_cut_flow_weight->Fill(9,weight);
@@ -2675,7 +2693,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 	}else  Hist( "h_event_type" )->Fill(Event_type,weight); // blinding 
 
-		if( found_event[0] && Event_type!=evt_type[pos[0]]) {
+		if( found_event.size()>0 && Event_type!=evt_type[pos[0]]) {
 	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << Event_type << SLogger::endmsg;
   }
 
@@ -3105,12 +3123,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         Hist("h_deltaR_max")->Fill(maxDR);
         Hist("h_deltaR_min")->Fill(minDR);
         
-    	if( found_event[0] && Event_type!=evt_type[pos[0]]) {
+    	if( found_event.size()>0 && Event_type!=evt_type[pos[0]]) {
 	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << Event_type << SLogger::endmsg;
   }
     
     
-    if (!found_event[0] && signal){
+    if (found_event.size()==0 && signal){
 	 	  m_logger << ERROR << " My plus of type " << Event_type << SLogger::endmsg;
 		TLorentzVector Zvector;
 		TLorentzVector Hvector;
