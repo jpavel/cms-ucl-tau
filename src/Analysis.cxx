@@ -1256,8 +1256,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         GoodToDenomElectron_assoc_index.clear();
 
 	std::vector<myobject> electron = m->PreSelectedElectrons;
-	//m_logger << DEBUG << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
-
+	if(examineThisEvent) std::cout << " There are " << electron.size() << " preselected electrons " << std::endl;
+	
 	for (uint i = 0; i < electron.size(); i++) {
 
 		double elPt = electron[i].pt;
@@ -1279,11 +1279,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				denomElectron.push_back(electron[i]);
                 }
 	}
+	
 
 	//m_logger << DEBUG << " There are " << goodElectron.size() << " good electrons " << " and " << GoodToDenomElectron_assoc_index.size() << " goodToDenom eles " << SLogger::endmsg;
 	//m_logger << DEBUG << " There are " << denomElectron.size() << " denom electrons " << " and " << DenomToGoodElectron_assoc_index.size() << "denomToGood eles " << SLogger::endmsg;
 	int muCandZ = goodMuon.size();
 	int elCandZ = goodElectron.size();
+	if(examineThisEvent) std::cout << " There are " << elCandZ << " good electrons and " << denomElectron.size() << " denom electrons" << std::endl;
+	
+	
 	Hist("h_n_goodEl")->Fill(goodElectron.size(),PUWeight);
 	// Z compatibility
 	std::vector<myobject> Zcand;
@@ -1518,7 +1522,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,Z_weight);
 
 	// Z overlap removal
-
+	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denom electrons before Zremoval" << std::endl;
+	
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		bool removed = false;
@@ -1564,16 +1569,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			{	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
 		}
 
-		for(uint j = 0; j < denomMuon.size() && !removed; j++)
-		{
-			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
-			{	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-		}
+		//~ for(uint j = 0; j < denomMuon.size() && !removed; j++)
+		//~ {
+			//~ if(examineThisEvent) std::cout << " distance of electron to muon is " << deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
+			//~ if(examineThisEvent) std::cout << " Is Mu good? " << isGoodMu(denomMuon[j]) << std::endl;
+			//~ if(examineThisEvent) std::cout << " Mu iso is " << RelIsoMu(denomMuon[j]) << std::endl;
+			//~ 
+			//~ if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && isGoodMu(denomMuon[j])) 
+			//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
+		//~ }
 	}
 
 	//m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
- 
+    if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denom electrons after Zremoval" << std::endl;
+	
         //generic vector definitions for MUONS and ELECTRONS
 	std::vector<myobject> genericMuon;
         genericMuon.clear();
@@ -2055,7 +2065,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
-		if(Hcand_type[i]==7 || Hcand_type[i]==3){
+		if(Hcand_type[i]==5 || Hcand_type[i]==3){
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
 		
@@ -2069,7 +2079,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
-		if(Hcand_type[i]==5 || Hcand_type[i]==1){
+		if(Hcand_type[i]==7 || Hcand_type[i]==1){
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
 		
