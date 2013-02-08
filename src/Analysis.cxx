@@ -947,8 +947,9 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 			if(verbose) std::cout << " Mu cand no. " << i << std::endl;
 			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
 			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << isGoodMu(genericMuon[i]) << std::endl;
 			
-			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
+			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodMu(genericMuon[i]) &&
 				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR ) 
 			Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
@@ -961,15 +962,17 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
 			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
 			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << isGoodEl(genericElectron[i]) << std::endl;
+			
 	
-	
-			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR &&
+			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodEl(genericElectron[i]) &&
 				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR )  
 			Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
 	}
 	
-	
+	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
 	return Ad_lepton;
 }
 
@@ -1282,19 +1285,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Zmucand=Zelcand=false;
 	double dMass=999.0;
 	int Zindex[2] = {-1,-1};
+	if(examineThisEvent) std::cout << "Finding Z out of " << goodMuon.size() << " muons " << std::endl;
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
+		if(examineThisEvent) std::cout << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << std::endl;
 		if(Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.3) continue;
+		if(examineThisEvent) std::cout << "  -> Passed pre-selection " << std::endl;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
 			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
-
+			if(examineThisEvent) std::cout << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << std::endl;
 			if(RelIsoMu(goodMuon[j]) > 0.3) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
 			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR) continue;
-
+			if(examineThisEvent) std::cout << " Passed pre-selection " << std::endl;
+			
 			TLorentzVector cand;
 			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
 					goodMuon[i].py+goodMuon[j].py,
@@ -1302,7 +1309,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
 			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-			if(mass > 80. && mass < 100.){
+			if(examineThisEvent) std::cout << " mass " << mass << std::endl;
+			
+			if(mass > 60. && mass < 120.){
 				Zmumu=true;
 				double dM = 999.;
 				if(BestMassForZ > 0.0){
@@ -1489,6 +1498,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Z mass is " << Zmass << std::endl;
 	}
 	else{
+		if(examineThisEvent) std::cout << "No Z cand!" << std::endl;
 			return;
 	}
 	
@@ -1642,7 +1652,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
 	
-	for(uint i = 0; i < genericMuon.size() && !muTau; i++)
+	for(uint i = 0; i < genericMuon.size() ; i++)
 	{
 
 		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
@@ -1697,12 +1707,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 		if(!switchToFakeRate){		
 			if(!checkCategories && !iso1_muTau) continue;}
-		for(uint j=0; j< goodTau.size() && !muTau && WZ_Rej(m,genericMuon[i]); j++)
+		for(uint j=0; j< goodTau.size() && WZ_Rej(m,genericMuon[i]); j++)
 		{
                         //the following switch could be also omitted
                         //since in the case of switchToFakeRate && UseSumPtCut
                         //Cut_leptau_sumPt is 0
-			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << std::endl;
+			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
+			if(examineThisEvent){
+				TLorentzVector ele1;
+				TLorentzVector tau2;
+				TLorentzVector H_; 
+				ele1.SetPxPyPzE(genericMuon[i].px,genericMuon[i].py,genericMuon[i].pz,genericMuon[i].E);        
+				tau2.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);        
+				H_=ele1+tau2;
+				std::cout << " H candidate mass is " << H_.M() << std::endl;
+			}
+			
 			
 			if(!switchToFakeRate){
 				if(UseSumPtCut && genericMuon[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;}			
@@ -1721,7 +1741,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			//~ else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
 			//~ else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
 			//~ else if (!switchToFakeRate && !iso1_muTau && !iso2 && category < 0){ category = 0; muE=false; muTau=true;}
-			else continue;
+			//else continue;
 			if(!switchToFakeRate){
 				Hindex[0]=i;
 				Hindex[1]=j;
@@ -1811,6 +1831,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; eTau=true;}
 			if(switchToFakeRate && signal){
+				if(examineThisEvent) std::cout << "PASSED!" << std::endl;
 				Hcand.push_back(genericElectron[i]);
 				Hcand.push_back(goodTau[j]);
 				if(Zmumu) Hcand_type.push_back(3);
@@ -1893,12 +1914,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
-			if(AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j])){
+			bool verb=false;
+			if(examineThisEvent) verb=true;
+			
+			if(AdLepton(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j],verb)){
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
-			bool verb=false;
-			if(examineThisEvent) verb=true;
 			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
 			if (switchToFakeRate){ signal = true; tauTau=true;}
 			if(switchToFakeRate && signal){
@@ -1919,7 +1941,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 				// sync begin
 		if( found_event[0]){
-				 m_logger << ERROR << " MISSED H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
+				 m_logger << FATAL << " MISSED H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
 				 m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
 				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
 				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
@@ -2001,11 +2023,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	event_type.clear();
 	Hmass.clear();
 	
-	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << Hcand_type[0] << Hcand_type[1] << std::endl;
+	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << Hcand_type[0] << std::endl;
 	
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
-		if(Hcand_type[i]==4){
+		if(Hcand_type[i]==8 || Hcand_type[i]==4){
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
 		
@@ -2016,70 +2038,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hmass.push_back(mass);
 		}
 	}
-	if(examineThisEvent) std::cout << "First : " << event_type[0] << " " << Hmass[0] << std::endl;
-	if(examineThisEvent) std::cout << "Second : " << event_type[1] << " " << Hmass[1] << std::endl;
+//	if(examineThisEvent) std::cout << "First : " << event_type[0] << " " << Hmass[0] << std::endl;
 	
-	
-	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==3 || Hcand_type[i]==7);i++)
+	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
-		//if(Hcand_type[i]!=3 || Hcand_type[i]!=7) continue;
+		if(Hcand_type[i]==7 || Hcand_type[i]==3){
+		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
+		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
+		
+		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
+		}
 	}
 	
-	for(uint i=0; i< Hcand_type.size() && (Hcand_type[i]==1 || Hcand_type[i]==5);i++)
+	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
-		//if(Hcand_type[i]!=1 || Hcand_type[i]!=5) continue;
+		if(Hcand_type[i]==5 || Hcand_type[i]==1){
+		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
+		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
+		
+		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
+		}
 	}
-	
-	//~ for(uint i=0; i< Hcand.size()/2; i++)
-	//~ {	
-		//~ Hmass[i]=PairMass(Hcand[Hcand.size()-1-2*i],Hcand[Hcand.size()-2-2*i]);
-	//~ }
-
-	//~ if(Zmumu)
-	//~ {
-		//~ if(tauTau){
-			//~ event_type[0]=4;
-			//~ if(eTau){
-				//~ event_type[1]=3;
-				//~ if(muTau) event_type[2]=1;
-				//~ 
-			//~ }else{
-				//~ if(muTau) event_type[1]=1;
-				//~ 
-			//~ }
-		//~ }else{
-			//~ if(eTau){
-				//~ event_type[0]=3;
-				//~ if(muTau) event_type[1]=1;
-				//~ 
-			//~ }else{
-				//~ if(muTau) event_type[0]=1;
-			//~ }
-		//~ }
-	//~ }else if(Zee){
-		//~ if(tauTau){
-			//~ event_type[0]=8;
-			//~ if(eTau){
-				//~ event_type[1]=7;
-				//~ if(muTau) event_type[2]=5;
-			//~ }else{
-				//~ if(muTau) event_type[1]=5;
-			//~ }
-		//~ }else{
-			//~ if(eTau){
-				//~ event_type[0]=7;
-				//~ if(muTau) event_type[1]=5;
-			//~ }else{
-				//~ if(muTau) event_type[0]=5;
-			//~ }
-		//~ }
-	//~ }
 		
 		
 	
