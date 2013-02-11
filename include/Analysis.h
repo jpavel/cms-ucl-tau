@@ -67,6 +67,7 @@ public:
    double deltaR(double eta1, double phi1, double eta2, double phi2);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
+   bool AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    double PairMass(myobject Hcand1, myobject Hcand2);	
    bool DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose=false);
 	
@@ -310,6 +311,7 @@ private:
 	std::string InTreeName;
 	double Ptcut;
 	double maxDeltaR;
+	double maxDeltaR_H;
 	double BestMassForZ;
 	double dZvertex;
 	double bTagValue;

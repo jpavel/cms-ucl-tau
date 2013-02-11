@@ -16,6 +16,7 @@ Analysis::Analysis()
 		SetLogName( GetName() );
 		DeclareProperty("InTreeName",InTreeName);
 		DeclareProperty("maxDeltaR",maxDeltaR);
+		DeclareProperty("maxDeltaR_H",maxDeltaR_H);
 		DeclareProperty("MyPtCut",Ptcut);
 		DeclareProperty("BestMassForZ",BestMassForZ);
 		DeclareProperty("dZvertex", dZvertex);
@@ -978,6 +979,46 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	return Ad_lepton;
 }
 
+bool Analysis::AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2,bool verbose){
+	bool Ad_lepton=false;
+	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
+	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
+	for(uint i = 0; i < genericMuon.size(); i++)
+	{   
+			if(verbose) std::cout << " Mu cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << isGoodMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoMu(genericMuon[i]) << std::endl;
+	
+			
+			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodMu(genericMuon[i]) &&
+				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR ) 
+			Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   
+    }
+	 if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	
+	for(uint i = 0; i < genericElectron.size(); i++)
+	{   
+			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << isGoodEl(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
+	
+			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isGoodEl(genericElectron[i]) &&
+				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR )  
+			Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   
+	}
+	
+	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
+	return Ad_lepton;
+}
+
 bool Analysis::DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose)
 {
 	if(verbose) std::cout << "  > Distances are: " <<  fabs(Zcand1.z_expo - Zcand2.z_expo) << " " << fabs(Zcand1.z_expo - Hcand1.z_expo) <<
@@ -985,7 +1026,7 @@ bool Analysis::DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobje
 					" " << fabs(Zcand2.z_expo - Hcand2.z_expo) << " " << fabs(Hcand1.z_expo - Hcand2.z_expo) << std::endl;
 					
 	bool dZ_expo = (fabs(Zcand1.z_expo - Zcand2.z_expo) < dZvertex && fabs(Zcand1.z_expo - Hcand1.z_expo) < dZvertex 
-					&& fabs(Zcand1.z_expo - Hcand2.z_expo) < dZvertex && fabs(Zcand2.z_expo - Hcand1.z_expo) < dZvertex );
+					&& fabs(Zcand1.z_expo - Hcand2.z_expo) < dZvertex );//&& fabs(Zcand2.z_expo - Hcand1.z_expo) < dZvertex );
 				//	&& fabs(Zcand2.z_expo - Hcand2.z_expo) < dZvertex);// && fabs(Hcand1.z_expo - Hcand2.z_expo) < dZvertex);
     
     if(!dZ_expo && verbose) std::cout << "FAILED same vertex cut!" << std::endl;
@@ -1636,20 +1677,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		               {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 		}
 		
-		//~ for(uint j = 0; j < genericMuon.size() && !removed; j++)
-		//~ {    
-			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR 	 ) 
-				//~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		        //~ 
-        //~ }
-//~ 
-		//~ for(uint j = 0; j < genericElectron.size() && !removed; j++)
-		//~ {
-                        //~ 
-			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR ) 
-				//~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		        //~ 
-        //~ }
+			for(uint j = 0; j < genericMuon.size() && !removed; j++)
+			{    
+				if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR && isGoodMu(genericMuon[j]) 	 ) 
+					{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+					
+			}
+	
+			for(uint j = 0; j < genericElectron.size() && !removed; j++)
+			{
+							
+				if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR && isGoodEl(genericElectron[j]) ) 
+					{goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+					
+			}
 	}
 	}
 
@@ -1753,7 +1794,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(genericMuon[i].charge*goodTau[j].charge >= 0) continue;
 			}
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;  
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR_H) continue;  
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
 			//~ else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
@@ -1794,10 +1835,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
 					if(!switchToFakeRate){		
 		if (!iso1 && !checkCategories) continue;}
-					if(switchToFakeRate){		
-		if(genericElectron[i].numLostHitEleInner > 1) continue;}
-					else{
-		if(genericElectron[i].numLostHitEleInner > 0) continue;}
+		if(genericElectron[i].numLostHitEleInner > 0) continue;
 		m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
 		
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
@@ -1826,7 +1864,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(genericElectron[i].charge*goodTau[j].charge >= 0) continue;
 							}
 			if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR_H) continue;
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			if (!WZ_Rej(m,genericElectron[i])) continue;
@@ -1916,7 +1954,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
 		
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR_H) continue;
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
 			
 			//~ else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;

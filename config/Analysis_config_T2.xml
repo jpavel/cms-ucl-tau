@@ -71,8 +71,10 @@
 		<Item Name="Cut_leplep_sumPt" Value="30" />  
 		
 		<Item Name="printoutEvents" Value="true" />
-		<Item Name="maxDeltaR" Value="0.3" />            
-                <Item Name="examineEvent" Value="46286691" />
+		<Item Name="maxDeltaR" Value="0.1" />            
+        <Item Name="maxDeltaR_H" Value="0.3" />            
+        
+                <Item Name="examineEvent" Value="" />
                 <Item Name="removeTauOverlap" Value="true" />
                       
 		</UserConfig>
