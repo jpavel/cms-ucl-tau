@@ -72,7 +72,7 @@
 		
 		<Item Name="printoutEvents" Value="true" />
 		<Item Name="maxDeltaR" Value="0.3" />            
-                <Item Name="examineEvent" Value="" />
+                <Item Name="examineEvent" Value="46286691" />
                 <Item Name="removeTauOverlap" Value="true" />
                       
 		</UserConfig>
