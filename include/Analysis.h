@@ -167,6 +167,7 @@ private:
         TH1* h_event_type;
         TH1* h_event_type_raw;
         TH1* h_event_type_medium;
+        TH1* h_event_type_loose;
         TH1* h_event_type_tight;
         TH1* h_mu1Z_pt;
         TH1* h_mu2Z_pt;
@@ -267,15 +268,19 @@ private:
 	TH1*  h_denom;
 
 	std::vector<TH1*>  h_denom_types;
+	std::vector<TH1*>  h_loose_types;
 	std::vector<TH1*>  h_medium_types;
 	std::vector<TH1*>  h_tight_types;
 	std::vector<TH1*>  h_denom_types_eta;
+	std::vector<TH1*>  h_loose_types_eta;
 	std::vector<TH1*>  h_medium_types_eta;
 	std::vector<TH1*>  h_tight_types_eta;
 	std::vector<TH1*>  h_denom_types_centralEtaRegion;
+	std::vector<TH1*>  h_loose_types_centralEtaRegion;
 	std::vector<TH1*>  h_medium_types_centralEtaRegion;
 	std::vector<TH1*>  h_tight_types_centralEtaRegion;
 	std::vector<TH1*>  h_denom_types_externalEtaRegion;
+	std::vector<TH1*>  h_loose_types_externalEtaRegion;
 	std::vector<TH1*>  h_medium_types_externalEtaRegion;
 	std::vector<TH1*>  h_tight_types_externalEtaRegion;
 

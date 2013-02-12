@@ -3,7 +3,6 @@
 -->
 
 
-<!--
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1000_1_07f.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1001_1_P7W.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_100_1_btJ.root" Lumi="1.0" />
@@ -28,7 +27,6 @@
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1018_2_X6c.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1019_1_lRY.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_10_1_fUx.root" Lumi="1.0" />
--->
 <!--
 This is it!
 -->
