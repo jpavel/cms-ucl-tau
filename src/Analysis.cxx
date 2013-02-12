@@ -1112,23 +1112,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
 		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
 
-        if(switchToFakeRate && UseSumPtCut){
         Cut_tau_base_Pt  = 0;
         Cut_tautau_sumPt = 0;
         Cut_leptau_sumPt = 0;
         Cut_leplep_sumPt = 0;
-	}
-        else if(!switchToFakeRate && UseSumPtCut){
-        Cut_tau_base_Pt  = 20;
-        Cut_tautau_sumPt = 60;
-        Cut_leptau_sumPt = 45;
-        Cut_leplep_sumPt = 30;
-	}
-	if(!switchToFakeRate){	
-		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=20;
-		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=20;
-		if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=20;
-	    }
+	
+	
 
 	double PUWeight = 1.0;
 	double nPU = 0.0;
@@ -1151,17 +1140,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		pos.push_back(pos_helper);
 		pos_helper = std::find(evt_number.begin()+pos[i]+1, evt_number.end(), eNumber) - evt_number.begin();
 	}
-	//~ pos[1] = std::find(evt_number.begin()+pos[0]+1, evt_number.end(), eNumber) - evt_number.begin();
-	//~ if( pos[1] < evt_number.size()  )
-	//~ {
-		//~ found_event[1] = true;
-	//~ }
-	//~ pos[2] = std::find(evt_number.begin()+pos[1]+1, evt_number.end(), eNumber) - evt_number.begin();
-	//~ 
-	//~ if( pos[2] < evt_number.size()  )
-	//~ {
-		//~ found_event[2] = true;
-	//~ }
+	
 	if(found_event.size()!=pos.size()) m_logger << FATAL << "Sync info reading mismatch" << SLogger::endmsg; // sync
 	uint pos_l=0,pos_t=0;
 	if(found_event.size()>0)
@@ -1232,9 +1211,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < found_event.size(); i++){
 		if(found_event[i]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[i]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
 	}
-	//~ if(found_event[1]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[1]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
-	//~ if(found_event[2]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[2]] << " loose/medium/tight: " << isLoose << "/" << isMedium << "/" << isTight << SLogger::endmsg; // sync
-	//~ 
+	
 	h_cut_flow->Fill(1,1);
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
@@ -1322,8 +1299,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 
-	//m_logger << DEBUG << " There are " << goodElectron.size() << " good electrons " << " and " << GoodToDenomElectron_assoc_index.size() << " goodToDenom eles " << SLogger::endmsg;
-	//m_logger << DEBUG << " There are " << denomElectron.size() << " denom electrons " << " and " << DenomToGoodElectron_assoc_index.size() << "denomToGood eles " << SLogger::endmsg;
 	int muCandZ = goodMuon.size();
 	int elCandZ = goodElectron.size();
 	if(examineThisEvent) std::cout << " There are " << elCandZ << " good electrons and " << denomElectron.size() << " denom electrons" << std::endl;
@@ -1413,7 +1388,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint i = 0; i < goodElectron.size(); i++)
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
-			//if( goodElectron[i].pt < 20 || 
 			if(Zee) continue;
 			if(RelIsoEl(goodElectron[i]) > 0.3) continue;
 			for(uint j = i+1; j < goodElectron.size() && !Zee; j++)
@@ -1667,7 +1641,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 
         //check the overlap
-	if(removeTauOverlap){
 	for(uint i = 0; i < goodTau.size(); i++)
 	{
 		bool removed = false;
@@ -1692,7 +1665,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					
 			}
 	}
-	}
+	
 
 	int tauCand = 	goodTau.size();
 	if(examineThisEvent) std::cout << " There are " << tauCand << " tau candidates " << std::endl;
@@ -1704,7 +1677,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool muE = false;
 	bool signal = false;
 	short category = -1;       
-	int Hindex[2] = {-1,-1};
 	std::vector<myobject> Hcand;
 	std::vector<int> Hcand_type;
 	Hcand.clear();
@@ -1717,61 +1689,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
 	
-		double relIso = RelIsoMu(genericMuon[i]);
-		bool iso1_muE = (relIso < 0.3);
-		bool iso1_muTau = (relIso < 0.15);
-                
-		if(!switchToFakeRate){		
-			if(!checkCategories && !iso1_muE) continue;}
-			if(examineThisEvent) std::cout << " Checking electrons " << std::endl;
 	
-		if(!switchToFakeRate){
-		for(uint j=0; j < genericElectron.size() && !signal; j++)
-		{
-                        //the following switch could be also omitted
-                        //since in the case of switchToFakeRate && UseSumPtCut
-                        //Cut_leplep_sumPt is 0
-            if(examineThisEvent) std::cout << " electron no " << j << std::endl;
-	            
-			if(!switchToFakeRate){
-				if(UseSumPtCut && genericMuon[i].pt+genericElectron[j].pt < Cut_leplep_sumPt) continue;}
-			bool iso2 = (RelIsoEl(genericElectron[j]) < 0.3);
-			if(switchToFakeRate){
-				if(genericMuon[i].charge*genericElectron[j].charge < 0) continue; 
-			}
-			else{ 
-				if(genericMuon[i].charge*genericElectron[j].charge >= 0) continue;
-			} 
-			if(deltaR(genericElectron[j].eta,genericElectron[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;
-
-			if (switchToFakeRate){ signal = true; muE=true; muTau = false;}
-			else if (!switchToFakeRate && iso1_muE && iso2){ signal = true; muE=true; muTau = false;}
-			else if (!switchToFakeRate && !iso1_muE && iso2  && category < 1){ category = 2; muE=true; muTau = false;}
-			else if (!switchToFakeRate && iso1_muE && !iso2 && category < 1){ category = 1; muE=true; muTau = false;} 
-			else if (!switchToFakeRate && !iso1_muE && !iso2 && category < 0){ category = 0; muE=true; muTau = false;}
-			else continue;
-			Hindex[0]=i;
-			Hindex[1]=j;
-			if(signal && AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],genericElectron[j])){ signal=false; muE=false;}
-			bool verb=false;
-			if(examineThisEvent) verb=true;
-			if(signal && !DZ_expo(Zcand[0],Zcand[1],genericMuon[i],genericElectron[j], verb)) { signal=false; muE=false;}
-
-		}
-		}
-		
-		
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
 		if(examineThisEvent) std::cout << " Checking mutau " << std::endl;
 		if(examineThisEvent) std::cout << " Mu candidate i= " << i << " " << genericMuon[i].pt << std::endl;
 			
-		if(!switchToFakeRate){		
-			if(!checkCategories && !iso1_muTau) continue;}
 		for(uint j=0; j< goodTau.size() && WZ_Rej(m,genericMuon[i]); j++)
 		{
-                        //the following switch could be also omitted
-                        //since in the case of switchToFakeRate && UseSumPtCut
-                        //Cut_leptau_sumPt is 0
+                       
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent){
 				TLorentzVector ele1;
@@ -1783,46 +1708,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				std::cout << " H candidate mass is " << H_.M() << std::endl;
 			}
 			
-			
-			if(!switchToFakeRate){
-				if(UseSumPtCut && genericMuon[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;}			
-			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
-			if(switchToFakeRate){	
-				if(genericMuon[i].charge*goodTau[j].charge < 0) continue;
-			}
-			else{
-				if(genericMuon[i].charge*goodTau[j].charge >= 0) continue;
-			}
+			if(genericMuon[i].charge*goodTau[j].charge < 0) continue;
 			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR_H) continue;  
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
-			//~ else if (!switchToFakeRate && iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
-			//~ else if (!switchToFakeRate && !iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
-			//~ else if (!switchToFakeRate && iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
-			//~ else if (!switchToFakeRate && !iso1_muTau && !iso2 && category < 0){ category = 0; muE=false; muTau=true;}
-			//else continue;
-			if(!switchToFakeRate){
-				Hindex[0]=i;
-				Hindex[1]=j;
-			}
 			if(AdLepton(genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j])){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
 				continue;}
-				bool verb=false;
-				if(examineThisEvent) verb=true;
-				if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) { continue;}
-				if (switchToFakeRate){ signal = true; muTau=true;}
-				if(switchToFakeRate && signal){
-				Hcand.push_back(genericMuon[i]);
-				Hcand.push_back(goodTau[j]);
-				if(Zmumu) Hcand_type.push_back(1);
-				else if(Zee) Hcand_type.push_back(5);
-			}
+			bool verb=false;
+			if(examineThisEvent) verb=true;
+			if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) continue;
+			signal = true; 
+			muTau=true;
+			Hcand.push_back(genericMuon[i]);
+			Hcand.push_back(goodTau[j]);
+			if(Zmumu) Hcand_type.push_back(1);
+			else if(Zee) Hcand_type.push_back(5);
+			
 		}             
 	}
 
-	//if(signal && AdLepton(genericMuon,genericElectron,Hcand)) signal=false;
 	if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
@@ -1832,12 +1738,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < genericElectron.size() ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
-		bool iso1 = (RelIsoEl(genericElectron[i]) < 0.1);
-					if(!switchToFakeRate){		
-		if (!iso1 && !checkCategories) continue;}
+		
 		if(genericElectron[i].numLostHitEleInner > 0) continue;
 		m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
-		
+		if (!WZ_Rej(m,genericElectron[i])) continue;
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
 		for(uint j=0; j< goodTau.size(); j++)
 		{
@@ -1851,49 +1755,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				H_=ele1+tau2;
 				std::cout << " H candidate mass is " << H_.M() << std::endl;
 			}
-			//the following switch could be also omitted
-			//since in the case of switchToFakeRate && UseSumPtCut
-			//Cut_leptau_sumPt is 0
-						 if(!switchToFakeRate){
-			if(UseSumPtCut && genericElectron[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;}
-			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
-			if(switchToFakeRate){	
 			if(genericElectron[i].charge*goodTau[j].charge < 0) continue;
-			}
-							else{
-			if(genericElectron[i].charge*goodTau[j].charge >= 0) continue;
-							}
 			if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR_H) continue;
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
-			if (!WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
-			//~ else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
-			//~ else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
-			//~ else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
-			//~ else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
-			//~ else continue;
-			if(!switchToFakeRate){
-				Hindex[0]=i;
-				Hindex[1]=j;
-			}
+			
 			bool verb = false;
 			if(examineThisEvent) verb = true;
 			if(AdLepton(genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
-				}
-			if(examineThisEvent) verb=true;
-			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) { continue;}
-			if (switchToFakeRate){ signal = true; eTau=true;}
-			if(switchToFakeRate && signal){
-				if(examineThisEvent) std::cout << "PASSED!" << std::endl;
-				Hcand.push_back(genericElectron[i]);
-				Hcand.push_back(goodTau[j]);
-				if(Zmumu) Hcand_type.push_back(3);
-				else if(Zee) Hcand_type.push_back(7);
 			}
+			if(examineThisEvent) verb=true;
+			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) continue;
+			signal = true; 
+			eTau=true;
+			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
+			Hcand.push_back(genericElectron[i]);
+			Hcand.push_back(goodTau[j]);
+			if(Zmumu) Hcand_type.push_back(3);
+			else if(Zee) Hcand_type.push_back(7);
+		
 		}
 	}
 	
@@ -1908,17 +1792,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i = 0; i < goodTau.size() && !tauTau ; i++)
 	{
 		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
-		if(switchToFakeRate){
-					  if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
-		}
-		else{
-					if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
-		}
+		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
+				
 		if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 		if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
-		bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
-					if(!switchToFakeRate){		
-		if(!checkCategories && !iso1) continue;}
 		if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
 		for(uint j=i+1; j< goodTau.size() && !tauTau; j++)
 		{
@@ -1933,44 +1810,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				std::cout << " H candidate mass is " << H_.M() << std::endl;
 			}
 			
-			
-			if(switchToFakeRate){
-				 if(goodTau[j].pt < Cut_tautau_Pt_2) continue;
-			}
-			else{
-				if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
-				if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
-			}
+			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
+			if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
 			
-			if(switchToFakeRate){
-				if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
-			}
-			else{
-				if(goodTau[i].charge*goodTau[j].charge >= 0) continue;
-			}
 			if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 			if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
 		
-			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR_H) continue;
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
 			
-			//~ else if (!switchToFakeRate && iso1 && iso2){ signal = true; muTau=muE=eTau=false; tauTau=true;
-			//~ }
-			//~ else if (!switchToFakeRate && !iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;
-			//~ }
-			//~ else if (!switchToFakeRate && iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;
-			//~ }
-			//~ else if (!switchToFakeRate && !iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;
-			//~ }
-			//~ else continue;
-			if(!switchToFakeRate)
-			{
-				Hindex[0]=i;
-				Hindex[1]=j;
-			}
 			bool verb=false;
 			if(examineThisEvent) verb=true;
 			
@@ -1978,21 +1828,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
-			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) { continue;}
-			if (switchToFakeRate){ signal = true; tauTau=true;}
-			if(switchToFakeRate && signal){
-				Hcand.push_back(goodTau[i]);
-				Hcand.push_back(goodTau[j]);
-				if(Zmumu) Hcand_type.push_back(4);
-				else if(Zee) Hcand_type.push_back(8);
-			}
+			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 
+			signal = true; tauTau=true;
+			Hcand.push_back(goodTau[i]);
+			Hcand.push_back(goodTau[j]);
+			if(Zmumu) Hcand_type.push_back(4);
+			else if(Zee) Hcand_type.push_back(8);
 			m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
 			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
 
 		}
 	}
 	
-	if(examineThisEvent) std::cout << Hindex[0] <<  Hindex[1] << " " << muTau << muE << eTau << tauTau << std::endl;
+	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
 	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
@@ -2002,44 +1850,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
 				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
 				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
-				 //~ if(evt_type[pos[0]]==7)
-				 //~ {
-					 //~ TLorentzVector eH_eTau,tauH_eTau,H_eTau;
-                                                //~ eH_eTau.SetPxPyPzE(goodElectron[0].px,goodElectron[0].py,goodElectron[0].pz,goodElectron[0].E);
-                                                //~ tauH_eTau.SetPxPyPzE(goodTau[0].px,goodTau[0].py,goodTau[0].pz,goodTau[0].E);
-                                                //~ H_eTau = eH_eTau+tauH_eTau;
-					//~ m_logger << WARNING << " My mass " << H_eTau.M() << SLogger::endmsg;
-					//~ m_logger << WARNING << "Z is made from " << Zindex[0] << " and " << Zindex[1] << SLogger::endmsg;
-					//~ for(uint i = 0; i < electron.size() && !eTau ; i++)
-                        //~ {
-						//~ 
-                            //~ double relIso = RelIsoEl(electron[i]);
-                            //~ m_logger << WARNING << " good el. no " << i << " relIso " << relIso << " hits " << electron[i].numLostHitEleInner << 
-                            //~ " charge " << electron[i].charge << SLogger::endmsg;
-                            //~ if (relIso > 0.25){m_logger << WARNING << " rej iso"  << SLogger::endmsg; continue;}
-                            //~ if(relIso < 0.10 && electron[i].numLostHitEleInner < 1)
-                            //~ {
-                                //~ m_logger << WARNING << " Checking for eTau " << SLogger::endmsg;	
-                                //~ for(uint j=0; j< goodTau.size() && !muTau; j++)
-                                //~ {
-                                     //~ m_logger << WARNING << " good tau no. " << j << " MVA " << goodTau[j].discriminationByElectronMVA << " hits " << 
-                            //~ " charge " << goodTau[i].charge << " delta R " <<
-                            //~ deltaR(goodTau[j].eta,goodTau[j].phi,electron[i].eta,electron[i].phi) << SLogger::endmsg;
-                            //~ TLorentzVector eH,tauH,H_m;
-                                                //~ eH.SetPxPyPzE(electron[i].px,electron[i].py,electron[i].pz,electron[i].E);
-                                                //~ tauH.SetPxPyPzE(goodTau[j].px,goodTau[j].py,goodTau[j].pz,goodTau[j].E);
-                                                //~ H_m = eH+tauH;
-								//~ m_logger << WARNING << " My mass " << H_m.M() << SLogger::endmsg;
-                                    //~ if(electron[i].charge*goodTau[j].charge >=0) continue;
-                                    //~ if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
-                                    //~ if(deltaR(goodTau[j].eta,goodTau[j].phi,electron[i].eta,electron[i].phi)< 0.3) continue;
-									//~ eTau=true;
-								//~ }
-							//~ }
-						//~ }
-				 //~ 
-				 //~ 
-				 //~ }
+				 
 				 
 			 }
 		// sync end
@@ -2051,26 +1862,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(found_event[i]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << SLogger::endmsg;
 		
 		}
-		//~ if(found_event[1]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
-		//~ if(found_event[2]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
+		
 	}
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
 	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,Z_weight);
 
 
-	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
 	// cross-check
 	h_cut_flow->Fill(4,1);
 	h_cut_flow_weight->Fill(4,Z_weight);
 	
-	//~ if(muTau+muE+eTau+tauTau > 1){
-		//~ m_logger << ERROR << "Non-exclusive event type!! Aborting." << SLogger::endmsg;
-		//~ m_logger << ERROR << muTau << muE << eTau << tauTau << " " << eNumber << SLogger::endmsg;			 
-		//~ return;
-	//~ }
-
-	h_cut_flow->Fill(5,1);
+		h_cut_flow->Fill(5,1);
 	h_cut_flow_weight->Fill(5,Z_weight);
 
 	m_logger << DEBUG << " muTau " << muTau << SLogger::endmsg;
@@ -2078,7 +1881,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " eTau " << eTau << SLogger::endmsg;
 	m_logger << DEBUG << " tauTau " << tauTau << SLogger::endmsg;
 
-	//short event_type[3] = {0,0,0};
 	std::vector<int> event_type;
 	std::vector<double> Hmass;//[3] = {0.0,0.0,0.0};
 	event_type.clear();
@@ -2089,9 +1891,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
 		if(Hcand_type[i]==8 || Hcand_type[i]==4){
-		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
-		
+		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;	
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
@@ -2099,14 +1899,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hmass.push_back(mass);
 		}
 	}
-//	if(examineThisEvent) std::cout << "First : " << event_type[0] << " " << Hmass[0] << std::endl;
 	
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
 		if(Hcand_type[i]==5 || Hcand_type[i]==3){
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
-		
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
@@ -2119,8 +1916,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		if(Hcand_type[i]==7 || Hcand_type[i]==1){
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		//if(Hcand_type[i]!=4 || Hcand_type[i]!=8) continue;
-		
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
@@ -2135,8 +1930,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(event_type[i]!=evt_type[pos[i]] && found_event[i]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[i]] << " and mine is " << event_type[i] << SLogger::endmsg; 
 	
 	}
-	//~ if(event_type[1]!=evt_type[pos[1]] && found_event[1]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[1]] << " and mine is " << event_type[1] << SLogger::endmsg; 
-	//~ if(event_type[2]!=evt_type[pos[2]] && found_event[2]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[2]] << " and mine is " << event_type[2] << SLogger::endmsg; 
 	
 	// efficiency correction;
 
@@ -2210,244 +2003,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	// overlap cleaning
 
-	bool Ad_lepton = false;
-
-        //~ if(switchToFakeRate){
-	     //~ if(examineThisEvent) Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,1);
-        //~ else Ad_lepton=AdLepton(genericMuon,genericElectron,Hcand,0);    
-        //~ }
-//~ 
-        //~ else{
-	//~ for(uint i = 0; i < genericMuon.size(); i++)
-	//~ {
-		//~ if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoMu(genericMuon[i]) < 0.4) 
-			//~ Ad_lepton=true;
-	//~ }
-//~ 
-	//~ for(uint i = 0; i < genericElectron.size(); i++)
-	//~ {
-		//~ if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoEl(genericElectron[i]) < 0.4)  
-			//~ Ad_lepton=true;
-	//~ }
-	//~ if(!IgnoreAdditionalTaus){
-		//~ for(uint i = 0; i < goodTau.size(); i++)
-		//~ {
-			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
-					//~ deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
-				//~ Ad_lepton=true;
-		//~ }
-	    //~ }
-        //~ }//close else
+	
     int Event_type=event_type[0];
 		
-	if(Ad_lepton) 
-		{			
-		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
-			if( found_event.size()>0){ 
-				 m_logger << ERROR << " Premature abortion! H cand of type " << evt_type[pos[0]] << " and mine is " << event_type[0] << SLogger::endmsg;
-				  m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
-				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
-				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
-				
-				TLorentzVector H_1,H_2,H_sum;
-                                                H_1.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-                                                H_2.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-                                                H_sum = H_1 + H_2;
-				
-				m_logger << WARNING << " My mass " << H_sum.M() << " and his " << mass_H[pos[0]] << SLogger::endmsg;
-					
-				bool LooseElectron = (goodTau[0].discriminationByElectronLoose > 0.5);
-				bool LooseMuon = (goodTau[0].discriminationByMuonLoose > 0.5);
-				bool CombinedIsolation = (goodTau[0].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
-				
-				bool DecayMode = (goodTau[0].discriminationByDecayModeFinding > 0.5);
-				
-				bool HLooseElectron = (Hcand[1].discriminationByElectronLoose > 0.5);
-				bool HLooseMuon = (Hcand[1].discriminationByMuonLoose > 0.5);
-				bool HCombinedIsolation = (Hcand[1].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
-				
-				bool HDecayMode = (Hcand[1].discriminationByDecayModeFinding > 0.5);
-				TLorentzVector Zvector;
-		        TLorentzVector Hvector;
-			
-				std::cout << " -------------------------------------------------------------------------------- " << std::endl;
-		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << std::endl;;
-		switch(Event_type){
-		case 1: 
-			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] <<std::endl;                                    	
-			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-        case 2:
-            std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "El1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-		case 3: 
-			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-			std::cout << "El1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
-			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-        case 4: 
-			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-        case 5: 
-			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-        case 6:
-            std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "El3(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-		case 7: 
-			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-		    std::cout << "El3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
-		    std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-        case 8: 
-			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << " Z mass Abdollah " << mass_Z[pos[0]] << std::endl;                                    	
-			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << " H mass Abdollah " << mass_H[pos[0]] << std::endl;
-            break;
-        }
-				
-				for(uint iTau=0; iTau < goodTau.size(); iTau++){
-				 std::cout << "-->Additional tau pt " << goodTau[iTau].pt << " eta " << goodTau[iTau].eta << " phi " << goodTau[iTau].phi <<
-				  " AgainstElectronLoose " << goodTau[iTau].discriminationByElectronLoose  << " AgainstMuonLoose " << goodTau[iTau].discriminationByMuonLoose << " MediumCombinedIsolation " << goodTau[iTau].byMediumCombinedIsolationDeltaBetaCorr << 
-				  " DecayModeFinding " << goodTau[iTau].discriminationByDecayModeFinding << std::endl;
-				 }
-			 }
-
-		return;
-	}
-	
+		
 	h_cut_flow->Fill(7,1);
 	h_cut_flow_weight->Fill(7,weight);
 
-        if(!switchToFakeRate){	
-	if(signal) {h_cut_flow_signal->Fill(2,1);
-        }
-	else if (category==0) {h_cut_flow_cat0->Fill(2,1);
-        }
-	else if (category==1) {h_cut_flow_cat1->Fill(2,1);
-        }
-	else if (category==2) {h_cut_flow_cat2->Fill(2,1);
-        }
-  	if(signal){ h_cut_flow_signal_weight->Fill(2,weight);
-        }
-	else if (category==0) {h_cut_flow_cat0_weight->Fill(2,weight);
-        }
-	else if (category==1) {h_cut_flow_cat1_weight->Fill(2,weight);
-        }
-	else if (category==2) {h_cut_flow_cat2_weight->Fill(2,weight);
-        }
-	}
-	// Same vertex check
-
-        //~ if(!switchToFakeRate){
-	//~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[0].z_expo) < dZvertex && fabs(Zcand[0].z_expo - Hcand[1].z_expo) < dZvertex);		
-	//~ if(!dZ_expo)
-	//~ {
-		//~ if( found_event.size()>0) m_logger << ERROR << " Wrong vertex! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
-		//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-		//~ return;
-	//~ }
-	//~ }
-        //~ else{
-        //~ bool dZ_expo = (fabs(Zcand[0].z_expo - Zcand[1].z_expo) < dZvertex);
-        //~ bool dZ_expo2 = false;
-        //~ for(uint i = 0; i < Hcand.size() && dZ_expo; i+=2)
-        //~ {
-                //~ if((fabs(Zcand[0].z_expo - Hcand[i].z_expo) > dZvertex)||(fabs(Zcand[0].z_expo - Hcand[i+1].z_expo) > dZvertex))
-                //~ {
-                        //~ Hcand.erase(Hcand.begin()+i);
-                        //~ Hcand.erase(Hcand.begin()+i);
-                        //~ i-=2;
-                        //~ if(Hcand.size()==0) i= Hcand.size();
-                //~ }else dZ_expo2=true;
-        //~ }
-        //~ dZ_expo=dZ_expo && dZ_expo2;
-		//~ if(!dZ_expo)
-		//~ {
-			//~ m_logger << INFO << "Not from the same vertex. Aborting." << SLogger::endmsg;
-			//~ return;
-		//~ }
-      //~ }
-
-        if(!switchToFakeRate){
-	h_cut_flow->Fill(8,1);
-	h_cut_flow_weight->Fill(8,weight);
+    
 	
-	if(signal) {h_cut_flow_signal->Fill(3,1);
-        }
-	else if (category==0) {h_cut_flow_cat0->Fill(3,1);
-        }
-	else if (category==1) {h_cut_flow_cat1->Fill(3,1);
-        }
-	else if (category==2) {h_cut_flow_cat2->Fill(3,1);
-        }
-	
-	if(signal) {h_cut_flow_signal_weight->Fill(3,weight);
-        }
-	else if (category==0) {h_cut_flow_cat0_weight->Fill(3,weight);
-        }
-	else if (category==1) {h_cut_flow_cat1_weight->Fill(3,weight);
-        }
-	else if (category==2) {h_cut_flow_cat2_weight->Fill(3,weight);
-        }
-        }
 
 	// b-tag veto
 
@@ -2487,14 +2051,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 	}
-        if(!switchToFakeRate){
-	Hist("h_nbjets")->Fill(count_bJets,weight);
-	if(signal) Hist("h_nbjets_signal")->Fill(count_bJets,weight);
-	 
-	Hist("h_nbjetsVetoed")->Fill(count_bJetsVetoed,weight);
-	Hist("h_nbjets_afterVeto")->Fill(count_bJets_afterVeto,weight);
-	if(signal)Hist("h_nbjets_afterVeto_signal")->Fill(count_bJets_afterVeto,weight);
-	}
+    
 
 	if(bTagVeto)
 	{
@@ -2513,48 +2070,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << " vs " << event_type[i] << " " << Hmass[i] << SLogger::endmsg;
 		}
 	}
-	//~ if(signal && found_event[1]){
-		//~ if(evt_type[pos[1]]==event_type[1] &&  fabs (mass_H[pos[1]] - Hmass[1]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
-		//~ " H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << SLogger::endmsg;
-		//~ else m_logger << FATAL << "Found MISMATCH: " << 
-		//~ " H cand of type " << evt_type[pos[1]] << " and mass " << mass_H[pos[1]] << " vs " << event_type[1] << " " << Hmass[1] << SLogger::endmsg;
-	//~ }
-	//~ if(signal && found_event[2]){
-		//~ if(evt_type[pos[2]]==event_type[2] &&  fabs (mass_H[pos[2]] - Hmass[2]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
-		//~ " H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << SLogger::endmsg;
-		//~ else m_logger << FATAL << "Found MISMATCH: " << 
-		//~ " H cand of type " << evt_type[pos[2]] << " and mass " << mass_H[pos[2]] << " vs " << event_type[2] << " " << Hmass[2] << SLogger::endmsg;
-	//~ }
-
+	
 	h_cut_flow->Fill(9,1);
 	h_cut_flow_weight->Fill(9,weight);
 
-        if(!switchToFakeRate){
-	if(signal) h_cut_flow_signal->Fill(4,1);
-	else if (category==0) h_cut_flow_cat0->Fill(4,1);
-	else if (category==1) h_cut_flow_cat1->Fill(4,1);
-	else if (category==2) h_cut_flow_cat2->Fill(4,1);
-
-	if(signal) h_cut_flow_signal_weight->Fill(4,weight);
-	else if (category==0) h_cut_flow_cat0_weight->Fill(4,weight);
-	else if (category==1) h_cut_flow_cat1_weight->Fill(4,weight);
-	else if (category==2) h_cut_flow_cat2_weight->Fill(4,weight);
-        }
+        
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 	h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
 
-        if(switchToFakeRate){
-            for(uint i =0; i < Hcand.size() && !tauTau; i+=2)
-            {
-                if(!WZ_Rej(m,Hcand[i])){
-                    Hcand.erase(Hcand.begin()+i);
-                    Hcand.erase(Hcand.begin()+i);
-                    i-=2;
-                    continue;
-                }
-            }
-			TLorentzVector Hcand1,Hcand2,H_boson;
+        	TLorentzVector Hcand1,Hcand2,H_boson;
 
             for(uint i =0; i < Hcand.size(); i+=2)
             {
@@ -2715,636 +2240,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 h_H_mass_types[Event_type-1]->Fill(H_boson.M(),weight);
             }
 
-        }//close switch to fake
-
-        else{
-        double tMass = -100;
-        if(!tauTau)
-        {
-            if(!muE) tMass = Tmass(m,Hcand[0]);
-            else{
-                if(Hcand[0].pt > Hcand[1].pt) tMass = Tmass(m,Hcand[0]);
-                    else tMass = Tmass(m,Hcand[1]);
-                }
-
-                Hist("h_Tmass")->Fill(tMass,weight); 
-            }
-
-
-            if(isSimulation)
-            { 
-                if(signal){
-                    Hist( "h_event_type" )->Fill(Event_type,weight);
-                    Hist( "h_event_type_raw" )->Fill(Event_type);
-		 
-		 }
-		
-	}else  Hist( "h_event_type" )->Fill(Event_type,weight); // blinding 
-
-		if( found_event.size()>0 && Event_type!=evt_type[pos[0]]) {
-	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << Event_type << SLogger::endmsg;
-  }
-
-	
-	//histograms for selected candidates
-	double Hmass=-100;
-	switch(Event_type)
-	{
-		case 2:
-		case 6:
-			muH_muE_tightMuIso.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			eH_muE_tightMuIso.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_muE_tightMuIso = muH_muE_tightMuIso+eH_muE_tightMuIso;
-			Hist( "h_muH_muE_tightMuIso_pt" )->Fill(muH_muE_tightMuIso.Pt(),weight);
-			Hist( "h_eH_muE_tightMuIso_pt" )->Fill(eH_muE_tightMuIso.Pt(),weight);
-			Hist( "h_H_muE_tightMuIso_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
-			Hist( "h_H_muE_tightMuIso_mass" )->Fill(H_muE_tightMuIso.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_muE_tightMuIso.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_muE_tightMuIso.M(),weight);
-			Hist( "h_H_eta")->Fill(H_muE_tightMuIso.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_muE_tightMuIso.Phi(),weight);
-			h_H_mass_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);
-			Hmass=H_muE_tightMuIso.M();
-			
-			if(signal)
-			{
-				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
-				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
-				h_signal_pt1_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_pt2_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
-			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
-				h_category1_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat1_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
-			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
-				h_category2_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat2_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
-			}else if(category==0){
-				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_category0_pt_types[Event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_H_mass_cat0_types[Event_type-1]->Fill(H_muE_tightMuIso.M(),weight);		
-			}
-			
-			
-			
-			break;
-		case 1:
-		case 5:
-			muH_muTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			tauH_muTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_muTau = muH_muTau+tauH_muTau;
-			Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
-			Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
-			Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt(),weight);
-			Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_muTau.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_muTau.M(),weight);
-			Hist( "h_H_eta")->Fill(H_muTau.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_muTau.Phi(),weight);
-			h_H_mass_types[Event_type-1]->Fill(H_muTau.M(),weight);
-			
-			Hmass=H_muTau.M();
-			
-			if(signal)
-			{
-				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
-				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
-				h_signal_pt1_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_pt2_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[Event_type-1]->Fill(H_muTau.M(),weight);					
-			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
-				h_category1_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat1_types[Event_type-1]->Fill(H_muTau.M(),weight);
-			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
-				h_category2_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat2_types[Event_type-1]->Fill(H_muTau.M(),weight);
-			}else if(category==0){
-				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_category0_pt_types[Event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_H_mass_cat0_types[Event_type-1]->Fill(H_muTau.M(),weight);
-			}
-			
-			break;
-		case 3:
-		case 7:
-			eH_eTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			tauH_eTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_eTau = eH_eTau+tauH_eTau;
-			Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
-			Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
-			Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt(),weight);
-			Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_eTau.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_eTau.M(),weight);
-			Hist( "h_H_eta")->Fill(H_eTau.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_eTau.Phi(),weight);
-			h_H_mass_types[Event_type-1]->Fill(H_eTau.M(),weight);
-			
-			Hmass=H_eTau.M();
-			
-			if(signal)
-			{
-				Hist("h_signal_pt1")->Fill(Hcand[1].pt,weight);
-				Hist("h_signal_pt2")->Fill(Hcand[0].pt,weight);	
-				h_signal_pt1_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_pt2_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[Event_type-1]->Fill(H_eTau.M(),weight);				
-			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[1].pt,weight);
-				h_category1_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat1_types[Event_type-1]->Fill(H_eTau.M(),weight);
-			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[0].pt,weight);
-				h_category2_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat2_types[Event_type-1]->Fill(H_eTau.M(),weight);
-			}else if(category==0){
-				h_category0_pt->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_category0_pt_types[Event_type-1]->Fill(Hcand[1].pt,Hcand[0].pt,weight);
-				h_H_mass_cat0_types[Event_type-1]->Fill(H_eTau.M(),weight);
-			}	
-
-			break;	
-		case 4:
-		case 8:
-
-			tau1H_tauTau.SetPxPyPzE(Hcand[0].px,Hcand[0].py,Hcand[0].pz,Hcand[0].E);
-			tau2H_tauTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
-			H_tauTau = tau1H_tauTau+tau2H_tauTau;
-			Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
-			Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
-			Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt(),weight);
-			Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
-			Hist( "h_H_pt" )->Fill(H_tauTau.Pt(),weight);
-			Hist( "h_H_mass" )->Fill(H_tauTau.M(),weight);
-
-			Hist( "h_H_eta")->Fill(H_tauTau.Eta(),weight);
-			Hist( "h_H_phi")->Fill(H_tauTau.Phi(),weight);
-			h_H_mass_types[Event_type-1]->Fill(H_tauTau.M(),weight);
-			
-			Hmass=H_tauTau.M();
-			
-			if(signal)
-			{
-				Hist("h_signal_pt1")->Fill(Hcand[0].pt,weight);
-				Hist("h_signal_pt2")->Fill(Hcand[1].pt,weight);	
-				h_signal_pt1_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_signal_pt2_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_signal_SumPt_types[Event_type-1]->Fill(Hcand[0].pt+Hcand[1].pt,weight);
-				h_H_mass_signal_types[Event_type-1]->Fill(H_tauTau.M(),weight);				
-			}else if(category==1){
-				Hist("h_category1_pt")->Fill(Hcand[0].pt,weight);
-				h_category1_pt_types[Event_type-1]->Fill(Hcand[0].pt,weight);
-				h_H_mass_cat1_types[Event_type-1]->Fill(H_tauTau.M(),weight);
-			}else if(category==2){
-				Hist("h_category2_pt")->Fill(Hcand[1].pt,weight);
-				h_category2_pt_types[Event_type-1]->Fill(Hcand[1].pt,weight);
-				h_H_mass_cat2_types[Event_type-1]->Fill(H_tauTau.M(),weight);
-			}else if(category==0){
-				h_category0_pt->Fill(Hcand[0].pt,Hcand[1].pt,weight);
-				h_category0_pt_types[Event_type-1]->Fill(Hcand[0].pt,Hcand[1].pt,weight);
-				h_H_mass_cat0_types[Event_type-1]->Fill(H_tauTau.M(),weight);
-			}	
-
-			break;
-
-
-	}
-
-	Hist( "h_H_lep1_eta")->Fill(Hcand[0].eta,weight);
-	Hist( "h_H_lep1_phi")->Fill(Hcand[0].phi,weight);
-	Hist( "h_H_lep2_eta")->Fill(Hcand[1].eta,weight);
-	Hist( "h_H_lep2_phi")->Fill(Hcand[1].phi,weight);
-	Hist( "h_total_weight")->Fill(weight);
-
-        //histogram to estimate the final yield corrected with the FR
-
-        double cat0_weight_medium, cat1_weight_medium, cat2_weight_medium;
-        double cat0_weight_tight, cat1_weight_tight, cat2_weight_tight;
-        double FR_mu_medium = FR_MMed, FR_mu_tight = FR_MTig;
-        double FR_ele_medium = FR_EMed, FR_ele_tight = FR_ETig;
-        double FR_tau_medium, FR_tau_tight;
-        double FR_tau1_medium, FR_tau1_tight;
-        double FR_tau2_medium, FR_tau2_tight;
-
-        switch(Event_type){
-        //MMMT
-        case 1:
-        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
-        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
-        h_cat0_FR_medium->Fill(1,weight*cat0_weight_medium);
-        h_cat0_FR_tight->Fill(1,weight*cat0_weight_tight);
-        }
-        else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
-        h_cat1_FR_medium->Fill(1,weight*cat1_weight_medium);
-        h_cat1_FR_tight->Fill(1,weight*cat1_weight_tight);
-        }
-        else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
-        h_cat2_FR_medium->Fill(1,weight*cat2_weight_medium);
-        h_cat2_FR_tight->Fill(1,weight*cat2_weight_tight);
-        }
-        break;
-        //MMEM
-        case 2:
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
-        h_cat0_FR_medium->Fill(2,weight*cat0_weight_medium);
-        h_cat0_FR_tight->Fill(2,weight*cat0_weight_tight);
-        }
-        else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
-        h_cat1_FR_medium->Fill(2,weight*cat1_weight_medium);
-        h_cat1_FR_tight->Fill(2,weight*cat1_weight_tight);
-        }
-        else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
-        h_cat2_FR_medium->Fill(2,weight*cat2_weight_medium);
-        h_cat2_FR_tight->Fill(2,weight*cat2_weight_tight);
-	}
-        break;
-        //MMET
-        case 3:
-        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
-        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);
-        h_cat0_FR_medium->Fill(3,weight*cat0_weight_medium);
-        h_cat0_FR_tight->Fill(3,weight*cat0_weight_tight);
-        }
-        else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
-        h_cat1_FR_medium->Fill(3,weight*cat1_weight_medium);
-        h_cat1_FR_tight->Fill(3,weight*cat1_weight_tight);
-        }
-        else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
-        h_cat2_FR_medium->Fill(3,weight*cat2_weight_medium);
-        h_cat2_FR_tight->Fill(3,weight*cat2_weight_tight);
-        }
-        break;
-        //MMTT
-        case 4:
-        FR_tau1_medium = fakeTau_medium(Hcand[0].pt);
-        FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
-        FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
-        FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
-        h_cat0_FR_medium->Fill(4,weight*cat0_weight_medium);
-        h_cat0_FR_tight->Fill(4,weight*cat0_weight_tight);
-        }
-        else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
-        h_cat1_FR_medium->Fill(4,weight*cat1_weight_medium);
-        h_cat1_FR_tight->Fill(4,weight*cat1_weight_tight);
-	}
-        else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
-        h_cat2_FR_medium->Fill(4,weight*cat2_weight_medium);
-        h_cat2_FR_tight->Fill(4,weight*cat2_weight_tight);
-        }
-        break;
-        //EEMT
-        case 5:
-        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
-        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_medium*FR_mu_medium)/(1-FR_tau_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau_tight*FR_mu_tight)/(1-FR_tau_tight*FR_mu_tight);
-        h_cat0_FR_medium->Fill(5,weight*cat0_weight_medium);
-        h_cat0_FR_tight->Fill(5,weight*cat0_weight_tight);
-	}
-        else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
-        h_cat1_FR_medium->Fill(5,weight*cat1_weight_medium);
-        h_cat1_FR_tight->Fill(5,weight*cat1_weight_tight);
-        }
-        else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
-	h_cat2_FR_medium->Fill(5,weight*cat2_weight_medium);
-	h_cat2_FR_tight->Fill(5,weight*cat2_weight_tight);
-	}
-        break;
-        //EEEM
-        case 6:
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_mu_medium)/(1-FR_ele_medium*FR_mu_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_mu_tight)/(1-FR_ele_tight*FR_mu_tight);
-	h_cat0_FR_medium->Fill(6,weight*cat0_weight_medium);
-	h_cat0_FR_tight->Fill(6,weight*cat0_weight_tight);
-        }
-        else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
-	h_cat1_FR_medium->Fill(6,weight*cat1_weight_medium);
-	h_cat1_FR_tight->Fill(6,weight*cat1_weight_tight);
-	}
-        else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_medium/(1-FR_mu_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_mu_tight/(1-FR_mu_tight);
-	h_cat2_FR_medium->Fill(6,weight*cat2_weight_medium);
-	h_cat2_FR_tight->Fill(6,weight*cat2_weight_tight);
-	}
-        break;
-        //EEET
-        case 7:
-        FR_tau_medium = fakeTau_medium(Hcand[1].pt);
-        FR_tau_tight = fakeTau_tight(Hcand[1].pt);
-        if(category==0){
-	cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_medium*FR_tau_medium)/(1-FR_ele_medium*FR_tau_medium);	
-	cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_ele_tight*FR_tau_tight)/(1-FR_ele_tight*FR_tau_tight);	
-	h_cat0_FR_medium->Fill(7,weight*cat0_weight_medium);
-	h_cat0_FR_tight->Fill(7,weight*cat0_weight_tight);
-        }
-	else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_medium/(1-FR_tau_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*FR_tau_tight/(1-FR_tau_tight);
-	h_cat1_FR_medium->Fill(7,weight*cat1_weight_medium);
-	h_cat1_FR_tight->Fill(7,weight*cat1_weight_tight);
-        }
-	else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_medium/(1-FR_ele_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*FR_ele_tight/(1-FR_ele_tight);
-	h_cat2_FR_medium->Fill(7,weight*cat2_weight_medium);
-	h_cat2_FR_medium->Fill(7,weight*cat2_weight_tight);
-	}	        
-	break;
-        //EETT
-        case 8:
-        FR_tau1_medium = fakeTau_medium(Hcand[0].pt);
-        FR_tau1_tight = fakeTau_tight(Hcand[0].pt);
-        FR_tau2_medium = fakeTau_medium(Hcand[1].pt);
-        FR_tau2_tight = fakeTau_tight(Hcand[1].pt);
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << fakeTau_medium(Hcand[0].pt) << " func tight " << fakeTau_tight(Hcand[0].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << fakeTau_medium(Hcand[1].pt) << " func tight " << fakeTau_tight(Hcand[1].pt) << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[0].pt " << Hcand[0].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[0].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[0].pt))+p2_tight  << SLogger::endmsg;
-        m_logger << DEBUG << " Event_type: " << Event_type << " Hcand[1].pt " << Hcand[1].pt << " func med " << p0_medium*(TMath::Exp(p1_medium*Hcand[1].pt))+p2_medium << " func tight " << p0_tight*(TMath::Exp(p1_tight*Hcand[1].pt))+p2_tight  << SLogger::endmsg;
-
-        if(category==0){
-        cat0_weight_medium = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium*FR_tau2_medium)/(1-FR_tau1_medium*FR_tau2_medium);
-        cat0_weight_tight = (h_category0_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight*FR_tau2_tight)/(1-FR_tau1_tight*FR_tau2_tight);
-	h_cat0_FR_medium->Fill(8,weight*cat0_weight_medium);
-	h_cat0_FR_tight->Fill(8,weight*cat0_weight_tight);
-        }
-	else if(category==1){
-        cat1_weight_medium = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_medium)/(1-FR_tau1_medium);
-        cat1_weight_tight = (h_category1_pt_types[Event_type-1]->GetEntries())*(FR_tau1_tight)/(1-FR_tau1_tight);
-	h_cat1_FR_medium->Fill(8,weight*cat1_weight_medium);
-	h_cat1_FR_tight->Fill(8,weight*cat1_weight_tight);
-
-        }
-	else if(category==2){
-        cat2_weight_medium = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_medium)/(1-FR_tau2_medium);
-        cat2_weight_tight = (h_category2_pt_types[Event_type-1]->GetEntries())*(FR_tau2_tight)/(1-FR_tau2_tight);
-	h_cat2_FR_medium->Fill(8,weight*cat2_weight_medium);
-	h_cat2_FR_tight->Fill(8,weight*cat2_weight_tight);
-        }
-	break;
-
-        }	
-	
-	h_cut_flow->Fill(10,1);
-	h_cut_flow_weight->Fill(10,weight);
-
-        // DeltaR check
-        Hist("h_deltaR")->Fill(deltaR(Hcand[0].eta,Hcand[0].phi,Hcand[1].eta,Hcand[1].phi));
-        Hist("h_deltaR")->Fill(deltaR(Zcand[0].eta,Zcand[0].phi,Zcand[1].eta,Zcand[1].phi));
-        Hist("h_deltaR")->Fill(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[1].eta,Hcand[1].phi));
-        Hist("h_deltaR")->Fill(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[0].eta,Hcand[0].phi));
-        Hist("h_deltaR")->Fill(deltaR(Zcand[1].eta,Zcand[1].eta,Hcand[1].eta,Hcand[1].phi));
-        Hist("h_deltaR")->Fill(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[0].eta,Hcand[0].phi));
-
-        //max DeltaR
-        std::vector<double> deltaRlist;
-        deltaRlist.clear();
-        deltaRlist.push_back(deltaR(Hcand[0].eta,Hcand[0].phi,Hcand[1].eta,Hcand[1].phi));
-        deltaRlist.push_back(deltaR(Zcand[0].eta,Zcand[0].phi,Zcand[1].eta,Zcand[1].phi));
-        deltaRlist.push_back(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[1].eta,Hcand[1].phi));
-        deltaRlist.push_back(deltaR(Zcand[0].eta,Zcand[0].phi,Hcand[0].eta,Hcand[0].phi));
-        deltaRlist.push_back(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[1].eta,Hcand[1].phi));
-        deltaRlist.push_back(deltaR(Zcand[1].eta,Zcand[1].phi,Hcand[0].eta,Hcand[0].phi));
-
-        double maxDR = deltaRlist[0];
-        double minDR = deltaRlist[0];
-
-	for(int i = 0; i<(int)deltaRlist.size(); i++)
-	{
-		if(deltaRlist[i] > maxDR)
-			maxDR = deltaRlist[i];
-		if(minDR > deltaRlist[i])
-			minDR = deltaRlist[i];
-	}
-        Hist("h_deltaR_max")->Fill(maxDR);
-        Hist("h_deltaR_min")->Fill(minDR);
         
-    	if( found_event.size()>0 && Event_type!=evt_type[pos[0]]) {
-	  m_logger << ERROR << " Wrong event type. His is " << evt_type[pos[0]] << " and mine is " << Event_type << SLogger::endmsg;
-  }
-    
-    
-    if (found_event.size()==0 && signal){
-	 	  m_logger << ERROR << " My plus of type " << Event_type << SLogger::endmsg;
-		TLorentzVector Zvector;
-		TLorentzVector Hvector;
-		std::cout << " -------------------------------------------------------------------------------- " << std::endl;
-		std::cout << " lumi number " << m->lumiNumber << " event number: " << m->eventNumber << " entry " << entries << std::endl;;
-		switch(Event_type){
-		case 1: 
-			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-        case 2:
-            std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "Mu3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "El1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-		case 3: 
-			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "El1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
-			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonLoose " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-        case 4: 
-			std::cout << "Mu1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoMu(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "Mu2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoMu(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-        case 5: 
-			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonTight " << Hcand[1].discriminationByMuonTight << " AgainstElectronLoose " << Hcand[1].discriminationByElectronLoose
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-        case 6:
-            std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "Mu1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoMu(Hcand[0]) << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "El3(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " iso " << RelIsoEl(Hcand[1]) << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-		case 7: 
-			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-		    std::cout << "El3(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " iso " << RelIsoEl(Hcand[0]) << " charge " << Hcand[0].charge << " missing hits in ID " << Hcand[0].numLostHitEleInner << std::endl;
-		    std::cout << "Tau1(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonLoose " << Hcand[1].discriminationByMuonLoose << " AgainstElectronMVA " << Hcand[1].discriminationByElectronMVA
-			<< " CombinedMediumIsolation " << Hcand[1].byMediumCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-        case 8: 
-			std::cout << "El1(Z): pt: " << Zcand[0].pt << " eta: " << Zcand[0].eta << " phi: " << Zcand[0].phi << " iso " << RelIsoEl(Zcand[0]) << " charge " << Zcand[0].charge << std::endl;
-			std::cout << "El2(Z): pt: " << Zcand[1].pt << " eta: " << Zcand[1].eta << " phi: " << Zcand[1].phi << " iso " << RelIsoEl(Zcand[1]) << " charge " << Zcand[1].charge << std::endl;
-			Zvector.SetPxPyPzE(Zcand[1].px+Zcand[0].px,Zcand[0].py+Zcand[1].py,Zcand[0].pz+Zcand[1].pz,Zcand[0].E+Zcand[1].E);
-            std::cout << " Z mass " << Zvector.M() << std::endl;                                    	
-			std::cout << "Tau1(H): pt: " << Hcand[0].pt << " eta: " << Hcand[0].eta << " phi: " << Hcand[0].phi << " AgainstMuonMedium " << Hcand[0].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[0].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[0].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[0].charge << std::endl;
-			std::cout << "Tau2(H): pt: " << Hcand[1].pt << " eta: " << Hcand[1].eta << " phi: " << Hcand[1].phi << " AgainstMuonMedium " << Hcand[1].discriminationByMuonMedium << " AgainstElectronMedium " << Hcand[1].discriminationByElectronMedium
-			<< " TightCombinedIsolation " << Hcand[1].byTightCombinedIsolationDeltaBetaCorr << " charge " << Hcand[1].charge << std::endl;
-			Hvector.SetPxPyPzE(Hcand[1].px+Hcand[0].px,Hcand[0].py+Hcand[1].py,Hcand[0].pz+Hcand[1].pz,Hcand[0].E+Hcand[1].E);
-            std::cout << " H mass " << Hvector.M() << std::endl;
-            break;
-    	}	
-		std::cout << "---> Detailed accounts: " << std::endl;
-		std::cout << " ---------------- MUONS ---------------------- " << std::endl;
-		 for (uint i = 0; i < muon.size(); i++) {
 
-		double muPt = muon[i].pt;
-		double muEta = muon[i].eta;
-		bool muGlobal = muon[i].isGlobalMuon;
-		bool muTracker = muon[i].isTrackerMuon;
-		double relIso = RelIsoMu(muon[i]);
-		
-		bool pfID = PFMuonID(muon[i]);	
-		std::cout << " --> no. " << i << " pt "  << muPt << " eta " << muEta << " phi " << muon[i].phi 
-		<< " ID: " << pfID << " iso " << relIso << std::endl; 
-		
-		if (muGlobal && muTracker && muPt > 10 && fabs(muEta) < 2.4 && relIso < 0.4 && pfID)
-		{
-					goodMuon.push_back(muon[i]);
-					std::cout << "  ----> GOOD MUON <---- " << std::endl;
-					Hist("h_mu_relIso")->Fill(relIso);
-		}
-		
-    }
-    std::cout << " ---------------- ELECTRONS ---------------------- " << std::endl;
-		
-		for (uint i = 0; i < electron.size(); i++) {
-
-		double elPt = electron[i].pt;
-		double elEta = electron[i].eta;
-		int missingHits = electron[i].numLostHitEleInner;
-		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
-		double relIso = RelIsoEl(electron[i]);
-		std::cout << " --> no. " << i << " pt "  << elPt << " eta " << elEta << " phi " << electron[i].phi 
-		<< " ID: " << elID << " mHits " << missingHits << " iso " << relIso << std::endl; 
-		
-		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.4 && elID)
-		{
-			goodElectron.push_back(electron[i]);
-			std::cout << "  ----> GOOD ELECTRON <---- " << std::endl;
-			Hist("h_el_relIso")->Fill(relIso);
-		}
-    }
-		
-	std::cout << " ---------------- TAUS ---------------------- " << std::endl;
-	
-	for (uint i = 0; i < tau.size(); i++) {
-   
-		double tauPt = tau[i].pt;
-		double tauEta = tau[i].eta;
-		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
-		bool LooseMuon = (tau[i].discriminationByMuonLoose > 0.5);
-		bool CombinedIsolation = (tau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
-		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
-		
-		if (tauPt > 20 && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && CombinedIsolation && DecayMode){
-			goodTau.push_back(tau[i]);
-			std::cout << " --> no. " << i << " pt "  << tauPt << " eta " << tauEta << " phi " << tau[i].phi << std::endl; 
-		}
-		
-    }
-	
-	
-		
-}
-
-      
-	if(signal && printoutEvents)
-	{
-		 TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-		 log1 << setiosflags(ios::fixed) << std::setprecision(1) << event_type[0] << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass << std::endl;
-	}
-	
-        }//close else (analysis case)
-	
+        
 	return;
 
 

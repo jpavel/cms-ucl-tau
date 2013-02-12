@@ -3,6 +3,7 @@
 -->
 
 
+<!--
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1000_1_07f.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1001_1_P7W.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_100_1_btJ.root" Lumi="1.0" />
@@ -16,6 +17,7 @@
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1009_1_xqs.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1010_1_Atu.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1011_1_Wq2.root" Lumi="1.0" />
+
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_101_1_HSw.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1012_1_ems.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1013_1_qT1.root" Lumi="1.0" />
@@ -26,6 +28,7 @@
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1018_2_X6c.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1019_1_lRY.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_10_1_fUx.root" Lumi="1.0" />
+-->
 <!--
 This is it!
 -->
@@ -48,7 +51,6 @@ This is it!
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1033_1_uTa.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1034_1_WgE.root" Lumi="1.0" />
 
-<!--
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1035_1_ZbD.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1036_1_0bi.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1037_1_mPD.root" Lumi="1.0" />
@@ -78,9 +80,7 @@ This is it!
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1059_1_orw.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1060_1_Gza.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1061_1_bhB.root" Lumi="1.0" />
--->
 
-<!--
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_106_1_AzW.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1062_1_vRn.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1063_1_wVo.root" Lumi="1.0" />
@@ -112,13 +112,10 @@ This is it!
 
 
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1086_0_H1z.root" Lumi="1.0" />
--->
 
-<!--
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1087_0_pgk.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1088_0_FiF.root" Lumi="1.0" />
 <In FileName="/home/jpavel/ntuples/CMS/analysis/FakeRateSync/FakeRateSync//output_Ntuples_1089_0_PMd.root" Lumi="1.0" />
--->
 
 
 <!-- Total number of events processed: 991177 -->
