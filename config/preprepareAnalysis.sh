@@ -1,0 +1,2 @@
+source PrePrepareJobs_listDir_noRemoval.sh /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/Data/ AnalFull_2012_CD CD.list 50 Analysis_config_T2_DataEl_53.xml results_anal/2012
+source PrePrepareJobs_listDir.sh /pnfs/iihe/cms/store/user/abdollah/ZHttNtuples/ AnalFull_2012_AB AB.list 50 Analysis_config_T2_DataEl_53.xml results_anal/2012
