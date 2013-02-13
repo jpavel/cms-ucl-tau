@@ -1213,6 +1213,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		pos.push_back(pos_helper);
 		pos_helper = std::find(evt_number.begin()+pos[i]+1, evt_number.end(), eNumber) - evt_number.begin();
 	}
+	bool examineThisEvent;
+	if( examineEvent==eNumber) examineThisEvent=true;
+	else examineThisEvent=false;
 	
 	if(found_event.size()!=pos.size()) m_logger << FATAL << "Sync info reading mismatch" << SLogger::endmsg; // sync
 	std::vector<uint> pos_l,pos_m,pos_t;
@@ -1225,8 +1228,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		pos_helper = std::find(evt_number_l.begin(), evt_number_l.end(), eNumber) - evt_number_l.begin();
 		for( uint i =0; pos_helper < evt_number_l.size(); i++ )
 		{
+			if(examineThisEvent) std::cout << "Found loose cand no. " << i << " with event number " << evt_number_l[pos_helper]
+			<< " and type " <<  evt_type_l[pos_helper] << " and mass " << mass_H_l[pos_helper] << " index: " << pos_helper << std::endl;
 			isLoose.push_back(true);
-			pos_l.push_back(pos_helper);
+			pos_l.push_back(pos_helper);	
 			pos_helper = std::find(evt_number_l.begin()+pos_l[i]+1, evt_number_l.end(), eNumber) - evt_number_l.begin();
 		}
 		pos_helper=0;
@@ -1281,9 +1286,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_Nvertex_NoCut")->Fill(nGoodVx);
 	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
 
-	bool trigPass,examineThisEvent;
-	if( examineEvent==eNumber) examineThisEvent=true;
-	else examineThisEvent=false;
+	bool trigPass;
+	
 	trigPass = Trg_MC_12(m,examineThisEvent);
 	if(examineThisEvent) std::cout << "Examining event " << examineEvent << std::endl;
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
@@ -1973,6 +1977,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<double> Hmass;//[3] = {0.0,0.0,0.0};
 	event_type.clear();
 	Hmass.clear();
+	std::vector<myobject> Hcand_sync;
+	Hcand_sync.clear();
 	
 	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << Hcand_type[0] << std::endl;
 	
@@ -1985,6 +1991,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
 		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
+		Hcand_sync.push_back(Hcand[2*i]);
+		Hcand_sync.push_back(Hcand[2*i+1]);
 		}
 	}
 	
@@ -1997,6 +2005,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
 		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
+		Hcand_sync.push_back(Hcand[2*i]);
+		Hcand_sync.push_back(Hcand[2*i+1]);
 		}
 	}
 	
@@ -2009,6 +2019,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
 		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
 		Hmass.push_back(mass);
+		Hcand_sync.push_back(Hcand[2*i]);
+		Hcand_sync.push_back(Hcand[2*i+1]);
 		}
 	}
 		
@@ -2197,58 +2209,78 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << " preparing isLoose... vectors " << std::endl;
 	
+	uint nLoose,nMedium,nTight;
+	nLoose=nMedium=nTight=0;
 	
 	for(uint i=0; i < found_event.size();i++)
 	{
 		isLoose_match.push_back(0);
-		for(uint j=0; j < isLoose.size(); j++)
+		for(uint j=0; j < isLoose.size(); ++j)
 		{
-			if(evt_type_l[pos_l[j]]!=evt_type[pos[i]] || evt_number_l[pos_l[j]]!=evt_number[pos[i]] || fabs(mass_Z_l[pos_l[j]]-mass_Z[pos[i]]) > 0.1)
-				m_logger << FATAL << "Something wrong with Loose vector info!" << SLogger::endmsg;
+			if(examineThisEvent) std::cout << " going through element " << j << " and " << i << " out of " << isLoose.size() << " and " << found_event.size() << std::endl;
+			if(evt_type_l[pos_l[j]]!=evt_type[pos[i]] || evt_number_l[pos_l[j]]!=evt_number[pos[i]] || fabs(mass_H_l[pos_l[j]]-mass_H[pos[i]]) > 0.1) continue;
+			
+			
 			if(evt_type[pos[i]]%4!=0){
 				if (fabs(mass_H[pos[i]]-mass_H_l[pos_l[j]]) < 0.1){
 					isLoose_match[i]=1;
+					nLoose++;
 				}
 			}else{
 				if(examineThisEvent) std::cout << "Filling for tautau" << std::endl;
-				if(j<isLoose.size()-1){
+				if(j<(isLoose.size()-1)){
 					if(examineThisEvent) std::cout << "  -> Still cand remaining" << std::endl;	
-					if((evt_type_l[pos_l[j+1]]==evt_type_l[pos_l[j]])&&(evt_number_l[pos_l[j]]==evt_number_l[pos_l[j+1]])&&(fabs(mass_Z_l[pos_l[j]]-mass_Z_l[pos[j+1]]) < 0.1)){
+					if((evt_type_l[pos_l[j+1]]==evt_type_l[pos_l[j]])&&(evt_number_l[pos_l[j]]==evt_number_l[pos_l[j+1]])&&(fabs(mass_H_l[pos_l[j]]-mass_H_l[pos_l[j+1]]) < 0.1)){
 						if(examineThisEvent) std::cout << "There is another tautau cand" << std::endl;
 						isLoose_match[i]=2;
 						j++;
+						nLoose+=2;
+						continue;
 					}else{
-						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
+						if(examineThisEvent) std::cout << "This is last tautau cand" << std::endl;
+						if(examineThisEvent) std::cout << "Index of this is " << j << " " << pos_l[j] << " and " << pos_l[j+1] << std::endl;
+						if(examineThisEvent) std::cout << "Next loose is " << evt_type_l[pos_l[j+1]] << " " << evt_number_l[pos_l[j+1]] << " " << mass_H_l[pos_l[j+1]] << std::endl;
+						if(examineThisEvent) std::cout << "this loose is " << evt_type_l[pos_l[j]] << " " << evt_number_l[pos_l[j]] << " " << mass_H_l[pos_l[j]] << std::endl;
+						
 						isLoose_match[i]=1;
+						nLoose++;
+						continue;
 					}
 				}else{
 						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
 						isLoose_match[i]=1;
+						nLoose++;
+						continue;
 				}	
-			}	 
+			}
+			if(examineThisEvent) std::cout << " finishing loop with element " << j << " out of " << isLoose.size() << std::endl;
 		}
 		
 		isMedium_match.push_back(0);
 		for(uint j=0; j < isMedium.size(); j++)
 		{
 			if(evt_type_m[pos_m[j]]!=evt_type[pos[i]] || evt_number_m[pos_m[j]]!=evt_number[pos[i]] || fabs(mass_Z_m[pos_m[j]]-mass_Z[pos[i]]) > 0.1)
-				m_logger << FATAL << "Something wrong with Medium vector info!" << SLogger::endmsg;
+				continue;
 			if(evt_type[pos[i]]%4!=0){
 				if (fabs(mass_H[pos[i]]-mass_H_m[pos_m[j]]) < 0.1){
 					isMedium_match[i]=1;
+					nMedium++;
 				}
 			}else{
 				if(j<isMedium.size()-1){
-					if((evt_type_m[pos_m[j+1]]==evt_type_m[pos_m[j]])&&(evt_number_m[pos_m[j]]==evt_number_m[pos_m[j+1]])&&(fabs(mass_Z_m[pos_m[j]]-mass_Z_m[pos[j+1]]) < 0.1)){
+					if((evt_type_m[pos_m[j+1]]==evt_type_m[pos_m[j]])&&(evt_number_m[pos_m[j]]==evt_number_m[pos_m[j+1]])&&(fabs(mass_Z_m[pos_m[j]]-mass_Z_m[pos_m[j+1]]) < 0.1)){
 						isMedium_match[i]=2;
 						j++;
+						nMedium+=2;
 					}else{
 						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
 						isMedium_match[i]=1;
+						nMedium++;
 					}
 				}else{
 					if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
 					isMedium_match[i]=1;
+					nMedium++;
 				}	
 			} 
 		}
@@ -2257,27 +2289,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j=0; j < isTight.size(); j++)
 		{
 			if(evt_type_t[pos_t[j]]!=evt_type[pos[i]] || evt_number_t[pos_t[j]]!=evt_number[pos[i]] || fabs(mass_Z_t[pos_t[j]]-mass_Z[pos[i]]) > 0.1)
-				m_logger << FATAL << "Something wrong with Tight vector info!" << SLogger::endmsg;
+				continue;
 			if(evt_type[pos[i]]%4!=0){
 				if (fabs(mass_H[pos[i]]-mass_H_t[pos_t[j]]) < 0.1){
 					isTight_match[i]=1;
+					nTight++;
 				}
 			}else{
 				if(j<isTight.size()-1){
-					if((evt_type_t[pos_t[j+1]]==evt_type_t[pos_t[j]])&&(evt_number_t[pos_t[j]]==evt_number_t[pos_t[j+1]])&&(fabs(mass_Z_t[pos_t[j]]-mass_Z_t[pos[j+1]]) < 0.1)){
+					if((evt_type_t[pos_t[j+1]]==evt_type_t[pos_t[j]])&&(evt_number_t[pos_t[j]]==evt_number_t[pos_t[j+1]])&&(fabs(mass_Z_t[pos_t[j]]-mass_Z_t[pos_t[j+1]]) < 0.1)){
 						isTight_match[i]=2;
+						nTight+=2;
 						j++;
 					}else{
 						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
 						isTight_match[i]=1;
+						nTight++;
 					}
 				}else{
 					if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
 					isTight_match[i]=1;
+					nTight++;
 					}	
 			} 
 		}
 	}
+	if(nLoose!=isLoose.size()) m_logger << FATAL << "Loose match vector wrongly filled!" << SLogger::endmsg;
+	if(nMedium!=isMedium.size()) m_logger << FATAL << "Medium match vector wrongly filled!" << SLogger::endmsg;
+	if(nTight!=isTight.size()) m_logger << FATAL << "Tight match vector wrongly filled!" << SLogger::endmsg;
+	
 	
 	if(examineThisEvent) std::cout << " prepared isLoose... vectors " << std::endl;
 	
@@ -2298,29 +2338,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
             for(uint i =0; i < Hcand.size(); i+=2)
             {
-                if(examineThisEvent) std::cout << " -checking Hcand no. " << i << std::endl;
+                if(examineThisEvent) std::cout << " -checking Hcand no. " << i << " type is " << event_type[i/2] << std::endl;
                 Hist( "h_event_type" )->Fill(event_type[i/2],weight);
-                Hist("h_denom")->Fill(Hcand[i].pt,weight);
-                h_denom_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
-                h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight);
-                if(fabs(Hcand[i].eta)<1.2){
-					h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+                Hist("h_denom")->Fill(Hcand_sync[i].pt,weight);
+                h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+                h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+                if(fabs(Hcand_sync[i].eta)<1.2){
+					h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
                 }else{
-					h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+					h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
                 }
                 int isL=0;
                 int isM=0;
                 int isT=0;
                 if(event_type[i/2]%4==3){
-                    if(RelIsoEl(Hcand[i]) < 0.30 && isGoodEl(Hcand[i])){ 
+                    if(RelIsoEl(Hcand_sync[i]) < 0.30 && isGoodEl(Hcand_sync[i])){ 
 						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
+						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
 						isL++;
-						if(fabs(Hcand[i].eta)<1.2){
-							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
 						if(found_event.size() > 0){
 							if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
@@ -2329,15 +2369,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;		
 						}
 					}
-                    if(RelIsoEl(Hcand[i]) < 0.10 && isGoodEl(Hcand[i])){ 
+                    if(RelIsoEl(Hcand_sync[i]) < 0.10 && isGoodEl(Hcand_sync[i])){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
+						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
 						isT++; 
-						if(fabs(Hcand[i].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
 						if(found_event.size() > 0){
 							if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
@@ -2350,15 +2390,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 if(event_type[i/2]%4==1){
 					if(examineThisEvent) std::cout << " checking muTau isolation " << std::endl;
 	
-                    if(RelIsoMu(Hcand[i]) < 0.30 && isGoodMu(Hcand[i])){ 
+                    if(RelIsoMu(Hcand_sync[i]) < 0.30 && isGoodMu(Hcand_sync[i])){ 
 						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
-						isM++; 
-						if(fabs(Hcand[i].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
+						isL++; 
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
 						if(found_event.size() > 0){
 							if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
@@ -2367,15 +2407,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
 						}
                     }
-                    if(RelIsoMu(Hcand[i]) < 0.10 && isGoodMu(Hcand[i])){ 
+                    if(RelIsoMu(Hcand_sync[i]) < 0.10 && isGoodMu(Hcand_sync[i])){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
+						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
 						isT++;
-						if(fabs(Hcand[i].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
 						if(found_event.size() > 0){
 							if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
@@ -2387,78 +2427,82 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 }
                 if(examineThisEvent) std::cout << " done lepton iso " << std::endl;
                 if(event_type[i/2]%4==0){
-                    h_denom_types[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
-                    h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand[i+1].eta,weight);
-					if(fabs(Hcand[i+1].eta)<1.2){
-						h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+                    h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+                    h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
+					if(fabs(Hcand_sync[i+1].eta)<1.2){
+						h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 					}else{
-						h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+						h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 					}
-                    if(Hcand[i].byLooseCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(Hcand_sync[i].byLooseCombinedIsolationDeltaBetaCorr >= 0.5){ 
 						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
+						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
 						isL++; 
-						if(fabs(Hcand[i].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
                     }
-                    if(Hcand[i+1].byLooseCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr >= 0.5){ 
 						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand[i+1].eta,weight); 
+						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight); 
 						isL++; 
-						if(fabs(Hcand[i+1].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+						if(fabs(Hcand_sync[i+1].eta)<1.2){
+							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 						}
                     }
                     // medium
-                    if(Hcand[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(examineThisEvent) std::cout << "Checking tau with pt " << Hcand_sync[i].pt << std::endl;
+                    if(Hcand_sync[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ 
+						if(examineThisEvent) std::cout << "Passed medium iso" << std::endl;
 						Hist("h_event_type_medium")->Fill(event_type[i/2],weight); 
-						h_medium_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
+						h_medium_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
 						isM++; 
-						if(fabs(Hcand[i].eta)<1.2){
-							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
                     }
-                    if(Hcand[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(examineThisEvent) std::cout << "Checking tau with pt " << Hcand_sync[i+1].pt << std::endl;
+                    if(Hcand_sync[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ 
+						if(examineThisEvent) std::cout << "Passed medium iso" << std::endl;
 						Hist("h_event_type_medium")->Fill(event_type[i/2],weight); 
-						h_medium_types[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight); 
-						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand[i+1].eta,weight); 
+						h_medium_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
+						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight); 
 						isM++; 
-						if(fabs(Hcand[i+1].eta)<1.2){
-							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+						if(fabs(Hcand_sync[i+1].eta)<1.2){
+							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 						}else{
-							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 						}
                     }
                     //tight
                     
-                    if(Hcand[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(Hcand_sync[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand[i].eta,weight); 
+						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
 						isT++; 
-						if(fabs(Hcand[i].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i].pt,weight);
+							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 						}
                     }
-                    if(Hcand[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(Hcand_sync[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand[i+1].eta,weight); 
+						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight); 
 						isT++; 
-						if(fabs(Hcand[i+1].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+						if(fabs(Hcand_sync[i+1].eta)<1.2){
+							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
 						}else{
 							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
 						}
