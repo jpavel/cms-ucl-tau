@@ -2528,9 +2528,32 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 double Hmass = H_boson.M();
                 if(printoutEvents)
 				{
+					int exp_event_type;
+					switch(event_type[i/2])
+					{
+						case 1: exp_event_type=301; break;
+						case 3: exp_event_type=201; break;
+						case 4: exp_event_type=101; break;
+						case 5: exp_event_type=601; break;
+						case 7: exp_event_type=701; break;
+						case 8: exp_event_type=501; break;
+						default: exp_event_type=0; break;
+					}
 					TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-					log1 << setiosflags(ios::fixed) << std::setprecision(1) << Event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass 
-					<< " " << Hcand[i].pt << " " << Hcand[i+1].pt << " " << isM << " " << isT << " " << std::endl;
+					log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;
+					for(int i=0;i < isL; i++)
+					{
+						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+3 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
+					}
+					for(int i=0;i < isM; i++)
+					{
+						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+2 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
+					}
+					for(int i=0;i < isT; i++)
+					{
+						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+1 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
+					}
+					
 				}
                 
             }
