@@ -309,6 +309,9 @@ private:
         
         reweight::LumiReWeighting* LumiWeights_;
         ofstream log1;
+        ofstream log_events;
+        ofstream log_files;
+        
 	
         
 

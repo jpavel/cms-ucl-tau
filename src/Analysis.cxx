@@ -637,7 +637,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
-	if(printoutEvents) log1.open("events.txt");
+	if(printoutEvents){
+		 log1.open("events.txt");
+		 log_events.open("eventlist.txt");
+		 log_files.open("filelist.txt");
+	 }
 	
 	//bookkeeping
 	lumi.open("lumi.csv");
@@ -833,7 +837,11 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
         std::cout << "Tight    : " << h_tight->Integral() << std::endl;
         std::cout << "Denom    : " << h_denom->Integral() << std::endl;
 
-	if(printoutEvents) log1.close();
+	if(printoutEvents){ 
+		log1.close();
+		log_events.close();
+		log_files.close();
+	}
 	
 	
 	
@@ -1178,7 +1186,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		current_run=m->runNumber;
 		current_lumi=m->lumiNumber;
 	}
-
+	TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
+					
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
 		Hist("h_nPU_Info")->Fill(m->PUInfo);
@@ -1293,7 +1302,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
-	  if(found_event.size()>0) m_logger << ERROR << "ENTRY " << m_allEvents <<", event " << eNumber << ":  WRONG TRIGGER" << SLogger::endmsg; // sync
+	  if(found_event.size()>0){
+		   m_logger << ERROR << "ENTRY " << m_allEvents <<", event " << eNumber << ":  WRONG TRIGGER" << SLogger::endmsg; // sync
+		   log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+		   log_files << fileName << std::endl;
+	   }
 		return;
 	}
 	for(uint i = 0; i < found_event.size(); i++){
@@ -1615,6 +1628,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	else{
 		if(examineThisEvent) std::cout << "No Z cand!" << std::endl;
+		if(found_event.size()>0){
+			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+			log_files << fileName << std::endl;
+		}
 			return;
 	}
 	
@@ -1941,7 +1958,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
 				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
 				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
-				 
+				 log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+				 log_files << fileName << std::endl;
 				 
 			 }
 		// sync end
@@ -2159,7 +2177,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(bTagVeto)
 	{
-		 if( found_event.size()>0) m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+		 if( found_event.size()>0){ 
+			 m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+			 log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+			log_files << fileName << std::endl;
+		}
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
@@ -2169,12 +2191,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// now we have the cands
 	
 	// sync
+	bool fatal = false;
+	bool used_fatal=false;
 	if(signal && found_event.size()>0){
 		for(uint i=0; i < found_event.size(); i++){
 			if(evt_type[pos[i]]==event_type[i] &&  fabs (mass_H[pos[i]] - Hmass[i]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
 			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << SLogger::endmsg;
-			else m_logger << FATAL << "Found MISMATCH: " << 
+			else{
+				 m_logger << FATAL << "Found MISMATCH: " << 
 			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << " vs " << event_type[i] << " " << Hmass[i] << SLogger::endmsg;
+			fatal=true;
+			}
+		}
+		if(fatal && !used_fatal){
+			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+			log_files << fileName << std::endl;
+			used_fatal=true;
 		}
 	}
 	if(event_type.size() > found_event.size())
@@ -2183,9 +2215,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 for(uint i=found_event.size(); i <event_type.size(); i++)
 		 {
 			m_logger << FATAL << "  >" << event_type[i] << ": " << Hmass[i] << SLogger::endmsg;
+			fatal = true;
 		 }
+		 if(fatal && !used_fatal){
+			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+			log_files << fileName << std::endl;
+			used_fatal=true;
+		}
 	}
-	if(event_type.size() < found_event.size()) m_logger << FATAL << "ENTRY " << m_allEvents <<", event " << eNumber<< ": I have missing candidate(s):" << SLogger::endmsg;
+	if(event_type.size() < found_event.size()){
+		 m_logger << FATAL << "ENTRY " << m_allEvents <<", event " << eNumber<< ": I have missing candidate(s):" << SLogger::endmsg;
+		 if(!used_fatal){
+			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+			log_files << fileName << std::endl;
+			used_fatal=true;
+		}
+	}
 	
 	
 	//~ if(found_event.size()==0){
@@ -2365,8 +2410,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						if(found_event.size() > 0){
 							if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							else m_logger << FATAL << "One more LOOSE: " << 
+							else {
+								m_logger << FATAL << "One more LOOSE: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;		
+								if(!used_fatal){
+									log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+									log_files << fileName << std::endl;
+									used_fatal=true;
+								}
+							}
 						}
 					}
                     if(RelIsoEl(Hcand_sync[i]) < 0.10 && isGoodEl(Hcand_sync[i])){ 
@@ -2382,8 +2434,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						if(found_event.size() > 0){
 							if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							else m_logger << FATAL << "One more TIGHT: " << 
+							else{
+								 m_logger << FATAL << "One more TIGHT: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
+								if(!used_fatal){
+									log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+									log_files << fileName << std::endl;
+									used_fatal=true;
+								}
+							}
+								
 						}
 					}
                 }
@@ -2403,8 +2463,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						if(found_event.size() > 0){
 							if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							else m_logger << FATAL << "One more LOOSE: " << 
+							else{
+								 m_logger << FATAL << "One more LOOSE: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
+								if(!used_fatal){
+									log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+									log_files << fileName << std::endl;
+									used_fatal=true;
+								}
+							}
 						}
                     }
                     if(RelIsoMu(Hcand_sync[i]) < 0.10 && isGoodMu(Hcand_sync[i])){ 
@@ -2420,8 +2487,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						if(found_event.size() > 0){
 							if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							else m_logger << FATAL << "One more TIGHT: " << 
+							else{
+								 m_logger << FATAL << "One more TIGHT: " << 
 								" H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
+								if(!used_fatal){
+									log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+									log_files << fileName << std::endl;
+									used_fatal=true;
+								}
+							}
 						}
                    }
                 }
@@ -2511,15 +2585,33 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 
                 //sync check
 				if(found_event.size() > 0){
-					if(isL!=isLoose_match[i/2]) m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of loose: mine is " << isL <<
+					if(isL!=isLoose_match[i/2]){
+						 m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of loose: mine is " << isL <<
 							" and his is " << isLoose_match[i/2] << SLogger::endmsg;
-					else m_logger << WARNING << " Found correct number of LOOSE." << SLogger::endmsg;
-					if(isM!=isMedium_match[i/2]) m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of medium: mine is " << isM <<
-								" and his is " << isMedium_match[i/2] << SLogger::endmsg;
-					else m_logger << WARNING << " Found correct number of MEDIUM." << SLogger::endmsg;
-					if(isT!=isTight_match[i/2]) m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of tight: mine is " << isT <<
-								" and his is " << isTight_match[i/2] << SLogger::endmsg;
-					else m_logger << WARNING << " Found correct number of TIGHT." << SLogger::endmsg;
+						if(!used_fatal){
+							log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+							log_files << fileName << std::endl;
+							used_fatal=true;
+						}	
+					}else m_logger << WARNING << " Found correct number of LOOSE." << SLogger::endmsg;
+					if(isM!=isMedium_match[i/2]){
+						 m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of medium: mine is " << isM <<
+						" and his is " << isMedium_match[i/2] << SLogger::endmsg;
+						if(!used_fatal){
+							log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+							log_files << fileName << std::endl;
+							used_fatal=true;
+						}
+					}else m_logger << WARNING << " Found correct number of MEDIUM." << SLogger::endmsg;
+					if(isT!=isTight_match[i/2]){
+						 m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of tight: mine is " << isT <<
+						" and his is " << isTight_match[i/2] << SLogger::endmsg;
+						if(!used_fatal){
+							log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+							log_files << fileName << std::endl;
+							used_fatal=true;
+						}
+					}else m_logger << WARNING << " Found correct number of TIGHT." << SLogger::endmsg;
 				}
 	                
                 Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
@@ -2539,7 +2631,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						case 8: exp_event_type=501; break;
 						default: exp_event_type=0; break;
 					}
-					TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
 					log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;
 					for(int i=0;i < isL; i++)
 					{
@@ -2553,6 +2644,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					{
 						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+1 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
 					}
+					
 					
 				}
                 
