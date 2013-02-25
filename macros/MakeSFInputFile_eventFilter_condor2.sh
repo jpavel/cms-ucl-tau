@@ -30,9 +30,6 @@ rm ${output_name}_*makeXML.sh
 
 
 cp ${1} temp_input.1 
-total=`more temp_input.1 | wc -l`
-echo "Total number of input root files is" $total
-counter=0
 
 touch temp_input.1.1
 
@@ -45,35 +42,45 @@ touch temp_input.1.1
 #~ touch duplicates.list
 #~ 
 #~ 
-#~ #duplicate removal
-#~ for block in  `seq -s ' ' 1 ${total}`; do
-    #~ more temp_input.1 |  grep "_${block}_[0-9]\{1,\}_....root" > copies.list
-    #~ copies=`more copies.list | wc -l`
-    #~ toRemove=`expr $copies - 1`
-    #~ if [ $copies -gt 0 ]; then
-      #~ more copies.list | head -n ${toRemove} >> duplicates.list
-      #~ more copies.list | tail -n 1 >> toKeep.list
-    #~ fi
-    #~ rm -f copies.list
-#~ done
-#~ 
-#~ rm -f temp_input.1
-#~ mv toKeep.list temp_input.1
+#duplicate removal
+# for block in  `seq -s ' ' 1 ${total}`; do
+#     more temp_input.1 |  grep "_${block}_[0-9]\{1,\}_....root" > copies.list
+#     copies=`more copies.list | wc -l`
+#     toRemove=`expr $copies - 1`
+#     if [ $copies -gt 0 ]; then
+#       more copies.list | head -n ${toRemove} >> duplicates.list
+#       more copies.list | tail -n 1 >> toKeep.list
+#     fi
+#     rm -f copies.list
+# done
+
+# rm -f temp_input.1
+# mv toKeep.list temp_input.1
 
 #~ 
 #~ 
 #~ 
 #~ 
 #~ 
-#~ more temp_input.1 |while read line
-#~ do
-  #~ file=`echo $line`
-  #~ echo "${full_path}${file}" >> temp_input.1.1
-#~ done
+currFile=""
+more temp_input.1 |while read line
+do
+  file=`echo $line`
+  if [ "${file}" != "${currFile}" ]; then
+    echo "${file}" >> temp_input.1.1
+    currFile=${file}
+  fi
+done
+
+mv temp_input.1.1 temp_input.1
+total=`more temp_input.1 | wc -l`
+echo "Total number of input root files is" $total
+counter=0
+
+
 #~ 
 #~ #echo "The full paths to all files are:"
 #~ #more temp_input.1.1
-#~ mv temp_input.1.1 temp_input.1
 
 until [ $total -lt 1 ]
 do
