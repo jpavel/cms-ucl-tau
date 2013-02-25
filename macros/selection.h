@@ -3,6 +3,7 @@
 
 #include "myevent.h"
 #include "helper.h"
+#include <vector>
 
 #include "TLorentzVector.h"
 
@@ -230,6 +231,30 @@ bool PassFilter(myevent* m, bool debug,
 	
 	return true;
 }
+
+bool PassFilter(myevent* m, bool debug,
+				std::vector<long> run_number,
+				std::vector<long> event_number)
+				{
+					long rNumber =  m->runNumber;
+					long eNumber = m->eventNumber;
+					
+					if(debug)
+					std::cout << rNumber << " " << eNumber << std::endl;
+					
+					uint pos_helper=0; 
+					bool pass = false;
+					pos_helper = std::find(event_number.begin(), event_number.end(), eNumber) - event_number.begin();
+					for(uint i=0; pos_helper < event_number.size() && !pass; i++ )
+					{
+						 std::cout << " found event " << eNumber << " " << event_number[pos_helper] << std::endl;
+						 std::cout << " run number is " << rNumber << " " << run_number[pos_helper] << std::endl;
+						if(rNumber==run_number[pos_helper]) pass = true;
+						pos_helper = std::find(event_number.begin()+pos_helper+1, event_number.end(), eNumber) - event_number.begin();
+					}
+					
+				return pass;
+				}	
 
 #endif // selection_H
 
