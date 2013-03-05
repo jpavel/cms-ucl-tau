@@ -24,10 +24,3 @@ ls -l
 echo ">> set environment"
 pwd=$PWD
 source $VO_CMS_SW_DIR/cmsset_default.sh
-cd /localgrid/jez/workarea/CMSSW_5_3_3/src
-eval `scram runtime -sh`
-cd SFrame
-source setup.sh
-cd $pwd
-
-# staging-in input

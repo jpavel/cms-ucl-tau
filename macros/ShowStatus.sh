@@ -39,6 +39,11 @@ lumiCalc2.py overview -i ${outputDir}/${output}/lumi.json 1>lumi.out 2>lumi.err
 tail lumi.out -n 4
 touch Resubmit_now.sh
 rm -f Resubmit_now.sh 
-echo "source Resubmit2.sh resubmit ${task} ${outputLoc}" > Resubmit_now.sh
+touch Resubmit_now_noDelete.sh
+rm -f Resubmit_now_noDelete.sh
+echo "source Resubmit2.sh resubmit ${task} ${outputLoc} 0" > Resubmit_now.sh
+echo "source Resubmit2.sh resubmit ${task} ${outputLoc} 1" > Resubmit_now_noDelete.sh
 chmod +x Resubmit_now.sh
+chmod +x Resubmit_now_noDelete.sh
 echo "To resubmit failed jobs do ./Resubmit_now.sh"
+echo "To resubmit failed jobs and do not delete do ./Resubmit_now_noDelete.sh"

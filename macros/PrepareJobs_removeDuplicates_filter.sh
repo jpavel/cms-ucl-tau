@@ -17,6 +17,29 @@
 touch temp_input.1
 rm -f temp_input.*
 
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  echo script not sourced! Exiting...
+  exit 1
+fi
+
+if [ "${PWD##/localgrid/}" = "${PWD}" ]; then
+    echo "Not in localgrid! It is not possible to submit to local queue unless you are in /localgrid directory! Exiting... "
+    return 3
+fi
+
+
+if [ "$CMSSW_BASE" = "" ]; then
+  echo \$CMSSW_BASE is NOT set! Exiting...
+  return 1
+fi
+
+if [ $# -ne 7 ]; then
+    echo "Wrong number of input arguments!"
+    echo "Usage: source PrepareJobs_removeDuplicates_filter.sh <PNFSinput> <taskName> <filesPerJob> <isFR> <is2011> <PNFSoutput> <resultsOutput>"
+    echo "e.g. source PrepareJobs_removeDuplicates_filter.sh /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/Data/DoubleElectron_Run2012D-PromptReco-v1/ FILTER3_D_Ele 10 0 0 /pnfs/iihe/cms/store/user/jez/test/newFilter3 results_filter/test"
+    return 2
+fi
+
 time=`date "+%Y%m%d"`
 input_data=`echo $1`
 output_name=${time}_$2
@@ -122,6 +145,20 @@ mkdir -p ${output_name}
 cp ${output_name}_run_filter_all.C ${output_name}/${output_name}_run_filter_all.C
 rm -f ${output_name}_run_filter_all.C
 
+
+touch script2.sh
+rm -f script2.sh
+touch script2.sh
+
+echo "cd "$CMSSW_BASE"/src" >> script2.sh
+echo "eval \`scram runtime -sh\`" >> script2.sh
+echo "cd \$pwd" >> script2.sh
+echo "" >> script2.sh
+echo "# staging-in input" >> script2.sh
+
+cp script.sh script_temp.sh
+cat script2.sh >> script_temp.sh
+
 until [ $total -lt 1 ]
 do
   echo "Total is" $total
@@ -137,7 +174,7 @@ do
   rm -f temp_input.1.2
   mv temp_input_2_${counter}.1.2 temp_input.1.2
   mkdir -p ${output_name}/job${counter}
-  cp script.sh ${output_name}/job${counter}/${output_name}_${counter}.sh
+  cp script_temp.sh ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "export X509_USER_PROXY=${sframe_dir}/myProxy" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "mkdir -p /scratch/${output_name}_input_${counter}" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   sed -i "s/_input/_input_${counter}/g" input_${counter}.*
@@ -178,6 +215,7 @@ do
 done 
 rm -f temp_input*
 rm -f full_path
+rm -f script_temp.sh
 
 chmod +x ${output_name}_SubmitAll.sh
 echo "To submit jobs, do ./${output_name}_SubmitAll.sh"
