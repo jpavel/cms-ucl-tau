@@ -1,6 +1,6 @@
 #include "TChain.h"
 #include "TFile.h"
-#include "../include/myevent.h"
+#include "myevent.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -8,10 +8,8 @@
 
 #include "selection.h"
 
-#ifdef __CINT__
-#pragma link C++ class myevent+;
-#pragma link C++ class myobject+;
-#endif
+#include "LinkDef.h"
+
 
 int filter(TString inputDir, long n_evt=100,bool is11=false,bool isFR=false)
 {
