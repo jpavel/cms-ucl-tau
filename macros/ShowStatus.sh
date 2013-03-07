@@ -23,11 +23,12 @@ source MergeOutput_filter2.sh ${task} ${outputDir}/${output}/
 finished=`more ${outputDir}/${output}/*_total.txt | wc -l`
 echo "${finished} jobs produced output"
 saved=`ls ${outputLoc} | wc -l`
-saved_size=`ls -lh ${outputLoc} | head -n 1 | tr -cd [:digit:]`
-input_size=`ls -lh ${inputLoc} | head -n 1 | tr -cd [:digit:]`
+saved_size=`ls -l ${outputLoc} | head -n 1 | tr -cd [:digit:]`
+input_size=`ls -l ${inputLoc} | head -n 1 | tr -cd [:digit:]`
 source removeDuplicate.sh ${outputLoc} 1 ${max}
 ratio=`echo "${saved_size} / ${input_size} * 100" | bc -l | awk '{printf("%04.1f",$1);}'`
-echo "The size of filtered output is ${saved_size} GB (${ratio} %)"
+saved_GB=`echo "${saved_size} / 1024 / 1000" | bc -l | awk '{printf("%04.1f",$1);}'`
+echo "The size of filtered output is ${saved_GB} GB (${ratio} %)"
 echo "---------SUMMARY----------"
 echo "total: ${max}"
 echo "successful: ${successful}"
