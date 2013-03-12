@@ -12,8 +12,7 @@ ls -l
 echo ">> script.sh is listing files and directories in userdir on storage element"
 ls -l /pnfs/iihe/cms/store/user/$USER
 
-##When accessing files on the storage element it is imporant to execute your code on the /scratch partition of the workernode you are running on. Therefore you need to copy your executable which is accessing/writing root files on
-to the /scratch partition and execute it there. This is illustrated below.
+##When accessing files on the storage element it is imporant to execute your code on the /scratch partition of the workernode you are running on. Therefore you need to copy your executable which is accessing/writing root files onto the /scratch partition and execute it there. This is illustrated below.
 
 echo ">> cd into /scratch partition"
 cd /scratch
