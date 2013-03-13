@@ -21,14 +21,15 @@ public:
 
 
     float pt, eta, px, py, phi, charge, E, et, pz, z, mass, dz_Ver_match, Energy, mt, jetMass, eta_SC;
-    float mod_pt, mod_eta, mod_phi, mod_charge, mod_z;
-    float Gmod_pt, Gmod_eta, Gmod_phi, Gmod_charge, Gmod_z;
+    float mod_pt, mod_eta, mod_phi, mod_charge, mod_z, mod_mass;
+    float Gmod_pt, Gmod_eta, Gmod_phi, Gmod_charge, Gmod_z, Gmod_mass;
     float pfIsoAll, pfIsoCharged, pfIsoNeutral, pfIsoGamma, pfIsoPU, pfIsoPULow,Id_mvaTrg,Id_mvaNonTrg;
     float pfIsoAll_NoPFId, pfIsoCharged_NoPFId, pfIsoNeutral_NoPFId, pfIsoGamma_NoPFId, pfIsoPU_NoPFId;
     float z_expo;
-    double position_Rho, position_rho;
+    float position_Rho, position_rho;
 
      int pdgId, status, mod_pdgId, mod_status, Gmod_pdgId, Gmod_status, tracksSize;
+     int gen_index, decay_mode;
     //Muon
     float dB, d0, emfraction;
     float DepositR03Ecal;
@@ -44,7 +45,7 @@ public:
    int normalizedChi2_innTrk, numberOfValidMuonHits_innTrk,  numberOfHits_innTrk;
    float normalizedChi2;
    int trkLayerMeasure , intrkLayerMeasure,  intrkLayerpixel;
-    double    dxy_in , dZ_in ;
+    float    dxy_in , dZ_in ;
 
 
     //Vertex Mettopology Trigger
@@ -67,9 +68,18 @@ public:
     bool puJetIdLoose, puJetIdMedium, puJetIdTight;
     //    float leadChargedParticlePt, leadNeutralParticlePt, leadParticlePt, leadTrackD0;
     float mva_e_pi, mva_pi_mu, mva_e_mu, hcalEnergy, ecalEnergy, trackRefPt;
-    int numChargedParticlesSignalCone, numNeutralHadronsSignalCone, numPhotonsSignalCone, numParticlesSignalCone;
+    int numChargedParticlesSignalCone, numNeutralHadronsSignalCone, numPhotonsSignalCone, numParticlesSignalCone, signalPiZeroCandidates;
     int numChargedParticlesIsoCone, numNeutralHadronsIsoCone, numPhotonsIsoCone, numParticlesIsoCone;
     float ptSumChargedParticlesIsoCone, ptSumPhotonsIsoCone;
+    
+    float sig_track1_pt, sig_track1_phi, sig_track1_eta, sig_track1_m;
+    float sig_track2_pt, sig_track2_phi, sig_track2_eta, sig_track2_m;
+    float sig_track3_pt, sig_track3_phi, sig_track3_eta, sig_track3_m;
+
+    float sig_pi0_1_pt, sig_pi0_1_phi, sig_pi0_1_eta, sig_pi0_1_m;
+    float sig_pi0_2_pt, sig_pi0_2_phi, sig_pi0_2_eta, sig_pi0_2_m;
+
+
     //    float discriminationByLeadingTrackFinding;
     //    float discriminationByLeadingTrackPtCut;
     //    float discriminationByDecayModeSelection;
@@ -80,35 +90,53 @@ public:
     //    float discriminationByTaNCLoose;
     //    float discriminationByTaNCMedium;
     //    float discriminationByTaNCTight;
-    float discriminationByDecayModeFinding;
-    float discriminationByVeryLooseIsolation;
-    float discriminationByLooseIsolation;
-    float discriminationByMediumIsolation;
-    float discriminationByTightIsolation;
-    float discriminationByElectronLoose;
-    float discriminationByElectronMedium;
-    float discriminationByElectronTight;
-    float discriminationByElectronMVA;
-    float discriminationByMuonLoose;
-    float discriminationByMuonMedium;
-    float discriminationByMuonTight;
-    float byVLooseCombinedIsolationDeltaBetaCorr;
-    float byLooseCombinedIsolationDeltaBetaCorr;
-    float byMediumCombinedIsolationDeltaBetaCorr;
-    float byTightCombinedIsolationDeltaBetaCorr;
+    bool discriminationByDecayModeFinding;
+    bool discriminationByVeryLooseIsolation;
+    bool discriminationByLooseIsolation;
+    bool discriminationByMediumIsolation;
+    bool discriminationByTightIsolation;
+    bool discriminationByElectronLoose;
+    bool discriminationByElectronMedium;
+    bool discriminationByElectronTight;
+    bool discriminationByElectronMVA;
+    bool discriminationByElectronMVA2Loose;
+    bool discriminationByElectronMVA2Medium;
+    bool discriminationByElectronMVA2Tight;
+    bool discriminationByElectronMVA3Loose;
+    bool discriminationByElectronMVA3Medium;
+    bool discriminationByElectronMVA3Tight;
+    bool discriminationByElectronMVA3VTight;
+
+    bool discriminationByMuonLoose;
+    bool discriminationByMuonMedium;
+    bool discriminationByMuonTight;
+    bool discriminationByMuonLoose2;
+    bool discriminationByMuonMedium2;
+    bool discriminationByMuonTight2;
+    bool byVLooseCombinedIsolationDeltaBetaCorr;
+    bool byLooseCombinedIsolationDeltaBetaCorr;
+    bool byMediumCombinedIsolationDeltaBetaCorr;
+    bool byTightCombinedIsolationDeltaBetaCorr;
+    bool byLooseCombinedIsolationDeltaBetaCorr3Hits;
+    bool byMediumCombinedIsolationDeltaBetaCorr3Hits;
+    bool byTightCombinedIsolationDeltaBetaCorr3Hits;
+
 
 
     float byIsolationMVAraw;
-    float byLooseIsolationMVA;
-    float byMediumIsolationMVA;
-    float byTightIsolationMVA;
-    float againstElectronTightMVA2;
+    float byIsolationMVA2raw;
+    bool byLooseIsolationMVA;
+    bool byMediumIsolationMVA;
+    bool byTightIsolationMVA;
+    bool byLooseIsolationMVA2;
+    bool byMediumIsolationMVA2;
+    bool byTightIsolationMVA2;
 
-    float CicVeryLoose;
-    float CicLoose;
-    float CicMedium;
-    float CicTight;
-    float CicSuperTight;
+  /*   float CicVeryLoose; */
+/*     float CicLoose; */
+/*     float CicMedium; */
+/*     float CicTight; */
+/*     float CicSuperTight; */
 
     //    float CicHZZVeryLoose;
     //    float CicHZZLoose;
