@@ -491,6 +491,37 @@ double Analysis::RelIsoEl(myobject el){
 	return relIso;		
 }
 
+bool Analysis::isGoodMu(myobject mu){
+
+                double muPt = mu.pt;
+                double eMuta = mu.eta;
+                bool muGlobal = mu.isGlobalMuon;
+                bool muTracker = mu.isTrackerMuon;
+                double relIso = RelIsoMu(mu);
+
+                bool pfID = PFMuonID(mu);
+
+                if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4 && pfID)
+                {
+                        return true;
+                }else return false;
+}
+
+bool Analysis::isGoodEl(myobject el){
+	        
+	        double elPt = el.pt;
+                double elEta = el.eta;
+                int missingHits = el.numLostHitEleInner;
+                bool elID = EleMVANonTrigId(elPt,elEta,el.Id_mvaNonTrg);
+                double relIso = RelIsoEl(el);
+
+                if (elPt > 10. && fabs(elEta) < 2.5  && elID && missingHits <=1)
+                {
+                        return true;
+                }else return false;
+}
+
+
 bool Analysis::Trg_MC_12(myevent* m, bool found) {
 	map<string, int> myHLT = m->HLT;
 	bool Trigger = false;

@@ -69,8 +69,12 @@ public:
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
+   bool isGoodMu(myobject mu);
+   bool isGoodEl(myobject el);
+   
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
+   
    
    
 private:
