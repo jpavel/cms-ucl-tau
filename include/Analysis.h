@@ -71,7 +71,7 @@ public:
    double RelIsoEl(myobject el);
    bool isGoodMu(myobject mu);
    bool isGoodEl(myobject el);
-   
+   double InvMass(myobject o1, myobject o2);
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
    
@@ -86,6 +86,14 @@ private:
 	
 	myevent *m;
 	
+	
+	std::vector <int> evt_number;
+	std::vector <int> lumi_number;
+	std::vector <int> evt_type;
+	std::vector <double>  mass_Z;
+	std::vector <double>  mass_H;
+	double examineEvent;
+	ofstream plus;
 	
 	
 	int compared;
@@ -240,6 +248,8 @@ private:
 	std::string InTreeName;
 	double Ptcut;
 	double maxDeltaR;
+	double maxDeltaR2;
+	
 	double BestMassForZ;
 	double dZvertex;
 	double bTagValue;

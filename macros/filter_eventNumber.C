@@ -6,15 +6,15 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
+#include "LinkDef.h"
 
 
 #include "selection.h"
 
-#ifdef __CINT__
-#pragma link C++ class myevent+;
-#pragma link C++ class myobject+;
-#endif
+//~ #ifdef __CINT__
+//~ #pragma link C++ class myevent+;
+//~ #pragma link C++ class myobject+;
+//~ #endif
 
 /*
  * A script to filter out events based on their run and event number. 
