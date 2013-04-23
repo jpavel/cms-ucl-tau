@@ -186,6 +186,18 @@ private:
         TH1* h_n_goodMu_Hcand;
         TH1* h_n_goodTau_Hcand;
         
+        TH1* h_Zmass_afterZselection;
+        TH1* h_Zmass_endOfselection;
+        TH1* h_Zmass_endOfselection_signal;
+        TH1* h_tMass_muTau_signal;
+        TH1* h_tMass_muTau_cat0;
+        TH1* h_tMass_muTau_cat1;
+        TH1* h_tMass_muTau_cat2;
+        TH1* h_tMass_eTau_signal;
+        TH1* h_tMass_eTau_cat0;
+        TH1* h_tMass_eTau_cat1;
+        TH1* h_tMass_eTau_cat2;
+        
         TH1* h_PU_weight;
         TH1* h_total_weight;
         TH1* h_nPU_raw;

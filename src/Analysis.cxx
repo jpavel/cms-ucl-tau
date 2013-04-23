@@ -58,7 +58,7 @@ Analysis::Analysis()
 		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=15;
 		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=15;
-	    if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=15;
+		if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=15;
 	    
 	    
 
@@ -83,23 +83,23 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
-        h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
-        h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
-        h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
+	h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
+	h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
+	h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
 
-        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
-        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
-        
-        h_cut_flow_signal 				= Book(TH1D("h_cut_flow_signal","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat0					= Book(TH1D("h_cut_flow_cat0","Cut Flow cat0",4,0.5,4.5));
-		h_cut_flow_cat1					= Book(TH1D("h_cut_flow_cat1","Cut Flow cat1",4,0.5,4.5));
-		h_cut_flow_cat2					= Book(TH1D("h_cut_flow_cat2","Cut Flow cat2",4,0.5,4.5));
+	h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
+	h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
 
-		h_cut_flow_signal_weight		= Book(TH1D("h_cut_flow_signal_weight","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat0_weight			= Book(TH1D("h_cut_flow_cat0_weight","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat1_weight			= Book(TH1D("h_cut_flow_cat1_weight","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat2_weight			= Book(TH1D("h_cut_flow_cat2_weight","Cut Flow signal",4,0.5,4.5));
-	
+	h_cut_flow_signal 				= Book(TH1D("h_cut_flow_signal","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat0					= Book(TH1D("h_cut_flow_cat0","Cut Flow cat0",4,0.5,4.5));
+	h_cut_flow_cat1					= Book(TH1D("h_cut_flow_cat1","Cut Flow cat1",4,0.5,4.5));
+	h_cut_flow_cat2					= Book(TH1D("h_cut_flow_cat2","Cut Flow cat2",4,0.5,4.5));
+
+	h_cut_flow_signal_weight		= Book(TH1D("h_cut_flow_signal_weight","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat0_weight			= Book(TH1D("h_cut_flow_cat0_weight","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat1_weight			= Book(TH1D("h_cut_flow_cat1_weight","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat2_weight			= Book(TH1D("h_cut_flow_cat2_weight","Cut Flow signal",4,0.5,4.5));
+
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
 	h_event_type        	      	= Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
@@ -107,18 +107,18 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	
 	//Z->mumu    
-	h_mu1Z_pt           		= Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
-	h_mu2Z_pt          		        = Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));
-	h_Zmass_mumu        		= Book(TH1D("h_Zmass_mumu","Zmumu_mass",60,60,120));
-	h_Zpt_mumu          		= Book(TH1D("h_Zpt_mumu","Zmumu_pt",300,0,300));
+	h_mu1Z_pt     				      		= Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
+	h_mu2Z_pt          		       		 	= Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));
+	h_Zmass_mumu        					= Book(TH1D("h_Zmass_mumu","Zmumu_mass",60,60,120));
+	h_Zpt_mumu          					= Book(TH1D("h_Zpt_mumu","Zmumu_pt",300,0,300));
 	//Z->ee    
-	h_ele1Z_pt          		= Book(TH1D("h_ele1Z_pt","ele1_Pt",300,0,300));
-	h_ele2Z_pt         		        = Book(TH1D("h_ele2Z_pt","ele2_Pt",300,0,300));
-	h_Zmass_ee          		= Book(TH1D("h_Zmass_ee","Zee_mass",60,60,120));
-	h_Zpt_ee            		= Book(TH1D("h_Zpt_ee","Zee_pt",300,0,300));
+	h_ele1Z_pt          					= Book(TH1D("h_ele1Z_pt","ele1_Pt",300,0,300));
+	h_ele2Z_pt         		        		= Book(TH1D("h_ele2Z_pt","ele2_Pt",300,0,300));
+	h_Zmass_ee          					= Book(TH1D("h_Zmass_ee","Zee_mass",60,60,120));
+	h_Zpt_ee            					= Book(TH1D("h_Zpt_ee","Zee_pt",300,0,300));
 	//Z
-	h_Zmass     		        = Book(TH1D("h_Zmass","Z_mass",60,60,120));
-	h_Zpt            		   = Book(TH1D("h_Zpt","Z_pt",300,0,300));
+	h_Zmass     		        			= Book(TH1D("h_Zmass","Z_mass",60,60,120));
+	h_Zpt            		   			= Book(TH1D("h_Zpt","Z_pt",300,0,300));
 
 	h_Z_eta				= Book(TH1D("h_Z_eta","H #eta; #eta",100,-3.0,3.0));
 	h_Z_phi				= Book(TH1D("h_Z_phi","H #phi; #phi",64,-3.2,3.2));
@@ -165,6 +165,20 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_H_lep2_eta			= Book(TH1D("h_H_lep2_eta","H #eta; #eta",100,-3.0,3.0));
 	h_H_lep2_phi			= Book(TH1D("h_H_lep2_phi","H #phi; #phi",64,-3.2,3.2));
 
+        //Z mass and tMass plot (added by Lucia)
+	h_Zmass_afterZselection     		        	= Book(TH1D("h_Zmass_afterZselection","Z_mass after the Z selection (all events)",60,60,120));
+	h_Zmass_endOfselection     		                = Book(TH1D("h_Zmass_endOfselection","Z_mass at the end of the selection (all events)",60,60,120));
+	h_Zmass_endOfselection_signal     		        = Book(TH1D("h_Zmass_endOfselection_signal","Z_mass at the end of selection (signal events)",60,60,120));
+	h_tMass_muTau_signal 		     		        = Book(TH1D("h_tMass_muTau_signal","Tmass with the leading lepton in the muTau final state (signal events)",100,0,200));
+	h_tMass_muTau_cat0 		     		        = Book(TH1D("h_tMass_muTau_cat0","Tmass with the leading lepton in the muTau final state (cat0 events)",100,0,200));
+	h_tMass_muTau_cat1 		     		        = Book(TH1D("h_tMass_muTau_cat1","Tmass with the leading lepton in the muTau final state (cat1 events)",100,0,200));
+	h_tMass_muTau_cat2 		     		        = Book(TH1D("h_tMass_muTau_cat2","Tmass with the leading lepton in the muTau final state (cat2 events)",100,0,200));
+	h_tMass_eTau_signal 		     		        = Book(TH1D("h_tMass_eTau_signal","Tmass with the leading lepton in the eTau final state (signal events)",100,0,200));
+	h_tMass_eTau_cat0 		     		        = Book(TH1D("h_tMass_eTau_cat0","Tmass with the leading lepton in the eTau final state (cat0 events)",100,0,200));
+	h_tMass_eTau_cat1 		     		        = Book(TH1D("h_tMass_eTau_cat1","Tmass with the leading lepton in the eTau final state (cat1 events)",100,0,200));
+	h_tMass_eTau_cat2 		     		        = Book(TH1D("h_tMass_eTau_cat2","Tmass with the leading lepton in the eTau final state (cat2 events)",100,0,200));
+             
+ 
 	// lepton histograms
 	h_n_goodEl			= Book(TH1D("h_n_goodEl","Number of good electrons; good electrons",10,-0.5,9.5));
 	h_n_goodMu			= Book(TH1D("h_n_goodMu","Number of good muons; good muons",10,-0.5,9.5));
@@ -192,7 +206,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_nbjets_afterVeto_signal              = Book(TH1D("h_nbjets_afterVeto_signal", "# of b-jets remaining after b-tag Veto",10,0,10));
 	h_nbjetsVetoed                  = Book(TH1D("h_nbjetsVetoed", "# of b-jets removed from b-tag Veto",10,0,10));
 
-	h_Tmass				= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
 
         h_nPU_Info                      = Book(TH1D("h_nPU_Info","PU info distribution",100,0,100));
         h_nPU_InfoTrue                  = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",100,0,100));
@@ -436,10 +449,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	  //~ " " << mass_Z[i] << " " << mass_H[i] << std::endl;		
 	  //~ }
 	//~ 
-
-	
-	
-	
 
 	return;
 
@@ -762,8 +771,8 @@ entries++;
 		bool muGlobal = muon[i].isGlobalMuon;
 		bool muTracker = muon[i].isTrackerMuon;
 		double relIso = RelIsoMu(muon[i]);
-
-		bool pfID = PFMuonID(muon[i]);	
+		bool pfID = PFMuonID(muon[i]);
+	
 		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && muon[i].isPFMuon)
 		{
 			goodMuon.push_back(muon[i]);
@@ -1056,8 +1065,12 @@ entries++;
 	
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 
-	if(Zmumu||Zee)
+	if(Zmumu||Zee){
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
+                //Z mass plot for all events
+                Hist( "h_Zmass_afterZselection" )->Fill(Zmass,Z_weight);
+        }
+
 	else{
 			 if(found_event){
 				  std::cout << "WRONG! event " << eNumber << "(#" << m_allEvents << ")" << std::endl; // sync 
@@ -1093,16 +1106,10 @@ entries++;
 	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,Z_weight);
 
 	
-	
-	
 	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " electrons before overlap " << std::endl;
 	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " muons before overlap " << std::endl;
 	
 
-	
-
-	
-	
 	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " electrons before tau overlap " << std::endl;
 	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " muons before tau overlap " << std::endl;
 	
@@ -1804,8 +1811,6 @@ entries++;
 	else if (category==2) h_cut_flow_cat2_weight->Fill(3,weight);
 
 
-
-
 	// b-tag veto
 
 	bool bTagVeto = false;
@@ -1888,13 +1893,22 @@ entries++;
 	double tMass = -100;
 	if(!tauTau)
 	{
-		if(!muE) tMass = Tmass(m,Hcand[0]);
-		else{
-			if(Hcand[0].pt > Hcand[1].pt) tMass = Tmass(m,Hcand[0]);
-			else tMass = Tmass(m,Hcand[1]);
-		}
-
-		Hist("h_Tmass")->Fill(tMass,weight); 
+		if(!muE){
+                   if(muTau){
+                      tMass = Tmass(m,Hcand[0]);
+		      if(signal) Hist( "h_tMass_muTau_signal" )->Fill(tMass,weight);
+		      if(category==0) Hist( "h_tMass_muTau_cat0" )->Fill(tMass,weight);
+		      if(category==1) Hist( "h_tMass_muTau_cat1" )->Fill(tMass,weight);
+		      if(category==2) Hist( "h_tMass_muTau_cat2" )->Fill(tMass,weight);
+                   }
+                   if(eTau){
+                      tMass = Tmass(m,Hcand[0]);
+		      if(signal) Hist( "h_tMass_eTau_signal" )->Fill(tMass,weight);
+		      if(category==0) Hist( "h_tMass_eTau_cat0" )->Fill(tMass,weight);
+		      if(category==1) Hist( "h_tMass_eTau_cat1" )->Fill(tMass,weight);
+		      if(category==2) Hist( "h_tMass_eTau_cat2" )->Fill(tMass,weight);
+                   }
+                }                  
 	}
 
 
@@ -2092,6 +2106,10 @@ entries++;
 	
 	h_cut_flow->Fill(10,1);
 	h_cut_flow_weight->Fill(10,weight);
+
+
+        Hist( "h_Zmass_endOfselection" )->Fill(Zmass,weight);
+        if(signal) Hist( "h_Zmass_endOfselection_signal" )->Fill(Zmass,weight);
 
         // DeltaR check
         Hist("h_deltaR")->Fill(deltaR(Hcand[0].eta,Hcand[0].phi,Hcand[1].eta,Hcand[1].phi));
