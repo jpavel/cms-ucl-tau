@@ -397,7 +397,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	// sync part
 	std::ifstream myfile;
 	 std::string line;
-	myfile.open ("eeem_new.txt");
+	myfile.open ("eemt_new.txt");
 	 if (myfile.is_open())
 	 {	
 	    
@@ -488,7 +488,8 @@ double Analysis::deltaR(double eta1, double phi1, double eta2, double phi2){
 	return dR;
 }
 
-bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
+
+bool Analysis::TightEleId(float pt, float eta, double value){
 	bool passingId=false;
 
 	if( pt<20. && fabs(eta)<0.8 && value>0.925)
@@ -506,6 +507,29 @@ bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
 		passingId=true;
 	//  if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
 	return passingId;
+}
+
+bool Analysis::TightEleId(myobject o){
+	return TightEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
+}
+
+
+bool Analysis::LooseEleId(float pt, float eta, double value){
+	bool passingId=false;
+
+	
+	if(pt>10. && fabs(eta)<0.8 && value>0.5)
+		passingId=true;
+	if(pt>10. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.12)
+		passingId=true;
+	if(pt>10. && fabs(eta)>=1.479 && value>0.6)
+		passingId=true;
+	//  if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
+	return passingId;
+}
+
+bool Analysis::LooseEleId(myobject o){
+	return LooseEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
 }
 
 bool Analysis::PFMuonID(myobject mu){
@@ -564,7 +588,7 @@ bool Analysis::isGoodEl(myobject el){
 	        double elPt = el.pt;
                 double elEta = el.eta_SC;
                 int missingHits = el.numLostHitEleInner;
-                bool elID = EleMVANonTrigId(elPt,el.eta_SC,el.Id_mvaNonTrg);
+                bool elID = LooseEleId(elPt,el.eta_SC,el.Id_mvaNonTrg);
                 double relIso = RelIsoEl(el);
 
                 if (elPt > 10. && fabs(elEta) < 2.5  && elID && missingHits <=1)
@@ -740,7 +764,7 @@ entries++;
 		double relIso = RelIsoMu(muon[i]);
 
 		bool pfID = PFMuonID(muon[i]);	
-		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
+		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && muon[i].isPFMuon)
 		{
 			goodMuon.push_back(muon[i]);
 			Hist("h_mu_relIso")->Fill(relIso,PUWeight);
@@ -760,7 +784,7 @@ entries++;
 		double elPt = electron[i].pt;
 		double elEta = electron[i].eta_SC;
 		int missingHits = electron[i].numLostHitEleInner;
-		bool elID = EleMVANonTrigId(elPt,electron[i].eta_SC,electron[i].Id_mvaNonTrg);
+		bool elID =  LooseEleId(elPt,electron[i].eta_SC,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
 		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && elID)
@@ -1187,7 +1211,7 @@ entries++;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
 
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR && RelIsoMu(goodMuon[j]) < 0.3) 
 			{	goodMuon.erase(goodMuon.begin()+i); i--; removed = true;}
 			if(removed)Zoverlap=true;
 
@@ -1201,7 +1225,7 @@ entries++;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
 
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR && RelIsoEl(goodElectron[j]) < 0.3) 
 			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
 			if(removed)Zoverlap=true;
 
@@ -1249,6 +1273,7 @@ entries++;
 		double relIso = RelIsoMu(goodMuon[i]);
 		bool iso1_muE = (relIso < 0.2);
 		bool iso1_muTau = (relIso < 0.25);
+		bool isTightMuon = isGoodMu(goodMuon[i]);
 		if(!checkCategories && !iso1_muE) continue;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
 		for(uint j=0; j< goodElectron.size() && !signal; j++)
@@ -1268,6 +1293,7 @@ entries++;
 
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
 		if(!checkCategories && !iso1_muTau) continue;
+		if(!isTightMuon) continue;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
 			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_mutau_sumPt) continue;			
@@ -1300,7 +1326,7 @@ entries++;
 			if( goodElectron[i].numLostHitEleInner > 0) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			if(examineThisEvent) std::cout << "ele1 no. " << i << " passes preselection with iso1 " << iso1 << std::endl;
-		
+			if(!TightEleId(goodElectron[i])) continue;
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
 				if(examineThisEvent) std::cout << "tau2 no. " << j << "out of " << goodTau.size() << std::endl;
@@ -2105,7 +2131,7 @@ entries++;
 	}
 	
 	//found_event=true; //unsync
-	if (!found_event && signal && event_type==6){
+	if (!found_event && signal && event_type==5){
 		plus << event_type << " " << m->runNumber << " " << m->eventNumber << std::endl;
 	 	  m_logger << ERROR << " My plus of type " << event_type << SLogger::endmsg;
 		TLorentzVector Zvector;
@@ -2229,12 +2255,13 @@ entries++;
 		for (uint i = 0; i < electron.size(); i++) {
 
 		double elPt = electron[i].pt;
-		double elEta = electron[i].eta;
+		double elEta = electron[i].eta_SC;
 		int missingHits = electron[i].numLostHitEleInner;
-		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
+		bool elID = TightEleId(elPt,elEta,electron[i].Id_mvaNonTrg);
+		bool elID2 = LooseEleId(elPt,elEta,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 		std::cout << " --> no. " << i << " pt "  << elPt << " eta " << elEta << " phi " << electron[i].phi 
-		<< " ID: " << elID << " mHits " << missingHits << " iso " << relIso << std::endl; 
+		<< " ID tight: " << elID << " ID loose: " << elID2 << " mHits " << missingHits << " iso " << relIso << std::endl; 
 		
 		if (elPt > 10 && fabs(elEta) < 2.5 && missingHits <= 1 && relIso < 0.3 && elID)
 		{

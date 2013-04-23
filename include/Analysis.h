@@ -65,7 +65,10 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
    
    double deltaR(double eta1, double phi1, double eta2, double phi2);
-   bool EleMVANonTrigId(float pt, float eta, double value);
+   bool TightEleId(float pt, float eta, double value);
+   bool TightEleId(myobject o);
+   bool LooseEleId(float pt, float eta, double value);
+   bool LooseEleId(myobject o);
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
