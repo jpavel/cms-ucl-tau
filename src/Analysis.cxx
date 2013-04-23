@@ -636,7 +636,7 @@ bool Analysis::Trg_MC_12(myevent* m, bool found) {
 
 double Analysis::Tmass(myevent *m, myobject mu) {
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
 	return tMass_v;
@@ -876,7 +876,7 @@ entries++;
 					goodMuon[i].E+goodMuon[j].E);
 			double mass = cand.M();
 			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-			if(mass > 60. && mass < 120.){
+			if(fabs(mass - BestMassForZ) < 10. ){
 				Zmumu=true;
 				double dM = 999.;
 				if(BestMassForZ > 0.0){
@@ -942,7 +942,7 @@ entries++;
 				double mass = cand.M();
 				if(examineThisEvent) std::cout << "The mass is " << mass << "(" << mass_Z[pos] << ")" << std::endl;
 				m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-				if(mass > 60. && mass < 120.){ 
+				if(fabs(mass - BestMassForZ) < 10. ){ 
 					Zee=true;
 					double dM = 999.; 
 					if(BestMassForZ > 0.0){
@@ -1296,6 +1296,7 @@ entries++;
 		if(!isTightMuon) continue;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
+			if(Tmass(m,goodMuon[i]) > 30) continue;
 			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_mutau_sumPt) continue;			
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
@@ -1320,7 +1321,7 @@ entries++;
 		for(uint i = 0; i < goodElectron.size() && !signal ; i++)
 		{
 			if(examineThisEvent) std::cout << "ele1 no. " << i << "out of " << goodElectron.size() << std::endl;
-		
+			if(Tmass(m,goodElectron[i]) > 30) continue;
 			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.15);
 			if (!iso1 && !checkCategories) continue;
 			if( goodElectron[i].numLostHitEleInner > 0) continue;
