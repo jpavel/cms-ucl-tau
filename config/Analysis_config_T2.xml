@@ -14,7 +14,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="100000" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="9" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -27,7 +27,7 @@
         	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
         <Item Name="dZvertex" Value="0.1" /> 
 			<!-- Value of b-tag weight for veto -->
-        <Item Name="bTagValue" Value="0.898" />
+        <Item Name="bTagValue" Value="0.679" />
         	<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
         <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
 		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
@@ -74,7 +74,7 @@
 		<Item Name="maxDeltaR" Value="0.1" />            
         <Item Name="maxDeltaR_H" Value="0.3" />            
         
-                <Item Name="examineEvent" Value="" />
+                <Item Name="examineEvent" Value="36625452" />
                 <Item Name="removeTauOverlap" Value="true" />
                       
 		</UserConfig>

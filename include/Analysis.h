@@ -66,19 +66,22 @@ public:
    
    double deltaR(double eta1, double phi1, double eta2, double phi2);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose);
-   bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
+   bool AdLepton(myevent *m,std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    double PairMass(myobject Hcand1, myobject Hcand2);	
    bool DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose=false);
 	
-   bool EleMVANonTrigId(float pt, float eta, double value);
-   bool PFMuonID(myobject mu);
+   bool TightEleId(float pt, float eta, double value);
+   bool TightEleId(myobject o);
+   bool LooseEleId(float pt, float eta, double value);
+   bool LooseEleId(myobject o);   bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
    bool WZ_Rej(myevent *m, myobject mu);
    bool isGoodMu(myobject mu);
+   bool isLooseMu(myobject mu);
    bool isGoodEl(myobject el);
    double fakeTau_tight(double pt);
    double fakeTau_medium(double pt);
