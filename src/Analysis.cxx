@@ -1418,6 +1418,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
                // if (!WZ_Rej(m,muon[i])) continue;                
 				denomMuon.push_back(muon[i]);
+		}else{
+			if(examineThisEvent) std::cout << " pre-muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
+			muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
 		}
     }
 
@@ -1445,6 +1448,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits < 2)
 		{
+			if(examineThisEvent) std::cout << " pre-electron " << i << " pt eta etaSC: " << elPt << " " 
+			<< elEta << " " << electron[i].eta << std::endl;
 			if(elID){
 				GoodToDenomElectron_assoc_index.push_back(denomElectron.size());
 				DenomToGoodElectron_assoc_index.push_back(goodElectron.size());
@@ -1858,6 +1863,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 	}
 	
+	//test
+	//~ for(uint i = 0; i < denomElectron.size() ; i++)
+		//~ {
+			//~ bool removed = false;
+			//~ for(int j = 0; j < goodTau.size() && !removed; j++)
+			//~ {
+				//~ if(examineThisEvent && RelIsoEl(denomElectron[i]) < 0.3) std::cout << " tau " << j << "(" << goodTau[j].pt << " GeV) to electron " << i <<
+				 //~ "(" << RelIsoEl(denomElectron[i]) <<", " << denomElectron[i].pt << " GeV) distance is " << 
+				 //~ deltaR(goodTau[j].eta,goodTau[j].phi,denomElectron[i].eta,denomElectron[i].phi) << std::endl;
+				//~ if(deltaR(goodTau[j].eta,goodTau[j].phi,denomElectron[i].eta,denomElectron[i].phi)< maxDeltaR && RelIsoEl(denomElectron[i]) < 0.3 && LooseEleId(denomElectron[i])) 
+				//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
+			//~ }
+	//~ 
+			//~ if(examineThisEvent && removed) std::cout << " tau overlap with electron " << std::endl;
+		//~ }
+	
+	
 	uint isoElectrons = 0;
 	uint isoMuons = 0;
 	for(uint i=0; i< denomElectron.size(); i++)
@@ -1987,8 +2009,60 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<int> Hcand_type;
 	Hcand.clear();
 	Hcand_type.clear();
-	
+	std::vector<uint> usedTauIdx;
+	usedTauIdx.clear();
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
+	
+	bool tauTau =false;
+
+	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
+	for(uint i = 0; i < goodTau.size() && !tauTau ; i++)
+	{
+		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
+		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
+		if(goodTau[i].discriminationByElectronLoose <= 0.5) continue;
+				
+		//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
+		//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
+		if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
+		for(uint j=i+1; j< goodTau.size() && !tauTau; j++)
+		{
+			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << " mass: " << 
+			PairMass(goodTau[i],goodTau[j]) <<std::endl;
+			
+			
+			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
+			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
+			if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
+			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
+		
+			//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
+			//if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
+			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
+		
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
+			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
+			
+			bool verb=false;
+			if(examineThisEvent) verb=true;
+			
+			if(AdLepton_tt(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j],verb)){
+				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+				continue;
+			}
+			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 
+			signal = true; tauTau=true;
+			Hcand.push_back(goodTau[i]);
+			Hcand.push_back(goodTau[j]);
+			usedTauIdx.push_back(i);
+			usedTauIdx.push_back(j);
+			if(Zmumu) Hcand_type.push_back(4);
+			else if(Zee) Hcand_type.push_back(8);
+			m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
+			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
+
+		}
+	}
 	
 	for(uint i = 0; i < genericMuon.size() ; i++)
 	{
@@ -2005,6 +2079,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j=0; j< goodTau.size() &&!muTau; j++)
 		{
                        
+			//~ if((j==usedTauIdx[0] || j==usedTauIdx[1]) && examineThisEvent) std::cout << "This tau has been used!" << std::endl;
+			//~ if(j==usedTauIdx[0] || j==usedTauIdx[1]) continue;
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent){
 				TLorentzVector ele1;
@@ -2056,6 +2132,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
 		for(uint j=0; j< goodTau.size() &&!eTau; j++)
 		{
+			//~ if((j==usedTauIdx[0] || j==usedTauIdx[1]) && examineThisEvent) std::cout << "This tau has been used!" << std::endl;
+			//~ if(j==usedTauIdx[0] || j==usedTauIdx[1]) continue;
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent){
 				TLorentzVector ele1;
@@ -2100,54 +2178,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
 	
 	if(examineThisEvent && signal && eTau){ std::cout << "Found etau candidate" << std::endl;}
-	bool tauTau =false;
-
-	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
-	for(uint i = 0; i < goodTau.size() && !tauTau ; i++)
-	{
-		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
-		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
-		if(goodTau[i].discriminationByElectronLoose <= 0.5) continue;
-				
-		//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
-		//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
-		if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
-		for(uint j=i+1; j< goodTau.size() && !tauTau; j++)
-		{
-			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << " mass: " << 
-			PairMass(goodTau[i],goodTau[j]) <<std::endl;
-			
-			
-			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
-			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
-			if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
-			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
-		
-			//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
-			//if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
-			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
-		
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
-			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
-			
-			bool verb=false;
-			if(examineThisEvent) verb=true;
-			
-			if(AdLepton_tt(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j],verb)){
-				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
-				continue;
-			}
-			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 
-			signal = true; tauTau=true;
-			Hcand.push_back(goodTau[i]);
-			Hcand.push_back(goodTau[j]);
-			if(Zmumu) Hcand_type.push_back(4);
-			else if(Zee) Hcand_type.push_back(8);
-			m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
-			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
-
-		}
-	}
+	
 	
 	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
