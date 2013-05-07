@@ -14,7 +14,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="9" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -74,7 +74,7 @@
 		<Item Name="maxDeltaR" Value="0.1" />            
         <Item Name="maxDeltaR_H" Value="0.3" />            
         
-                <Item Name="examineEvent" Value="36625452" />
+                <Item Name="examineEvent" Value="" />
                 <Item Name="removeTauOverlap" Value="true" />
                       
 		</UserConfig>
