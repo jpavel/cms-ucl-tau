@@ -1465,21 +1465,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//overlap cleaning
 	
-	for(int i = 0; i < denomMuon.size(); i++)
-	{
-		if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << denomMuon.size() << std::endl;
-		
-		bool removed = false;
-		for(uint j = i+1; j < denomMuon.size() && !removed ; j++)
-		{
-			if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << denomMuon.size() 
-			<<":" << deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
-		
-			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
-			{	denomMuon.erase(denomMuon.begin()+i); i--;removed = true;}
-			if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
-		}
-	}
+	//~ for(int i = 0; i < denomMuon.size(); i++)
+	//~ {
+		//~ if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << denomMuon.size() << std::endl;
+		//~ 
+		//~ bool removed = false;
+		//~ for(uint j = i+1; j < denomMuon.size() && !removed ; j++)
+		//~ {
+			//~ if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << denomMuon.size() 
+			//~ <<":" << deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
+		//~ 
+			//~ if(deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
+			//~ {	denomMuon.erase(denomMuon.begin()+i); i--;removed = true;}
+			//~ if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
+		//~ }
+	//~ }
 	//~ 
 	
 	
@@ -1487,15 +1487,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << denomElectron.size() << std::endl;
 		bool removed = false;
-		for(uint j = i+1; j < denomElectron.size() && !removed ; j++)
-		{
-			if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
-			<< " " << deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
-		
-			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) 
-			{	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-			if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
-		}
+		//~ for(uint j = i+1; j < denomElectron.size() && !removed ; j++)
+		//~ {
+			//~ if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
+			//~ << " " << deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
+		//~ 
+			//~ if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) 
+			//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
+			//~ if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
+		//~ }
 
 		for(uint j = 0; j < denomMuon.size() && !removed; j++)
 		{
@@ -1832,27 +1832,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		bool removed = false;
 		
-		for(uint j = 0; j < denomMuon.size() && !removed; j++)
-		{
-
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIsoMu(denomMuon[j]) < 0.3) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-
-		}
-
-	    if(examineThisEvent && removed) std::cout << " tau overlap with muon" << std::endl;
+		//~ for(uint j = 0; j < denomMuon.size() && !removed; j++)
+		//~ {
+//~ 
+			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIsoMu(denomMuon[j]) < 0.3) 
+			//~ {	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+//~ 
+		//~ }
+//~ 
+	    //~ if(examineThisEvent && removed) std::cout << " tau overlap with muon" << std::endl;
 		
-		for(uint j = 0; j < denomElectron.size() && !removed; j++)
-		{
-
-			if(examineThisEvent && RelIsoEl(denomElectron[j]) < 0.3) std::cout << " tau " << i << "(" << goodTau[i].pt << " GeV) to electron " << j <<
-			 "(" << RelIsoEl(denomElectron[j]) <<", " << denomElectron[j].pt << " GeV) distance is " << 
-			 deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR && RelIsoEl(denomElectron[j]) < 0.3 ) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-
-			if(examineThisEvent && removed) std::cout << " tau overlap with electron " << std::endl;
-		}
+		//~ for(uint j = 0; j < denomElectron.size() && !removed; j++)
+		//~ {
+//~ 
+			//~ if(examineThisEvent && RelIsoEl(denomElectron[j]) < 0.3) std::cout << " tau " << i << "(" << goodTau[i].pt << " GeV) to electron " << j <<
+			 //~ "(" << RelIsoEl(denomElectron[j]) <<", " << denomElectron[j].pt << " GeV) distance is " << 
+			 //~ deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
+			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR && RelIsoEl(denomElectron[j]) < 0.3 ) 
+			//~ {	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+//~ 
+			//~ if(examineThisEvent && removed) std::cout << " tau overlap with electron " << std::endl;
+		//~ }
 		
 			
 		
