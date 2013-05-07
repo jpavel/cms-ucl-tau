@@ -882,6 +882,11 @@ double Analysis::deltaR(double eta1, double phi1, double eta2, double phi2){
 	return dR;
 }
 
+double Analysis::deltaR(myobject o1, myobject o2){
+	return deltaR(o1.eta,o1.phi,o2.eta,o2.phi);
+}
+  
+
 bool Analysis::TightEleId(float pt, float eta, double value){
 	bool passingId=false;
 
@@ -1905,7 +1910,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
 
-			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR ) 
+			if(examineThisEvent) std::cout << "muon no. " << i << " (" << denomMuon[i].pt << ") with Z cand no." << j
+			<< " (" << Zcand[j].pt << ") and distance is " <<  deltaR(denomMuon[i],Zcand[j]) << std::endl;
+			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR && isLooseMu(denomMuon[i])) 
 			{	denomMuon.erase(denomMuon.begin()+i); i--; removed = true;}
 			if(removed)Zoverlap=true;
 

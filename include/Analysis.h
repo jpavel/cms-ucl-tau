@@ -65,6 +65,7 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
    
    double deltaR(double eta1, double phi1, double eta2, double phi2);
+   double deltaR(myobject o1, myobject o2);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose);
    bool AdLepton(myevent *m,std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
