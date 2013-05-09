@@ -1051,7 +1051,7 @@ bool Analysis::AdLepton(std::vector<myobject> genericMuon, std::vector<myobject>
 	return Ad_lepton;
 }
 
-bool Analysis::AdLepton(myevent *m, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2,bool verbose){
+bool Analysis::AdLepton_mt(myevent *m, uint index, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2,bool verbose){
 	bool Ad_lepton=false;
 	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
 	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
@@ -1067,8 +1067,7 @@ bool Analysis::AdLepton(myevent *m, std::vector<myobject> genericMuon, std::vect
 			if (!WZ_Rej(m,genericMuon[i])) continue;
 			
 			
-			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isLooseMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.3 &&
-				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR ) 
+			if(isLooseMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.3  && i!=index ) 
 			Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
@@ -1087,13 +1086,61 @@ bool Analysis::AdLepton(myevent *m, std::vector<myobject> genericMuon, std::vect
 			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
 			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
 			if (!WZ_Rej(m,genericElectron[i])) continue;
-			if( genericElectron[i].numLostHitEleInner > 0) continue;
+			if( genericElectron[i].numLostHitEleInner > 1) continue;
 	
+			if(verbose) std::cout << " decision: " << LooseEleId(genericElectron[i]) << " " << 	RelIsoEl(genericElectron[i]) << " " << i << " index " << index << std::endl;
+	
+			if(LooseEleId(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.3 )  
+				Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   
+	}
+	
+	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
+	return Ad_lepton;
+}
+
+bool Analysis::AdLepton_et(myevent *m, uint index, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2,bool verbose){
+	bool Ad_lepton=false;
+	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
+	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
+	for(uint i = 0; i < genericMuon.size(); i++)
+	{   
+			if(verbose) std::cout << " Mu cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << isLooseMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericMuon[i]) << std::endl;
 			
-	
-			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && TightEleId(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.3 &&
-				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR )  
+			if (!WZ_Rej(m,genericMuon[i])) continue;
+			
+			
+			if(isLooseMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.3  ) 
 			Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   
+    }
+	 if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	
+	for(uint i = 0; i < genericElectron.size(); i++)
+	{   
+			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Is very good? " << TightEleId(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Pt is " << genericElectron[i].pt << std::endl;
+			if(verbose) std::cout << " num lost hits is " << genericElectron[i].numLostHitEleInner << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
+			if (!WZ_Rej(m,genericElectron[i])) continue;
+			if( genericElectron[i].numLostHitEleInner > 1) continue;
+	
+			if(verbose) std::cout << " decision: " << LooseEleId(genericElectron[i]) << " " << 	RelIsoEl(genericElectron[i]) << " " << i << " index " << index << std::endl;
+	
+			if(LooseEleId(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.3 && i!=index )  
+				Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
 	}
@@ -1111,11 +1158,10 @@ bool Analysis::AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobje
 			if(verbose) std::cout << " Mu cand no. " << i << std::endl;
 			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
 			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-			if(verbose) std::cout << " Is good? " << isGoodMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " Is good? " << isLooseMu(genericMuon[i]) << std::endl;
 			if(verbose) std::cout << " iso is " << RelIsoMu(genericMuon[i]) << std::endl;
 			
-			if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && isLooseMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.3 &&
-				deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR ) 
+			if(isLooseMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.3) 
 			Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
@@ -1127,12 +1173,11 @@ bool Analysis::AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobje
 			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
 			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
 			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-			if(verbose) std::cout << " Is good? " << isGoodEl(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
 			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
 			
 			
-			if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi)> maxDeltaR && LooseEleId(genericElectron[i]) && RelIsoEl(genericElectron[i]) < 0.3 &&
-				deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi)> maxDeltaR )  
+			if(LooseEleId(genericElectron[i]) && genericElectron[i].numLostHitEleInner == 0 && RelIsoEl(genericElectron[i]) < 0.3)  
 			Ad_lepton=true;
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
@@ -1465,7 +1510,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 				//if (!WZ_Rej(m,electron[i])) continue;
 				denomElectron.push_back(electron[i]);
-        }
+        }else{
+			if(examineThisEvent) std::cout << "Pre-electron no. " << i << " rejected: " << elPt << " " << elEta << " " << missingHits <<std::endl;
+		}
 	}
 	
 	
@@ -1912,7 +1959,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 			if(examineThisEvent) std::cout << "muon no. " << i << " (" << denomMuon[i].pt << ") with Z cand no." << j
 			<< " (" << Zcand[j].pt << ") and distance is " <<  deltaR(denomMuon[i],Zcand[j]) << std::endl;
-			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR && isLooseMu(denomMuon[i])) 
+			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	denomMuon.erase(denomMuon.begin()+i); i--; removed = true;}
 			if(removed)Zoverlap=true;
 
@@ -1925,7 +1972,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-
+			if(examineThisEvent) std::cout << "electron no. " << i << " (" << denomElectron[i].pt << ") with Z cand no." << j
+					<< " (" << Zcand[j].pt << ") and distance is " <<  deltaR(denomElectron[i],Zcand[j]) << std::endl;
 			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
 			if(removed)Zoverlap=true;
@@ -1949,7 +1997,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	//~ 
 	if(examineThisEvent) std::cout << "Checking Z overlap..." << std::endl;
 	
-	if(Zoverlap) return;
+	//if(Zoverlap) return;
 
 	//m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
@@ -2108,7 +2156,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-			if(AdLepton(m,genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j],verb)){ 
+			if(AdLepton_mt(m,i,genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
 				continue;}
 			if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) continue;
@@ -2133,8 +2181,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
 		
-		//if(genericElectron[i].numLostHitEleInner > 0) continue;
-		m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;
+		if(genericElectron[i].numLostHitEleInner > 0) continue;
+		if(examineThisEvent) std::cout << DEBUG << " Checking for eTau " << std::endl;
 		if (!WZ_Rej(m,genericElectron[i])) continue;
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
 		for(uint j=0; j< goodTau.size() &&!eTau; j++)
@@ -2162,7 +2210,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			if(AdLepton(m,genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
+			if(AdLepton_et(m,i,genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
