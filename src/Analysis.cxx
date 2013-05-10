@@ -288,9 +288,107 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
                 h_denom_types_externalEtaRegion.push_back(h_temp);
         }
+        //////////////////////////////////
+       h_denom_jet_types.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jet_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_jet_types.push_back(h_temp);
+        }
+       h_denom_jet_types_eta.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jet_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_denom_jet_types_eta.push_back(h_temp);
+        }
+       h_denom_jet_types_centralEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jet_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_jet_types_centralEtaRegion.push_back(h_temp);
+        }
+       h_denom_jet_types_externalEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jet_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_jet_types_externalEtaRegion.push_back(h_temp);
+        }
+        ///////////////////////////
+               h_denom_jetRef_types.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jetRef_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_jetRef_types.push_back(h_temp);
+        }
+       h_denom_jetRef_types_eta.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jetRef_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_denom_jetRef_types_eta.push_back(h_temp);
+        }
+       h_denom_jetRef_types_centralEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jetRef_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_jetRef_types_centralEtaRegion.push_back(h_temp);
+        }
+       h_denom_jetRef_types_externalEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_denom_jetRef_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_denom_jetRef_types_externalEtaRegion.push_back(h_temp);
+        }
         
         //loose
-        
+        h_loose_types.clear();
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
                 std::stringstream s;
@@ -302,6 +400,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
                 h_loose_types.push_back(h_temp);
         }
+        h_loose_types_eta.clear();
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
                 std::stringstream s;
@@ -313,6 +412,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
                 h_loose_types_eta.push_back(h_temp);
         }
+        h_loose_types_centralEtaRegion.clear();
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
                 std::stringstream s;
@@ -324,6 +424,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
                 h_loose_types_centralEtaRegion.push_back(h_temp);
         }
+        h_loose_types_externalEtaRegion.clear();
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
         {
                 std::stringstream s;
@@ -334,6 +435,106 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 std::string title = ss.str();
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
                 h_loose_types_externalEtaRegion.push_back(h_temp);
+        }
+        
+         //loose_jet
+        h_loose_jet_types.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jet_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_loose_jet_types.push_back(h_temp);
+        }
+        h_loose_jet_types_eta.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jet_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_loose_jet_types_eta.push_back(h_temp);
+        }
+        h_loose_jet_types_centralEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jet_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_loose_jet_types_centralEtaRegion.push_back(h_temp);
+        }
+        h_loose_jet_types_externalEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jet_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_loose_jet_types_externalEtaRegion.push_back(h_temp);
+        }
+        
+         //loose_jetRef
+        h_loose_jetRef_types.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jetRef_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_loose_jetRef_types.push_back(h_temp);
+        }
+        h_loose_jetRef_types_eta.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jetRef_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_loose_jetRef_types_eta.push_back(h_temp);
+        }
+        h_loose_jetRef_types_centralEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jetRef_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_loose_jetRef_types_centralEtaRegion.push_back(h_temp);
+        }
+        h_loose_jetRef_types_externalEtaRegion.clear();
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_loose_jetRef_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_loose_jetRef_types_externalEtaRegion.push_back(h_temp);
         }
 		// medium
         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
@@ -424,6 +625,190 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
                 std::string title = ss.str();
                 TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
                 h_tight_types_externalEtaRegion.push_back(h_temp);
+        }
+        
+        //m+t jet
+        
+         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_jet_types.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_medium_jet_types_eta.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_jet_types_centralEtaRegion.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_jet_types_externalEtaRegion.push_back(h_temp);
+        }
+
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_jet_types.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_tight_jet_types_eta.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_jet_types_centralEtaRegion.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_jet_types_externalEtaRegion.push_back(h_temp);
+        }
+        
+        //jetRef
+        
+         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_jetRef_types.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_medium_jetRef_types_eta.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_jetRef_types_centralEtaRegion.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_medium_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_medium_jetRef_types_externalEtaRegion.push_back(h_temp);
+        }
+
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_jetRef_types.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_ETA_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
+                h_tight_jetRef_types_eta.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_centralEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_jetRef_types_centralEtaRegion.push_back(h_temp);
+        }
+        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
+        {
+                std::stringstream s;
+                s << "h_tight_type_externalEtaRegion_" << i;
+                std::string name = s.str();
+                std::stringstream ss;
+                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
+                std::string title = ss.str();
+                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
+                h_tight_jetRef_types_externalEtaRegion.push_back(h_temp);
         }
 
 	h_category0_pt=Retrieve<TH2D>("h_category0_pt");
@@ -885,7 +1270,23 @@ double Analysis::deltaR(double eta1, double phi1, double eta2, double phi2){
 double Analysis::deltaR(myobject o1, myobject o2){
 	return deltaR(o1.eta,o1.phi,o2.eta,o2.phi);
 }
-  
+ 
+myobject Analysis::ClosestInCollection(myobject o1, std::vector<myobject> collection, double max=0.5)
+{
+	int index = -1;
+	double minDist = 999.;
+	for(uint i = 0; i< collection.size(); i++)
+	{
+		double dR = deltaR(o1,collection[i]);
+		if(dR< max && dR < minDist)
+		{
+			index=i;
+			minDist=dR;
+		}
+	}
+	if(index>=0) return collection[index];
+	else return o1;
+}  
 
 bool Analysis::TightEleId(float pt, float eta, double value){
 	bool passingId=false;
@@ -2689,30 +3090,49 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
             for(uint i =0; i < Hcand.size(); i+=2)
             {
+                myobject ClosestJet = ClosestInCollection(Hcand_sync[i],jet);
+                myobject ClosestJet2 = ClosestInCollection(Hcand_sync[i+1],jet);
                 if(examineThisEvent) std::cout << " -checking Hcand no. " << i << " type is " << event_type[i/2] << std::endl;
                 Hist( "h_event_type" )->Fill(event_type[i/2],weight);
                 Hist("h_denom")->Fill(Hcand_sync[i].pt,weight);
                 h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
                 h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+                
+                h_denom_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+                h_denom_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
+                
+                h_denom_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+                h_denom_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight);
+                
                 if(fabs(Hcand_sync[i].eta)<1.2){
 					h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+					h_denom_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					h_denom_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
                 }else{
 					h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+					h_denom_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					h_denom_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
                 }
                 int isL=0;
                 int isM=0;
                 int isT=0;
-                //~ if(event_type[i/2]%4==3){
-                    //~ if(RelIsoEl(Hcand_sync[i]) < 0.30 && isGoodEl(Hcand_sync[i])){ 
-						//~ Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						//~ h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						//~ h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						//~ isL++;
-						//~ if(fabs(Hcand_sync[i].eta)<1.2){
-							//~ h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }else{
-							//~ h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }
+                if(event_type[i/2]%4==3){
+                    if(RelIsoEl(Hcand_sync[i]) < 0.30 && LooseEleId(Hcand_sync[i])){ 
+						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
+						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
+						isL++;
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
+						}else{
+							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+						}
 						//~ if(found_event.size() > 0){
 							//~ if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
 								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
@@ -2726,17 +3146,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								//~ }
 							//~ }
 						//~ }
-					//~ }
-                    //~ if(RelIsoEl(Hcand_sync[i]) < 0.10 && isGoodEl(Hcand_sync[i])){ 
-						//~ Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						//~ h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						//~ h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						//~ isT++; 
-						//~ if(fabs(Hcand_sync[i].eta)<1.2){
-							//~ h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }else{
-							//~ h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }
+					}
+                    if(RelIsoEl(Hcand_sync[i]) < 0.15 && isGoodEl(Hcand_sync[i])){ 
+						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
+						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
+						isT++;
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
+						}else{
+							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+						}
 						//~ if(found_event.size() > 0){
 							//~ if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
 								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
@@ -2751,21 +3177,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 							//~ }
 								//~ 
 						//~ }
-					//~ }
-                //~ }
-                //~ if(event_type[i/2]%4==1){
-					//~ if(examineThisEvent) std::cout << " checking muTau isolation " << std::endl;
-	//~ 
-                    //~ if(RelIsoMu(Hcand_sync[i]) < 0.30 && isGoodMu(Hcand_sync[i])){ 
-						//~ Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						//~ h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						//~ h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						//~ isL++; 
-						//~ if(fabs(Hcand_sync[i].eta)<1.2){
-							//~ h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }else{
-							//~ h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }
+					}
+                }
+                if(event_type[i/2]%4==1){
+					if(examineThisEvent) std::cout << " checking muTau isolation " << std::endl;
+	
+                    if(RelIsoMu(Hcand_sync[i]) < 0.30 && isLooseMu(Hcand_sync[i])){ 
+						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
+						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
+						isL++;
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
+						}else{
+							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+						}
 						//~ if(found_event.size() > 0){
 							//~ if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
 								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
@@ -2779,17 +3211,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								//~ }
 							//~ }
 						//~ }
-                    //~ }
-                    //~ if(RelIsoMu(Hcand_sync[i]) < 0.10 && isGoodMu(Hcand_sync[i])){ 
-						//~ Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						//~ h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						//~ h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						//~ isT++;
-						//~ if(fabs(Hcand_sync[i].eta)<1.2){
-							//~ h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }else{
-							//~ h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-						//~ }
+                    }
+                    if(RelIsoMu(Hcand_sync[i]) < 0.25 && isGoodMu(Hcand_sync[i])){ 
+						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
+						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
+						isT++;
+						if(fabs(Hcand_sync[i].eta)<1.2){
+							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
+						}else{
+							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+						}
 						//~ if(found_event.size() > 0){
 							//~ if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
 								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
@@ -2803,88 +3241,163 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 								//~ }
 							//~ }
 						//~ }
-                   //~ }
-                //~ }
+                   }
+                }
                 //~ if(examineThisEvent) std::cout << " done lepton iso " << std::endl;
                 if(event_type[i/2]%4==0){
                     h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
                     h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
+                    h_denom_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
+					h_denom_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
+                
+					h_denom_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+					h_denom_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight);
+               
 					if(fabs(Hcand_sync[i+1].eta)<1.2){
 						h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+						h_denom_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
+						h_denom_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
 					}else{
 						h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+						h_denom_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
+						h_denom_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
 					}
-                    if(Hcand_sync[i].byLooseCombinedIsolationDeltaBetaCorr >= 0.5){ 
+					if(examineThisEvent) std::cout << "Checking tau 1 with pt " << Hcand_sync[i].pt << std::endl;
+                    if(Hcand_sync[i].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
+						if(examineThisEvent) std::cout << "Has loose iso!" << Hcand_sync[i].pt << std::endl;
 						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
 						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						isL++; 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
+						h_loose_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight); 
+						h_loose_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight); 
+						isL++;
 						if(fabs(Hcand_sync[i].eta)<1.2){
 							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_loose_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
 						}else{
 							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_loose_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
                     }
-                    if(Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                     if(examineThisEvent) std::cout << "Checking tau 2 with pt " << Hcand_sync[i+1].pt << std::endl;
+                   
+                    if(Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
+						if(examineThisEvent) std::cout << "Has loose iso!" << Hcand_sync[i+1].pt << std::endl;
+						
 						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
 						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight); 
-						isL++; 
+						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
+						
+						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight); 
+						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
+						h_loose_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight); 
+						h_loose_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight); 
+						isL++;
 						if(fabs(Hcand_sync[i+1].eta)<1.2){
 							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+							h_loose_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
+					
 						}else{
 							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+							h_loose_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
 						}
                     }
                     // medium
-                    if(examineThisEvent) std::cout << "Checking tau with pt " << Hcand_sync[i].pt << std::endl;
-                    if(Hcand_sync[i].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ 
-						if(examineThisEvent) std::cout << "Passed medium iso" << std::endl;
+                    
+                    if(Hcand_sync[i].byMediumCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
+						if(examineThisEvent) std::cout << "tau 1 Passed medium iso" << std::endl;
 						Hist("h_event_type_medium")->Fill(event_type[i/2],weight); 
 						h_medium_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						isM++; 
+						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_medium_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_medium_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
+						h_medium_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight); 
+						h_medium_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight); 
+						isM++;
 						if(fabs(Hcand_sync[i].eta)<1.2){
 							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_medium_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+							h_medium_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
 						}else{
 							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_medium_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+							h_medium_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
                     }
-                    if(examineThisEvent) std::cout << "Checking tau with pt " << Hcand_sync[i+1].pt << std::endl;
-                    if(Hcand_sync[i+1].byMediumCombinedIsolationDeltaBetaCorr >= 0.5){ 
-						if(examineThisEvent) std::cout << "Passed medium iso" << std::endl;
+                    if(Hcand_sync[i+1].byMediumCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
+						if(examineThisEvent) std::cout << "tau 2 Passed medium iso" << std::endl;
 						Hist("h_event_type_medium")->Fill(event_type[i/2],weight); 
 						h_medium_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
-						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight); 
-						isM++; 
+						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
+						
+						h_medium_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight); 
+						h_medium_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
+						h_medium_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight); 
+						h_medium_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight); 
+						isM++;
 						if(fabs(Hcand_sync[i+1].eta)<1.2){
 							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+							h_medium_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+							h_medium_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
+					
 						}else{
 							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+							h_medium_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+							h_medium_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
 						}
                     }
                     //tight
                     
-                    if(Hcand_sync[i].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(Hcand_sync[i].byTightCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
 						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight); 
-						isT++; 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
+						
+						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
+						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
+						h_tight_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight); 
+						h_tight_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight); 
+						isT++;
 						if(fabs(Hcand_sync[i].eta)<1.2){
 							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_tight_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
+					
 						}else{
 							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
+							h_tight_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
+							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
                     }
-                    if(Hcand_sync[i+1].byTightCombinedIsolationDeltaBetaCorr >= 0.5){ 
+                    if(Hcand_sync[i+1].byTightCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
 						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight); 
-						isT++; 
+						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
+						
+						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight); 
+						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
+						h_tight_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight); 
+						h_tight_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight); 
+						isT++;
 						if(fabs(Hcand_sync[i+1].eta)<1.2){
 							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+							h_tight_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
+					
 						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand[i+1].pt,weight);
+							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
+							h_tight_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
+							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
 						}
                     }
                 }// end of tautau

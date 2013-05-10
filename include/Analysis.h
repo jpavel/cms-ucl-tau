@@ -66,6 +66,7 @@ public:
    
    double deltaR(double eta1, double phi1, double eta2, double phi2);
    double deltaR(myobject o1, myobject o2);
+   myobject ClosestInCollection(myobject o1, std::vector<myobject> collection, double max);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose);
    bool AdLepton_mt(myevent *m, uint index, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_et(myevent *m, uint index, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
@@ -288,6 +289,41 @@ private:
 	std::vector<TH1*>  h_loose_types_externalEtaRegion;
 	std::vector<TH1*>  h_medium_types_externalEtaRegion;
 	std::vector<TH1*>  h_tight_types_externalEtaRegion;
+	
+	std::vector<TH1*>  h_denom_jet_types;
+	std::vector<TH1*>  h_loose_jet_types;
+	std::vector<TH1*>  h_medium_jet_types;
+	std::vector<TH1*>  h_tight_jet_types;
+	std::vector<TH1*>  h_denom_jet_types_eta;
+	std::vector<TH1*>  h_loose_jet_types_eta;
+	std::vector<TH1*>  h_medium_jet_types_eta;
+	std::vector<TH1*>  h_tight_jet_types_eta;
+	std::vector<TH1*>  h_denom_jet_types_centralEtaRegion;
+	std::vector<TH1*>  h_loose_jet_types_centralEtaRegion;
+	std::vector<TH1*>  h_medium_jet_types_centralEtaRegion;
+	std::vector<TH1*>  h_tight_jet_types_centralEtaRegion;
+	std::vector<TH1*>  h_denom_jet_types_externalEtaRegion;
+	std::vector<TH1*>  h_loose_jet_types_externalEtaRegion;
+	std::vector<TH1*>  h_medium_jet_types_externalEtaRegion;
+	std::vector<TH1*>  h_tight_jet_types_externalEtaRegion;
+	
+	
+	std::vector<TH1*>  h_denom_jetRef_types;
+	std::vector<TH1*>  h_loose_jetRef_types;
+	std::vector<TH1*>  h_medium_jetRef_types;
+	std::vector<TH1*>  h_tight_jetRef_types;
+	std::vector<TH1*>  h_denom_jetRef_types_eta;
+	std::vector<TH1*>  h_loose_jetRef_types_eta;
+	std::vector<TH1*>  h_medium_jetRef_types_eta;
+	std::vector<TH1*>  h_tight_jetRef_types_eta;
+	std::vector<TH1*>  h_denom_jetRef_types_centralEtaRegion;
+	std::vector<TH1*>  h_loose_jetRef_types_centralEtaRegion;
+	std::vector<TH1*>  h_medium_jetRef_types_centralEtaRegion;
+	std::vector<TH1*>  h_tight_jetRef_types_centralEtaRegion;
+	std::vector<TH1*>  h_denom_jetRef_types_externalEtaRegion;
+	std::vector<TH1*>  h_loose_jetRef_types_externalEtaRegion;
+	std::vector<TH1*>  h_medium_jetRef_types_externalEtaRegion;
+	std::vector<TH1*>  h_tight_jetRef_types_externalEtaRegion;
 
 	std::vector<TH1*>  h_H_mass_types;
 	std::vector<TH1*>  h_H_mass_signal_types;
