@@ -1032,144 +1032,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
 	
-	// sync part
-	std::ifstream myfile;
-	myfile.open ("newSync.txt");
-	 if (myfile.is_open())
-	 {	
-	    
-	    while ( myfile.good() )
-	    {
-	      int i_number;
-		  double number;
-		  short my_FR_type=-1; 
-		  myfile >> i_number;
-		  int e_type = i_number-90; // FIXME (original i_number/100)
-		  int FR_type = i_number%100;
-		  if(FR_type==1) my_FR_type=0;
-		  else if(FR_type==2) my_FR_type= 3;
-		  else if(FR_type==3 && (e_type%4==1)) my_FR_type= 2;
-		  else my_FR_type= 1;	
-		  my_FR_type=0; //FIXME! shortcut
-		//  std::cout << i_number << " " << EventTypeConv(e_type) << " " << my_FR_type << std::endl;
-		  switch(my_FR_type){
-			case 0:
-				evt_type.push_back(EventTypeConv(e_type));      
-				myfile >> i_number;
-				run_number.push_back(i_number);
-				myfile >> i_number;
-				lumi_number.push_back(i_number);
-				myfile >> i_number;
-				evt_number.push_back(i_number);
-				myfile >> number;
-				mass_Z.push_back(number);
-				myfile >> number;
-				mass_H.push_back(number);
-				break;
-			case 1:
-				evt_type_l.push_back(EventTypeConv(e_type));      
-				myfile >> i_number;
-				run_number_l.push_back(i_number);
-				myfile >> i_number;
-				lumi_number_l.push_back(i_number);
-				myfile >> i_number;
-				evt_number_l.push_back(i_number);
-				myfile >> number;
-				mass_Z_l.push_back(number);
-				myfile >> number;
-				mass_H_l.push_back(number);
-				break;
-			case 2:
-				evt_type_m.push_back(EventTypeConv(e_type));      
-				myfile >> i_number;
-				run_number_m.push_back(i_number);
-				myfile >> i_number;
-				lumi_number_m.push_back(i_number);
-				myfile >> i_number;
-				evt_number_m.push_back(i_number);
-				myfile >> number;
-				mass_Z_m.push_back(number);
-				myfile >> number;
-				mass_H_m.push_back(number);
-				break;
-			case 3:
-				evt_type_t.push_back(EventTypeConv(e_type));      
-				myfile >> i_number;
-				run_number_t.push_back(i_number);
-				myfile >> i_number;
-				lumi_number_t.push_back(i_number);
-				myfile >> i_number;
-				evt_number_t.push_back(i_number);
-				myfile >> number;
-				mass_Z_t.push_back(number);
-				myfile >> number;
-				mass_H_t.push_back(number);
-				break;
-		  }	
-		  
-		
-	    }
-	    myfile.close();
-	  }
-	evt_number.pop_back();
-	run_number.pop_back();
-	lumi_number.pop_back();
-	evt_type.pop_back();
-	mass_Z.pop_back();
-	mass_H.pop_back();
-	//FIXME
-	//~ evt_number_l.pop_back();
-	//~ run_number_l.pop_back();
-	//~ lumi_number_l.pop_back();
-	//~ evt_type_l.pop_back();
-	//~ mass_Z_l.pop_back();
-	//~ mass_H_l.pop_back();
 	
-	//~ evt_number_m.pop_back();
-	//~ run_number_m.pop_back();
-	//~ lumi_number_m.pop_back();
-	//~ evt_type_m.pop_back();
-	//~ mass_Z_m.pop_back();
-	//~ mass_H_m.pop_back();
-	//~ 
-	//~ evt_number_t.pop_back();
-	//~ run_number_t.pop_back();
-	//~ lumi_number_t.pop_back();
-	//~ evt_type_t.pop_back();
-	//~ mass_Z_t.pop_back();
-	//~ mass_H_t.pop_back();
-	
-	  std::cout << evt_number.size() << " " << run_number.size() << " " << lumi_number.size() << " " << evt_type.size() << 
-	  " " << mass_Z.size() <<  std::endl;
-	  
-	  //~ for(uint i=0; i< evt_number.size(); i++)
-	  //~ {
-		 //~ log1 << evt_number[i] << std::endl;	
-	  //~ }
-	  //~ std::cout << evt_number_l.size() << " " << run_number_l.size() << " " << lumi_number_l.size() << " " << evt_type_l.size() << 
-	  //~ " " << mass_Z_l.size() <<  std::endl;
-	  //~ std::cout << evt_number_m.size() << " " << run_number_m.size() << " " << lumi_number_m.size() << " " << evt_type_m.size() << 
-	  //~ " " << mass_Z_m.size() <<  std::endl;	
-	  //~ std::cout << evt_number_t.size() << " " << run_number_t.size() << " " << lumi_number_t.size() << " " << evt_type_t.size() << 
-	  //~ " " << mass_Z_t.size() <<  std::endl;
-	  //~ 
-	  std::cout << evt_number.at(evt_number.size()-1) << " " << run_number.at(evt_number.size()-1) << " " << lumi_number.at(evt_number.size()-1) << " " << evt_type.at(evt_number.size()-1) << 
-	  " " << mass_Z.at(evt_number.size()-1) <<  std::endl;
-	  //~ std::cout << evt_number_l.at(evt_number_l.size()-1) << " " << run_number_l.at(evt_number_l.size()-1) << " " << lumi_number_l.at(evt_number_l.size()-1) << " " << evt_type_l.at(evt_number_l.size()-1) << 
-	  //~ " " << mass_Z_l.at(evt_number_l.size()-1) <<  std::endl;
-	  //~ std::cout << evt_number_m.at(evt_number_m.size()-1) << " " << run_number_m.at(evt_number_m.size()-1) << " " << lumi_number_m.at(evt_number_m.size()-1) << " " << evt_type_m.at(evt_number_m.size()-1) << 
-	  //~ " " << mass_Z_m.at(evt_number_m.size()-1) <<  std::endl;	
-	  //~ std::cout << evt_number_t.at(evt_number_t.size()-1) << " " << run_number_t.at(evt_number_t.size()-1) << " " << lumi_number_t.at(evt_number_t.size()-1) << " " << evt_type_t.at(evt_number_t.size()-1) << 
-	  //~ " " << mass_Z_t.at(evt_number_t.size()-1) <<  std::endl;
-	  //~ 
-	  //~ std::cout << evt_number.at(evt_number.size()-2) << " " << run_number.at(evt_number.size()-2) << " " << lumi_number.at(evt_number.size()-2) << " " << evt_type.at(evt_number.size()-2) << 
-	  //~ " " << mass_Z.at(evt_number.size()-2) <<  std::endl;
-	  //~ std::cout << evt_number_l.at(evt_number_l.size()-2) << " " << run_number_l.at(evt_number_l.size()-2) << " " << lumi_number_l.at(evt_number_l.size()-2) << " " << evt_type_l.at(evt_number_l.size()-2) << 
-	  //~ " " << mass_Z_l.at(evt_number_l.size()-2) <<  std::endl;
-	  //~ std::cout << evt_number_m.at(evt_number_m.size()-2) << " " << run_number_m.at(evt_number_m.size()-2) << " " << lumi_number_m.at(evt_number_m.size()-2) << " " << evt_type_m.at(evt_number_m.size()-2) << 
-	  //~ " " << mass_Z_m.at(evt_number_m.size()-2) <<  std::endl;	
-	  //~ std::cout << evt_number_t.at(evt_number_t.size()-2) << " " << run_number_t.at(evt_number_t.size()-2) << " " << lumi_number_t.at(evt_number_t.size()-2) << " " << evt_type_t.at(evt_number_t.size()-2) << 
-	  //~ " " << mass_Z_t.at(evt_number_t.size()-2) <<  std::endl;
 	
 	return;
 
@@ -1721,58 +1584,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if( examineEvent==eNumber) examineThisEvent=true;
 	else examineThisEvent=false;
 	
-	// sync
-	std::vector<uint> pos;
-	pos.clear();
-	uint pos_helper=0; 
-	pos_helper = std::find(evt_number.begin(), evt_number.end(), eNumber) - evt_number.begin();
-	for(uint i=0; pos_helper < evt_number.size(); i++ )
-	{
-		if(examineThisEvent)  std::cout << "Found cand no. " << i << " with event number " << evt_number[pos_helper] 
-		<< " and type " <<  evt_type[pos_helper] << " and mass " << mass_H[pos_helper] << " index: " << pos_helper << std::endl;
-		found_event.push_back(true);
-		pos.push_back(pos_helper);
-		pos_helper = std::find(evt_number.begin()+pos[i]+1, evt_number.end(), eNumber) - evt_number.begin();
-	}
-	
-	if(found_event.size()!=pos.size()) m_logger << FATAL << "Sync info reading mismatch" << SLogger::endmsg; // sync
-	std::vector<uint> pos_l,pos_m,pos_t;
-	pos_l.clear();
-	pos_m.clear();
-	pos_t.clear();
-	pos_helper=0;
-	if(found_event.size()>0)
-	{
-		pos_helper = std::find(evt_number_l.begin(), evt_number_l.end(), eNumber) - evt_number_l.begin();
-		for( uint i =0; pos_helper < evt_number_l.size(); i++ )
-		{
-			if(examineThisEvent) std::cout << "Found loose cand no. " << i << " with event number " << evt_number_l[pos_helper]
-			<< " and type " <<  evt_type_l[pos_helper] << " and mass " << mass_H_l[pos_helper] << " index: " << pos_helper << std::endl;
-			isLoose.push_back(true);
-			pos_l.push_back(pos_helper);	
-			pos_helper = std::find(evt_number_l.begin()+pos_l[i]+1, evt_number_l.end(), eNumber) - evt_number_l.begin();
-		}
-		pos_helper=0;
-		pos_helper = std::find(evt_number_m.begin(), evt_number_m.end(), eNumber) - evt_number_m.begin();
-		for( uint i =0; pos_helper < evt_number_m.size(); i++ )
-		{
-			isMedium.push_back(true);
-			pos_m.push_back(pos_helper);
-			pos_helper = std::find(evt_number_m.begin()+pos_m[i]+1, evt_number_m.end(), eNumber) - evt_number_m.begin();
-		}
-		pos_helper=0;
-		pos_helper = std::find(evt_number_t.begin(), evt_number_t.end(), eNumber) - evt_number_t.begin();
-		for( uint i =0; pos_helper < evt_number_t.size(); i++ )
-		{
-			isTight.push_back(true);
-			pos_t.push_back(pos_helper);
-			pos_helper = std::find(evt_number_t.begin()+pos_t[i]+1, evt_number_t.end(), eNumber) - evt_number_t.begin();
-		}
-		
-	}
-	
-	
-	// end sync
 	
 	Hist("h_PU_weight")->Fill(PUWeight);
 	if(!useTruePileUp && is2011){ 
@@ -1807,19 +1618,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool trigPass;
 	
 	trigPass = Trg_MC_12(m,examineThisEvent);
-	if(examineThisEvent) std::cout << "Examining event " << examineEvent << std::endl;
+	
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
-	  if(found_event.size()>0){
-		   m_logger << ERROR << "ENTRY " << m_allEvents <<", event " << eNumber << ":  WRONG TRIGGER" << SLogger::endmsg; // sync
-		   log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-		   log_files << fileName << std::endl;
-	   }
+		if(examineThisEvent) std::cout << "Trigger fail! " << examineEvent << std::endl;
+	
 		return;
-	}
-	for(uint i = 0; i < found_event.size(); i++){
-		if(found_event[i]) m_logger << ERROR << "ENTRY " << m_allEvents << ": Found event " << eNumber << " type " << evt_type[pos[i]] << " loose/medium/tight: " << isLoose.size() << "/" << isMedium.size() << "/" << isTight.size() << SLogger::endmsg; // sync
 	}
 	
 	h_cut_flow->Fill(1,1);
@@ -1840,10 +1645,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	goodMuon.clear();
 	std::vector<myobject> denomMuon;
 	denomMuon.clear();
-	std::vector<int> DenomToGoodMuon_assoc_index; // indices of good muons
-	DenomToGoodMuon_assoc_index.clear();
-	std::vector<int> GoodToDenomMuon_assoc_index; // indices of denom muons
-	GoodToDenomMuon_assoc_index.clear();
 
 
 	std::vector<myobject> muon = m->PreSelectedMuons;
@@ -1862,13 +1663,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 			if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
 			{
-				GoodToDenomMuon_assoc_index.push_back(denomMuon.size());
-				DenomToGoodMuon_assoc_index.push_back(goodMuon.size());
 				goodMuon.push_back(muon[i]);
 				Hist("h_mu_relIso")->Fill(relIso,PUWeight);
 			}
-               // if (!WZ_Rej(m,muon[i])) continue;                
-				denomMuon.push_back(muon[i]);
+        		denomMuon.push_back(muon[i]);
 		}else{
 			if(examineThisEvent) std::cout << " pre-muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
 			muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
@@ -1881,11 +1679,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	goodElectron.clear();
         std::vector<myobject> denomElectron;
         denomElectron.clear();
-        std::vector<int> DenomToGoodElectron_assoc_index; // indices of good electrons
-        DenomToGoodElectron_assoc_index.clear();
-        std::vector<int> GoodToDenomElectron_assoc_index; // indices of denom electrons
-        GoodToDenomElectron_assoc_index.clear();
-
+   
 	std::vector<myobject> electron = m->PreSelectedElectrons;
 	if(examineThisEvent) std::cout << " There are " << electron.size() << " preselected electrons " << std::endl;
 	
@@ -1902,14 +1696,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << " pre-electron " << i << " pt eta etaSC: " << elPt << " " 
 			<< elEta << " " << electron[i].eta << std::endl;
 			if(elID){
-				GoodToDenomElectron_assoc_index.push_back(denomElectron.size());
-				DenomToGoodElectron_assoc_index.push_back(goodElectron.size());
 				goodElectron.push_back(electron[i]);
 				Hist("h_el_relIso")->Fill(relIso,PUWeight);
-			}else{
-				DenomToGoodElectron_assoc_index.push_back(-1);
 			}
-				//if (!WZ_Rej(m,electron[i])) continue;
 				denomElectron.push_back(electron[i]);
         }else{
 			if(examineThisEvent) std::cout << "Pre-electron no. " << i << " rejected: " << elPt << " " << elEta << " " << missingHits <<std::endl;
@@ -2036,16 +1825,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		        
             int i = Zindex[0];
 			int j = Zindex[1];
-			//int denom_i = GoodToDenomMuon_assoc_index[i];
-			//int denom_j = GoodToDenomMuon_assoc_index[j];
+	
 		if(denomMuon[i].pt > 20.){
 			Zcand.push_back(denomMuon[i]);
 			Zcand.push_back(denomMuon[j]);
 			denomMuon.erase(denomMuon.begin()+i);
 			denomMuon.erase(denomMuon.begin()+j-1);
-			//denomMuon.erase(denomMuon.begin()+denom_i);
-			//denomMuon.erase(denomMuon.begin()+denom_j-1);
-
+	
 			Zmumu=true;
 		}
 	}
@@ -2102,16 +1888,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(Zindex[0] > -1 && Zindex[1] > -1 && Zelcand){
 				int i = Zindex[0];
 				int j = Zindex[1];
-				//int denom_i = GoodToDenomElectron_assoc_index[i];
-				//int denom_j = GoodToDenomElectron_assoc_index[j];
-
+		
 			if(denomElectron[i].pt > 20.){			
 				Zcand.push_back(denomElectron[i]);
 				Zcand.push_back(denomElectron[j]);	
 				denomElectron.erase(denomElectron.begin()+i);
 				denomElectron.erase(denomElectron.begin()+j-1);
-				//denomElectron.erase(denomElectron.begin()+denom_i);
-				//denomElectron.erase(denomElectron.begin()+denom_j-1);
 				Zee=true;
 			}
 		}
@@ -2202,10 +1984,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	else{
 		if(examineThisEvent) std::cout << "No Z cand!" << std::endl;
-		if(found_event.size()>0){
-			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-			log_files << fileName << std::endl;
-		}
 			return;
 	}
 	
@@ -2223,7 +2001,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	int elCand=denomElectron.size();
 	std::vector<myobject> tau = m->PreSelectedHPSTaus;
 
-	//m_logger << DEBUG << " There are " << tau.size() << " preselected taus " << SLogger::endmsg;
 
 	for (uint i = 0; i < tau.size(); i++) {
 
@@ -2286,51 +2063,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << "There is " << goodTau.size() << " goodTaus " << std::endl;
 	// overlap check tau-leptons
-	for(int i = 0; i < goodTau.size(); i++)
-	{
-		bool removed = false;
 		
-		//~ for(uint j = 0; j < denomMuon.size() && !removed; j++)
-		//~ {
-//~ 
-			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIsoMu(denomMuon[j]) < 0.3) 
-			//~ {	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-//~ 
-		//~ }
-//~ 
-	    //~ if(examineThisEvent && removed) std::cout << " tau overlap with muon" << std::endl;
-		
-		//~ for(uint j = 0; j < denomElectron.size() && !removed; j++)
-		//~ {
-//~ 
-			//~ if(examineThisEvent && RelIsoEl(denomElectron[j]) < 0.3) std::cout << " tau " << i << "(" << goodTau[i].pt << " GeV) to electron " << j <<
-			 //~ "(" << RelIsoEl(denomElectron[j]) <<", " << denomElectron[j].pt << " GeV) distance is " << 
-			 //~ deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
-			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR && RelIsoEl(denomElectron[j]) < 0.3 ) 
-			//~ {	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-//~ 
-			//~ if(examineThisEvent && removed) std::cout << " tau overlap with electron " << std::endl;
-		//~ }
-		
-			
-		
-	}
-	
-	//test
-	//~ for(uint i = 0; i < denomElectron.size() ; i++)
-		//~ {
-			//~ bool removed = false;
-			//~ for(int j = 0; j < goodTau.size() && !removed; j++)
-			//~ {
-				//~ if(examineThisEvent && RelIsoEl(denomElectron[i]) < 0.3) std::cout << " tau " << j << "(" << goodTau[j].pt << " GeV) to electron " << i <<
-				 //~ "(" << RelIsoEl(denomElectron[i]) <<", " << denomElectron[i].pt << " GeV) distance is " << 
-				 //~ deltaR(goodTau[j].eta,goodTau[j].phi,denomElectron[i].eta,denomElectron[i].phi) << std::endl;
-				//~ if(deltaR(goodTau[j].eta,goodTau[j].phi,denomElectron[i].eta,denomElectron[i].phi)< maxDeltaR && RelIsoEl(denomElectron[i]) < 0.3 && LooseEleId(denomElectron[i])) 
-				//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-			//~ }
-	//~ 
-			//~ if(examineThisEvent && removed) std::cout << " tau overlap with electron " << std::endl;
-		//~ }
 	
 	
 	uint isoElectrons = 0;
@@ -2400,7 +2133,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//if(Zoverlap) return;
 
-	//m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
     if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denom electrons after Zremoval" << std::endl;
 	
@@ -2410,13 +2142,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> genericElectron;
         genericElectron.clear();
       
-        //~ if(!switchToFakeRate){
-        //~ genericMuon = goodMuon;
-        //~ genericElectron = goodElectron;}
-        //~ else{
         genericMuon = denomMuon;
         genericElectron = denomElectron;
-        //}
         
 
 	
@@ -2424,31 +2151,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// checking the rest of the event
 	
 
-        //~ //check the overlap
-	//~ for(uint i = 0; i < goodTau.size(); i++)
-	//~ {
-		//~ bool removed = false;
-		//~ for(uint j = 0; j < Zcand.size() && !removed; j++)
-		//~ {
-			//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
-		               //~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-		//~ }
-		//~ 
-			//~ for(uint j = 0; j < genericMuon.size() && !removed; j++)
-			//~ {    
-				//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,genericMuon[j].eta,genericMuon[j].phi)< maxDeltaR && isGoodMu(genericMuon[j]) 	 ) 
-					//~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-					//~ 
-			//~ }
-	//~ 
-			//~ for(uint j = 0; j < genericElectron.size() && !removed; j++)
-			//~ {
-							//~ 
-				//~ if(deltaR(goodTau[i].eta,goodTau[i].phi,genericElectron[j].eta,genericElectron[j].phi)< maxDeltaR && isGoodEl(genericElectron[j]) ) 
-					//~ {goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-					//~ 
-			//~ }
-	//~ }
 	
 
 	int tauCand = 	goodTau.size();
@@ -2640,26 +2342,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
 	if(!muTau && !muE && !eTau && !tauTau){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
-				// sync begin
-		if( found_event.size()>0){
-				 m_logger << FATAL << " MISSED H cand of type " << evt_type[pos[0]] << " and mass " << mass_H[pos[0]] << SLogger::endmsg;
-				 m_logger << ERROR << " Remaining mu, tau, el " << goodMuon.size() << " " << goodTau.size() << " " << goodElectron.size()
-				 << " out of " << muCand << " " << tauCand << " " << elCand << " out of "
-				 << muCandZ <<  " " << elCandZ << SLogger::endmsg;
-				 log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-				 log_files << fileName << std::endl;
-				 
-			 }
-		// sync end
-
+	
 		return;
-	}else{
-		for(uint i =0; i < found_event.size(); i++)
-		{
-			if(found_event[i]) m_logger << ERROR << " FOUND H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << SLogger::endmsg;
-		
-		}
-		
 	}
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
@@ -2733,11 +2417,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 		
 		
-	for(uint i=0; i < found_event.size(); i++)
-	{
-		if(event_type[i]!=evt_type[pos[i]] && found_event[i]) m_logger << WARNING << " WRONG type! His is " << evt_type[pos[i]] << " and mine is " << event_type[i] << SLogger::endmsg; 
-	
-	}
 	
 	if(examineThisEvent) std::cout << " After type assignment" << std::endl;
 	
@@ -2862,21 +2541,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			
 			bTagVeto = !overlap;
-			//~ if(!AllowTauBOverlap){
-				//~ if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ){
-					//~ bTagVeto = true;	
-					//~ count_bJetsVetoed++;
-				//~ }		
-				//~ else count_bJets_afterVeto++;
-			//~ }else{
-				//~ if(eTau || muTau){
-					//~ if(dR1>0.4 && dR2>0.4 && dR3>0.4 ){ bTagVeto=true; count_bJetsVetoed++;}
-				//~ }else if (tauTau){
-					//~ if(dR1>0.4 && dR2>0.4 ){ bTagVeto=true; count_bJetsVetoed++;}
-				//~ }else if (muE){
-					//~ if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4){ bTagVeto=true; count_bJetsVetoed++;}
-				//~ }
-			//~ }
+		
 		}
 	}
     
@@ -2884,11 +2549,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(bTagVeto)
 	{
-		 if( found_event.size()>0){ 
-			 m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
-			 log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-			log_files << fileName << std::endl;
-		}
+		 //~ if( found_event.size()>0){ 
+			 //~ m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
+			 //~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
+			//~ log_files << fileName << std::endl;
+		//~ }
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
@@ -2900,182 +2565,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// sync
 	bool fatal = false;
 	bool used_fatal=false;
-	if(signal && found_event.size()>0){
-		for(uint i=0; i < found_event.size(); i++){
-			if(evt_type[pos[i]]==event_type[i] &&  fabs (mass_H[pos[i]] - Hmass[i]) < 0.1) m_logger << WARNING << "Found MATCH: " << 
-			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << SLogger::endmsg;
-			else{
-				 m_logger << FATAL << "Found MISMATCH: " << 
-			" H cand of type " << evt_type[pos[i]] << " and mass " << mass_H[pos[i]] << " vs " << event_type[i] << " " << Hmass[i] << SLogger::endmsg;
-			fatal=true;
-			}
-		}
-		if(fatal && !used_fatal){
-			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-			log_files << fileName << std::endl;
-			used_fatal=true;
-		}
-	}
-	if(event_type.size() > found_event.size())
-	{
-		 m_logger << FATAL << "ENTRY " << m_allEvents <<", event " << eNumber<< ": I have non-matched candidate(s):" << SLogger::endmsg;
-		 for(uint i=found_event.size(); i <event_type.size(); i++)
-		 {
-			m_logger << FATAL << "  >" << event_type[i] << ": " << Hmass[i] << SLogger::endmsg;
-			fatal = true;
-		 }
-		 if(fatal && !used_fatal){
-			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-			log_files << fileName << std::endl;
-			used_fatal=true;
-		}
-	}
-	if(event_type.size() < found_event.size()){
-		 m_logger << FATAL << "ENTRY " << m_allEvents <<", event " << eNumber<< ": I have missing candidate(s):" << SLogger::endmsg;
-		 if(!used_fatal){
-			log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-			log_files << fileName << std::endl;
-			used_fatal=true;
-		}
-	}
 	
 	
-	//~ if(found_event.size()==0){
-		 //~ m_logger << FATAL << "ENTRY " << m_allEvents <<", event " << eNumber<< ": I have non-matched candidate(s):" << SLogger::endmsg;
-		 //~ for(uint i=0; i <event_type.size(); i++)
-		 //~ {
-			//~ m_logger << FATAL << "  >" << event_type[i] << ": " << Hmass[i] << SLogger::endmsg;
-		 //~ }
-	 //~ }
-	// end sync
-	
-	// preparing isLoose, isMedium and isTight vectors...
-	
-	// sync
-	std::vector<int> isLoose_match;
-	std::vector<int> isMedium_match;
-	std::vector<int> isTight_match;
-	isLoose_match.clear();
-	isMedium_match.clear();
-	isTight_match.clear();
-	
-	if(examineThisEvent) std::cout << " preparing isLoose... vectors " << std::endl;
-	
-	uint nLoose,nMedium,nTight;
-	nLoose=nMedium=nTight=0;
-	
-	for(uint i=0; i < found_event.size();i++)
-	{
-		isLoose_match.push_back(0);
-		for(uint j=0; j < isLoose.size(); ++j)
-		{
-			if(examineThisEvent) std::cout << " going through element " << j << " and " << i << " out of " << isLoose.size() << " and " << found_event.size() << std::endl;
-			if(evt_type_l[pos_l[j]]!=evt_type[pos[i]] || evt_number_l[pos_l[j]]!=evt_number[pos[i]] || fabs(mass_H_l[pos_l[j]]-mass_H[pos[i]]) > 0.1) continue;
-			
-			
-			if(evt_type[pos[i]]%4!=0){
-				if (fabs(mass_H[pos[i]]-mass_H_l[pos_l[j]]) < 0.1){
-					isLoose_match[i]=1;
-					nLoose++;
-				}
-			}else{
-				if(examineThisEvent) std::cout << "Filling for tautau" << std::endl;
-				if(j<(isLoose.size()-1)){
-					if(examineThisEvent) std::cout << "  -> Still cand remaining" << std::endl;	
-					if((evt_type_l[pos_l[j+1]]==evt_type_l[pos_l[j]])&&(evt_number_l[pos_l[j]]==evt_number_l[pos_l[j+1]])&&(fabs(mass_H_l[pos_l[j]]-mass_H_l[pos_l[j+1]]) < 0.1)){
-						if(examineThisEvent) std::cout << "There is another tautau cand" << std::endl;
-						isLoose_match[i]=2;
-						j++;
-						nLoose+=2;
-						continue;
-					}else{
-						if(examineThisEvent) std::cout << "This is last tautau cand" << std::endl;
-						if(examineThisEvent) std::cout << "Index of this is " << j << " " << pos_l[j] << " and " << pos_l[j+1] << std::endl;
-						if(examineThisEvent) std::cout << "Next loose is " << evt_type_l[pos_l[j+1]] << " " << evt_number_l[pos_l[j+1]] << " " << mass_H_l[pos_l[j+1]] << std::endl;
-						if(examineThisEvent) std::cout << "this loose is " << evt_type_l[pos_l[j]] << " " << evt_number_l[pos_l[j]] << " " << mass_H_l[pos_l[j]] << std::endl;
-						
-						isLoose_match[i]=1;
-						nLoose++;
-						continue;
-					}
-				}else{
-						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
-						isLoose_match[i]=1;
-						nLoose++;
-						continue;
-				}	
-			}
-			if(examineThisEvent) std::cout << " finishing loop with element " << j << " out of " << isLoose.size() << std::endl;
-		}
-		
-		isMedium_match.push_back(0);
-		for(uint j=0; j < isMedium.size(); j++)
-		{
-			if(evt_type_m[pos_m[j]]!=evt_type[pos[i]] || evt_number_m[pos_m[j]]!=evt_number[pos[i]] || fabs(mass_Z_m[pos_m[j]]-mass_Z[pos[i]]) > 0.1)
-				continue;
-			if(evt_type[pos[i]]%4!=0){
-				if (fabs(mass_H[pos[i]]-mass_H_m[pos_m[j]]) < 0.1){
-					isMedium_match[i]=1;
-					nMedium++;
-				}
-			}else{
-				if(j<isMedium.size()-1){
-					if((evt_type_m[pos_m[j+1]]==evt_type_m[pos_m[j]])&&(evt_number_m[pos_m[j]]==evt_number_m[pos_m[j+1]])&&(fabs(mass_Z_m[pos_m[j]]-mass_Z_m[pos_m[j+1]]) < 0.1)){
-						isMedium_match[i]=2;
-						j++;
-						nMedium+=2;
-					}else{
-						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
-						isMedium_match[i]=1;
-						nMedium++;
-					}
-				}else{
-					if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
-					isMedium_match[i]=1;
-					nMedium++;
-				}	
-			} 
-		}
-		
-		isTight_match.push_back(0);
-		for(uint j=0; j < isTight.size(); j++)
-		{
-			if(evt_type_t[pos_t[j]]!=evt_type[pos[i]] || evt_number_t[pos_t[j]]!=evt_number[pos[i]] || fabs(mass_Z_t[pos_t[j]]-mass_Z[pos[i]]) > 0.1)
-				continue;
-			if(evt_type[pos[i]]%4!=0){
-				if (fabs(mass_H[pos[i]]-mass_H_t[pos_t[j]]) < 0.1){
-					isTight_match[i]=1;
-					nTight++;
-				}
-			}else{
-				if(j<isTight.size()-1){
-					if((evt_type_t[pos_t[j+1]]==evt_type_t[pos_t[j]])&&(evt_number_t[pos_t[j]]==evt_number_t[pos_t[j+1]])&&(fabs(mass_Z_t[pos_t[j]]-mass_Z_t[pos_t[j+1]]) < 0.1)){
-						isTight_match[i]=2;
-						nTight+=2;
-						j++;
-					}else{
-						if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
-						isTight_match[i]=1;
-						nTight++;
-					}
-				}else{
-					if(examineThisEvent) std::cout << "There is only one tautau cand" << std::endl;
-					isTight_match[i]=1;
-					nTight++;
-					}	
-			} 
-		}
-	}
-	if(nLoose!=isLoose.size()) m_logger << FATAL << "Loose match vector wrongly filled!" << SLogger::endmsg;
-	if(nMedium!=isMedium.size()) m_logger << FATAL << "Medium match vector wrongly filled!" << SLogger::endmsg;
-	if(nTight!=isTight.size()) m_logger << FATAL << "Tight match vector wrongly filled!" << SLogger::endmsg;
-	
-	
-	if(examineThisEvent) std::cout << " prepared isLoose... vectors " << std::endl;
-	
-	if(found_event.size()!=isLoose_match.size() || found_event.size()!=isMedium_match.size() || found_event.size()!=isTight_match.size() )
-		m_logger << FATAL << "Loose/Medium/Tight match vector wrongly filled!" << SLogger::endmsg;
-	// end sync
 	
 	h_cut_flow->Fill(9,1);
 	h_cut_flow_weight->Fill(9,weight);
@@ -3133,19 +2624,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
-						//~ if(found_event.size() > 0){
-							//~ if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							//~ else {
-								//~ m_logger << FATAL << "One more LOOSE: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;		
-								//~ if(!used_fatal){
-									//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-									//~ log_files << fileName << std::endl;
-									//~ used_fatal=true;
-								//~ }
-							//~ }
-						//~ }
 					}
                     if(RelIsoEl(Hcand_sync[i]) < 0.15 && isGoodEl(Hcand_sync[i])){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
@@ -3163,21 +2641,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
-						//~ if(found_event.size() > 0){
-							//~ if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							//~ else{
-								 //~ m_logger << FATAL << "One more TIGHT: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-								//~ if(!used_fatal){
-									//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-									//~ log_files << fileName << std::endl;
-									//~ used_fatal=true;
-								//~ }
-							//~ }
-								//~ 
-						//~ }
-					}
+							}
                 }
                 if(event_type[i/2]%4==1){
 					if(examineThisEvent) std::cout << " checking muTau isolation " << std::endl;
@@ -3198,20 +2662,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
-						//~ if(found_event.size() > 0){
-							//~ if(isLoose_match[i/2]==1) m_logger << WARNING << "Found LOOSE: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							//~ else{
-								 //~ m_logger << FATAL << "One more LOOSE: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-								//~ if(!used_fatal){
-									//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-									//~ log_files << fileName << std::endl;
-									//~ used_fatal=true;
-								//~ }
-							//~ }
-						//~ }
-                    }
+					}
                     if(RelIsoMu(Hcand_sync[i]) < 0.25 && isGoodMu(Hcand_sync[i])){ 
 						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
 						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
@@ -3228,22 +2679,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
 							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
 						}
-						//~ if(found_event.size() > 0){
-							//~ if(isTight_match[i/2]==1) m_logger << WARNING << "Found TIGHT: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-							//~ else{
-								 //~ m_logger << FATAL << "One more TIGHT: " << 
-								//~ " H cand of type " << evt_type[pos[i/2]] << " and mass " << mass_H[pos[i/2]] << SLogger::endmsg;
-								//~ if(!used_fatal){
-									//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-									//~ log_files << fileName << std::endl;
-									//~ used_fatal=true;
-								//~ }
-							//~ }
-						//~ }
-                   }
+					 }
                 }
-                //~ if(examineThisEvent) std::cout << " done lepton iso " << std::endl;
+                if(examineThisEvent) std::cout << " done lepton iso " << std::endl;
                 if(event_type[i/2]%4==0){
                     h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
                     h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
@@ -3402,37 +2840,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                     }
                 }// end of tautau
                 
-                //sync check
-				//~ if(found_event.size() > 0){
-					//~ if(isL!=isLoose_match[i/2]){
-						 //~ m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of loose: mine is " << isL <<
-							//~ " and his is " << isLoose_match[i/2] << SLogger::endmsg;
-						//~ if(!used_fatal){
-							//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-							//~ log_files << fileName << std::endl;
-							//~ used_fatal=true;
-						//~ }	
-					//~ }else m_logger << WARNING << " Found correct number of LOOSE." << SLogger::endmsg;
-					//~ if(isM!=isMedium_match[i/2]){
-						 //~ m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of medium: mine is " << isM <<
-						//~ " and his is " << isMedium_match[i/2] << SLogger::endmsg;
-						//~ if(!used_fatal){
-							//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-							//~ log_files << fileName << std::endl;
-							//~ used_fatal=true;
-						//~ }
-					//~ }else m_logger << WARNING << " Found correct number of MEDIUM." << SLogger::endmsg;
-					//~ if(isT!=isTight_match[i/2]){
-						 //~ m_logger << FATAL << "ENTRY " << m_allEvents <<", event: Wrong number of tight: mine is " << isT <<
-						//~ " and his is " << isTight_match[i/2] << SLogger::endmsg;
-						//~ if(!used_fatal){
-							//~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-							//~ log_files << fileName << std::endl;
-							//~ used_fatal=true;
-						//~ }
-					//~ }else m_logger << WARNING << " Found correct number of TIGHT." << SLogger::endmsg;
-				//~ }
-	                
+                    
                 Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
                 Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
                 H_boson = Hcand1+Hcand2;
@@ -3453,18 +2861,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						default: exp_event_type=0; break;
 					}
 					log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass[i/2]  << "     " << fileName << std::endl;
-					//~ for(int i=0;i < isL; i++)
-					//~ {
-						//~ log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+3 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
-					//~ }
-					//~ for(int i=0;i < isM; i++)
-					//~ {
-						//~ log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+2 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
-					//~ }
-					//~ for(int i=0;i < isT; i++)
-					//~ {
-						//~ log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type+1 << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass  << "     " << fileName << std::endl;	
-					//~ }
 					
 					
 				}
