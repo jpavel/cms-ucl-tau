@@ -2536,7 +2536,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		{
 			
 			if(examineThisEvent) std::cout << "   > muon no. " << j << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
-			std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
+			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
 			if(genericElectron[i].charge*genericMuon[j].charge > 0) continue;
 			if(deltaR(genericMuon[j],genericElectron[i])< maxDeltaR) continue;
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(genericMuon[j],genericElectron[i]) << std::endl;            
