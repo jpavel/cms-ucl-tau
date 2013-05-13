@@ -154,7 +154,10 @@ public:
         float TrgObjectEta_medium ;
         float TrgObjectPt_medium ;
         float TrgObjectPhi_medium ;
-
+	
+	//operators
+	
+	
 
     ClassDef(myobject, 1)
 };

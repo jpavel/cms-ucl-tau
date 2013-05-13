@@ -3,7 +3,6 @@
 // Local include(s):
 #include "../include/Analysis.h"
 
-
 #include "Corrector.h"
 
 
@@ -1413,6 +1412,55 @@ bool Analysis::AdLepton_et(myevent *m, uint index, std::vector<myobject> generic
 	return Ad_lepton;
 }
 
+bool Analysis::AdLepton_em(myevent *m, uint index_e, uint index_m, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2,bool verbose){
+	bool Ad_lepton=false;
+	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
+	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
+	for(uint i = 0; i < genericMuon.size(); i++)
+	{   
+			if(verbose) std::cout << " Mu cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << isLooseMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoMu(genericMuon[i]) << std::endl;
+			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericMuon[i]) << std::endl;
+			
+			if (!WZ_Rej(m,genericMuon[i])) continue;
+			
+			
+			if(isLooseMu(genericMuon[i]) && RelIsoMu(genericMuon[i]) < 0.3 && i!=index_m ) 
+			Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   
+    }
+	 if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	
+	for(uint i = 0; i < genericElectron.size(); i++)
+	{   
+			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Is very good? " << TightEleId(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Pt is " << genericElectron[i].pt << std::endl;
+			if(verbose) std::cout << " num lost hits is " << genericElectron[i].numLostHitEleInner << std::endl;
+			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
+			if (!WZ_Rej(m,genericElectron[i])) continue;
+			if( genericElectron[i].numLostHitEleInner > 1) continue;
+	
+			if(verbose) std::cout << " decision: " << LooseEleId(genericElectron[i]) << " " << 	RelIsoEl(genericElectron[i]) << " " << i << " index " << index_e << std::endl;
+	
+			if(LooseEleId(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.3 && i!=index_e )  
+				Ad_lepton=true;
+			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   
+	}
+	
+	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
+	return Ad_lepton;
+}
+
 bool Analysis::AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2,bool verbose){
 	bool Ad_lepton=false;
 	if(verbose) std::cout << "Checking additional leptons!" << std::endl;
@@ -1512,6 +1560,10 @@ bool Analysis::isGoodEl(myobject el){
                         return true;
                 }else return false;
 }
+
+//~ bool Analysis::isLargerPt(myobject o1, myobject o2){
+	//~ return (o1.pt > o2.pt);
+//~ }
 
 // Fake Rate functions
 double Analysis::fakeTau_tight(double pt) {
@@ -2131,6 +2183,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	//~ 
 	if(examineThisEvent) std::cout << "Checking Z overlap..." << std::endl;
 	
+//	std::sort(goodTau.begin(),goodTau.end());
+	
 	//if(Zoverlap) return;
 
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
@@ -2162,11 +2216,28 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool muTau=false;
 	bool muE = false;
 	bool signal = false;
-	short category = -1;       
+	short category = -1;
+	 	bool category0 = false;
+		bool category1= false;
+		bool category2=false;     
+	 
 	std::vector<myobject> Hcand;
 	std::vector<int> Hcand_type;
+	std::vector<myobject> Hcand_cat0;
+	std::vector<int> Hcand_type_cat0;
+	std::vector<myobject> Hcand_cat1;
+	std::vector<int> Hcand_type_cat1;
+	std::vector<myobject> Hcand_cat2;
+	std::vector<int> Hcand_type_cat2;
 	Hcand.clear();
 	Hcand_type.clear();
+	Hcand_cat0.clear();
+	Hcand_type_cat0.clear();
+	Hcand_cat1.clear();
+	Hcand_type_cat1.clear();
+	Hcand_cat2.clear();
+	Hcand_type_cat2.clear();
+	
 	std::vector<uint> usedTauIdx;
 	usedTauIdx.clear();
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
@@ -2174,7 +2245,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	bool tauTau =false;
 
 	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
-	for(uint i = 0; i < goodTau.size() && !tauTau ; i++)
+	for(uint i = 0; i < goodTau.size() ; i++)
 	{
 		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
 		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
@@ -2183,7 +2254,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 		//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
 		if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
-		for(uint j=i+1; j< goodTau.size() && !tauTau; j++)
+		for(uint j=i+1; j< goodTau.size() && !(category0 && category1 && category2); j++)
 		{
 			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << " mass: " << 
 			PairMass(goodTau[i],goodTau[j]) <<std::endl;
@@ -2191,7 +2262,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
-			if(goodTau[i].charge*goodTau[j].charge  < 0) continue;
+			if(goodTau[i].charge*goodTau[j].charge  > 0) continue;
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
 		
 			//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
@@ -2208,10 +2279,45 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
 			}
-			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 
-			signal = true; tauTau=true;
-			Hcand.push_back(goodTau[i]);
-			Hcand.push_back(goodTau[j]);
+			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 			
+			if(goodTau[i].pt > goodTau[j].pt){ 
+				Hcand.push_back(goodTau[i]);
+				Hcand.push_back(goodTau[j]);
+			}else{
+				Hcand.push_back(goodTau[j]);
+				Hcand.push_back(goodTau[i]);
+			}
+			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << goodTau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits << goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits << std::endl;
+			int index = Hcand.size() -2;
+			if(Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && !category0)
+			{
+				if(examineThisEvent) std::cout << " in category 0!" << std::endl;
+				category0=true;
+				Hcand_cat0.push_back(Hcand[index]);
+				Hcand_cat0.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat0.push_back(4);
+				else if(Zee) Hcand_type_cat0.push_back(8);
+			}
+			if(Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5 && Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && !category1)
+			{
+				if(examineThisEvent) std::cout << " in category 1!" << std::endl;
+				category1=true;
+				Hcand_cat1.push_back(Hcand[index]);
+				Hcand_cat1.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat1.push_back(4);
+				else if(Zee) Hcand_type_cat1.push_back(8);
+			}
+			if(Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5 && !category2)
+			{
+				if(examineThisEvent) std::cout << " in category 2!" << std::endl;
+				category2=true;
+				Hcand_cat2.push_back(Hcand[index]);
+				Hcand_cat2.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat2.push_back(4);
+				else if(Zee) Hcand_type_cat2.push_back(8);
+			}
+			
 			usedTauIdx.push_back(i);
 			usedTauIdx.push_back(j);
 			if(Zmumu) Hcand_type.push_back(4);
@@ -2222,9 +2328,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	
+	if(examineThisEvent) std::cout << " After TT, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
+	category0 = false;
+	category1= false;
+	category2=false;     
+	
 	for(uint i = 0; i < genericMuon.size() ; i++)
 	{
-
+	
 		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
 	
 	
@@ -2232,9 +2343,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		if(examineThisEvent) std::cout << " Checking mutau " << std::endl;
 		if(examineThisEvent) std::cout << " Mu candidate i= " << i << " " << genericMuon[i].pt << " " << genericMuon[i].charge << std::endl;
-		if(!WZ_Rej(m,genericMuon[i])) continue;
+		//if(!WZ_Rej(m,genericMuon[i])) continue;
 		if(examineThisEvent) std::cout << " Passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;	
-		for(uint j=0; j< goodTau.size() &&!muTau; j++)
+		for(uint j=0; j< goodTau.size() && !(category0 && category1 && category2); j++)
 		{
                        
 			//~ if((j==usedTauIdx[0] || j==usedTauIdx[1]) && examineThisEvent) std::cout << "This tau has been used!" << std::endl;
@@ -2249,8 +2360,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				H_=ele1+tau2;
 				std::cout << " H candidate mass is " << H_.M() << std::endl;
 			}
+			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			
-			if(genericMuon[i].charge*goodTau[j].charge < 0) continue;
+			if(genericMuon[i].charge*goodTau[j].charge > 0) continue;
 			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
 		
@@ -2268,27 +2380,60 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			muTau=true;
 			Hcand.push_back(genericMuon[i]);
 			Hcand.push_back(goodTau[j]);
+			int index = Hcand.size() -2;
+			bool pass1 = (RelIsoMu(Hcand[index])<0.3 && isGoodMu(Hcand[index]));
+			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
+			
+			if( !pass1 && !pass2 && !category0)
+			{
+				category0=true;
+				Hcand_cat0.push_back(Hcand[index]);
+				Hcand_cat0.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat0.push_back(1);
+				else if(Zee) Hcand_type_cat0.push_back(5);
+			}
+			if(!pass1 && pass2 && !category1)
+			{
+				category1=true;
+				Hcand_cat1.push_back(Hcand[index]);
+				Hcand_cat1.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat1.push_back(1);
+				else if(Zee) Hcand_type_cat1.push_back(5);
+			}
+			if(pass1 && !pass2 && !category2)
+			{
+				category2=true;
+				Hcand_cat2.push_back(Hcand[index]);
+				Hcand_cat2.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat2.push_back(1);
+				else if(Zee) Hcand_type_cat2.push_back(5);
+			}
+			
 			if(Zmumu) Hcand_type.push_back(1);
 			else if(Zee) Hcand_type.push_back(5);
 			
 		}             
 	}
+	
 
 	if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
 	bool eTau = false;
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
-
+	category0 = false;
+	category1= false;
+	category2=false;     
+	
 	for(uint i = 0; i < genericElectron.size() ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
 		
 		if(genericElectron[i].numLostHitEleInner > 0) continue;
-		if(examineThisEvent) std::cout << DEBUG << " Checking for eTau " << std::endl;
-		if (!WZ_Rej(m,genericElectron[i])) continue;
+		if(examineThisEvent) std::cout << " Checking for eTau " << std::endl;
+		//if (!WZ_Rej(m,genericElectron[i])) continue;
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
-		for(uint j=0; j< goodTau.size() &&!eTau; j++)
+		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2); j++)
 		{
 			//~ if((j==usedTauIdx[0] || j==usedTauIdx[1]) && examineThisEvent) std::cout << "This tau has been used!" << std::endl;
 			//~ if(j==usedTauIdx[0] || j==usedTauIdx[1]) continue;
@@ -2302,7 +2447,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				H_=ele1+tau2;
 				std::cout << " H candidate mass is " << H_.M() << std::endl;
 			}
-			if(genericElectron[i].charge*goodTau[j].charge < 0) continue;
+			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
+			
+			if(genericElectron[i].charge*goodTau[j].charge > 0) continue;
 			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5) continue;
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) std::cout << "WTF!!!!!!!!!!!!!!!" << goodTau[j].eta << std::endl;
 		
@@ -2325,12 +2472,132 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
 			Hcand.push_back(genericElectron[i]);
 			Hcand.push_back(goodTau[j]);
+			int index = Hcand.size() -2;
+			
+					
+			bool pass1 = (RelIsoEl(Hcand[index])<0.3 && TightEleId(Hcand[index]));
+			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
+			
+			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
+			
+			if( !pass1 && !pass2 && !category0)
+			{
+				if(examineThisEvent) std::cout << "In category0" << std::endl;
+				category0=true;
+				Hcand_cat0.push_back(Hcand[index]);
+				Hcand_cat0.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat0.push_back(3);
+				else if(Zee) Hcand_type_cat0.push_back(7);
+			}
+			if(!pass1 && pass2 && !category1)
+			{
+				if(examineThisEvent) std::cout << "In category1" << std::endl;
+				category1=true;
+				Hcand_cat1.push_back(Hcand[index]);
+				Hcand_cat1.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat1.push_back(3);
+				else if(Zee) Hcand_type_cat1.push_back(7);
+			}
+			if(pass1 && !pass2 && !category2)
+			{
+				if(examineThisEvent) std::cout << "in category2" << std::endl;
+				category2=true;
+				Hcand_cat2.push_back(Hcand[index]);
+				Hcand_cat2.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat2.push_back(3);
+				else if(Zee) Hcand_type_cat2.push_back(7);
+			}
+			
 			if(Zmumu) Hcand_type.push_back(3);
 			else if(Zee) Hcand_type.push_back(7);
 		
 		}
 	}
+	if(examineThisEvent) std::cout << " After ET, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
 	
+	
+	//emu final state
+	bool eMu=false;
+	category0 = false;
+	category1= false;
+	category2=false;     
+	
+	
+	for(uint i = 0; i < genericElectron.size() ; i++)
+	{
+		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
+		
+		if(genericElectron[i].numLostHitEleInner > 1) continue;
+		if(examineThisEvent) std::cout << " Checking for eMu " << std::endl;
+		//if (!WZ_Rej(m,genericElectron[i])) continue;
+		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << genericMuon.size() << " muons." << std::endl;
+		for(uint j=0; j< genericMuon.size() && !(category0 && category1 && category2); j++)
+		{
+			if(examineThisEvent) std::cout << "   > muon no. " << j << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
+			std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
+			if(genericElectron[i].charge*genericMuon[j].charge > 0) continue;
+			if(deltaR(genericMuon[j],genericElectron[i])< maxDeltaR) continue;
+			if(examineThisEvent) std::cout << " j distance is " << deltaR(genericMuon[j],genericElectron[i]) << std::endl;            
+			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
+			
+			bool verb = false;
+			if(examineThisEvent) verb = true;
+			if(AdLepton_em(m,i,j,genericMuon,genericElectron,genericElectron[i],genericMuon[j],verb)){ 
+				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+				continue;
+			}
+			
+			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],genericMuon[j], verb)) continue;
+			signal = true; 
+			eMu=true;
+			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
+			Hcand.push_back(genericElectron[i]);
+			Hcand.push_back(genericMuon[j]);
+			int index = Hcand.size() -2;
+			
+			bool pass1 = (RelIsoEl(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
+			bool pass2 = (RelIsoMu(Hcand[index+1])<0.3 && isLooseMu(Hcand[index+1]));
+		    if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
+			
+			if( !pass1 && !pass2 && !category0)
+			{
+				if(examineThisEvent) std::cout << "In category0" << std::endl;
+				category0=true;
+				Hcand_cat0.push_back(Hcand[index]);
+				Hcand_cat0.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat0.push_back(2);
+				else if(Zee) Hcand_type_cat0.push_back(6);
+			}
+			if(pass1 && !pass2 && !category1)
+			{
+				if(examineThisEvent) std::cout << "In category1" << std::endl;
+				category1=true;
+				Hcand_cat1.push_back(Hcand[index]);
+				Hcand_cat1.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat1.push_back(2);
+				else if(Zee) Hcand_type_cat1.push_back(6);
+			}
+			if(!pass1 && pass2 && !category2)
+			{
+				if(examineThisEvent) std::cout << "in category2" << std::endl;
+				category2=true;
+				Hcand_cat2.push_back(Hcand[index]);
+				Hcand_cat2.push_back(Hcand[index+1]);
+				if(Zmumu) Hcand_type_cat2.push_back(2);
+				else if(Zee) Hcand_type_cat2.push_back(6);
+			}
+			
+			if(Zmumu) Hcand_type.push_back(2);
+			else if(Zee) Hcand_type.push_back(6);
+			
+			
+			
+		}
+    
+		
+	}
 
 	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
 	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
@@ -2340,7 +2607,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
-	if(!muTau && !muE && !eTau && !tauTau){ 
+	if((Hcand_cat2.size() + Hcand_cat1.size() + Hcand_cat0.size()) ==0){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 	
 		return;
@@ -2575,9 +2842,36 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 	h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
-
+	    std::vector<bool> PassFail;
+	    PassFail.clear();
         	TLorentzVector Hcand1,Hcand2,H_boson;
 		if(examineThisEvent) std::cout << " checking isolation " << std::endl;
+		
+		if(examineThisEvent) std::cout << "Now evaluating candidates!" << std::endl;
+		for(uint i =0; i < Hcand.size(); i+=2)
+            {
+				switch(event_type[i/2])
+				{
+						//tautau
+					case 4:
+					case 8:
+						PassFail.push_back((Hcand_sync[i].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i].pt > 10.));
+						PassFail.push_back((Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i+1].pt > 10.));
+						break;
+						//mutau
+					case 1:	
+					case 5:
+						PassFail.push_back(RelIsoMu(Hcand_sync[i])<0.3 && isLooseMu(Hcand_sync[i]));
+						PassFail.push_back((Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i+1].pt > 10.));
+						break;
+						//etau
+					case 3:
+					case 7:
+						PassFail.push_back(RelIsoEl(Hcand_sync[i])<0.3 && LooseEleId(Hcand_sync[i]));
+						PassFail.push_back((Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i+1].pt > 10.));
+						break;
+				}
+			}
 	
             for(uint i =0; i < Hcand.size(); i+=2)
             {
@@ -2846,24 +3140,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 H_boson = Hcand1+Hcand2;
                // double Hmass = H_boson.M();
                 
-                if(printoutEvents)
-				{
-					
-					int exp_event_type;
-					switch(event_type[i/2])
-					{
-						case 1: exp_event_type=93; break;
-						case 3: exp_event_type=92; break;
-						case 4: exp_event_type=91; break;
-						case 5: exp_event_type=96; break;
-						case 7: exp_event_type=97; break;
-						case 8: exp_event_type=95; break;
-						default: exp_event_type=0; break;
-					}
-					log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << Hmass[i/2]  << "     " << fileName << std::endl;
-					
-					
-				}
+               
                 
             }
 
@@ -2880,7 +3157,81 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
             }
 
         
-
+			
+			 if(printoutEvents)
+				{
+					if(examineThisEvent) std::cout << " in printout " << std::endl;
+					for(uint i=0; i < Hcand_cat0.size(); i+=2)
+					{
+						int exp_event_type;
+						std::string name;
+						double mass=PairMass(Hcand_cat0[i],Hcand_cat0[i+1]);
+						switch(Hcand_type_cat0[i/2])
+						{
+							case 1: exp_event_type=30; name="mmmt"; break;
+							case 2: exp_event_type=40; name="mmme"; break;
+							case 3: exp_event_type=20; name="mmet"; break;
+							case 4: exp_event_type=10; name="mmtt"; break;
+							case 5: exp_event_type=60; name="eemt"; break;
+							case 6: exp_event_type=80; name="eeem"; break;
+							case 7: exp_event_type=70; name="eeet"; break;
+							case 8: exp_event_type=50; name="eett"; break;
+							default: exp_event_type=0; break;
+						}
+						std::string status="FF";
+						
+						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << name << " " << status << " " <<  
+						m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << "     " << fileName << std::endl;
+						
+					}
+					for(uint i=0; i < Hcand_cat1.size(); i+=2)
+					{
+						int exp_event_type;
+						std::string name;
+						double mass=PairMass(Hcand_cat1[i],Hcand_cat1[i+1]);
+						switch(Hcand_type_cat1[i/2])
+						{
+							case 1: exp_event_type=32; name="mmmt"; break;
+							case 2: exp_event_type=42; name="mmme"; break;
+							case 3: exp_event_type=22; name="mmet"; break;
+							case 4: exp_event_type=12; name="mmtt"; break;
+							case 5: exp_event_type=62; name="eemt"; break;
+							case 6: exp_event_type=82; name="eeem"; break;
+							case 7: exp_event_type=72; name="eeet"; break;
+							case 8: exp_event_type=52; name="eett"; break;
+							default: exp_event_type=0; break;
+						}
+						std::string status="PF";
+						
+						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << name << " " << status << " " <<  
+						m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << "     " << fileName << std::endl;
+						
+					}
+					for(uint i=0; i < Hcand_cat2.size(); i+=2)
+					{
+						int exp_event_type;
+						std::string name;
+						double mass=PairMass(Hcand_cat2[i],Hcand_cat2[i+1]);
+						switch(Hcand_type_cat2[i/2])
+						{
+							case 1: exp_event_type=31; name="mmmt"; break;
+							case 2: exp_event_type=41; name="mmme"; break;
+							case 3: exp_event_type=21; name="mmet"; break;
+							case 4: exp_event_type=11; name="mmtt"; break;
+							case 5: exp_event_type=61; name="eemt"; break;
+							case 7: exp_event_type=71; name="eeet"; break;
+							case 6: exp_event_type=81; name="eeem"; break;
+							case 8: exp_event_type=51; name="eett"; break;
+							default: exp_event_type=0; break;
+						}
+						std::string status="FP";
+						
+						log1 << setiosflags(ios::fixed) << std::setprecision(1) << exp_event_type << " " << name << " " << status << " " <<  
+						m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << "     " << fileName << std::endl;
+						
+					}
+					
+				}
         
 	return;
 
