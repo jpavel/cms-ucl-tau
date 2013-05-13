@@ -2534,6 +2534,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << genericMuon.size() << " muons." << std::endl;
 		for(uint j=0; j< genericMuon.size() && !(category0 && category1 && category2); j++)
 		{
+			
 			if(examineThisEvent) std::cout << "   > muon no. " << j << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
 			std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
 			if(genericElectron[i].charge*genericMuon[j].charge > 0) continue;
@@ -2598,6 +2599,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     
 		
 	}
+	
+	if(examineThisEvent) std::cout << " After EM, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
+	
 
 	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
 	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
@@ -2670,6 +2674,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i=0; i< Hcand_type.size() ;i++)
 	{
 		if(Hcand_type[i]==7 || Hcand_type[i]==1){
+		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
+		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
+		event_type.push_back(Hcand_type[i]);
+		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
+		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
+		Hmass.push_back(mass);
+	//	if(examineThisEvent) std::cout << " > Mass is " << Hmass[0] << std::endl;
+		
+		Hcand_sync.push_back(Hcand[2*i]);
+		Hcand_sync.push_back(Hcand[2*i+1]);
+		}
+	}
+	
+		for(uint i=0; i< Hcand_type.size() ;i++)
+	{
+		if(Hcand_type[i]==6 || Hcand_type[i]==2){
 		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
 		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
 		event_type.push_back(Hcand_type[i]);
