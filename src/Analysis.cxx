@@ -937,7 +937,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         
 	for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
 	{
-		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2,sumPt;
+		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2,sumPt,jet_cat0,jet_cat1,jet_cat2,jetRef_cat0,jetRef_cat1,jetRef_cat2;
 		s << "h_H_mass_type_" << i;
 		mass_sig << "h_H_mass_signal_type_" << i;
 		mass_cat0 << "h_H_mass_cat0_type_" << i;
@@ -951,6 +951,15 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		cat1 << "h_category1_pt_" << i;
 		cat2 << "h_category2_pt_" << i;
 		
+		jet_cat0 << "h_jet_category0_jet_pt_" << i;
+		jet_cat1 << "h_jet_category1_jet_pt_" << i;
+		jet_cat2 << "h_jet_category2_jet_pt_" << i;
+		
+		
+		jetRef_cat0 << "h_jetRef_category0_jetRef_pt_" << i;
+		jetRef_cat1 << "h_jetRef_category1_jetRef_pt_" << i;
+		jetRef_cat2 << "h_jetRef_category2_jetRef_pt_" << i;
+		
 		std::string name = s.str(); 
 		std::string name_mass_sig = mass_sig.str(); 
 		std::string name_mass_cat0 = mass_cat0.str(); 
@@ -963,8 +972,15 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::string name_cat0 = cat0.str(); 
 		std::string name_cat1 = cat1.str(); 
 		std::string name_cat2 = cat2.str(); 
+		std::string name_jet_cat0 = jet_cat0.str(); 
+		std::string name_jet_cat1 = jet_cat1.str(); 
+		std::string name_jet_cat2 = jet_cat2.str(); 
 		
-		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2,tit_sumPt;
+		std::string name_jetRef_cat0 = jetRef_cat0.str(); 
+		std::string name_jetRef_cat1 = jetRef_cat1.str(); 
+		std::string name_jetRef_cat2 = jetRef_cat2.str(); 
+		
+		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2,tit_sumPt,tit_jet_cat0,tit_jet_cat1,tit_jet_cat2,tit_jetRef_cat0,tit_jetRef_cat1,tit_jetRef_cat2;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
 		
 		tit_sig_1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
@@ -973,6 +989,13 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		tit_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
 		tit_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+		tit_jet_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
+		tit_jet_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+		tit_jet_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+			tit_jetRef_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
+		tit_jetRef_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+		tit_jetRef_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+	
 			
 		std::string title = ss.str();
 		std::string title_sig_1 = tit_sig_1.str(); 
@@ -981,6 +1004,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::string title_cat0 = tit_cat0.str(); 
 		std::string title_cat1 = tit_cat1.str(); 
 		std::string title_cat2 = tit_cat2.str();
+		std::string title_jet_cat0 = tit_jet_cat0.str(); 
+		std::string title_jet_cat1 = tit_jet_cat1.str(); 
+		std::string title_jet_cat2 = tit_jet_cat2.str();
+		std::string title_jetRef_cat0 = tit_jetRef_cat0.str(); 
+		std::string title_jetRef_cat1 = tit_jetRef_cat1.str(); 
+		std::string title_jetRef_cat2 = tit_jetRef_cat2.str();
 		
 		TH1D* h_temp 					=  Book(TH1D(TString(name),TString(title),300,0.,300.));
 		TH1D* h_mass_sig_temp 				=  Book(TH1D(TString(name_mass_sig),TString(title),300,0.,300.));
@@ -996,6 +1025,15 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		TH1D* h_category1_temp_pt			= Book(TH1D(TString(name_cat1), TString(title_cat1),100,0,100));
 		TH1D* h_category2_temp_pt			= Book(TH1D(TString(name_cat2), TString(title_cat2),100,0,100));
 		
+		TH2D* h_category0_temp_jet_pt			= Book(TH2D(TString(name_jet_cat0), TString(title_jet_cat0),100,0,100,100,0,100));
+		TH1D* h_category1_temp_jet_pt			= Book(TH1D(TString(name_jet_cat1), TString(title_jet_cat1),100,0,100));
+		TH1D* h_category2_temp_jet_pt			= Book(TH1D(TString(name_jet_cat2), TString(title_jet_cat2),100,0,100));
+		
+		
+		TH2D* h_category0_temp_jetRef_pt			= Book(TH2D(TString(name_jetRef_cat0), TString(title_jetRef_cat0),100,0,100,100,0,100));
+		TH1D* h_category1_temp_jetRef_pt			= Book(TH1D(TString(name_jetRef_cat1), TString(title_jetRef_cat1),100,0,100));
+		TH1D* h_category2_temp_jetRef_pt			= Book(TH1D(TString(name_jetRef_cat2), TString(title_jetRef_cat2),100,0,100));
+		
 		h_H_mass_types.push_back(h_temp);
 		h_H_mass_signal_types.push_back(h_mass_sig_temp);
 		h_H_mass_cat0_types.push_back(h_mass_cat0_temp);
@@ -1009,6 +1047,14 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		h_category0_pt_types.push_back(h_category0_temp_pt);
 		h_category1_pt_types.push_back(h_category1_temp_pt);
 		h_category2_pt_types.push_back(h_category2_temp_pt);
+		
+		h_category0_jet_pt_types.push_back(h_category0_temp_jet_pt);
+		h_category1_jet_pt_types.push_back(h_category1_temp_jet_pt);
+		h_category2_jet_pt_types.push_back(h_category2_temp_jet_pt);
+    
+		h_category0_jetRef_pt_types.push_back(h_category0_temp_jetRef_pt);
+		h_category1_jetRef_pt_types.push_back(h_category1_temp_jetRef_pt);
+		h_category2_jetRef_pt_types.push_back(h_category2_temp_jetRef_pt);
     
 		
 	}
@@ -1587,6 +1633,8 @@ double Analysis::PairMass(myobject Hcand1, myobject Hcand2){
     H_sum = H_1 + H_2;
 	return H_sum.M();
 }
+
+
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
@@ -3251,6 +3299,94 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						
 					}
 					
+				}
+				
+				//histo filling
+				
+				for(uint i=0; i < Hcand_cat0.size(); i+=2)
+					{
+						int exp_event_type=Hcand_type_cat0[i/2];
+						myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
+						myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
+						switch(exp_event_type)
+						{
+							case 1:
+							case 3:
+							case 5:
+							case 7: 
+								h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].pt, Hcand_cat0[i].pt); 
+								h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt); 
+								h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].jetPt,Hcand_cat0[i].jetPt); 
+								break;
+							case 2: 
+							case 4: 
+							case 6: 
+							case 8: 
+								h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].pt, Hcand_cat0[i+1].pt);
+								h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt); 
+								h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].jetPt,Hcand_cat0[i+1].jetPt);
+								break;
+							default:
+								break;
+						}
+					}
+				// messed with categories: cat1 = tau fails or e fails	
+				for(uint i=0; i < Hcand_cat2.size(); i+=2)
+				{
+					int exp_event_type=Hcand_type_cat2[i/2];
+					myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
+					myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
+					switch(exp_event_type)
+					{
+						case 1:
+						case 3:
+						case 5:
+						case 7: 
+							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].pt); 
+							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].jetPt); 
+							break;
+						case 2: 
+						case 4: 
+						case 6: 
+						case 8: 
+							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt);
+							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt); 
+							break;
+						default:
+							break;
+					}
+											
+				}
+				
+				for(uint i=0; i < Hcand_cat1.size(); i+=2)
+				{
+					int exp_event_type=Hcand_type_cat1[i/2];
+					myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
+					myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
+					switch(exp_event_type)
+					{
+						case 1:
+						case 3:
+						case 5:
+						case 7: 
+							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].pt); 
+							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].jetPt); 
+							break;
+						case 2: 
+						case 4: 
+						case 6: 
+						case 8: 
+							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt);
+							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt); 
+							break;
+						default:
+							break;
+					}
+											
 				}
         
 	return;

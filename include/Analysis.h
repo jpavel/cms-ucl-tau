@@ -73,6 +73,7 @@ public:
    bool AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_em(myevent *m, uint index_e, uint index_m, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2,bool verbose=false);
    double PairMass(myobject Hcand1, myobject Hcand2);	
+   
    bool DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose=false);
   // bool isLargerPt(myobject o1, myobject o2);		
    bool TightEleId(float pt, float eta, double value);
@@ -340,6 +341,14 @@ private:
         std::vector<TH2*> h_category0_pt_types;
         std::vector<TH1*> h_category1_pt_types;
         std::vector<TH1*> h_category2_pt_types;
+        
+        std::vector<TH2*> h_category0_jet_pt_types;
+        std::vector<TH1*> h_category1_jet_pt_types;
+        std::vector<TH1*> h_category2_jet_pt_types;
+        
+        std::vector<TH2*> h_category0_jetRef_pt_types;
+        std::vector<TH1*> h_category1_jetRef_pt_types;
+        std::vector<TH1*> h_category2_jetRef_pt_types;
         
         
         TH1* h_Nvertex_NoCut;
