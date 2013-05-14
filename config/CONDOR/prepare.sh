@@ -1,0 +1,1 @@
+source Prepare_condor_InputDir_OutputName_FilesPerJob_configFile.sh /storage/data/cms/store/user/jez/ZHttNtuples_v2/53X/Data/DoubleElectron_Run2012C-24Aug2012-v1/ 20130514_DoubleElectron_Run2012C-24Aug2012-v1 50 Analysis_config_T2.xml results
