@@ -1095,18 +1095,19 @@ entries++;
 		else if(ShiftTauES_down && !ShiftTauES_up){
                   tauPt = tau[i].pt - SystUncert_ES * tau[i].pt;}
                 else{ 
-                  tauPt = tau[i].pt;}
+                  tauPt = tau[i].pt;
+                }
 		double tauEta = tau[i].eta;
 		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
 		bool LooseMuon = (tau[i].discriminationByMuonLoose2 > 0.5);
 		bool CombinedIsolation = (tau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
 
-		if (tauPt > Cut_tau_base_Pt && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
+		if (tauPt > Cut_tau_base_Pt && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode){
 			goodTau.push_back(tau[i]);
                         goodTau[goodTau.size()-1].pt = tauPt;
 			Hist("h_tauPt_EScheck")->Fill(tauPt);
-			Hist("h_tauPt_EScheck_W")->Fill(tauPt,Z_weight);
+			Hist("h_tauPt_EScheck_W")->Fill(tauPt,Z_weight);}
 	}
         
 	if(examineThisEvent) std::cout << "There is " << goodTau.size() << " goodTaus " << std::endl;
