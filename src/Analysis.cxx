@@ -84,6 +84,8 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
+	h_tauPt_EScheck                        = Book(TH1D("h_tauPt_EScheck","tau pt after ES shift", 100,0,300));
+	h_tauPt_EScheck_W                      = Book(TH1D("h_tauPt_EScheck_W","tau pt after ES shift (weighted)", 100,0,300));
 	h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
 	h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
 	h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
@@ -1090,7 +1092,7 @@ entries++;
                 //shift the pt of the tau by 1 sigma
 		if(ShiftTauES_up && !ShiftTauES_down){
                   tauPt = tau[i].pt + SystUncert_ES * tau[i].pt;}
-		if(ShiftTauES_down && !ShiftTauES_up){
+		else if(ShiftTauES_down && !ShiftTauES_up){
                   tauPt = tau[i].pt - SystUncert_ES * tau[i].pt;}
                 else{ 
                   tauPt = tau[i].pt;}
@@ -1103,6 +1105,8 @@ entries++;
 		if (tauPt > Cut_tau_base_Pt && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
 			goodTau.push_back(tau[i]);
                         goodTau[goodTau.size()-1].pt = tauPt;
+			Hist("h_tauPt_EScheck")->Fill(tauPt);
+			Hist("h_tauPt_EScheck_W")->Fill(tauPt,Z_weight);
 	}
         
 	if(examineThisEvent) std::cout << "There is " << goodTau.size() << " goodTaus " << std::endl;
