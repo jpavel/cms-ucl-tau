@@ -103,6 +103,9 @@ private:
 	int entries;
 
 	// cut-flow
+    TH1* h_tauPt_EScheck;
+    TH1* h_tauPt_EScheck_W;
+
     TH1* h_deltaR;
     TH1* h_deltaR_max;
     TH1* h_deltaR_min;
