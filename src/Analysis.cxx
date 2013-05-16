@@ -56,6 +56,7 @@ Analysis::Analysis()
 		DeclareProperty("examineEvent",examineEvent); //sync
 		DeclareProperty("ShiftTauES_up",ShiftTauES_up); //sync
 		DeclareProperty("ShiftTauES_down",ShiftTauES_down); //sync
+		DeclareProperty("SystUncert_ES",SystUncert_ES); //sync
 		
 		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=15;
@@ -308,7 +309,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     h_category1_pt_types.clear();
     h_category2_pt_types.clear();
         
-	for(int i = 1; i <= h_event_type->GetNbinsX(); i++)
+	for(uint i = 1; i <= h_event_type->GetNbinsX(); i++)
 	{
 		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2,sumPt;
 		s << "h_H_mass_type_" << i;
@@ -770,7 +771,7 @@ entries++;
 	
 	//overlap cleaning
 	
-	for(uint i = 0; i < goodMuon.size(); i++)
+	for(int i = 0; i < goodMuon.size(); i++)
 	{
 		if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << goodMuon.size() << std::endl;
 		
@@ -787,7 +788,7 @@ entries++;
 	}
 	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());
 	
-	for(uint i = 0; i < goodElectron.size(); i++)
+	for(int i = 0; i < goodElectron.size(); i++)
 	{
 		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << goodElectron.size() << std::endl;
 		bool removed = false;
@@ -1087,12 +1088,12 @@ entries++;
 
                 double tauPt;
                 //shift the pt of the tau by 1 sigma
-		if(ShiftTauES_up && !ShiftTauES_down) continue;
-                  tauPt = tau[i].pt+0.03*tau[i].pt;
-		if(ShiftTauES_down && !ShiftTauES_up) continue;
-                  tauPt = tau[i].pt-0.03*tau[i].pt;
-                if(!ShiftTauES_up && !ShiftTauES_down) continue; 
-                  tauPt = tau[i].pt;
+		if(ShiftTauES_up && !ShiftTauES_down){
+                  tauPt = tau[i].pt + SystUncert_ES * tau[i].pt;}
+		if(ShiftTauES_down && !ShiftTauES_up){
+                  tauPt = tau[i].pt - SystUncert_ES * tau[i].pt;}
+                else{ 
+                  tauPt = tau[i].pt;}
 		double tauEta = tau[i].eta;
 		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
 		bool LooseMuon = (tau[i].discriminationByMuonLoose2 > 0.5);
@@ -1101,11 +1102,11 @@ entries++;
 
 		if (tauPt > Cut_tau_base_Pt && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
 			goodTau.push_back(tau[i]);
-                        goodTau[goodTau.size()-1].pt = goodTau[i].pt;
+                        goodTau[goodTau.size()-1].pt = tauPt;
 	}
         
 	if(examineThisEvent) std::cout << "There is " << goodTau.size() << " goodTaus " << std::endl;
-	for(uint i = 0; i < goodTau.size(); i++)
+	for(int i = 0; i < goodTau.size(); i++)
 	{
 		bool removed = false;
 		
@@ -1174,7 +1175,7 @@ entries++;
 	// Z overlap removal
 	bool Zoverlap = false;
 	
-	for(uint i = 0; i < goodMuon.size(); i++)
+	for(int i = 0; i < goodMuon.size(); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
@@ -1188,7 +1189,7 @@ entries++;
 		if(examineThisEvent && removed) std::cout << " mu overlap with Z" << std::endl;
 	}
 	
-	for(uint i = 0; i < goodElectron.size(); i++)
+	for(int i = 0; i < goodElectron.size(); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
@@ -1202,7 +1203,7 @@ entries++;
 		if(examineThisEvent && removed) std::cout << " electron overlap with Z" << std::endl;
 	}
 
-	for(uint i = 0; i < goodTau.size(); i++)
+	for(int i = 0; i < goodTau.size(); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
@@ -1904,7 +1905,7 @@ entries++;
         double maxDR = deltaRlist[0];
         double minDR = deltaRlist[0];
 
-	for(uint i = 0; i<deltaRlist.size(); i++)
+	for(int i = 0; i<deltaRlist.size(); i++)
 	{
 		if(deltaRlist[i] > maxDR)
 			maxDR = deltaRlist[i];
