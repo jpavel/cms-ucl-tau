@@ -302,9 +302,10 @@ private:
     
     bool IgnoreAdditionalTaus;
     bool IgnoreSF;
-	bool IgnorePUW;
-	
-	bool printoutEvents;
+    bool IgnorePUW;
+    bool ShiftTauES_up;
+    bool ShiftTauES_down;
+    bool printoutEvents;
 	
 	ofstream lumi;
 	ofstream dupl;
