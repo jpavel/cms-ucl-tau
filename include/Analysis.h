@@ -305,6 +305,7 @@ private:
     bool IgnorePUW;
     bool ShiftTauES_up;
     bool ShiftTauES_down;
+    double SystUncert_ES;
     bool printoutEvents;
 	
 	ofstream lumi;
