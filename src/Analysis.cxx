@@ -16,6 +16,7 @@ Analysis::Analysis()
 		SetLogName( GetName() );
 		DeclareProperty("InTreeName",InTreeName);
 		DeclareProperty("maxDeltaR",maxDeltaR);
+		DeclareProperty("maxDeltaR2",maxDeltaR2);
 		DeclareProperty("MyPtCut",Ptcut);
 		DeclareProperty("BestMassForZ",BestMassForZ);
 		DeclareProperty("dZvertex", dZvertex);
@@ -44,18 +45,20 @@ Analysis::Analysis()
 		DeclareProperty("AllowTauBOverlap",AllowTauBOverlap);
 		
 		DeclareProperty("Cut_tautau_sumPt",Cut_tautau_sumPt);
-		DeclareProperty("Cut_leptau_sumPt",Cut_leptau_sumPt);
+		DeclareProperty("Cut_mutau_sumPt",Cut_mutau_sumPt);
+		DeclareProperty("Cut_etau_sumPt",Cut_etau_sumPt);
 		DeclareProperty("Cut_leplep_sumPt",Cut_leplep_sumPt);
 		DeclareProperty("UseSumPtCut",UseSumPtCut);
 		DeclareProperty("IgnoreAdditionalTaus",IgnoreAdditionalTaus);
 		DeclareProperty("IgnoreSF",IgnoreSF);
 		DeclareProperty("IgnorePUW",IgnorePUW);
 		DeclareProperty("printoutEvents",printoutEvents);
+		DeclareProperty("examineEvent",examineEvent); //sync
 		
 		
-		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=20;
-		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=20;
-	    if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=20;
+		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=15;
+		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=15;
+		if(Cut_tautau_Pt_2< 1e-3 && Cut_tautau_Pt_2 >= 0) Cut_tautau_Pt_2=15;
 	    
 	    
 
@@ -80,23 +83,23 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
-        h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
-        h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
-        h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
+	h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
+	h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
+	h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
 
-        h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
-        h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
-        
-        h_cut_flow_signal 				= Book(TH1D("h_cut_flow_signal","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat0					= Book(TH1D("h_cut_flow_cat0","Cut Flow cat0",4,0.5,4.5));
-		h_cut_flow_cat1					= Book(TH1D("h_cut_flow_cat1","Cut Flow cat1",4,0.5,4.5));
-		h_cut_flow_cat2					= Book(TH1D("h_cut_flow_cat2","Cut Flow cat2",4,0.5,4.5));
+	h_cut_flow                      = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));
+	h_cut_flow_weight               = Book(TH1D("h_cut_flow_weight","Cut Flow Weighted",11,-0.5,10.5));
 
-		h_cut_flow_signal_weight		= Book(TH1D("h_cut_flow_signal_weight","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat0_weight			= Book(TH1D("h_cut_flow_cat0_weight","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat1_weight			= Book(TH1D("h_cut_flow_cat1_weight","Cut Flow signal",4,0.5,4.5));
-		h_cut_flow_cat2_weight			= Book(TH1D("h_cut_flow_cat2_weight","Cut Flow signal",4,0.5,4.5));
-	
+	h_cut_flow_signal 				= Book(TH1D("h_cut_flow_signal","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat0					= Book(TH1D("h_cut_flow_cat0","Cut Flow cat0",4,0.5,4.5));
+	h_cut_flow_cat1					= Book(TH1D("h_cut_flow_cat1","Cut Flow cat1",4,0.5,4.5));
+	h_cut_flow_cat2					= Book(TH1D("h_cut_flow_cat2","Cut Flow cat2",4,0.5,4.5));
+
+	h_cut_flow_signal_weight		= Book(TH1D("h_cut_flow_signal_weight","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat0_weight			= Book(TH1D("h_cut_flow_cat0_weight","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat1_weight			= Book(TH1D("h_cut_flow_cat1_weight","Cut Flow signal",4,0.5,4.5));
+	h_cut_flow_cat2_weight			= Book(TH1D("h_cut_flow_cat2_weight","Cut Flow signal",4,0.5,4.5));
+
 	h_el_n              		= Book(TH1D("el_n","el_n",50,0,50));
 	h_el_cut            		= Book(TH1D("el_cit","el_cut",50,0,50));
 	h_event_type        	      	= Book(TH1D("h_event_type","Event Type",8,0.5,8.5));
@@ -104,18 +107,18 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	
 	//Z->mumu    
-	h_mu1Z_pt           		= Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
-	h_mu2Z_pt          		        = Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));
-	h_Zmass_mumu        		= Book(TH1D("h_Zmass_mumu","Zmumu_mass",60,60,120));
-	h_Zpt_mumu          		= Book(TH1D("h_Zpt_mumu","Zmumu_pt",300,0,300));
+	h_mu1Z_pt     				      		= Book(TH1D("h_mu1Z_pt","muon1_Pt",300,0,300));
+	h_mu2Z_pt          		       		 	= Book(TH1D("h_mu2Z_pt","muon2_Pt",300,0,300));
+	h_Zmass_mumu        					= Book(TH1D("h_Zmass_mumu","Zmumu_mass",60,60,120));
+	h_Zpt_mumu          					= Book(TH1D("h_Zpt_mumu","Zmumu_pt",300,0,300));
 	//Z->ee    
-	h_ele1Z_pt          		= Book(TH1D("h_ele1Z_pt","ele1_Pt",300,0,300));
-	h_ele2Z_pt         		        = Book(TH1D("h_ele2Z_pt","ele2_Pt",300,0,300));
-	h_Zmass_ee          		= Book(TH1D("h_Zmass_ee","Zee_mass",60,60,120));
-	h_Zpt_ee            		= Book(TH1D("h_Zpt_ee","Zee_pt",300,0,300));
+	h_ele1Z_pt          					= Book(TH1D("h_ele1Z_pt","ele1_Pt",300,0,300));
+	h_ele2Z_pt         		        		= Book(TH1D("h_ele2Z_pt","ele2_Pt",300,0,300));
+	h_Zmass_ee          					= Book(TH1D("h_Zmass_ee","Zee_mass",60,60,120));
+	h_Zpt_ee            					= Book(TH1D("h_Zpt_ee","Zee_pt",300,0,300));
 	//Z
-	h_Zmass     		        = Book(TH1D("h_Zmass","Z_mass",60,60,120));
-	h_Zpt            		   = Book(TH1D("h_Zpt","Z_pt",300,0,300));
+	h_Zmass     		        			= Book(TH1D("h_Zmass","Z_mass",60,60,120));
+	h_Zpt            		   			= Book(TH1D("h_Zpt","Z_pt",300,0,300));
 
 	h_Z_eta				= Book(TH1D("h_Z_eta","H #eta; #eta",100,-3.0,3.0));
 	h_Z_phi				= Book(TH1D("h_Z_phi","H #phi; #phi",64,-3.2,3.2));
@@ -162,6 +165,20 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_H_lep2_eta			= Book(TH1D("h_H_lep2_eta","H #eta; #eta",100,-3.0,3.0));
 	h_H_lep2_phi			= Book(TH1D("h_H_lep2_phi","H #phi; #phi",64,-3.2,3.2));
 
+        //Z mass and tMass plot (added by Lucia)
+	h_Zmass_afterZselection     		        	= Book(TH1D("h_Zmass_afterZselection","Z_mass after the Z selection (all events)",60,60,120));
+	h_Zmass_endOfselection     		                = Book(TH1D("h_Zmass_endOfselection","Z_mass at the end of the selection (all events)",60,60,120));
+	h_Zmass_endOfselection_signal     		        = Book(TH1D("h_Zmass_endOfselection_signal","Z_mass at the end of selection (signal events)",60,60,120));
+	h_tMass_muTau_signal 		     		        = Book(TH1D("h_tMass_muTau_signal","Tmass with the leading lepton in the muTau final state (signal events)",100,0,200));
+	h_tMass_muTau_cat0 		     		        = Book(TH1D("h_tMass_muTau_cat0","Tmass with the leading lepton in the muTau final state (cat0 events)",100,0,200));
+	h_tMass_muTau_cat1 		     		        = Book(TH1D("h_tMass_muTau_cat1","Tmass with the leading lepton in the muTau final state (cat1 events)",100,0,200));
+	h_tMass_muTau_cat2 		     		        = Book(TH1D("h_tMass_muTau_cat2","Tmass with the leading lepton in the muTau final state (cat2 events)",100,0,200));
+	h_tMass_eTau_signal 		     		        = Book(TH1D("h_tMass_eTau_signal","Tmass with the leading lepton in the eTau final state (signal events)",100,0,200));
+	h_tMass_eTau_cat0 		     		        = Book(TH1D("h_tMass_eTau_cat0","Tmass with the leading lepton in the eTau final state (cat0 events)",100,0,200));
+	h_tMass_eTau_cat1 		     		        = Book(TH1D("h_tMass_eTau_cat1","Tmass with the leading lepton in the eTau final state (cat1 events)",100,0,200));
+	h_tMass_eTau_cat2 		     		        = Book(TH1D("h_tMass_eTau_cat2","Tmass with the leading lepton in the eTau final state (cat2 events)",100,0,200));
+             
+ 
 	// lepton histograms
 	h_n_goodEl			= Book(TH1D("h_n_goodEl","Number of good electrons; good electrons",10,-0.5,9.5));
 	h_n_goodMu			= Book(TH1D("h_n_goodMu","Number of good muons; good muons",10,-0.5,9.5));
@@ -189,7 +206,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_nbjets_afterVeto_signal              = Book(TH1D("h_nbjets_afterVeto_signal", "# of b-jets remaining after b-tag Veto",10,0,10));
 	h_nbjetsVetoed                  = Book(TH1D("h_nbjetsVetoed", "# of b-jets removed from b-tag Veto",10,0,10));
 
-	h_Tmass				= Book(TH1D("h_Tmass","Transverse mass of leading lepton;Transverse mass[GeV]",100,0,200));
 
         h_nPU_Info                      = Book(TH1D("h_nPU_Info","PU info distribution",100,0,100));
         h_nPU_InfoTrue                  = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",100,0,100));
@@ -379,13 +395,16 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
 	
-	if(printoutEvents) log1.open("events.txt");
+	if(printoutEvents){
+		 log1.open("events.txt");
+		 plus.open("plus_events.txt");
+	 }
+	
 	dupl.open("duplicates.txt");
 	
 	lumi.open("lumi.csv");
 	
 	current_run=current_lumi=-999;
-	
 	
 	
 
@@ -405,7 +424,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 
-	if(printoutEvents) log1.close();
+	if(printoutEvents){ log1.close(); plus.close();}
 	dupl.close();
 	lumi.close();
 	ofstream log2;       
@@ -436,16 +455,36 @@ double Analysis::deltaR(double eta1, double phi1, double eta2, double phi2){
 	return dR;
 }
 
-bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
+
+bool Analysis::TightEleId(float pt, float eta, double value){
 	bool passingId=false;
 
-	if(pt>5. && pt<10. && fabs(eta)<0.8 && value>0.47)
+	if( pt<20. && fabs(eta)<0.8 && value>0.925)
 		passingId=true;
-	if(pt>5. && pt<10. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.004)
+	if( pt<20. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.915)
 		passingId=true;
-	if(pt>5. && pt<10. && fabs(eta)>=1.479 && value>0.294)
+	if( pt<20. && fabs(eta)>=1.479 && value>0.965)
 		passingId=true;
 
+	if(pt>20. && fabs(eta)<0.8 && value>0.905)
+		passingId=true;
+	if(pt>20. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.955)
+		passingId=true;
+	if(pt>20. && fabs(eta)>=1.479 && value>0.975)
+		passingId=true;
+	//  if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
+	return passingId;
+}
+
+bool Analysis::TightEleId(myobject o){
+	return TightEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
+}
+
+
+bool Analysis::LooseEleId(float pt, float eta, double value){
+	bool passingId=false;
+
+	
 	if(pt>10. && fabs(eta)<0.8 && value>0.5)
 		passingId=true;
 	if(pt>10. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.12)
@@ -454,6 +493,10 @@ bool Analysis::EleMVANonTrigId(float pt, float eta, double value){
 		passingId=true;
 	//  if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
 	return passingId;
+}
+
+bool Analysis::LooseEleId(myobject o){
+	return LooseEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
 }
 
 bool Analysis::PFMuonID(myobject mu){
@@ -467,7 +510,7 @@ bool Analysis::PFMuonID(myobject mu){
 
 double Analysis::RelIsoMu(myobject mu){
 
-	double MuIsoTrk = mu.pfIsoCharged;
+	double MuIsoTrk = mu.pfIsoAll;
 	double MuIsoEcal = mu.pfIsoGamma;
 	double MuIsoHcal = mu.pfIsoNeutral;
 	double MuIsoPU = mu.pfIsoPU;
@@ -479,7 +522,7 @@ double Analysis::RelIsoMu(myobject mu){
 }
 
 double Analysis::RelIsoEl(myobject el){
-	double ElIsoTrk = el.pfIsoCharged;
+	double ElIsoTrk = el.pfIsoAll;
 	double ElIsoEcal = el.pfIsoGamma;
 	double ElIsoHcal = el.pfIsoNeutral;
 	double ElIsoPU = el.pfIsoPU;
@@ -510,9 +553,9 @@ bool Analysis::isGoodMu(myobject mu){
 bool Analysis::isGoodEl(myobject el){
 	        
 	        double elPt = el.pt;
-                double elEta = el.eta;
+                double elEta = el.eta_SC;
                 int missingHits = el.numLostHitEleInner;
-                bool elID = EleMVANonTrigId(elPt,elEta,el.Id_mvaNonTrg);
+                bool elID = LooseEleId(elPt,el.eta_SC,el.Id_mvaNonTrg);
                 double relIso = RelIsoEl(el);
 
                 if (elPt > 10. && fabs(elEta) < 2.5  && elID && missingHits <=1)
@@ -560,17 +603,28 @@ bool Analysis::Trg_MC_12(myevent* m, bool found) {
 
 double Analysis::Tmass(myevent *m, myobject mu) {
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
 	return tMass_v;
+}
+
+double Analysis::InvMass(myobject o1, myobject o2)
+{
+		TLorentzVector cand;
+		cand.SetPxPyPzE(o1.px+o2.px,
+					o1.py+o2.py,
+					o1.pz+o2.pz,
+					o1.E+o2.E);
+		double mass = cand.M();
+		return mass;
 }
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
 
 		++m_allEvents;
-		
+	//	bool found_event = false; 
 	if(m->runNumber == 163255 && m->lumiNumber ==  603)
     {
          TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
@@ -599,6 +653,11 @@ entries++;
 		if(IgnorePUW) PUWeight = 1.0;
 	}
 	int eNumber = m->eventNumber;
+	 bool examineThisEvent;
+      if( examineEvent==eNumber) examineThisEvent=true;
+      else examineThisEvent=false;
+	 
+	 if(examineThisEvent) std::cout << "NOW EXAMINING EVENT " << eNumber << " WHICH IS # " << m_allEvents << std::endl;
 	
 	Hist("h_PU_weight")->Fill(PUWeight);
 	if(!useTruePileUp && is2011){ 
@@ -639,7 +698,6 @@ entries++;
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
 	if(nGoodVx < 1) return;
-	
 	h_cut_flow->Fill(2,1);
 	h_cut_flow_weight->Fill(2,PUWeight);
 	
@@ -662,9 +720,9 @@ entries++;
 		bool muGlobal = muon[i].isGlobalMuon;
 		bool muTracker = muon[i].isTrackerMuon;
 		double relIso = RelIsoMu(muon[i]);
-
-		bool pfID = PFMuonID(muon[i]);	
-		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
+		bool pfID = PFMuonID(muon[i]);
+	
+		if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && muon[i].isPFMuon)
 		{
 			goodMuon.push_back(muon[i]);
 			Hist("h_mu_relIso")->Fill(relIso,PUWeight);
@@ -682,9 +740,9 @@ entries++;
 	for (uint i = 0; i < electron.size(); i++) {
 
 		double elPt = electron[i].pt;
-		double elEta = electron[i].eta;
+		double elEta = electron[i].eta_SC;
 		int missingHits = electron[i].numLostHitEleInner;
-		bool elID = EleMVANonTrigId(elPt,elEta,electron[i].Id_mvaNonTrg);
+		bool elID =  LooseEleId(elPt,electron[i].eta_SC,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
 		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && elID)
@@ -708,20 +766,75 @@ entries++;
 	Zmucand=Zelcand=false;
 	double dMass=999.0;
 	int Zindex[2] = {-1,-1};
+	
+	
+	//overlap cleaning
+	
+	for(int i = 0; i < goodMuon.size(); i++)
+	{
+		if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << goodMuon.size() << std::endl;
+		
+		bool removed = false;
+		for(uint j = i+1; j < goodMuon.size() && !removed ; j++)
+		{
+			if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << goodMuon.size() 
+			<<":" << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+		
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR2) 
+			{	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
+			if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
+		}
+	}
+	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());
+	
+	for(int i = 0; i < goodElectron.size(); i++)
+	{
+		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << goodElectron.size() << std::endl;
+		bool removed = false;
+		for(uint j = i+1; j < goodElectron.size() && !removed ; j++)
+		{
+			if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
+			<< " " << deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi) << std::endl;
+		
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR2) 
+			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
+			if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
+		}
+
+		for(uint j = 0; j < goodMuon.size() && !removed; j++)
+		{
+			if(examineThisEvent) std::cout << "Looping over mu no. " << j << " out of " << goodMuon.size() << " " << 
+			deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR2 && RelIsoMu(goodMuon[j]) < 0.3) 
+			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
+			if(examineThisEvent) std::cout << "Muremoved? " << removed << std::endl;
+		}
+
+	}
+	
+	
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
 		//if(goodMuon[i].pt < 20. 
+		if(examineThisEvent) std::cout << "Checking muon no. " << i+1 << " from " << goodMuon.size() << ": pt is " << 
+			 goodMuon[i].pt << " and charge " << goodMuon[i].charge << " iso " << RelIsoEl(goodMuon[i]) << std::endl;
 		if(Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.3) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
 			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
-
+				if(examineThisEvent) std::cout << "Checking 2nd muon no. " << j+1 << " from " << goodMuon.size() << ": pt is " << 
+			 goodMuon[j].pt << " and charge " << goodMuon[j].charge << " iso " << RelIsoEl(goodMuon[j]) << std::endl;
+				if(examineThisEvent) std::cout << "Candidate mass is " << InvMass(goodMuon[i],goodMuon[j]) <<std::endl;
+			
 			if(RelIsoMu(goodMuon[j]) > 0.3) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
+			if(examineThisEvent) std::cout << "Heading to pre-selection. Delta R is " << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+				
 			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR) continue;
-
+			if(examineThisEvent) std::cout << "passed pre-selection. Delta R is " << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+		
 			TLorentzVector cand;
 			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
 					goodMuon[i].py+goodMuon[j].py,
@@ -732,6 +845,8 @@ entries++;
 			if(mass > 60. && mass < 120.){
 				Zmumu=true;
 				double dM = 999.;
+				if(examineThisEvent) std::cout << " Entered mass check. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
+		
 				if(BestMassForZ > 0.0){
 					Zmumu=false;
 					dM=fabs(mass-BestMassForZ);
@@ -747,13 +862,16 @@ entries++;
 					Zindex[0]=i;
 					Zindex[1]=j;
 				}
+				if(examineThisEvent) std::cout << " End of mass check. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 			}
 		}
 	}
 	if(Zindex[0] > -1 && Zindex[1] > -1 && Zmucand){
+			if(examineThisEvent) std::cout << " Making Z. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 			int i = Zindex[0];
 			int j = Zindex[1];
 		if(goodMuon[i].pt > 20.){
+			if(examineThisEvent) std::cout << " Leading muon pt cut. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 			Zcand.push_back(goodMuon[i]);
 			Zcand.push_back(goodMuon[j]);
 			goodMuon.erase(goodMuon.begin()+i);
@@ -761,7 +879,7 @@ entries++;
 			Zmumu=true;
 		}
 	}
-
+	if(examineThisEvent) std::cout << " End of Zmumu sequence. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 
@@ -771,16 +889,22 @@ entries++;
 		for(uint i = 0; i < goodElectron.size(); i++)
 		{
 			m_logger << VERBOSE << " ->good electron no. "<< i << " has pt "<<  goodElectron[i].pt << " and charge " << goodElectron[i].charge << SLogger::endmsg;
+			if(examineThisEvent) std::cout << "Checking electron no. " << i+1 << " from " << goodElectron.size() << ": pt is " << 
+			 goodElectron[i].pt << " and charge " << goodElectron[i].charge << " iso " << RelIsoEl(goodElectron[i]) << std::endl;
 			//if( goodElectron[i].pt < 20 || 
 			if(Zee) continue;
 			if( RelIsoEl(goodElectron[i]) > 0.3) continue;
 			for(uint j = i+1; j < goodElectron.size() && !Zee; j++)
 			{
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  goodElectron[j].pt << " and charge " << goodElectron[j].charge << SLogger::endmsg;
+				if(examineThisEvent) std::cout << "Checking 2nd electron no. " << j+1 << " from " << goodElectron.size() << ": pt is " << 
+			 goodElectron[j].pt << " and charge " << goodElectron[j].charge << " iso " << RelIsoEl(goodElectron[j]) << std::endl;
+				if(examineThisEvent) std::cout << "Candidate mass is " << InvMass(goodElectron[i],goodElectron[j])  <<std::endl;
+			
 				if( RelIsoEl(goodElectron[j]) > 0.3) continue;	
 				if(goodElectron[i].charge*goodElectron[j].charge >=0.) continue;
 				if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR) continue;
-
+				if(examineThisEvent) std::cout << "Passed pre-selection. Delta R is " << deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi) << std::endl;
 				TLorentzVector cand;
 				cand.SetPxPyPzE(goodElectron[i].px+goodElectron[j].px,
 						goodElectron[i].py+goodElectron[j].py,
@@ -830,8 +954,8 @@ entries++;
 		if(Zmumu)
 		{
 			if(is2012_53){
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);;
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);;
+				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
 			}else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
@@ -842,8 +966,8 @@ entries++;
 			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
 			if(is2012_53){
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);;
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);;
+				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
 			}else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
@@ -899,16 +1023,36 @@ entries++;
 		Hist( "h_Z_lep2_phi")->Fill(ele2.Phi(),Z_weight);
 	}
 
-
-
+	
 	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
 
-	if(Zmumu||Zee)
+	if(Zmumu||Zee){
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
+                //Z mass plot for all events
+                Hist( "h_Zmass_afterZselection" )->Fill(Zmass,Z_weight);
+        }
+
 	else{
 			return;
+	}
+	
+	if(examineThisEvent){
+		if(Zee){
+			std::cout << "There is Zee with mass " << Zmass << std::endl;
+			for(uint i =0; i <2; i++)
+			{
+				std::cout << " Electron #" << i+1 << " pt: " << Zcand[i].pt << " eta: " << Zcand[i].eta << " phi: " << Zcand[i].phi << std::endl;
+			}
+		}else{
+				std::cout << "There is Zmm with mass " << Zmass  << std::endl;
+			for(uint i =0; i <2; i++)
+			{
+				std::cout << " Muon #" << i+1 << " pt: " << Zcand[i].pt << " eta: " << Zcand[i].eta << " phi: " << Zcand[i].phi << std::endl;
+			}
+		}
 	
 	}
+
 	
 	h_cut_flow->Fill(3,1);
 	h_cut_flow_weight->Fill(3,Z_weight);
@@ -916,35 +1060,15 @@ entries++;
 	Hist("h_Nvertex_AfterZ")->Fill(nGoodVx);
 	Hist("h_Nvertex_AfterZ_W")->Fill(nGoodVx,Z_weight);
 
-	// Z overlap removal
+	
+	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " electrons before overlap " << std::endl;
+	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " muons before overlap " << std::endl;
+	
 
-	for(int i = 0; i < goodMuon.size(); i++)
-	{
-		bool removed = false;
-		for(uint j = 0; j < Zcand.size() && !removed; j++)
-		{
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
-			{	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
-		}
-	}
-	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());
-
-	for(int i = 0; i < goodElectron.size(); i++)
-	{
-		bool removed = false;
-		for(uint j = 0; j < Zcand.size() && !removed; j++)
-		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
-			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
-		}
-
-		for(uint j = 0; j < goodMuon.size() && !removed; j++)
-		{
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR && RelIsoMu(goodMuon[j]) < 0.4) 
-			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
-		}
-
-	}
+	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " electrons before tau overlap " << std::endl;
+	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " muons before tau overlap " << std::endl;
+	
+	
 	m_logger << DEBUG << " There are " << goodMuon.size() << " and " << goodElectron.size() << " remaining after Z overlap removal " << SLogger::endmsg;
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
 	// checking the rest of the event
@@ -964,14 +1088,111 @@ entries++;
 		double tauPt = tau[i].pt;
 		double tauEta = tau[i].eta;
 		bool LooseElectron = (tau[i].discriminationByElectronLoose > 0.5);
-		bool LooseMuon = (tau[i].discriminationByMuonLoose > 0.5);
-		bool CombinedIsolation = (tau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5);
+		bool LooseMuon = (tau[i].discriminationByMuonLoose2 > 0.5);
+		bool CombinedIsolation = (tau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
 
 
 		if (tauPt > Cut_tau_base_Pt && fabs(tauEta) < 2.3 && LooseElectron && LooseMuon && DecayMode)
 			goodTau.push_back(tau[i]);
 
+	}
+	if(examineThisEvent) std::cout << "There is " << goodTau.size() << " goodTaus " << std::endl;
+	for(int i = 0; i < goodTau.size(); i++)
+	{
+		bool removed = false;
+		
+		for(uint j = 0; j < goodMuon.size() && !removed; j++)
+		{
+
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR2 && RelIsoMu(goodMuon[j]) < 0.3) 
+			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+
+		}
+
+	    if(examineThisEvent && removed) std::cout << " tau overlap with muon" << std::endl;
+		
+		for(uint j = 0; j < goodElectron.size() && !removed; j++)
+		{
+
+			if(examineThisEvent && RelIsoEl(goodElectron[j]) < 0.3) std::cout << " tau " << i << " to electron " << j << "(" << RelIsoEl(goodElectron[j]) << 
+			") distance is " << deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi) << std::endl;
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR2 && RelIsoEl(goodElectron[j]) < 0.3 ) 
+			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
+
+
+		}
+		if(examineThisEvent && removed) std::cout << " tau overlap with electron " << std::endl;
+			
+		
+	}
+	
+	if(examineThisEvent){
+		 std::cout << "checking size of electrons and muons..." << std::endl;
+		 for(uint iEl = 0; iEl < goodElectron.size(); iEl++)
+		 {
+			double relIso = RelIsoEl(goodElectron[iEl]);
+    		std::cout << " good el. no " << iEl << " pt: " << goodElectron[iEl].pt << " eta: " << goodElectron[iEl].eta << " phi: " << goodElectron[iEl].phi << " relIso " << relIso << " hits " << goodElectron[iEl].numLostHitEleInner << 
+                            " charge " << goodElectron[iEl].charge << std::endl;
+			for(uint iMu = 0; iMu < goodMuon.size(); iMu++)
+			{
+				std::cout << "->Mass with mu#" << iMu << " is " << InvMass(goodElectron[iEl],goodMuon[iMu]) << std::endl;
+			} 				
+		 }
+		 
+		 for(uint iMu = 0; iMu < goodMuon.size(); iMu++)
+		 {
+			double relIso = RelIsoMu(goodMuon[iMu]);
+    		std::cout << " good  mu. no " << iMu << " pt: " << goodMuon[iMu].pt << " eta: " << goodMuon[iMu].eta << " phi: " << goodMuon[iMu].phi << " relIso " << relIso << 
+                            " charge " << goodMuon[iMu].charge << std::endl;
+		 }
+	 
+	 }
+	 
+	uint isoLeptons = 0;
+	for(uint i=0; i< goodElectron.size(); i++)
+	{
+		if(RelIsoEl(goodElectron[i]) < 0.3) isoLeptons++;
+	}
+ 
+	for(uint i=0; i< goodMuon.size(); i++)
+	{
+		if(RelIsoMu(goodMuon[i]) < 0.3) isoLeptons++;
+	}
+	
+	if(isoLeptons > 2 ) return;
+	
+	if(examineThisEvent) std::cout << "checking size of electrons and muons...PASSED" << std::endl;
+	
+	// Z overlap removal
+	bool Zoverlap = false;
+	
+	for(int i = 0; i < goodMuon.size(); i++)
+	{
+		bool removed = false;
+		for(uint j = 0; j < Zcand.size() && !removed; j++)
+		{
+
+			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR && RelIsoMu(goodMuon[j]) < 0.3) 
+			{	goodMuon.erase(goodMuon.begin()+i); i--; removed = true;}
+			if(removed)Zoverlap=true;
+
+		}
+		if(examineThisEvent && removed) std::cout << " mu overlap with Z" << std::endl;
+	}
+	
+	for(int i = 0; i < goodElectron.size(); i++)
+	{
+		bool removed = false;
+		for(uint j = 0; j < Zcand.size() && !removed; j++)
+		{
+
+			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR && RelIsoEl(goodElectron[j]) < 0.3) 
+			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
+			if(removed)Zoverlap=true;
+
+		}
+		if(examineThisEvent && removed) std::cout << " electron overlap with Z" << std::endl;
 	}
 
 	for(int i = 0; i < goodTau.size(); i++)
@@ -984,28 +1205,19 @@ entries++;
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 
 		}
-
-		for(uint j = 0; j < goodMuon.size() && !removed; j++)
-		{
-
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR && RelIsoMu(goodMuon[j]) < 0.4) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-
-		}
-
-		for(uint j = 0; j < goodElectron.size() && !removed; j++)
-		{
-
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR && RelIsoEl(goodElectron[j]) < 0.4 ) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-
-
-		}
-
-
+		if(examineThisEvent && removed) std::cout << " tau overlap with Z" << std::endl;
 	}
+	
+	if(examineThisEvent) std::cout << "Checking Z overlap..." << std::endl;
+	
+	if(Zoverlap) return;
+		
+		
 	int tauCand = 	goodTau.size();
-
+	if(examineThisEvent) std::cout << " There are " << goodTau.size() << " after overlap " << std::endl;
+	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " electrons after overlap " << std::endl;
+	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " muons after overlap " << std::endl;
+	
 	m_logger << DEBUG << " There are " << goodTau.size() << " good taus " << SLogger::endmsg;	
 	Hist("h_n_goodTau_Hcand")->Fill(goodTau.size());	
 
@@ -1022,7 +1234,8 @@ entries++;
 
 		double relIso = RelIsoMu(goodMuon[i]);
 		bool iso1_muE = (relIso < 0.3);
-		bool iso1_muTau = (relIso < 0.15);
+		bool iso1_muTau = (relIso < 0.25);
+		bool isTightMuon = isGoodMu(goodMuon[i]);
 		if(!checkCategories && !iso1_muE) continue;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
 		for(uint j=0; j< goodElectron.size() && !signal; j++)
@@ -1042,12 +1255,14 @@ entries++;
 
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
 		if(!checkCategories && !iso1_muTau) continue;
+		if(!isTightMuon) continue;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
-			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;			
-			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
+			//if(Tmass(m,goodMuon[i]) > 30) continue;
+			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_mutau_sumPt) continue;			
+			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
-			if(goodTau[j].discriminationByMuonTight <=0.5) continue;
+			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< maxDeltaR) continue;                                    
 			if (iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
 			else if (!iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
@@ -1067,23 +1282,38 @@ entries++;
 	{
 		for(uint i = 0; i < goodElectron.size() && !signal ; i++)
 		{
-
-			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.1);
+			if(examineThisEvent) std::cout << "ele1 no. " << i << "out of " << goodElectron.size() << std::endl;
+			//if(Tmass(m,goodElectron[i]) > 30) continue;
+			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.15);
 			if (!iso1 && !checkCategories) continue;
 			if( goodElectron[i].numLostHitEleInner > 0) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
+			if(examineThisEvent) std::cout << "ele1 no. " << i << " passes preselection with iso1 " << iso1 << std::endl;
+			if(!TightEleId(goodElectron[i])) continue;
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
-				if(UseSumPtCut && goodElectron[i].pt+goodTau[j].pt < Cut_leptau_sumPt) continue;
-				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byMediumIsolationMVA > 0.5 : goodTau[j].byMediumCombinedIsolationDeltaBetaCorr > 0.5;
+				if(examineThisEvent) std::cout << "tau2 no. " << j << "out of " << goodTau.size() << std::endl;
+		
+				if(UseSumPtCut && goodElectron[i].pt+goodTau[j].pt < Cut_etau_sumPt) continue;
+				if(examineThisEvent) std::cout << "sum pt" << std::endl;
+		
+				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 				if(goodElectron[i].charge*goodTau[j].charge >=0) continue;
-				if(goodTau[j].discriminationByElectronMVA <=0.5) continue;
+				if(examineThisEvent) std::cout << "charge" << std::endl;
+		
+				if(goodTau[j].discriminationByElectronMVA3Tight <=0.5) continue;
+				if(examineThisEvent) std::cout << "antie" << std::endl;
+		
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodElectron[i].eta,goodElectron[i].phi)< maxDeltaR) continue;
+				if(examineThisEvent) std::cout << "overlap" << std::endl;
+		
 				if (iso1 && iso2){ signal = true; muTau=muE=false; eTau=true;}
 				else if (!iso1 && iso2  && category < 1){ category = 2; muTau=muE=false; eTau=true;}
 				else if (iso1 && !iso2  && category < 1){ category = 1; muTau=muE=false; eTau=true;} 
 				else if (!iso1 && !iso2 && category < 0){ category = 0; muTau=muE=false; eTau=true;}
 				else continue;
+				if(examineThisEvent) std::cout << "signal!" << signal <<std::endl;
+		
 				Hindex[0]=i;
 				Hindex[1]=j;
 			}
@@ -1098,25 +1328,35 @@ entries++;
 	{
 		for(uint i = 0; i < goodTau.size() && !signal ; i++)
 		{
+			if(examineThisEvent) std::cout << "tau1 no. " << i << "out of " << goodTau.size() << std::endl;
 			if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
-			if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
-			if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
-			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byTightIsolationMVA > 0.5 : goodTau[i].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
+			//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
+			//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
+			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byLooseIsolationMVA > 0.5 : goodTau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5; 
 			if(!checkCategories && !iso1) continue;
+			if(examineThisEvent) std::cout << "tau1 no. " << i << " passed pre-selection and iso is " << iso1 << std::endl;
+			
 			for(uint j=i+1; j< goodTau.size() && !signal; j++)
 			{
+				if(examineThisEvent) std::cout << "tau2 no. " << j << std::endl;
 				if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
 				if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
+				if(examineThisEvent) std::cout << "sum pt cut" <<  std::endl;
 				if(goodTau[i].charge*goodTau[j].charge >=0) continue;
-				if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
-				if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
-				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byTightIsolationMVA > 0.5 : goodTau[j].byTightCombinedIsolationDeltaBetaCorr > 0.5; 
+				if(examineThisEvent) std::cout << "charge " <<  std::endl;
+				//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
+				//if(goodTau[j].discriminationByMuonMedium <=0.5) continue; 
+				if(examineThisEvent) std::cout << "lepton rejection " <<  std::endl;
+				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5; 
+				if(examineThisEvent) std::cout << "iso is " << iso2 << std::endl;
 				if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
+				if(examineThisEvent) std::cout << "non-overlapping" << std::endl;
 				if (iso1 && iso2){ signal = true; muTau=muE=eTau = false; tauTau=true;}
 				else if (!iso1 && iso2  && category < 1){ category = 1; muTau=muE=eTau = false; tauTau=true;}
 				else if (iso1 && !iso2  && category < 1){ category = 2; muTau=muE=eTau = false; tauTau=true;} 
 				else if (!iso1 && !iso2 && category < 0){ category = 0; muTau=muE=eTau = false; tauTau=true;}
 				else continue;
+				if(examineThisEvent && signal) std::cout << "signal!" << std::endl;
 				Hindex[0]=i;
 				Hindex[1]=j;
 
@@ -1129,6 +1369,7 @@ entries++;
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 		return;
 	}
+	
 	
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
 	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,Z_weight);
@@ -1267,16 +1508,19 @@ entries++;
 	bool Ad_lepton = false;	
 	for(uint i = 0; i < goodMuon.size(); i++)
 	{
-		if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
-				deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoMu(goodMuon[i]) < 0.4) 
+		if(deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR2 &&
+				deltaR(goodMuon[i].eta,goodMuon[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR2 && RelIsoMu(goodMuon[i]) < 0.3) 
 			Ad_lepton=true;
 
 	}
 
 	for(uint i = 0; i < goodElectron.size(); i++)
 	{
-		if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
-				deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && RelIsoEl(goodElectron[i]) < 0.4)  
+		if(examineThisEvent) std::cout << "checking additional ele no. " << i << " out of " << goodElectron.size() << std::endl;
+		if(examineThisEvent && RelIsoEl(goodElectron[i]) < 0.3) std::cout << "Distance of ele " << i << " is " << deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)
+		<< " and " << deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi) << std::endl;
+		if(deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR2 &&
+				deltaR(goodElectron[i].eta,goodElectron[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR2 && RelIsoEl(goodElectron[i]) < 0.3)  
 			Ad_lepton=true;
 
 	}
@@ -1286,6 +1530,9 @@ entries++;
 		{
 			
 		//	if(fabs(goodTau[i].z_expo - Hcand[0].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Hcand[1].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Zcand[0].z_expo) > dZvertex || fabs(goodTau[i].z_expo - Zcand[1].z_expo) > dZvertex) continue;
+			if(examineThisEvent && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5) std::cout << "Distance of tau " << i << " is " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi) << 
+			" and " << deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi) << std::endl; //sync
+			
 			if(deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[0].eta,Hcand[0].phi)> maxDeltaR &&
 					deltaR(goodTau[i].eta,goodTau[i].phi,Hcand[1].eta,Hcand[1].phi)> maxDeltaR && goodTau[i].byMediumCombinedIsolationDeltaBetaCorr > 0.5)  
 				Ad_lepton=true;
@@ -1294,7 +1541,7 @@ entries++;
 
 	if(Ad_lepton) 
 	{			
-		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg;
+		m_logger << INFO << "Additional good lepton(s) present. Aborting. " << SLogger::endmsg; 
 		return;
 	}
 	
@@ -1336,8 +1583,6 @@ entries++;
 	else if (category==2) h_cut_flow_cat2_weight->Fill(3,weight);
 
 
-
-
 	// b-tag veto
 
 	bool bTagVeto = false;
@@ -1353,12 +1598,16 @@ entries++;
 		double bTag = jet[i].bDiscriminatiors_CSV;
 		if(jetPt > 20. && fabs(jetEta) < 2.4 && bTag > bTagValue){
 			count_bJets++;
+			if(examineThisEvent) std::cout << " b jet candidate with value " << bTag <<  std::endl;
+				
 			double dR1,dR2,dR3,dR4;
 			dR1=deltaR(jetEta,jetPhi,Zcand[0].eta,Zcand[0].phi);
 			dR2=deltaR(jetEta,jetPhi,Zcand[1].eta,Zcand[1].phi);
 			dR3=deltaR(jetEta,jetPhi,Hcand[0].eta,Hcand[0].phi);
 			dR4=deltaR(jetEta,jetPhi,Hcand[1].eta,Hcand[1].phi);
 			
+			if(examineThisEvent) std::cout << " Distances are " << dR1 << " " << dR2 << " " << dR3 << " " << dR4 <<  std::endl;
+				
 			if(!AllowTauBOverlap){
 				if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4>0.4 ){
 					bTagVeto = true;	
@@ -1371,9 +1620,11 @@ entries++;
 				}else if (tauTau){
 					if(dR1>0.4 && dR2>0.4 ){ bTagVeto=true; count_bJetsVetoed++;}
 				}else if (muE){
-					if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4){ bTagVeto=true; count_bJetsVetoed++;}
+					if(dR1>0.4 && dR2>0.4 && dR3>0.4 && dR4 > 0.4){ bTagVeto=true; count_bJetsVetoed++;}
 				}
 			}
+			if(examineThisEvent) std::cout << " event will be b-vetoed!" <<  std::endl;
+				
 		}
 	}
 	Hist("h_nbjets")->Fill(count_bJets,weight);
@@ -1410,13 +1661,22 @@ entries++;
 	double tMass = -100;
 	if(!tauTau)
 	{
-		if(!muE) tMass = Tmass(m,Hcand[0]);
-		else{
-			if(Hcand[0].pt > Hcand[1].pt) tMass = Tmass(m,Hcand[0]);
-			else tMass = Tmass(m,Hcand[1]);
-		}
-
-		Hist("h_Tmass")->Fill(tMass,weight); 
+		if(!muE){
+                   if(muTau){
+                      tMass = Tmass(m,Hcand[0]);
+		      if(signal) Hist( "h_tMass_muTau_signal" )->Fill(tMass,weight);
+		      if(category==0) Hist( "h_tMass_muTau_cat0" )->Fill(tMass,weight);
+		      if(category==1) Hist( "h_tMass_muTau_cat1" )->Fill(tMass,weight);
+		      if(category==2) Hist( "h_tMass_muTau_cat2" )->Fill(tMass,weight);
+                   }
+                   if(eTau){
+                      tMass = Tmass(m,Hcand[0]);
+		      if(signal) Hist( "h_tMass_eTau_signal" )->Fill(tMass,weight);
+		      if(category==0) Hist( "h_tMass_eTau_cat0" )->Fill(tMass,weight);
+		      if(category==1) Hist( "h_tMass_eTau_cat1" )->Fill(tMass,weight);
+		      if(category==2) Hist( "h_tMass_eTau_cat2" )->Fill(tMass,weight);
+                   }
+                }                  
 	}
 
 
@@ -1611,6 +1871,10 @@ entries++;
 	
 	h_cut_flow->Fill(10,1);
 	h_cut_flow_weight->Fill(10,weight);
+
+
+        Hist( "h_Zmass_endOfselection" )->Fill(Zmass,weight);
+        if(signal) Hist( "h_Zmass_endOfselection_signal" )->Fill(Zmass,weight);
 
         // DeltaR check
         Hist("h_deltaR")->Fill(deltaR(Hcand[0].eta,Hcand[0].phi,Hcand[1].eta,Hcand[1].phi));

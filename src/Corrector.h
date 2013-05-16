@@ -655,6 +655,45 @@ double Corr_Trg_Ele_2012_53X(myobject const& a)
     return 1.0;
 }
 
+// Abdollah's numbers...
+//~ double Corr_Trg_Mu_2012_53X(myobject const& a) {
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 0.8) return 0.9818;
+    //~ if (a.pt >= 10 && a.pt < 15 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.2) return 0.9713;
+    //~ if (a.pt >= 10 && a.pt < 15 && 1.2 <= fabs(a.eta) && fabs(a.eta) < 2.1) return 0.9675;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 0.8) return 0.9781;
+    //~ if (a.pt >= 15 && a.pt < 20 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.2) return 0.9782;
+    //~ if (a.pt >= 15 && a.pt < 20 && 1.2 <= fabs(a.eta) && fabs(a.eta) < 2.1) return 0.9587;
+    //~ if (a.pt >= 20 && a.pt < 25 && fabs(a.eta) < 0.8) return 0.9873;
+    //~ if (a.pt >= 20 && a.pt < 25 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.2) return 0.9532;
+    //~ if (a.pt >= 20 && a.pt < 25 && 1.2 <= fabs(a.eta) && fabs(a.eta) < 2.1) return 0.9605;
+    //~ if (a.pt >= 25 && a.pt < 30 && fabs(a.eta) < 0.8) return 0.9755;
+    //~ if (a.pt >= 25 && a.pt < 30 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.2) return 0.9818;
+    //~ if (a.pt >= 25 && a.pt < 30 && 1.2 <= fabs(a.eta) && fabs(a.eta) < 2.1) return 0.9632;
+    //~ if (a.pt >= 30 && fabs(a.eta) < 0.8) return 0.9956;
+    //~ if (a.pt >= 30 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.2) return 0.9644;
+    //~ if (a.pt >= 30 && 1.2 <= fabs(a.eta) && fabs(a.eta) < 2.1) return 0.9530;
+    //~ return 1.0;
+//~ }
+//~ 
+//~ double Corr_Trg_Ele_2012_53X(myobject const& a) {
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) >= 0 && fabs(a.eta) < 0.8) return 0.9639;
+    //~ if (a.pt >= 10 && a.pt < 15 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.479) return 0.8898;
+    //~ if (a.pt >= 10 && a.pt < 15 && 1.479 <= fabs(a.eta) && fabs(a.eta) < 2.3) return 0.9228;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) >= 0 && fabs(a.eta) < 0.8) return 0.9762;
+    //~ if (a.pt >= 15 && a.pt < 20 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.479) return 0.9647;
+    //~ if (a.pt >= 15 && a.pt < 20 && 1.479 <= fabs(a.eta) && fabs(a.eta) < 2.3) return 0.9199;
+    //~ if (a.pt >= 20 && a.pt < 25 && fabs(a.eta) >= 0 && fabs(a.eta) < 0.8) return 0.9683;
+    //~ if (a.pt >= 20 && a.pt < 25 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.479) return 0.9666;
+    //~ if (a.pt >= 20 && a.pt < 25 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.3) return 0.9679;
+    //~ if (a.pt >= 25 && a.pt < 30 && fabs(a.eta) >= 0 && fabs(a.eta) < 0.8) return 0.9756;
+    //~ if (a.pt >= 25 && a.pt < 30 && 0.8 <= fabs(a.eta) && fabs(a.eta) < 1.479) return 0.9896;
+    //~ if (a.pt >= 25 && a.pt < 30 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.3) return 0.9473;
+    //~ if (a.pt > 30 && fabs(a.eta) >= 0.0 && fabs(a.eta) < 0.8) return 1.0035;
+    //~ if (a.pt > 30 && fabs(a.eta) >= 0.8 && fabs(a.eta) < 1.479) return 0.9977;
+    //~ if (a.pt > 30 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.3) return 0.9885;
+    //~ return 1;
+//~ }
+
 double Corr_trigger_Mu17_Mu8_2011(myobject const& a1, myobject const& a2 )
 {
 	return Eff_HLT_Mu17_Mu8_2011_TPfit_RunAB_EtaEta_DATAoverMC(a1.eta,a2.eta);

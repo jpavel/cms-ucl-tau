@@ -20,7 +20,7 @@ num_files=${3}
 
 # input datasets settings
 ntuple_name=output_
-srm_server=dcap://maite.iihe.ac.be
+#srm_server=dcap://maite.iihe.ac.be
 inTreeName=t
 
 full_path=${srm_server}${input_data}/
@@ -42,7 +42,7 @@ touch temp_input.1.1
 more temp_input.1 |while read line
 do
   file=`echo $line`
-  echo "${full_path}${file}" >> temp_input.1.1
+  echo "${input_data}${file}" >> temp_input.1.1
 done
 
 echo "The full paths to all files are:"

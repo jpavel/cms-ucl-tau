@@ -65,13 +65,16 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
    
    double deltaR(double eta1, double phi1, double eta2, double phi2);
-   bool EleMVANonTrigId(float pt, float eta, double value);
+   bool TightEleId(float pt, float eta, double value);
+   bool TightEleId(myobject o);
+   bool LooseEleId(float pt, float eta, double value);
+   bool LooseEleId(myobject o);
    bool PFMuonID(myobject mu);
    double RelIsoMu(myobject mu);
    double RelIsoEl(myobject el);
    bool isGoodMu(myobject mu);
    bool isGoodEl(myobject el);
-   
+   double InvMass(myobject o1, myobject o2);
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
    
@@ -86,6 +89,14 @@ private:
 	
 	myevent *m;
 	
+	
+	std::vector <int> evt_number;
+	std::vector <int> lumi_number;
+	std::vector <int> evt_type;
+	std::vector <double>  mass_Z;
+	std::vector <double>  mass_H;
+	double examineEvent;
+	ofstream plus;
 	
 	
 	int compared;
@@ -175,6 +186,18 @@ private:
         TH1* h_n_goodMu_Hcand;
         TH1* h_n_goodTau_Hcand;
         
+        TH1* h_Zmass_afterZselection;
+        TH1* h_Zmass_endOfselection;
+        TH1* h_Zmass_endOfselection_signal;
+        TH1* h_tMass_muTau_signal;
+        TH1* h_tMass_muTau_cat0;
+        TH1* h_tMass_muTau_cat1;
+        TH1* h_tMass_muTau_cat2;
+        TH1* h_tMass_eTau_signal;
+        TH1* h_tMass_eTau_cat0;
+        TH1* h_tMass_eTau_cat1;
+        TH1* h_tMass_eTau_cat2;
+        
         TH1* h_PU_weight;
         TH1* h_total_weight;
         TH1* h_nPU_raw;
@@ -240,6 +263,8 @@ private:
 	std::string InTreeName;
 	double Ptcut;
 	double maxDeltaR;
+	double maxDeltaR2;
+	
 	double BestMassForZ;
 	double dZvertex;
 	double bTagValue;
@@ -271,7 +296,8 @@ private:
     
     bool UseSumPtCut;
     double Cut_tautau_sumPt;
-    double Cut_leptau_sumPt;
+    double Cut_mutau_sumPt;
+    double Cut_etau_sumPt;
     double Cut_leplep_sumPt;
     
     bool IgnoreAdditionalTaus;
