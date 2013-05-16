@@ -410,7 +410,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	// sync part
 	std::ifstream myfile;
 	 std::string line;
-	myfile.open ("eemt_new.txt");
+	myfile.open ("eeem_new2.txt");
 	 if (myfile.is_open())
 	 {	
 	    
@@ -868,16 +868,24 @@ entries++;
 	{
 		m_logger << VERBOSE << "  ->good muon no. "<< i << " has pt "<<  goodMuon[i].pt << " and charge " << goodMuon[i].charge << SLogger::endmsg;
 		//if(goodMuon[i].pt < 20. 
+		if(examineThisEvent) std::cout << "Checking muon no. " << i+1 << " from " << goodMuon.size() << ": pt is " << 
+			 goodMuon[i].pt << " and charge " << goodMuon[i].charge << " iso " << RelIsoEl(goodMuon[i]) << std::endl;
 		if(Zmumu) continue;
 		if(RelIsoMu(goodMuon[i]) > 0.3) continue;
 		for(uint j = i+1; j < goodMuon.size() && !Zmumu; j++)
 		{
 			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  goodMuon[j].pt << " and charge " << goodMuon[j].charge << SLogger::endmsg;
-
+				if(examineThisEvent) std::cout << "Checking 2nd muon no. " << j+1 << " from " << goodMuon.size() << ": pt is " << 
+			 goodMuon[j].pt << " and charge " << goodMuon[j].charge << " iso " << RelIsoEl(goodMuon[j]) << std::endl;
+				if(examineThisEvent) std::cout << "Candidate mass is " << InvMass(goodMuon[i],goodMuon[j]) << " (" << mass_Z[pos] << ")" <<std::endl;
+			
 			if(RelIsoMu(goodMuon[j]) > 0.3) continue;
 			if(goodMuon[i].charge*goodMuon[j].charge >=0.) continue;
+			if(examineThisEvent) std::cout << "Heading to pre-selection. Delta R is " << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+				
 			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR) continue;
-
+			if(examineThisEvent) std::cout << "passed pre-selection. Delta R is " << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+		
 			TLorentzVector cand;
 			cand.SetPxPyPzE(goodMuon[i].px+goodMuon[j].px,
 					goodMuon[i].py+goodMuon[j].py,
@@ -888,6 +896,8 @@ entries++;
 			if(mass > 60. && mass < 120.){
 				Zmumu=true;
 				double dM = 999.;
+				if(examineThisEvent) std::cout << " Entered mass check. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
+		
 				if(BestMassForZ > 0.0){
 					Zmumu=false;
 					dM=fabs(mass-BestMassForZ);
@@ -903,13 +913,16 @@ entries++;
 					Zindex[0]=i;
 					Zindex[1]=j;
 				}
+				if(examineThisEvent) std::cout << " End of mass check. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 			}
 		}
 	}
 	if(Zindex[0] > -1 && Zindex[1] > -1 && Zmucand){
+			if(examineThisEvent) std::cout << " Making Z. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 			int i = Zindex[0];
 			int j = Zindex[1];
 		if(goodMuon[i].pt > 20.){
+			if(examineThisEvent) std::cout << " Leading muon pt cut. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 			Zcand.push_back(goodMuon[i]);
 			Zcand.push_back(goodMuon[j]);
 			goodMuon.erase(goodMuon.begin()+i);
@@ -917,7 +930,7 @@ entries++;
 			Zmumu=true;
 		}
 	}
-
+	if(examineThisEvent) std::cout << " End of Zmumu sequence. State if Zmumu is " << Zmumu << " and Zmucand is " << Zmucand << std::endl;
 
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 
@@ -1278,7 +1291,7 @@ entries++;
 	{
 
 		double relIso = RelIsoMu(goodMuon[i]);
-		bool iso1_muE = (relIso < 0.2);
+		bool iso1_muE = (relIso < 0.3);
 		bool iso1_muTau = (relIso < 0.25);
 		bool isTightMuon = isGoodMu(goodMuon[i]);
 		if(!checkCategories && !iso1_muE) continue;
@@ -1286,7 +1299,7 @@ entries++;
 		for(uint j=0; j< goodElectron.size() && !signal; j++)
 		{
 			if(UseSumPtCut && goodMuon[i].pt+goodElectron[j].pt < Cut_leplep_sumPt) continue;
-			bool iso2 = (RelIsoEl(goodElectron[j]) < 0.2);
+			bool iso2 = (RelIsoEl(goodElectron[j]) < 0.3);
 			if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
 			if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< maxDeltaR) continue;
 			if (iso1_muE && iso2){ signal = true; muE=true; muTau = false;}
@@ -2150,7 +2163,7 @@ entries++;
 	}
 	
 	//found_event=true; //unsync
-	if (!found_event && signal && event_type==5){
+	if (!found_event && signal && event_type==2){
 		plus << event_type << " " << m->runNumber << " " << m->eventNumber << std::endl;
 	 	  m_logger << ERROR << " My plus of type " << event_type << SLogger::endmsg;
 		TLorentzVector Zvector;

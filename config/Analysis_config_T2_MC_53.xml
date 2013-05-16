@@ -65,7 +65,7 @@
                 <Item Name="printoutEvents" Value="true" />
                 <Item Name="maxDeltaR" Value="0.1" />
                 <Item Name="maxDeltaR2" Value="0.1" />
-                <Item Name="examineEvent" Value="1280" />
+                <Item Name="examineEvent" Value="9459" />
                 <Item Name="IgnoreAdditionalTaus" Value="True" />
                 
                 <Item Name="IgnorePUW" Value="True" />
