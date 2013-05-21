@@ -84,6 +84,10 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
+	h_LT_tauTau                     = Book(TH1D("h_LT_tauTau","tau tau LT before cut", 100,0,300));
+	h_LT_eTau                       = Book(TH1D("h_LT_eTau","e tau LT before cut", 100,0,300));
+	h_LT_muTau                      = Book(TH1D("h_LT_muTau","e tau LT before cut", 100,0,300));
+
 	h_tauPt_EScheck                        = Book(TH1D("h_tauPt_EScheck","tau pt after ES shift", 100,0,300));
 	h_tauPt_EScheck_W                      = Book(TH1D("h_tauPt_EScheck_W","tau pt after ES shift (weighted)", 100,0,300));
 	h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
@@ -1253,6 +1257,7 @@ entries++;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
 		for(uint j=0; j< goodElectron.size() && !signal; j++)
 		{
+
 			if(UseSumPtCut && goodMuon[i].pt+goodElectron[j].pt < Cut_leplep_sumPt) continue;
 			bool iso2 = (RelIsoEl(goodElectron[j]) < 0.3);
 			if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
@@ -1272,6 +1277,7 @@ entries++;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
 			//if(Tmass(m,goodMuon[i]) > 30) continue;
+                        Hist("h_LT_muTau")->Fill(goodMuon[i].pt+goodTau[j].pt);
 			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_mutau_sumPt) continue;			
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
@@ -1307,6 +1313,7 @@ entries++;
 			{
 				if(examineThisEvent) std::cout << "tau2 no. " << j << "out of " << goodTau.size() << std::endl;
 		
+				Hist("h_LT_eTau")->Fill(goodElectron[i].pt+goodTau[j].pt);
 				if(UseSumPtCut && goodElectron[i].pt+goodTau[j].pt < Cut_etau_sumPt) continue;
 				if(examineThisEvent) std::cout << "sum pt" << std::endl;
 		
@@ -1353,6 +1360,7 @@ entries++;
 			{
 				if(examineThisEvent) std::cout << "tau2 no. " << j << std::endl;
 				if(goodTau[j].pt < Cut_tautau_Pt_2 && !UseSumPtCut) continue;
+				Hist("h_LT_tauTau")->Fill(goodTau[i].pt+goodTau[j].pt);
 				if(UseSumPtCut && goodTau[i].pt+goodTau[j].pt < Cut_tautau_sumPt) continue;
 				if(examineThisEvent) std::cout << "sum pt cut" <<  std::endl;
 				if(goodTau[i].charge*goodTau[j].charge >=0) continue;
@@ -1755,6 +1763,8 @@ entries++;
 			tauH_muTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 			H_muTau = muH_muTau+tauH_muTau;
 			Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
+                        cout << "tau pt mutau final state " << tauH_muTau.Pt();
+                        cout << "tau pt mutau final state PU" << tauH_muTau.Pt()*weight;
 			Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
 			Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt(),weight);
 			Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
@@ -1795,6 +1805,8 @@ entries++;
 			tauH_eTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 			H_eTau = eH_eTau+tauH_eTau;
 			Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
+                        cout << "tau pt etau final state " << tauH_eTau.Pt();
+                        cout << "tau pt etau final state PU " << tauH_eTau.Pt()*weight;
 			Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
 			Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt(),weight);
 			Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
@@ -1836,6 +1848,8 @@ entries++;
 			tau2H_tauTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 			H_tauTau = tau1H_tauTau+tau2H_tauTau;
 			Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
+                        cout << "tau2 pt tautau final state " << tau2H_tauTau.Pt();
+                        cout << "tau2 pt tautau final state PU " << tau2H_tauTau.Pt()*weight;
 			Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
 			Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt(),weight);
 			Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
