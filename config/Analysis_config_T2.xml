@@ -53,7 +53,7 @@
 		<Item Name="vetoElectronTrigger" Value="false" />
 		
 		<!-- Selection cuts -->       
-        <Item Name="Cut_tau_base_Pt" Value="20" />
+                <Item Name="Cut_tau_base_Pt" Value="20" />
 		<Item Name="Cut_tautau_Pt_1" Value="20" />
 		<Item Name="Cut_tautau_Pt_2" Value="20" />
 		<Item Name="Cut_tautau_MVA_iso" Value="false" />
