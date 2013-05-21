@@ -105,6 +105,10 @@ private:
 	// cut-flow
     TH1* h_tauPt_EScheck;
     TH1* h_tauPt_EScheck_W;
+    TH1* h_tauPt_EScheck_true;
+    TH1* h_LT_tauTau;
+    TH1* h_LT_muTau;
+    TH1* h_LT_eTau;
 
     TH1* h_deltaR;
     TH1* h_deltaR_max;
