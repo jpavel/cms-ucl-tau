@@ -90,6 +90,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	h_tauPt_EScheck                        = Book(TH1D("h_tauPt_EScheck","tau pt after ES shift", 100,0,300));
 	h_tauPt_EScheck_W                      = Book(TH1D("h_tauPt_EScheck_W","tau pt after ES shift (weighted)", 100,0,300));
+	h_tauPt_EScheck_true                      = Book(TH1D("h_tauPt_EScheck_true","tau pt after ES shift (true)", 100,0,300));
 	h_deltaR                        = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
 	h_deltaR_max                    = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
 	h_deltaR_min                    = Book(TH1D("h_deltaR_min","minDeltaR distributions", 100,0,10));
@@ -1111,6 +1112,7 @@ entries++;
 			goodTau.push_back(tau[i]);
                         goodTau[goodTau.size()-1].pt = tauPt;
 			Hist("h_tauPt_EScheck")->Fill(tauPt);
+			Hist("h_tauPt_EScheck_true")->Fill(goodTau[i].pt);
 			Hist("h_tauPt_EScheck_W")->Fill(tauPt,Z_weight);}
 	}
         
@@ -1763,8 +1765,9 @@ entries++;
 			tauH_muTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 			H_muTau = muH_muTau+tauH_muTau;
 			Hist( "h_muH_muTau_pt" )->Fill(muH_muTau.Pt(),weight);
-                        cout << "tau pt mutau final state " << tauH_muTau.Pt();
-                        cout << "tau pt mutau final state PU" << tauH_muTau.Pt()*weight;
+                        if(tauH_muTau.Pt()<15){
+                        cout << "event: " << m->eventNumber << " tau pt mutau final state " << tauH_muTau.Pt();
+                        }
 			Hist( "h_tauH_muTau_pt" )->Fill(tauH_muTau.Pt(),weight);
 			Hist( "h_H_muTau_pt" )->Fill(H_muTau.Pt(),weight);
 			Hist( "h_H_muTau_mass" )->Fill(H_muTau.M(),weight);
@@ -1805,8 +1808,9 @@ entries++;
 			tauH_eTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 			H_eTau = eH_eTau+tauH_eTau;
 			Hist( "h_eH_eTau_pt" )->Fill(eH_eTau.Pt(),weight);
-                        cout << "tau pt etau final state " << tauH_eTau.Pt();
-                        cout << "tau pt etau final state PU " << tauH_eTau.Pt()*weight;
+                        if(tauH_eTau.Pt()<15){
+                        cout << "event: " << m->eventNumber << " tau2 pt etau final state " << tauH_eTau.Pt();
+                        }
 			Hist( "h_tauH_eTau_pt" )->Fill(tauH_eTau.Pt(),weight);
 			Hist( "h_H_eTau_pt" )->Fill(H_eTau.Pt(),weight);
 			Hist( "h_H_eTau_mass" )->Fill(H_eTau.M(),weight);
@@ -1848,8 +1852,9 @@ entries++;
 			tau2H_tauTau.SetPxPyPzE(Hcand[1].px,Hcand[1].py,Hcand[1].pz,Hcand[1].E);
 			H_tauTau = tau1H_tauTau+tau2H_tauTau;
 			Hist( "h_tau1H_tauTau_pt" )->Fill(tau1H_tauTau.Pt(),weight);
-                        cout << "tau2 pt tautau final state " << tau2H_tauTau.Pt();
-                        cout << "tau2 pt tautau final state PU " << tau2H_tauTau.Pt()*weight;
+                        if(tau2H_tauTau.Pt()<15){
+                        cout << "event: " << m->eventNumber << " tau2 pt tautau final state " << tau2H_tauTau.Pt();
+                        }
 			Hist( "h_tau2H_tauTau_pt" )->Fill(tau2H_tauTau.Pt(),weight);
 			Hist( "h_H_tauTau_pt" )->Fill(H_tauTau.Pt(),weight);
 			Hist( "h_H_tauTau_mass" )->Fill(H_tauTau.M(),weight);
@@ -1943,7 +1948,6 @@ entries++;
 	
 	
 	return;
-
 
 }
 
