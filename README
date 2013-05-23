@@ -1,15 +1,28 @@
-### installation
+1129  svn co svn://svn.code.sf.net/p/sframe/code/SFrame/tags/SFrame-03-06-20 SFrame
+ 1130  cd SFrame/
+ 1131  source setup.sh
+ 1132  make
+ 1133  cd ..
+ 1134  git clone https://git.cern.ch/kerberos/cms-ucl-tau
+ 1135  git clone https://jez@git.cern.ch/kerberos/cms-ucl-tau
+ 1136  rm -rf cms-ucl-tau/
+ 1137  git clone https://jez@git.cern.ch/kerberos/cms-ucl-tau ZHtautauAnalysis
+ 1138  ls
+ 1139  cd ZHtautauAnalysis/
+
+
+### installation with GIT
 # 1) make sure you have set-up the ROOT environment
 
 # 2) checkout and compile SFRAME
-svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
+svn co svn://svn.code.sf.net/p/sframe/code/SFrame/tags/SFrame-03-06-20 SFrame
 cd SFrame
 source setup.sh
 make
 cd ..
 
 # 3) checkout and compile analysis package
-svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.2 ZHtautauAnalysis
+git clone https://jez@git.cern.ch/reps/cms-ucl-tau ZHtautauAnalysis
 cd ZHtautauAnalysis
 make
 
@@ -19,12 +32,27 @@ sframe-main  Analysis_config.xml
 
 
 ########### misc
-##making a tag
-svn copy svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.1 -m "new tag"
+##making a lightweight tag
+git tag v1.4
 
-## switching to a new tag
-svn switch  svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.3
+### making an annotated tag
+git tag -a v1.4 -m "making tag v1.4" 
 
+## switching to a new tag or branch
+git checkout v1.4
+
+## create new branch
+git branch myNewBranch
+
+## switch to branch
+git checkout myNewBranch
+
+## pushing to a server
+git push
+
+## review status of work directory
+git status
+ 
 ##################################
 ## Running at ULB cluster 
 ##################################
