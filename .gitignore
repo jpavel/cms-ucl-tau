@@ -1,0 +1,10 @@
+*.[oa]
+*.d
+*.so
+*~
+src/*_Dict.cxx
+src/*_Dict.h
+config/Analysis*.root
+config/*.txt
+config/*.csv
+config/input.xml
