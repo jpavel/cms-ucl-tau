@@ -23,22 +23,22 @@
 #include <iomanip>
 #include <fstream>
 
-#include "./plotStyles/AtlasStyle.C"
-#include "./plotStyles/AtlasUtils.h"
-#include "./plotStyles/AtlasUtils.C"
-#include "./plotStyles/TriggerPerfPaperConsts.h"
-#include "tdrstyle.C"
+#include "../plotStyles/AtlasStyle.C"
+#include "../plotStyles/AtlasUtils.h"
+#include "../plotStyles/AtlasUtils.C"
+#include "../plotStyles/TriggerPerfPaperConsts.h"
+#include "../plotStyles/tdrstyle.C"
 
 using namespace std;
 
-int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/PostMoriod/FakeRate/") {
+int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/FakeRate/") {
 
   gROOT->Reset();             
   //SetAtlasStyle();
   setTDRStyle();
   gStyle->SetPalette(1);
    
-  const uint rebinLeptonFR=10;	
+  const uint rebinLeptonFR=5;	
   const uint rebinTauFR=5;	
 	
 
@@ -48,7 +48,7 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		};
    
 
-  TString outputDir = "figsPM_jet";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/FakeRate/Summer13_jet";
 	
   
        
@@ -224,19 +224,22 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		
 		
 		h_loose_FR->Draw();
-		h_loose_FR->Fit("pol1");
+		TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",10.,90.);
+		fit1->SetParameters(0.015,0.2,-0.07);
+		h_loose_FR->Fit("fit1","R");
+		
 		
 		c1->Print(outputDir+"/png/looseMuonFR.png");
 		c1->Print(outputDir+"/pdf/looseMuonFR.pdf");
 		
 		h_medium_FR->Draw();
-		h_medium_FR->Fit("pol1");
+		h_medium_FR->Fit("fit1","R");
 		
 		c1->Print(outputDir+"/png/mediumMuonFR.png");
 		c1->Print(outputDir+"/pdf/mediumMuonFR.pdf");
 		
 		h_tight_FR->Draw();
-		h_tight_FR->Fit("pol1");
+		h_tight_FR->Fit("fit1","R");
 		
 		c1->Print(outputDir+"/png/tightMuonFR.png");
 		c1->Print(outputDir+"/pdf/tightMuonFR.pdf");
@@ -272,17 +275,20 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		h_tight_FR->GetYaxis()->SetTitle("tight fake rate");
 		
 		h_loose_FR->Draw();
-		h_loose_FR->Fit("pol1");
+		TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",10.,90.);
+		fit1->SetParameters(0.015,0.2,-0.07);
+		h_loose_FR->Fit("fit1","R");
+		//h_loose_FR->Fit("pol1");
 		c1->Print(outputDir+"/png/looseElectronFR.png");
 		c1->Print(outputDir+"/pdf/looseElectronFR.pdf");
 		
 		h_medium_FR->Draw();
-		h_medium_FR->Fit("pol1");
+		h_medium_FR->Fit("fit1","R");
 		c1->Print(outputDir+"/png/mediumElectronFR.png");
 		c1->Print(outputDir+"/pdf/mediumElectronFR.pdf");
 		
 		h_tight_FR->Draw();
-		h_tight_FR->Fit("pol1");
+		h_tight_FR->Fit("fit1","R");
 		c1->Print(outputDir+"/png/tightElectronFR.png");
 		c1->Print(outputDir+"/pdf/tightElectronFR.pdf");
 	}

@@ -23,15 +23,15 @@
 #include <iomanip>
 #include <fstream>
 
-#include "./plotStyles/AtlasStyle.C"
-#include "./plotStyles/AtlasUtils.h"
-#include "./plotStyles/AtlasUtils.C"
-#include "./plotStyles/TriggerPerfPaperConsts.h"
-#include "tdrstyle.C"
+#include "../plotStyles/AtlasStyle.C"
+#include "../plotStyles/AtlasUtils.h"
+#include "../plotStyles/AtlasUtils.C"
+#include "../plotStyles/TriggerPerfPaperConsts.h"
+#include "../plotStyles/tdrstyle.C"
 
 using namespace std;
 
-int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/PostMoriod/FakeRate/") {
+int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/FakeRate/") {
 
   gROOT->Reset();             
   //SetAtlasStyle();
@@ -48,7 +48,7 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		};
    
 
-  TString outputDir = "figsPM";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/FakeRate/Summer13";
 	
   
        
@@ -191,6 +191,8 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
         
 	}
   h_denom_types[0][0]->Draw();
+  double Total = ((TH1D*)f[0]->Get("h_nPU_raw"))->GetEntries();
+  std::cout << "Entries: " << Total << std::endl;
   
   // mutau FR
   TCanvas* c1 = new TCanvas("c1","c1", 1024,1024);
@@ -201,11 +203,15 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		h_loose_types[iFile][0]->Add(h_loose_types[iFile][4]);
 		h_medium_types[iFile][0]->Add(h_medium_types[iFile][4]);
 		h_tight_types[iFile][0]->Add(h_tight_types[iFile][4]); 
+		double nDenom= h_denom_types[iFile][0]->GetEntries();
 		TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][0]->Clone(); 
+		double nLoose = h_loose_FR->GetEntries();
 		h_loose_FR->Divide(h_denom_types[iFile][0]);
 		TH1D* h_medium_FR = (TH1D*)h_medium_types[iFile][0]->Clone(); 
+		double nMedium = h_medium_FR->GetEntries();
 		h_medium_FR->Divide(h_denom_types[iFile][0]);
 		TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][0]->Clone(); 
+		double nTight = h_tight_FR->GetEntries();
 		h_tight_FR->Divide(h_denom_types[iFile][0]);
 		
 		h_loose_FR->Rebin(rebinLeptonFR);
@@ -225,6 +231,20 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		
 		h_loose_FR->Draw();
 		h_loose_FR->Fit("pol1");
+		//TF1 *fit_loose=h_loose_FR->GetFunction("pol1");
+		//~ double par0 = h_loose_FR->GetFunction("pol1")->GetParameter(0);
+		//~ double par1 = h_loose_FR->GetFunction("pol1")->GetParameter(1);
+		//~ std::cout << "Fit params are " << par0 << " " << par1 << std::endl;
+		h_loose_FR->Fit("pol0");
+		
+		double nLooseErr2=nLoose*(1-nLoose/nDenom);
+		double nDenomErr2=nDenom*(1-nDenom/Total);
+		double rLoose= nLoose/nDenom;
+		double rLooseErr=sqrt(nLooseErr2+rLoose*rLoose*nDenomErr2)/nDenom;
+		
+		std::cout << "Selected objects are " << nLoose << "/" << nDenom << std::endl;
+		std::cout << "The average LOOSE MU rate is " << rLoose << "+-" << rLooseErr << std::endl;
+		
 		
 		c1->Print(outputDir+"/png/looseMuonFR.png");
 		c1->Print(outputDir+"/pdf/looseMuonFR.pdf");
@@ -232,11 +252,29 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		h_medium_FR->Draw();
 		h_medium_FR->Fit("pol1");
 		
+		h_medium_FR->Fit("pol0");
+		
+		double nMediumErr2=nMedium*(1-nMedium/nDenom);
+		double rMedium= nMedium/nDenom;
+		double rMediumErr=sqrt(nMediumErr2+rMedium*rMedium*nDenomErr2)/nDenom;
+		
+		std::cout << "Selected objects are " << nMedium << "/" << nDenom << std::endl;
+		std::cout << "The average MEDIUM MU rate is " << rMedium << "+-" << rMediumErr << std::endl;
+		
 		c1->Print(outputDir+"/png/mediumMuonFR.png");
 		c1->Print(outputDir+"/pdf/mediumMuonFR.pdf");
 		
 		h_tight_FR->Draw();
 		h_tight_FR->Fit("pol1");
+		h_tight_FR->Fit("pol0");
+		
+		double nTightErr2=nTight*(1-nTight/nDenom);
+		double rTight= nTight/nDenom;
+		double rTightErr=sqrt(nTightErr2+rTight*rTight*nDenomErr2)/nDenom;
+		
+		std::cout << "The average TIGHT MU rate is " << rTight << "+-" << rTightErr << std::endl;
+		
+		
 		
 		c1->Print(outputDir+"/png/tightMuonFR.png");
 		c1->Print(outputDir+"/pdf/tightMuonFR.pdf");
@@ -250,11 +288,15 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		h_loose_types[iFile][2]->Add(h_loose_types[iFile][6]);
 		h_medium_types[iFile][2]->Add(h_medium_types[iFile][6]); 
 		h_tight_types[iFile][2]->Add(h_tight_types[iFile][6]); 
+		double nDenom= h_denom_types[iFile][2]->GetEntries();
 		TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][2]->Clone(); 
+		double nLoose = h_loose_FR->GetEntries();
 		h_loose_FR->Divide(h_denom_types[iFile][2]);
-		TH1D* h_medium_FR = (TH1D*)h_medium_types[iFile][2]->Clone(); 
+		TH1D* h_medium_FR = (TH1D*)h_medium_types[iFile][2]->Clone();
+		double nMedium = h_medium_FR->GetEntries(); 
 		h_medium_FR->Divide(h_denom_types[iFile][2]);
-		TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][2]->Clone(); 
+		TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][2]->Clone();
+		double nTight = h_tight_FR->GetEntries(); 
 		h_tight_FR->Divide(h_denom_types[iFile][2]);
 		
 		h_loose_FR->Rebin(rebinLeptonFR);
@@ -272,17 +314,35 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		h_tight_FR->GetYaxis()->SetTitle("tight fake rate");
 		
 		h_loose_FR->Draw();
-		h_loose_FR->Fit("pol1");
+		h_loose_FR->Fit("pol1","","",10,90);
+		double nLooseErr2=nLoose*(1-nLoose/nDenom);
+		double nDenomErr2=nDenom*(1-nDenom/Total);
+		double rLoose= nLoose/nDenom;
+		double rLooseErr=sqrt(nLooseErr2+rLoose*rLoose*nDenomErr2)/nDenom;
+		
+		std::cout << "Selected objects are " << nLoose << "/" << nDenom << std::endl;
+		std::cout << "The average LOOSE EL rate is " << rLoose << "+-" << rLooseErr << std::endl;
 		c1->Print(outputDir+"/png/looseElectronFR.png");
 		c1->Print(outputDir+"/pdf/looseElectronFR.pdf");
 		
 		h_medium_FR->Draw();
-		h_medium_FR->Fit("pol1");
+		h_medium_FR->Fit("pol1","","",10,90);
+		double nMediumErr2=nMedium*(1-nMedium/nDenom);
+		double rMedium= nMedium/nDenom;
+		double rMediumErr=sqrt(nMediumErr2+rMedium*rMedium*nDenomErr2)/nDenom;
+		
+		std::cout << "Selected objects are " << nMedium << "/" << nDenom << std::endl;
+		std::cout << "The average MEDIUM EL rate is " << rMedium << "+-" << rMediumErr << std::endl;
 		c1->Print(outputDir+"/png/mediumElectronFR.png");
 		c1->Print(outputDir+"/pdf/mediumElectronFR.pdf");
 		
 		h_tight_FR->Draw();
-		h_tight_FR->Fit("pol1");
+		h_tight_FR->Fit("pol1","","",10,90);
+		double nTightErr2=nTight*(1-nTight/nDenom);
+		double rTight= nTight/nDenom;
+		double rTightErr=sqrt(nTightErr2+rTight*rTight*nDenomErr2)/nDenom;
+		
+		std::cout << "The average TIGHT EL rate is " << rTight << "+-" << rTightErr << std::endl;
 		c1->Print(outputDir+"/png/tightElectronFR.png");
 		c1->Print(outputDir+"/pdf/tightElectronFR.pdf");
 	}
@@ -494,7 +554,9 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		h_loose_types[iFile][3]->Add(h_second_loose_types[iFile][3]);
 		h_medium_types[iFile][3]->Add(h_second_medium_types[iFile][3]);
 		h_tight_types[iFile][3]->Add(h_second_tight_types[iFile][3]); 
-		TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][3]->Clone(); 
+		double nDenom= h_denom_types[iFile][3]->GetEntries();
+		TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][3]->Clone();
+		double nLoose = h_loose_FR->GetEntries();  
 		h_loose_FR->Divide(h_denom_types[iFile][3]);
 		TH1D* h_medium_FR = (TH1D*)h_medium_types[iFile][3]->Clone(); 
 		h_medium_FR->Divide(h_denom_types[iFile][3]);
@@ -520,6 +582,7 @@ int FRplots(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/Po
 		fit1->SetParameters(0.015,0.2,-0.07);
 		h_loose_FR->Fit("fit1","R");
 		
+		std::cout << "Selected objects are " << nLoose << "/" << nDenom << std::endl;
 		c1->Print(outputDir+"/png/looseTauFR_both.png");
 		c1->Print(outputDir+"/pdf/looseTauFR_both.pdf");
 		

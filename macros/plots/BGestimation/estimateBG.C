@@ -23,35 +23,35 @@
 #include <iomanip>
 #include <fstream>
 
-#include "./plotStyles/AtlasStyle.C"
-#include "./plotStyles/AtlasUtils.h"
-#include "./plotStyles/AtlasUtils.C"
-#include "./plotStyles/TriggerPerfPaperConsts.h"
-#include "tdrstyle.C"
+#include "../plotStyles/AtlasStyle.C"
+#include "../plotStyles/AtlasUtils.h"
+#include "../plotStyles/AtlasUtils.C"
+#include "../plotStyles/TriggerPerfPaperConsts.h"
+#include "../plotStyles/tdrstyle.C"
 
 using namespace std;
 
-int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms/HCP/") {
+int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/Application/") {
 
   gROOT->Reset();             
   //SetAtlasStyle();
   setTDRStyle();
   gStyle->SetPalette(1);
    
-  const uint rebinLeptonFR=10;	
-  const uint rebinTauFR=5;	
-	
+  //~ const uint rebinLeptonFR=10;	
+  //~ const uint rebinTauFR=5;	
+	//~ 
 
   const uint nFiles = 1;
   TString fileNames[nFiles] = {
 		"2012"
 		};
    
-  int colors[nFiles] = { kRed};
-  int markers[nFiles] = { 24};
+  //~ int colors[nFiles] = { kRed};
+  //~ int markers[nFiles] = { 24};
    
 
-  TString outputDir = "BGestimate";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/BGestimate";
 	
   
        
@@ -79,16 +79,16 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
   //~ std::vector<std::vector<TH1D*> >  h_medium_types;
   //~ std::vector<std::vector<TH1D*> >  h_tight_types;
   //~ 
-  const int nHist = 4;
+  const uint nHist = 4;
   TString histNames[nHist] = {"h_H_mass_signal_type_", 
 	"h_H_mass_cat0_type_", "h_H_mass_cat1_type_", "h_H_mass_cat2_type_"
 	};
-  const int nHist2 = 3;
+  const uint nHist2 = 3;
   TString histNames2[nHist2] = {"h_category0_pt_", 
 	"h_category1_pt_", "h_category2_pt_"
 	};	
 	
-  const int nTypes = 8; 	
+  const uint nTypes = 8; 	
   TH1D* h_hist[nFiles][nHist][nTypes];
   TH1D* h_hist2[nFiles][nHist2-1][nTypes];
   TH2D* h_hist2D[nFiles][1][nTypes];
@@ -122,15 +122,15 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
 	  
   } 
   
-  h_hist[0][0][0]->Draw();
+  h_hist2[0][0][0]->Draw();
  std::cout << h_hist[0][0][0]->GetSumOfWeights() << std::endl;
    
-   const double FR_ele_loose=0.036;
-   const double FR_ele_tight=0.015;
-   const double FR_mu_loose=0.030;
-   const double FR_mu_tight=0.018;
-   TF1 *FR_medium = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",15.,80.);
-   FR_medium->SetParameters(0.0090,0.1365,-0.0781);
+   const double FR_ele_loose=0.0278039;
+   const double FR_ele_tight=0.0111485;
+   const double FR_mu_loose=0.0379521;
+   const double FR_mu_tight=0.035781;
+   TF1 *FR_medium = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",10.,90.);
+   FR_medium->SetParameters(1.09956e-02,2.21698e-01,-8.16290e-02);
    TF1 *FR_tight = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",15.,80.);
    FR_tight->SetParameters(0.0077,0.1174,-0.0784);
    
@@ -142,9 +142,9 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
    double cat_estimate=0;
    for(uint iType=0; iType < nTypes; iType++){
 	   double bg_estimate=0;		
-	   for(uint iBin = 1; iBin <= h_hist2D[0][0][iType]->GetNbinsX()+1; iBin++)
+	   for(int iBin = 1; iBin <= h_hist2D[0][0][iType]->GetNbinsX()+1; iBin++)
 	   {
-		   for(uint jBin=1; jBin <= h_hist2D[0][0][iType]->GetNbinsY()+1;jBin++)
+		   for(int jBin=1; jBin <= h_hist2D[0][0][iType]->GetNbinsY()+1;jBin++)
 		   {
 			double pt1 = h_hist2D[0][0][iType]->GetXaxis()->GetBinCenter(iBin);
 			double pt2 = h_hist2D[0][0][iType]->GetYaxis()->GetBinCenter(jBin);
@@ -166,8 +166,8 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
 					fr2=FR_ele_tight;
 					break;
 				case 3:
-					fr1 = FR_tight->Eval(pt1);
-					fr2 = FR_tight->Eval(pt2);
+					fr1 = FR_medium->Eval(pt1);
+					fr2 = FR_medium->Eval(pt2);
 					break;
 			}
 			//std::cout << fr1 << " " << fr2 << " " << h_hist2D[0][0][iType]->GetBinContent(iBin,jBin) << std::endl;
@@ -184,7 +184,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
    
     for(uint iType=0; iType < nTypes; iType++){
 	   double bg_estimate=0;		
-	   for(uint iBin = 1; iBin <= h_hist2[0][0][iType]->GetNbinsX()+1; iBin++)
+	   for(int iBin = 1; iBin <= h_hist2[0][0][iType]->GetNbinsX()+1; iBin++)
 	   {
 		   double pt1 = h_hist2[0][0][iType]->GetXaxis()->GetBinCenter(iBin);
 		   double fr1;
@@ -200,7 +200,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
 					fr1=FR_medium->Eval(pt1);
 					break;
 				case 3:
-					fr1 = FR_tight->Eval(pt1);
+					fr1 = FR_medium->Eval(pt1);
 					break;
 			}
 			double estim = (fr1*h_hist2[0][0][iType]->GetBinContent(iBin))/((1-fr1));
@@ -219,7 +219,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
    
    for(uint iType=0; iType < nTypes; iType++){
 	   double bg_estimate=0;		
-	   for(uint iBin = 1; iBin <= h_hist2[0][1][iType]->GetNbinsX()+1; iBin++)
+	   for(int iBin = 1; iBin <= h_hist2[0][1][iType]->GetNbinsX()+1; iBin++)
 	   {
 		   double pt1 = h_hist2[0][1][iType]->GetXaxis()->GetBinCenter(iBin);
 		   double fr1;
@@ -235,7 +235,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
 					fr1=FR_ele_tight;
 					break;
 				case 3:
-					fr1 = FR_tight->Eval(pt1);
+					fr1 = FR_medium->Eval(pt1);
 					break;
 			}
 			double estim = (fr1*h_hist2[0][1][iType]->GetBinContent(iBin))/((1-fr1));
@@ -296,7 +296,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
 	std::cout << "\\end{table}" << std::endl; 
   
   ofstream tab1;
-	tab1.open("bgestimate.tab");
+	tab1.open(outputDir+"/bgestimate.tab");
 	
 	tab1 << "\\begin{table}[h]" << std::endl;
 	tab1 << "	\\begin{center}" << std::endl;
@@ -322,360 +322,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/ZHtautau/histograms
 	tab1 << "\\end{table}" << std::endl;
 	tab1.close();
 
-  //~ // mutau FR
-  //~ 
-  //~ 
   
-  //~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_denom_types[iFile][0]->Add(h_denom_types[iFile][4]);
-		//~ h_loose_types[iFile][0]->Add(h_loose_types[iFile][4]);
-		//~ TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][0]->Clone(); 
-		//~ h_loose_FR->Divide(h_denom_types[iFile][0]);
-		//~ 
-		//~ h_loose_FR->Rebin(rebinLeptonFR);
-		//~ h_loose_FR->Scale(1./rebinLeptonFR);
-		//~ 
-		//~ h_loose_FR->GetXaxis()->SetTitle("#mu P_{T}[GeV]");
-		//~ h_loose_FR->GetYaxis()->SetTitle("loose fake rate");
-		//~ 
-		//~ h_loose_FR->SetLineColor(colors[iFile]);
-		//~ h_loose_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_loose_FR->SetMarkerColor(colors[iFile]);
-		//~ h_loose_FR->SetMarkerSize(2.0);
-		//~ h_loose_FR->GetXaxis()->SetRangeUser(0.,50.);
-		//~ //h_loose_FR->SetMaximum(0.3);
-		//~ 
-		//~ 
-		//~ legMT->AddEntry(h_loose_FR,fileNames[iFile],"lp");
-		//~ 
-		//~ if(iFile>0)h_loose_FR->Draw("same");
-		//~ else h_loose_FR->Draw();
-	//~ 
-		//~ double sum=0.;
-		//~ double err=0.;
-		//~ for(uint iBin=2; iBin < 7; iBin++)
-		//~ {
-			//~ sum+=h_loose_FR->GetBinContent(iBin);
-			//~ err+=(h_loose_FR->GetBinError(iBin)*h_loose_FR->GetBinError(iBin));
-		//~ }
-		//~ sum/=5.0;
-		//~ err=sqrt(err)/5.0;
-		//~ std::cout<< setiosflags(ios::fixed) << std::setprecision(3) << " Loose Muon " << fileNames[iFile] << " " << sum << "$\\pm$" << err << std::endl;
-		//~ 
-		//~ 
-	//~ }
-		//~ legMT->Draw();
-		//~ c1->Print(outputDir+"/png/looseMuonFR.png");
-		//~ c1->Print(outputDir+"/eps/looseMuonFR.eps");
-		//~ c1->Print(outputDir+"/pdf/looseMuonFR.pdf");
-		//~ 
-	//~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_tight_types[iFile][0]->Add(h_tight_types[iFile][4]);
-		//~ TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][0]->Clone(); 
-		//~ h_tight_FR->Divide(h_denom_types[iFile][0]);
-		//~ 
-		//~ h_tight_FR->Rebin(rebinLeptonFR);
-		//~ h_tight_FR->Scale(1./rebinLeptonFR);
-		//~ 
-		//~ h_tight_FR->GetXaxis()->SetTitle("#mu P_{T}[GeV]");
-		//~ h_tight_FR->GetYaxis()->SetTitle("tight fake rate");
-		//~ 
-		//~ h_tight_FR->SetLineColor(colors[iFile]);
-		//~ h_tight_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_tight_FR->SetMarkerColor(colors[iFile]);
-		//~ h_tight_FR->GetXaxis()->SetRangeUser(0.,50.);
-		//~ h_tight_FR->SetMarkerSize(2.0);
-		//~ //h_tight_FR->SetMaximum(0.3);
-		//~ 
-		//~ if(iFile>0)h_tight_FR->Draw("same");
-		//~ else h_tight_FR->Draw();
-		//~ 
-		//~ double sum=0.;
-		//~ double err=0.;
-		//~ for(uint iBin=2; iBin < 7; iBin++)
-		//~ {
-			//~ sum+=h_tight_FR->GetBinContent(iBin);
-			//~ err+=(h_tight_FR->GetBinError(iBin)*h_tight_FR->GetBinError(iBin));
-		//~ }
-		//~ sum/=5.0;
-		//~ err=sqrt(err)/5.0;
-		//~ std::cout<< setiosflags(ios::fixed) << std::setprecision(3) << " Tight Muon " << fileNames[iFile] << " " << sum << "$\\pm$" << err << std::endl;
-		//~ 
-		//~ 
-	//~ }
-		//~ legMT->Draw();
-		//~ c1->Print(outputDir+"/png/tightMuonFR.png");
-		//~ c1->Print(outputDir+"/eps/tightMuonFR.eps");
-		//~ c1->Print(outputDir+"/pdf/tightMuonFR.pdf");
-		//~ 
-		//~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_denom_types[iFile][2]->Add(h_denom_types[iFile][6]);
-		//~ h_loose_types[iFile][2]->Add(h_loose_types[iFile][6]);
-		//~ TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][2]->Clone(); 
-		//~ h_loose_FR->Divide(h_denom_types[iFile][2]);
-		//~ 
-		//~ h_loose_FR->Rebin(rebinLeptonFR);
-		//~ h_loose_FR->Scale(1./rebinLeptonFR);
-		//~ 
-		//~ h_loose_FR->GetXaxis()->SetTitle("el P_{T}[GeV]");
-		//~ h_loose_FR->GetYaxis()->SetTitle("loose fake rate");
-		//~ 
-		//~ h_loose_FR->SetLineColor(colors[iFile]);
-		//~ h_loose_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_loose_FR->SetMarkerColor(colors[iFile]);
-		//~ h_loose_FR->GetXaxis()->SetRangeUser(0.,50.);
-		//~ h_loose_FR->SetMarkerSize(2.0);
-		//~ //h_loose_FR->SetMaximum(0.3);
-		//~ 
-		//~ if(iFile>0)h_loose_FR->Draw("same");
-		//~ else h_loose_FR->Draw();
-		//~ 
-		//~ double sum=0.;
-		//~ double err=0.;
-		//~ for(uint iBin=2; iBin < 7; iBin++)
-		//~ {
-			//~ sum+=h_loose_FR->GetBinContent(iBin);
-			//~ err+=(h_loose_FR->GetBinError(iBin)*h_loose_FR->GetBinError(iBin));
-		//~ }
-		//~ sum/=5.0;
-		//~ err=sqrt(err)/5.0;
-		//~ std::cout<< setiosflags(ios::fixed) << std::setprecision(3) << " Loose Electron " << fileNames[iFile] << " " << sum << "$\\pm$" << err << std::endl;
-		//~ 
-	//~ }
-		//~ legMT->Draw();
-		//~ c1->Print(outputDir+"/png/looseElectronFR.png");
-		//~ c1->Print(outputDir+"/eps/looseElectronFR.eps");
-		//~ c1->Print(outputDir+"/pdf/looseElectronFR.pdf");
-		//~ 
-	//~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_tight_types[iFile][2]->Add(h_tight_types[iFile][6]);
-		//~ TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][2]->Clone(); 
-		//~ h_tight_FR->Divide(h_denom_types[iFile][2]);
-		//~ 
-		//~ h_tight_FR->Rebin(rebinLeptonFR);
-		//~ h_tight_FR->Scale(1./rebinLeptonFR);
-		//~ 
-		//~ h_tight_FR->GetXaxis()->SetTitle("el P_{T}[GeV]");
-		//~ h_tight_FR->GetYaxis()->SetTitle("tight fake rate");
-		//~ 
-		//~ h_tight_FR->SetLineColor(colors[iFile]);
-		//~ h_tight_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_tight_FR->SetMarkerColor(colors[iFile]);
-		//~ h_tight_FR->GetXaxis()->SetRangeUser(0.,50.);
-		//~ //h_tight_FR->SetMaximum(0.3);
-		//~ h_tight_FR->SetMarkerSize(2.0);
-		//~ 
-		//~ 
-		//~ if(iFile>0)h_tight_FR->Draw("same");
-		//~ else h_tight_FR->Draw();
-		//~ 
-		//~ double sum=0.;
-		//~ double err=0.;
-		//~ for(uint iBin=2; iBin < 7; iBin++)
-		//~ {
-			//~ sum+=h_tight_FR->GetBinContent(iBin);
-			//~ err+=(h_tight_FR->GetBinError(iBin)*h_tight_FR->GetBinError(iBin));
-		//~ }
-		//~ sum/=5.0;
-		//~ err=sqrt(err)/5.0;
-		//~ std::cout<< setiosflags(ios::fixed) << std::setprecision(3) << " Tight Electron " << fileNames[iFile] << " " << sum << "$\\pm$" << err << std::endl;
-		//~ 
-		//~ 
-	//~ }
-		//~ legMT->Draw();
-		//~ c1->Print(outputDir+"/png/tightElectronFR.png");
-		//~ c1->Print(outputDir+"/eps/tightElectronFR.eps");
-		//~ c1->Print(outputDir+"/pdf/tightElectronFR.pdf");
-		//~ 
-	//~ //tautau
-	//~ TLegend* legTT = new TLegend(0.7,0.6,0.9,0.8);
-  //~ legTT->SetBorderSize(0);
-  //~ legTT->SetFillColor(0);
-  //~ legTT->SetTextSize(legend_size);
-  //~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_denom_types[iFile][3]->Add(h_denom_types[iFile][7]);
-		//~ h_loose_types[iFile][3]->Add(h_loose_types[iFile][7]);
-		//~ TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][3]->Clone(); 
-		//~ h_loose_FR->Divide(h_denom_types[iFile][3]);
-		//~ 
-		//~ h_loose_FR->Rebin(rebinTauFR);
-		//~ h_loose_FR->Scale(1./rebinTauFR);
-		//~ 
-		//~ h_loose_FR->GetXaxis()->SetTitle("#tau P_{T}[GeV]");
-		//~ h_loose_FR->GetYaxis()->SetTitle("loose fake rate");
-		//~ 
-		//~ h_loose_FR->SetLineColor(colors[iFile]);
-		//~ h_loose_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_loose_FR->SetMarkerColor(colors[iFile]);
-		//~ h_loose_FR->SetMarkerSize(2.0);
-		//~ h_loose_FR->GetXaxis()->SetRangeUser(0.,95.);
-		//~ //h_loose_FR->SetMaximum(0.1);
-		//~ h_loose_FR->SetMinimum(0.);
-		//~ 
-		//~ 
-		//~ TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",15.,80.);
-		//~ fit1->SetParameters(0.015,0.2,-0.07);
-		//~ fit1->SetLineColor(colors[iFile]);
-		//~ h_loose_FR->Fit("fit1","RN");
-		//~ 
-		 //~ 
-		//~ legTT->AddEntry(h_loose_FR,fileNames[iFile],"lp");
-		//~ 
-		//~ if(iFile>0)h_loose_FR->Draw("same");
-		//~ else h_loose_FR->Draw();
-		//~ 
-		//~ fit1->Draw("same");
-		//~ 
-	//~ }
-		//~ legTT->Draw();
-		//~ c1->Print(outputDir+"/png/looseTauFR.png");
-		//~ c1->Print(outputDir+"/eps/looseTauFR.eps");
-		//~ c1->Print(outputDir+"/pdf/looseTauFR.pdf");
-	//~ 
-	//~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_medium_types[iFile][3]->Add(h_medium_types[iFile][7]);
-		//~ TH1D* h_medium_FR = (TH1D*)h_medium_types[iFile][3]->Clone(); 
-		//~ h_medium_FR->Divide(h_denom_types[iFile][3]);
-		//~ 
-		//~ h_medium_FR->Rebin(rebinTauFR);
-		//~ h_medium_FR->Scale(1./rebinTauFR);
-		//~ 
-		//~ h_medium_FR->GetXaxis()->SetTitle("#tau P_{T}[GeV]");
-		//~ h_medium_FR->GetYaxis()->SetTitle("medium fake rate");
-		//~ 
-		//~ h_medium_FR->SetLineColor(colors[iFile]);
-		//~ h_medium_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_medium_FR->SetMarkerColor(colors[iFile]);
-		//~ h_medium_FR->SetMarkerSize(2.0);
-		//~ h_medium_FR->GetXaxis()->SetRangeUser(0.,95.);
-		//~ //h_medium_FR->SetMaximum(0.1);
-		//~ h_medium_FR->SetMinimum(0.);
-		//~ 
-		//~ 
-		//~ TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",15.,80.);
-		//~ fit1->SetParameters(0.015,0.2,-0.07);
-		//~ fit1->SetLineColor(colors[iFile]);
-		//~ h_medium_FR->Fit("fit1","RN");
-		//~ 
-		 //~ 
-		//~ 
-		//~ if(iFile>0)h_medium_FR->Draw("same");
-		//~ else h_medium_FR->Draw();
-		//~ 
-		//~ fit1->Draw("same");
-		//~ 
-	//~ }
-		//~ legTT->Draw();
-		//~ c1->Print(outputDir+"/png/mediumTauFR.png");
-		//~ c1->Print(outputDir+"/eps/mediumTauFR.eps");
-		//~ c1->Print(outputDir+"/pdf/mediumTauFR.pdf");
-	//~ 
-	//~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_tight_types[iFile][3]->Add(h_tight_types[iFile][7]);
-		//~ TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][3]->Clone(); 
-		//~ h_tight_FR->Divide(h_denom_types[iFile][3]);
-		//~ 
-		//~ h_tight_FR->Rebin(rebinTauFR);
-		//~ h_tight_FR->Scale(1./rebinTauFR);
-		//~ 
-		//~ h_tight_FR->GetXaxis()->SetTitle("#tau P_{T}[GeV]");
-		//~ h_tight_FR->GetYaxis()->SetTitle("tight fake rate");
-		//~ 
-		//~ h_tight_FR->SetLineColor(colors[iFile]);
-		//~ h_tight_FR->SetMarkerStyle(markers[iFile]);
-		//~ h_tight_FR->SetMarkerColor(colors[iFile]);
-		//~ h_tight_FR->SetMarkerSize(2.0);
-		//~ h_tight_FR->GetXaxis()->SetRangeUser(0.,95.);
-		//~ //h_tight_FR->SetMaximum(0.1);
-		//~ h_tight_FR->SetMinimum(0.);
-		//~ 
-		//~ 
-		//~ TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",15.,80.);
-		//~ fit1->SetParameters(0.015,0.2,-0.07);
-		//~ fit1->SetLineColor(colors[iFile]);
-		//~ h_tight_FR->Fit("fit1","RN");
-		//~ 
-		 //~ 
-		//~ 
-		//~ if(iFile>0)h_tight_FR->Draw("same");
-		//~ else h_tight_FR->Draw();
-		//~ 
-		//~ fit1->Draw("same");
-		//~ 
-	//~ }
-		//~ legTT->Draw();
-		//~ c1->Print(outputDir+"/png/tightTauFR.png");
-		//~ c1->Print(outputDir+"/eps/tightTauFR.eps");
-		//~ c1->Print(outputDir+"/pdf/tightTauFR.pdf");
-	//~ 
-	
-		//~ // tautau FR
-  //~ for(uint iFile=0; iFile < nFiles; iFile++)
-	//~ {
-		//~ //adding Zmumu and Zee togethger
-		//~ h_denom_types[iFile][3]->Add(h_denom_types[iFile][7]);
-		//~ h_loose_types[iFile][3]->Add(h_loose_types[iFile][7]);
-		//~ h_medium_types[iFile][3]->Add(h_medium_types[iFile][7]);
-		//~ h_tight_types[iFile][3]->Add(h_tight_types[iFile][7]); 
-		//~ TH1D* h_loose_FR = (TH1D*)h_loose_types[iFile][3]->Clone(); 
-		//~ h_loose_FR->Divide(h_denom_types[iFile][3]);
-		//~ TH1D* h_medium_FR = (TH1D*)h_medium_types[iFile][3]->Clone(); 
-		//~ h_medium_FR->Divide(h_denom_types[iFile][3]);
-		//~ TH1D* h_tight_FR = (TH1D*)h_tight_types[iFile][3]->Clone(); 
-		//~ h_tight_FR->Divide(h_denom_types[iFile][3]);
-		//~ 
-		//~ h_loose_FR->Rebin(rebinTauFR);
-		//~ h_loose_FR->Scale(1./rebinTauFR);
-		//~ h_medium_FR->Rebin(rebinTauFR);
-		//~ h_medium_FR->Scale(1./rebinTauFR);
-		//~ h_tight_FR->Rebin(rebinTauFR);
-		//~ h_tight_FR->Scale(1./rebinTauFR);
-		//~ 
-		//~ h_loose_FR->GetXaxis()->SetTitle("P_{T}[GeV]");
-		//~ h_loose_FR->GetYaxis()->SetTitle("loose fake rate");
-		//~ h_medium_FR->GetXaxis()->SetTitle("P_{T}[GeV]");
-		//~ h_medium_FR->GetYaxis()->SetTitle("medium fake rate");
-		//~ h_tight_FR->GetXaxis()->SetTitle("P_{T}[GeV]");
-		//~ h_tight_FR->GetYaxis()->SetTitle("tight fake rate");
-		//~ 
-		//~ h_loose_FR->Draw();
-		//~ TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",15.,80.);
-		//~ fit1->SetParameters(0.015,0.2,-0.07);
-		//~ h_loose_FR->Fit("fit1","R");
-		//~ 
-		//~ c1->Print(outputDir+"/png/looseTauFR.png");
-		//~ c1->Print(outputDir+"/eps/looseTauFR.eps");
-		//~ c1->Print(outputDir+"/pdf/looseTauFR.pdf");
-		//~ 
-		//~ h_medium_FR->Draw();
-		//~ h_medium_FR->Fit("fit1","R");
-		//~ 
-		//~ c1->Print(outputDir+"/png/mediumTauFR.png");
-		//~ c1->Print(outputDir+"/eps/mediumTauFR.eps");
-		//~ c1->Print(outputDir+"/pdf/mediumTauFR.pdf");
-		//~ 
-		//~ h_tight_FR->Draw();
-		//~ h_tight_FR->Fit("fit1","R");
-		//~ 
-		//~ c1->Print(outputDir+"/png/tightTauFR.png");
-		//~ c1->Print(outputDir+"/eps/tightTauFR.eps");
-		//~ c1->Print(outputDir+"/pdf/tightTauFR.pdf");
-	//~ }
-  //~ 
  	
   return 0;
 }
