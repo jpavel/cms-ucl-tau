@@ -8,3 +8,4 @@ config/Analysis*.root
 config/*.txt
 config/*.csv
 config/input.xml
+config/jobTempOutput*
