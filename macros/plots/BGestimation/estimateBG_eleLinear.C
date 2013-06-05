@@ -31,7 +31,7 @@
 
 using namespace std;
 
-int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/Application/") {
+int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/Application2/") {
 
   gROOT->Reset();             
   //SetAtlasStyle();
@@ -51,7 +51,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMori
   //~ int markers[nFiles] = { 24};
    
 
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/BGestimate";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/BGestimate2";
 	
   
        
