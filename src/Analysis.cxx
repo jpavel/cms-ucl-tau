@@ -1812,37 +1812,37 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//overlap cleaning
 	
-	//~ for(int i = 0; i < denomMuon.size(); i++)
-	//~ {
-		//~ if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << denomMuon.size() << std::endl;
-		//~ 
-		//~ bool removed = false;
-		//~ for(uint j = i+1; j < denomMuon.size() && !removed ; j++)
-		//~ {
-			//~ if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << denomMuon.size() 
-			//~ <<":" << deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
-		//~ 
-			//~ if(deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
-			//~ {	denomMuon.erase(denomMuon.begin()+i); i--;removed = true;}
-			//~ if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
-		//~ }
-	//~ }
-	//~ 
+	for(int i = 0; i < denomMuon.size(); i++)
+	{
+		if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << denomMuon.size() << std::endl;
+		
+		bool removed = false;
+		for(uint j = i+1; j < denomMuon.size() && !removed ; j++)
+		{
+			if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << denomMuon.size() 
+			<<":" << deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
+		
+			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
+			{	denomMuon.erase(denomMuon.begin()+i); i--;removed = true;}
+			if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
+		}
+	}
+	
 	
 	
 	for(int i = 0; i < denomElectron.size(); i++)
 	{
 		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << denomElectron.size() << std::endl;
 		bool removed = false;
-		//~ for(uint j = i+1; j < denomElectron.size() && !removed ; j++)
-		//~ {
-			//~ if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
-			//~ << " " << deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
-		//~ 
-			//~ if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) 
-			//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-			//~ if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
-		//~ }
+		for(uint j = i+1; j < denomElectron.size() && !removed ; j++)
+		{
+			if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
+			<< " " << deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
+		
+			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) 
+			{	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
+			if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
+		}
 
 		for(uint j = 0; j < denomMuon.size() && !removed; j++)
 		{
@@ -2233,7 +2233,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 //	std::sort(goodTau.begin(),goodTau.end());
 	
-	//if(Zoverlap) return;
+	if(Zoverlap) return;
 
 	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
     if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denom electrons after Zremoval" << std::endl;
@@ -2429,7 +2429,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hcand.push_back(genericMuon[i]);
 			Hcand.push_back(goodTau[j]);
 			int index = Hcand.size() -2;
-			bool pass1 = (RelIsoMu(Hcand[index])<0.3 && isGoodMu(Hcand[index]));
+			bool pass1 = (RelIsoMu(Hcand[index])<0.3 && isLooseMu(Hcand[index]));
 			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
 			
 			if( !pass1 && !pass2 && !category0)
@@ -2523,7 +2523,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			
 					
-			bool pass1 = (RelIsoEl(Hcand[index])<0.3 && TightEleId(Hcand[index]));
+			bool pass1 = (RelIsoEl(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
 			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
