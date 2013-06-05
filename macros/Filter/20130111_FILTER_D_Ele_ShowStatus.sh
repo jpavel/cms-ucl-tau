@@ -1,0 +1,1 @@
+source ShowStatus.sh 20130111_FILTER_D_Ele 20130111_FILTER_D_Ele results_filter/test /pnfs/iihe/cms/store/user/jez/test/newFilter /pnfs/iihe/cms/store/user/jez/ZHttNtuples/53X/Data/DoubleElectron_Run2012D-PromptReco-v1/

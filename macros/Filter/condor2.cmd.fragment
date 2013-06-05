@@ -1,0 +1,17 @@
+# here goes your shell script
+executable     = condor2.sh
+
+# here you specify where to put .log, .out and .err files
+output         = condor.out.$(Cluster).$(Process)
+error          = condor.err.$(Cluster).$(Process)
+log            = condor.log.$(Cluster).$(Process)
+
+
+# the following two parameters enable the file transfer mechanism
+# and specify that the output files should be transferred back
+# to the submit machine from the remote machine where the job executes
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+
+
+
