@@ -9,3 +9,11 @@ config/*.txt
 config/*.csv
 config/input.xml
 config/jobTempOutput*
+config/CONDOR/*.sh
+config/CONDOR/*.cmd
+!config/CONDOR/*condor*.sh
+!config/CONDOR/*condor*.cmd
+config/CONDOR/*/*
+config/CONDOR/*.out
+config/CONDOR/*.err
+config/CONDOR/resubmit

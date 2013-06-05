@@ -1,7 +1,7 @@
 #! /bin/sh
 
 #configuration
-release_path=/home/fynu/jpavel/scratch/FakeRate/CMSSW_5_3_3/src
+release_path=/home/fynu/jpavel/scratch/PostMoriond/Application/CMSSW_5_3_3/src
 
 source /nfs/soft/grid/ui/setup/grid-env.sh
 source /nfs/soft/cms/cmsset_default.sh
