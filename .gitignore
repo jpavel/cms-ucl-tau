@@ -9,3 +9,6 @@ config/*.txt
 config/*.csv
 config/input.xml
 config/jobTempOutput*
+macros/Filter/*.txt
+macros/Filter/*.csv
+macros/Filter/*.root
