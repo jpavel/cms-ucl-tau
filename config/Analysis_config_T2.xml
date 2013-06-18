@@ -76,9 +76,13 @@
 				
 				<Item Name="UseLongEvent" Value="true" />
                 <Item Name="examineEvent" Value="" />
-                <Item Name="OverM" Value="1104" />
-                <Item Name="BelowM" Value="367846" />
+                <Item Name="OverM" Value="151" />
+                
+                <Item Name="BelowM" Value="137720" />
                 <Item Name="removeTauOverlap" Value="true" />
+                
+         <Item Name="DoubleM" Value="false" />
+         <Item Name="DoubleE" Value="true" />
                       
 		</UserConfig>
 	</Cycle>

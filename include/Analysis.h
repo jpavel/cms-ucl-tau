@@ -426,6 +426,9 @@ private:
     bool UseLongEvent;
     double OverM;
     double BelowM;
+    
+    bool DoubleE;
+    bool DoubleM;
             
     
     
