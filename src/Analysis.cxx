@@ -64,6 +64,11 @@ Analysis::Analysis()
 		DeclareProperty("printoutEvents",printoutEvents);
 		DeclareProperty("examineEvent",examineEvent);
 		DeclareProperty("removeTauOverlap",removeTauOverlap);
+		
+		DeclareProperty("UseLongEvent",UseLongEvent);
+		DeclareProperty("OverM",OverM);
+		DeclareProperty("BelowM",BelowM);
+   
 	}
 
 Analysis::~Analysis() {
@@ -1658,8 +1663,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
 					
-	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
-
+	m_logger << INFO << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
+	//lumi << m->runNumber << " " << m->eventNumber << std::endl;
 		Hist("h_nPU_Info")->Fill(m->PUInfo);
 		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
 		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
@@ -1679,12 +1684,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		PUWeight = LumiWeights_->weight( nPU );
 		if(IgnorePUW) PUWeight = 1.0;
 	}
-	int eNumber = m->eventNumber;
+	long eNumber = m->eventNumber;
 	bool examineThisEvent;
-	if( examineEvent==eNumber) examineThisEvent=true;
+	long examineNumber;
+	if(UseLongEvent){
+		long temp = long(OverM)*1000000+long(BelowM);
+		examineNumber=temp;
+	}else examineNumber=examineEvent;
+	if( examineNumber==eNumber) examineThisEvent=true;
 	else examineThisEvent=false;
 	
-	
+	if(examineThisEvent) std::cout << "Examining!" << std::endl;
 	Hist("h_PU_weight")->Fill(PUWeight);
 	if(!useTruePileUp && is2011){ 
 		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
@@ -2338,7 +2348,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << goodTau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits << goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits << std::endl;
 			int index = Hcand.size() -2;
-			if(Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && !category0)
+			bool pass1 = Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
+			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
+			if(!pass1 && !pass2 && !category0)
 			{
 				if(examineThisEvent) std::cout << " in category 0!" << std::endl;
 				category0=true;
@@ -2347,7 +2359,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_cat0.push_back(4);
 				else if(Zee) Hcand_type_cat0.push_back(8);
 			}
-			if(Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5 && Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && !category1)
+			if(!pass1 && pass2 && !category1)
 			{
 				if(examineThisEvent) std::cout << " in category 1!" << std::endl;
 				category1=true;
@@ -2356,7 +2368,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_cat1.push_back(4);
 				else if(Zee) Hcand_type_cat1.push_back(8);
 			}
-			if(Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits <=0.5 && Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5 && !category2)
+			if(pass1 && !pass2 && !category2)
 			{
 				if(examineThisEvent) std::cout << " in category 2!" << std::endl;
 				category2=true;
@@ -2429,8 +2441,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hcand.push_back(genericMuon[i]);
 			Hcand.push_back(goodTau[j]);
 			int index = Hcand.size() -2;
-			bool pass1 = (RelIsoMu(Hcand[index])<0.3 && isLooseMu(Hcand[index]));
-			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
+			bool pass2 = (RelIsoMu(Hcand[index])<0.3 && isLooseMu(Hcand[index]));
+			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
 			
 			if( !pass1 && !pass2 && !category0)
 			{
@@ -2523,8 +2535,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			
 					
-			bool pass1 = (RelIsoEl(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
-			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
+			bool pass2 = (RelIsoEl(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
+			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
@@ -2619,7 +2631,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_cat0.push_back(2);
 				else if(Zee) Hcand_type_cat0.push_back(6);
 			}
-			if(pass1 && !pass2 && !category1)
+			if(!pass1 && pass2 && !category1)
 			{
 				if(examineThisEvent) std::cout << "In category1" << std::endl;
 				category1=true;
@@ -2628,7 +2640,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_cat1.push_back(2);
 				else if(Zee) Hcand_type_cat1.push_back(6);
 			}
-			if(!pass1 && pass2 && !category2)
+			if(pass1 && !pass2 && !category2)
 			{
 				if(examineThisEvent) std::cout << "in category2" << std::endl;
 				category2=true;
@@ -3331,35 +3343,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						}
 					}
 				// messed with categories: cat1 = tau fails or e fails	
-				for(uint i=0; i < Hcand_cat2.size(); i+=2)
-				{
-					int exp_event_type=Hcand_type_cat2[i/2];
-					myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
-					myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
-					switch(exp_event_type)
-					{
-						case 1:
-						case 3:
-						case 5:
-						case 7: 
-							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].pt); 
-							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
-							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].jetPt); 
-							break;
-						case 2: 
-						case 4: 
-						case 6: 
-						case 8: 
-							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt);
-							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
-							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt); 
-							break;
-						default:
-							break;
-					}
-											
-				}
-				
 				for(uint i=0; i < Hcand_cat1.size(); i+=2)
 				{
 					int exp_event_type=Hcand_type_cat1[i/2];
@@ -3371,17 +3354,46 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						case 3:
 						case 5:
 						case 7: 
-							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].pt); 
-							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
-							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].jetPt); 
+							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
+							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt); 
 							break;
 						case 2: 
 						case 4: 
 						case 6: 
 						case 8: 
-							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt);
+							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].pt);
+							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].jetPt); 
+							break;
+						default:
+							break;
+					}
+											
+				}
+				
+				for(uint i=0; i < Hcand_cat2.size(); i+=2)
+				{
+					int exp_event_type=Hcand_type_cat2[i/2];
+					myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
+					myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
+					switch(exp_event_type)
+					{
+						case 1:
+						case 3:
+						case 5:
+						case 7: 
+							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
+							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt); 
+							break;
+						case 2: 
+						case 4: 
+						case 6: 
+						case 8: 
+							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].pt);
 							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
-							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt); 
+							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].jetPt); 
 							break;
 						default:
 							break;

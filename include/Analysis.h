@@ -423,6 +423,11 @@ private:
     double examineEvent;
     bool removeTauOverlap;
     
+    bool UseLongEvent;
+    double OverM;
+    double BelowM;
+            
+    
     
     // bookkeeping variables
     

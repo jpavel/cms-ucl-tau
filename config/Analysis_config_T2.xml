@@ -73,8 +73,11 @@
 		<Item Name="printoutEvents" Value="true" />
 		<Item Name="maxDeltaR" Value="0.1" />            
         <Item Name="maxDeltaR_H" Value="0.3" />            
-        
+				
+				<Item Name="UseLongEvent" Value="true" />
                 <Item Name="examineEvent" Value="" />
+                <Item Name="OverM" Value="1104" />
+                <Item Name="BelowM" Value="367846" />
                 <Item Name="removeTauOverlap" Value="true" />
                       
 		</UserConfig>
