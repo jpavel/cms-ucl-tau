@@ -1667,7 +1667,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
 					
-	m_logger << INFO << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
+	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	//lumi << m->runNumber << " " << m->eventNumber << std::endl;
 		Hist("h_nPU_Info")->Fill(m->PUInfo);
 		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);

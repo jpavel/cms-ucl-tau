@@ -76,9 +76,9 @@
 				
 				<Item Name="UseLongEvent" Value="true" />
                 <Item Name="examineEvent" Value="" />
-                <Item Name="OverM" Value="1751" />
+                <Item Name="OverM" Value="" />
                 
-                <Item Name="BelowM" Value="239697" />
+                <Item Name="BelowM" Value="" />
                 <Item Name="removeTauOverlap" Value="true" />
                 
          <Item Name="DoubleM" Value="false" />
