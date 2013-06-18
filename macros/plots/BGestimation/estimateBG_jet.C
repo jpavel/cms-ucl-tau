@@ -51,7 +51,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMori
   //~ int markers[nFiles] = { 24};
    
 
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/BGestimate3";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/BGestimate_check";
 	
   
        

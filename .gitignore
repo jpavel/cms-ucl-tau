@@ -5,6 +5,7 @@
 src/*_Dict.cxx
 src/*_Dict.h
 config/Analysis*.root
+config/2012.root
 config/*.txt
 config/*.csv
 config/input.xml
@@ -12,3 +13,11 @@ config/jobTempOutput*
 macros/Filter/*.txt
 macros/Filter/*.csv
 macros/Filter/*.root
+config/CONDOR/*.sh
+config/CONDOR/*.cmd
+!config/CONDOR/*condor*.sh
+!config/CONDOR/*condor*.cmd
+config/CONDOR/*/*
+config/CONDOR/*.out
+config/CONDOR/*.err
+config/CONDOR/resubmit
