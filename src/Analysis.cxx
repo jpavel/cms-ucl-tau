@@ -2648,10 +2648,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			if(AdLepton_em(m,i,j,genericMuon,genericElectron,genericElectron[i],genericMuon[j],verb)){ 
-				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
-				continue;
-			}
+			//~ if(AdLepton_em(m,i,j,genericMuon,genericElectron,genericElectron[i],genericMuon[j],verb)){ 
+				//~ if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
+				//~ continue;
+			//~ }
 			
 			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],genericMuon[j], verb)) continue;
 			signal = true; 
@@ -2675,7 +2675,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_cat0.push_back(2);
 				else if(Zee) Hcand_type_cat0.push_back(6);
 			}
-			if(!pass1 && pass2 && !category1)
+			if(pass1 && !pass2 && !category1)
 			{
 				if(examineThisEvent) std::cout << "In category1" << std::endl;
 				category1=true;
@@ -2684,7 +2684,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_cat1.push_back(2);
 				else if(Zee) Hcand_type_cat1.push_back(6);
 			}
-			if(pass1 && !pass2 && !category2)
+			if(!pass1 && pass2 && !category2)
 			{
 				if(examineThisEvent) std::cout << "in category2" << std::endl;
 				category2=true;
@@ -3392,27 +3392,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					int exp_event_type=Hcand_type_cat1[i/2];
 					myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
 					myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
-					switch(exp_event_type)
-					{
-						case 1:
-						case 3:
-						case 5:
-						case 7: 
-						case 6: 
-						case 8: 
-							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
-							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
-							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt); 
-							break;
-						case 2: 
-						case 4: 
-							h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].pt);
-							h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
-							h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].jetPt); 
-							break;
-						default:
-							break;
-					}
+					//~ switch(exp_event_type)
+					//~ {
+						//~ case 1:
+						//~ case 3:
+						//~ case 5:
+						//~ case 7: 
+						//~ case 6: 
+						//~ case 8: 
+						//~ case 2: 
+						//~ case 4: 
+						 //~ 
+							//~ break;
+						//~ default:
+							//~ h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].pt);
+							//~ h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+							//~ h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].jetPt); 
+							//~ break;
+						//~ 
+							//~ break;
+					//~ }
+					
+						h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
+						h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+						h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt);
 											
 				}
 				
@@ -3421,27 +3424,28 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					int exp_event_type=Hcand_type_cat2[i/2];
 					myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
 					myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
-					switch(exp_event_type)
-					{
-						case 1:
-						case 3:
-						case 5:
-						case 7: 
-						case 6: 
-						case 8:
-							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
-							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
-							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt); 
-							break;
-						case 2: 
-						case 4: 				 
-							h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].pt);
-							h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
-							h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].jetPt); 
-							break;
-						default:
-							break;
-					}
+					h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
+					h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+					h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
+					//~ switch(exp_event_type)
+					//~ {
+						//~ case 1:
+						//~ case 3:
+						//~ case 5:
+						//~ case 7: 
+						//~ case 6: 
+						//~ case 8:
+					 //~ 
+							//~ break;
+						//~ case 2: 
+						//~ case 4: 				 
+							//~ h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].pt);
+							//~ h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+							//~ h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].jetPt); 
+							//~ break;
+						//~ default:
+							//~ break;
+					//~ }
 											
 				}
         
