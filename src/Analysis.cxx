@@ -1805,7 +1805,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool elID =  LooseEleId(elPt,electron[i].eta_SC,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
 
-		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits < 2)
+		if (elPt > 10. && fabs(elEta) < 2.5 )
 		{
 			if(examineThisEvent) std::cout << " pre-electron " << i << " pt eta etaSC: " << elPt << " " 
 			<< elEta << " " << electron[i].eta << std::endl;
@@ -1963,11 +1963,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Zee) continue;
 			if(RelIsoEl(denomElectron[i]) > 0.3) continue;
 			if(!LooseEleId(denomElectron[i])) continue;
+			if(denomElectron[i].numLostHitEleInner>1) continue;
 			for(uint j = i+1; j < denomElectron.size() && !Zee; j++)
 			{
 				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  denomElectron[j].pt << " and charge " << denomElectron[j].charge << SLogger::endmsg;
 				if(RelIsoEl(denomElectron[j]) > 0.3) continue;	
 				if(!LooseEleId(denomElectron[j])) continue;
+				if(denomElectron[j].numLostHitEleInner>1) continue;
 				if(denomElectron[i].charge*denomElectron[j].charge >=0.) continue;
 				if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) continue;
 
@@ -2185,7 +2187,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	uint isoMuons = 0;
 	for(uint i=0; i< denomElectron.size(); i++)
 	{
-		if(RelIsoEl(denomElectron[i]) < 0.3 && LooseEleId(denomElectron[i])) isoElectrons++;
+		if(RelIsoEl(denomElectron[i]) < 0.3 && LooseEleId(denomElectron[i]) && denomElectron[i].numLostHitEleInner<2 ) isoElectrons++;
 	}
  
 	for(uint i=0; i< denomMuon.size(); i++)
@@ -2251,7 +2253,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j = 0; j < denomElectron.size() && !removed; j++)
 		{
 
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR && RelIsoEl(denomElectron[j]) < 0.3 &&  LooseEleId(denomElectron[i])) 
+			if(deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR && RelIsoEl(denomElectron[j]) < 0.3 &&  LooseEleId(denomElectron[i]) && denomElectron[i].numLostHitEleInner <2 ) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 			if(examineThisEvent && removed) std::cout << " tau " << i << " overlaps with iso loose electron " << j << std::endl;
 		}
@@ -2630,7 +2632,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << "/" << genericElectron.size() << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
 		
-		if(genericElectron[i].numLostHitEleInner > 1) continue;
+		//if(genericElectron[i].numLostHitEleInner > 1) continue;
 		if(examineThisEvent) std::cout << " Checking for eMu " << std::endl;
 		//if (!WZ_Rej(m,genericElectron[i])) continue;
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << genericMuon.size() << " muons." << std::endl;
