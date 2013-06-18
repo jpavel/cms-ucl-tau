@@ -1488,29 +1488,29 @@ bool Analysis::AdLepton_em(myevent *m, uint index_e, uint index_m, std::vector<m
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
     }
-	 if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
-	
-	for(uint i = 0; i < genericElectron.size(); i++)
-	{   
-			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
-			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
-			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-			if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
-			if(verbose) std::cout << " Is very good? " << TightEleId(genericElectron[i]) << std::endl;
-			if(verbose) std::cout << " Pt is " << genericElectron[i].pt << std::endl;
-			if(verbose) std::cout << " num lost hits is " << genericElectron[i].numLostHitEleInner << std::endl;
-			if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
-			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
-		//	if (!WZ_Rej(m,genericElectron[i])) continue;
-			if( genericElectron[i].numLostHitEleInner > 1) continue;
-	
-			if(verbose) std::cout << " decision: " << LooseEleId(genericElectron[i]) << " " << 	RelIsoEl(genericElectron[i]) << " " << i << " index " << index_e << std::endl;
-	
-			if(LooseEleId(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.3 && i!=index_e )  
-				Ad_lepton=true;
-			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
-	   
-	}
+	 //~ if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	//~ 
+	//~ for(uint i = 0; i < genericElectron.size(); i++)
+	//~ {   
+			//~ if(verbose) std::cout << " Ele cand no. " << i << std::endl;
+			//~ if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			//~ if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			//~ if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
+			//~ if(verbose) std::cout << " Is very good? " << TightEleId(genericElectron[i]) << std::endl;
+			//~ if(verbose) std::cout << " Pt is " << genericElectron[i].pt << std::endl;
+			//~ if(verbose) std::cout << " num lost hits is " << genericElectron[i].numLostHitEleInner << std::endl;
+			//~ if(verbose) std::cout << " iso is " << RelIsoEl(genericElectron[i]) << std::endl;
+			//~ if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
+		//~ //	if (!WZ_Rej(m,genericElectron[i])) continue;
+			//~ if( genericElectron[i].numLostHitEleInner > 1) continue;
+	//~ 
+			//~ if(verbose) std::cout << " decision: " << LooseEleId(genericElectron[i]) << " " << 	RelIsoEl(genericElectron[i]) << " " << i << " index " << index_e << std::endl;
+	//~ 
+			//~ if(LooseEleId(genericElectron[i]) && RelIsoEl(genericElectron[i])<0.3 && i!=index_e )  
+				//~ Ad_lepton=true;
+			//~ if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
+	   //~ 
+	//~ }
 	
 	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
 	return Ad_lepton;
