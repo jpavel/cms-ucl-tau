@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <!-- This config file will run over input defined in input.xml file -->
-<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="VERBOSE">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -45,7 +45,6 @@
 		<Item Name="checkCategories" Value="true"/>
 		<Item Name="isSimulation" Value="true"/>
 		<Item Name="is2011" Value="false"/>
-		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="true"/>
 		
 		<Item Name="vetoMuonTrigger" Value="false" />

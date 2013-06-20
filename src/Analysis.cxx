@@ -32,9 +32,7 @@ Analysis::Analysis()
 		DeclareProperty("checkCategories",checkCategories);
 		DeclareProperty("isSimulation",isSimulation);
 		DeclareProperty("is2011",is2011);
-		DeclareProperty("is2012_52",is2012_52);
 		DeclareProperty("is2012_53",is2012_53);
-		DeclareProperty("useTruePileUp",useTruePileUp);
 		DeclareProperty("vetoMuonTrigger",vetoMuonTrigger);
 		DeclareProperty("vetoElectronTrigger", vetoElectronTrigger);
 		
@@ -397,9 +395,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	// Lumi weights
 
-	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogramABCD_True_2012","mcPU","pileup");
-	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
-	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
+    if (is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
 	
@@ -408,7 +404,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		 plus.open("plus_events.txt");
 	 }
 	
-	dupl.open("duplicates.txt");
 	
 	lumi.open("lumi.csv");
 	
@@ -433,7 +428,6 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 
 	if(printoutEvents){ log1.close(); plus.close();}
-	dupl.close();
 	lumi.close();
 	ofstream log2;       
      log2.open("total.txt");
@@ -632,12 +626,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
 
 		++m_allEvents;
-	//	bool found_event = false; 
-	if(m->runNumber == 163255 && m->lumiNumber ==  603)
-    {
-         TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-         dupl << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << fileName << std::endl;
-    }
+	
     
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
 		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
@@ -647,34 +636,29 @@ entries++;
 	
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
-		Hist("h_nPU_Info")->Fill(m->PUInfo);
-		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
-		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
+	Hist("h_nPU_Info")->Fill(m->PUInfo);
+	Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
+	Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
 
 
 	double PUWeight = 1.0;
 	double nPU = 0.0;
-	if(useTruePileUp || !is2011)  nPU = m->PUInfo_true;
-	else nPU = m->PUInfo_Bunch0;
+	nPU = m->PUInfo_true;
 	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
 		if(IgnorePUW) PUWeight = 1.0;
 	}
 	int eNumber = m->eventNumber;
-	 bool examineThisEvent;
+	bool examineThisEvent;
       if( examineEvent==eNumber) examineThisEvent=true;
       else examineThisEvent=false;
 	 
-	 if(examineThisEvent) std::cout << "NOW EXAMINING EVENT " << eNumber << " WHICH IS # " << m_allEvents << std::endl;
+	if(examineThisEvent) std::cout << "NOW EXAMINING EVENT " << eNumber << " WHICH IS # " << m_allEvents << std::endl;
 	
 	Hist("h_PU_weight")->Fill(PUWeight);
-	if(!useTruePileUp && is2011){ 
-		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
-		Hist("h_nPU_reweight")->Fill(m->PUInfo_Bunch0,PUWeight);
-	}else{ 
-		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
-		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
-	}
+	Hist("h_nPU_raw")->Fill(m->PUInfo_true);
+	Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
+	
 	
 	std::vector<myobject> vertex = m->Vertex;
 	std::vector<myobject> goodVertex;
@@ -964,9 +948,6 @@ entries++;
 			if(is2012_53){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
-			}else if(is2012_52){
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
 			}else{
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Corr_Trg_Mu_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Corr_Trg_Mu_2011(Zcand[1]);
@@ -976,9 +957,6 @@ entries++;
 			if(is2012_53){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
-			}else if(is2012_52){
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
 			}else{
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Corr_Trg_Ele_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Corr_Trg_Ele_2011(Zcand[1]);
@@ -1474,16 +1452,12 @@ entries++;
 		{
 			if(is2012_53){
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
-			}else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand[0]);
 			}
 		}else if(eTau){
 			if(is2012_53){
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
-			}else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand[0]);
 			}
@@ -1491,9 +1465,6 @@ entries++;
 			if(is2012_53){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
-			}else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Mu_Loose_2012(Hcand[0]);
-				corrHlep2=Cor_ID_Iso_Ele_Loose_2012(Hcand[1]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2011(Hcand[1]);
