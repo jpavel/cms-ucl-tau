@@ -4,7 +4,7 @@
 #include "../include/Analysis.h"
 
 
-#include "Corrector.h"
+#include "Corrector_new.h"
 
 
 ClassImp( Analysis );
@@ -53,10 +53,17 @@ Analysis::Analysis()
 		DeclareProperty("IgnoreSF",IgnoreSF);
 		DeclareProperty("IgnorePUW",IgnorePUW);
 		DeclareProperty("printoutEvents",printoutEvents);
-		DeclareProperty("examineEvent",examineEvent); //sync
-		DeclareProperty("ShiftTauES_up",ShiftTauES_up); //sync
-		DeclareProperty("ShiftTauES_down",ShiftTauES_down); //sync
-		DeclareProperty("SystUncert_ES",SystUncert_ES); //sync
+		DeclareProperty("examineEvent",examineEvent); 
+                //systematics
+		DeclareProperty("ShiftTauES_up",ShiftTauES_up); 
+		DeclareProperty("ShiftTauES_down",ShiftTauES_down); 
+		DeclareProperty("SystUncert_ES",SystUncert_ES); 
+                DeclareProperty("NoSFShift_Mu",NoSFShift_Mu);
+                DeclareProperty("SFShiftUp_Mu",SFShiftUp_Mu);
+                DeclareProperty("SFShiftDown_Mu",SFShiftDown_Mu);
+                DeclareProperty("NoSFShift_Ele",NoSFShift_Ele);
+                DeclareProperty("SFShiftUp_Ele",SFShiftUp_Ele);
+                DeclareProperty("SFShiftDown_Ele",SFShiftDown_Ele);
 		//sync
 		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=15;
@@ -84,6 +91,48 @@ void Analysis::EndCycle() throw( SError ) {
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
+        //gen histos (at the very beginning)
+	h_genEleFromZ_pt     		= Book(TH1D("h_genEleFromZ_pt","gelEle_Pt",300,0,300));
+	h_genMuFromZ_pt     		= Book(TH1D("h_genMuFromZ_pt","gelMu_Pt",300,0,300));
+	h_genEleFromZ_eta     		= Book(TH1D("h_genEleFromZ_eta","gelEle_Eta",100,-3,3));
+	h_genMuFromZ_eta     		= Book(TH1D("h_genMuFromZ_eta","gelMu_Eta",100,-3,3));
+
+	h_genEleFromT_pt     		= Book(TH1D("h_genEleFromT_pt","gelEle_Pt",300,0,300));
+	h_genMuFromT_pt     		= Book(TH1D("h_genMuFromT_pt","gelMu_Pt",300,0,300));
+	h_genEleFromT_eta     		= Book(TH1D("h_genEleFromT_eta","gelEle_Eta",100,-3,3));
+	h_genMuFromT_eta     		= Book(TH1D("h_genMuFromT_eta","gelMu_Eta",100,-3,3));
+
+	h_genTauHadFromZ_pt             = Book(TH1D("h_genTauHadFromZ_pt","gelTau_Pt",300,0,300));
+	h_genTauHadFromZ_eta            = Book(TH1D("h_genTauHadFromZ_eta","gelTau_Eta",100,-3,3));
+	h_genTauLepFromZ_pt             = Book(TH1D("h_genTauLepFromZ_pt","gelTau_Pt",300,0,300));
+	h_genTauLepFromZ_eta            = Book(TH1D("h_genTauLepFromZ_eta","gelTau_Eta",100,-3,3));
+
+        //gen - reco matching in the Z final states
+	h_muMatchedFromZ_pt             = Book(TH1D("h_muMatchedFromZ_pt","gelMu_Pt",300,0,300));
+	h_muMatchedFromZ_eta            = Book(TH1D("h_muMatchedFromZ_eta","genMu_eta",100,-3,3));
+	h_eleMatchedFromZ_pt             = Book(TH1D("h_eleMatchedFromZ_pt","genEle_Pt",300,0,300));
+	h_eleMatchedFromZ_eta            = Book(TH1D("h_eleMatchedFromZ_eta","genEle_eta",100,-3,3));
+
+        //gen - reco matching in the H final states
+	h_tauTau_tau1HadMatchedFromZ_pt          	= Book(TH1D("h_tauTau_tau1HadMatchedFromZ_pt","genTau_Pt",300,0,300));
+	h_tauTau_tau1HadMatchedFromZ_eta          	= Book(TH1D("h_tauTau_tau1HadMatchedFromZ_eta","genTau_eta",100,-3,3));
+	h_tauTau_tau2HadMatchedFromZ_pt          	= Book(TH1D("h_tauTau_tau2HadMatchedFromZ_pt","genTau_Pt",300,0,300));
+	h_tauTau_tau2HadMatchedFromZ_eta          	= Book(TH1D("h_tauTau_tau2HadMatchedFromZ_eta","genTau_eta",100,-3,3));
+	h_muTau_muMatchedFromZ_pt        		= Book(TH1D("h_muTau_muMatchedFromZ_pt","genmu_Pt",300,0,300));
+	h_muTau_muMatchedFromZ_eta        		= Book(TH1D("h_muTau_muMatchedFromZ_eta","genmu_eta",100,-3,3));
+	h_muTau_tauHadMatchedFromZ_pt        		= Book(TH1D("h_muTau_tauHadMatchedFromZ_pt","genTau_Pt",300,0,300));
+	h_muTau_tauHadMatchedFromZ_eta        		= Book(TH1D("h_muTau_tauHadMatchedFromZ_eta","genTau_eta",100,-3,3));
+	h_eTau_eMatchedFromZ_pt        			= Book(TH1D("h_eTau_eMatchedFromZ_pt","gene_Pt",300,0,300));
+	h_eTau_eMatchedFromZ_eta        		= Book(TH1D("h_eTau_eMatchedFromZ_eta","gene_eta",100,-3,3));
+	h_eTau_tauHadMatchedFromZ_pt        		= Book(TH1D("h_eTau_tauHadMatchedFromZ_pt","genTau_Pt",300,0,300));
+	h_eTau_tauHadMatchedFromZ_eta        		= Book(TH1D("h_eTau_tauHadMatchedFromZ_eta","genTau_eta",100,-3,3));
+	h_muE_muMatchedFromZ_pt        			= Book(TH1D("h_muE_muMatchedFromZ_pt","genmu_Pt",300,0,300));
+	h_muE_muMatchedFromZ_eta        		= Book(TH1D("h_muE_muMatchedFromZ_eta","genmu_eta",100,-3,3));
+	h_muE_eMatchedFromZ_pt        			= Book(TH1D("h_muE_eMatchedFromZ_pt","gene_Pt",300,0,300));
+	h_muE_eMatchedFromZ_eta        			= Book(TH1D("h_muE_eMatchedFromZ_eta","gene_eta",100,-3,3));
+
+
+        //
 	h_LT_tauTau                     = Book(TH1D("h_LT_tauTau","tau tau LT before cut", 100,0,300));
 	h_LT_eTau                       = Book(TH1D("h_LT_eTau","e tau LT before cut", 100,0,300));
 	h_LT_muTau                      = Book(TH1D("h_LT_muTau","e tau LT before cut", 100,0,300));
@@ -630,7 +679,7 @@ double Analysis::InvMass(myobject o1, myobject o2)
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
-
+    
 		++m_allEvents;
 	//	bool found_event = false; 
 	if(m->runNumber == 163255 && m->lumiNumber ==  603)
@@ -675,7 +724,56 @@ entries++;
 		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	}
-	
+
+
+        //printout gen particle informations
+
+	std::vector<myGenobject> genTauVisible = m->RecGenTauVisible;
+	std::vector<myGenobject> genParticle = m->RecGenParticle;
+        for (uint i = 0; i < genParticle.size(); i++) {
+           if(abs(genParticle[i].pdgId)==11 && genParticle[i].status==3 && genParticle[i].mod_pdgId==23){
+              Hist("h_genEleFromZ_pt")->Fill(genParticle[i].pt);
+              Hist("h_genEleFromZ_eta")->Fill(genParticle[i].eta);
+           }
+           if(abs(genParticle[i].pdgId)==11 && genParticle[i].mod_pdgId==15 && genParticle[i].Gmod_pdgId==23){
+		   cout << "electron from taus from Z!" << endl;
+		   Hist("h_genEleFromT_pt")->Fill(genParticle[i].pt);
+		   Hist("h_genEleFromT_eta")->Fill(genParticle[i].eta);
+           }
+           if(abs(genParticle[i].pdgId)==13 && genParticle[i].status==3 && genParticle[i].mod_pdgId==23){
+              Hist("h_genMuFromZ_pt")->Fill(genParticle[i].pt);
+              Hist("h_genMuFromZ_eta")->Fill(genParticle[i].eta);
+           }
+           if(abs(genParticle[i].pdgId)==13 && genParticle[i].mod_pdgId==15 && genParticle[i].Gmod_pdgId==23){
+		   cout << "muon from taus from Z !" << endl;
+		   Hist("h_genMuFromT_pt")->Fill(genParticle[i].pt);
+		   Hist("h_genMuFromT_eta")->Fill(genParticle[i].eta);
+           }
+        }
+
+        //tau visible
+	for (uint i = 0; i < genTauVisible.size(); i++) {
+		//cout << "ID: " << genTauVisible[i].pdgId << " STATUS: " << genTauVisible[i].status << " INDEX: "<< genTauVisible[i].gen_index << endl;
+		if(genTauVisible[i].decay_mode == 0){
+		int index = genTauVisible[i].gen_index;
+			for (uint i = 0; i < genParticle.size(); i++) {
+				if (i==index){
+				//if (i==index && genParticle[index].mod_pdgId == 23){
+					Hist("h_genTauHadFromZ_pt")->Fill(genParticle[i].pt);
+					Hist("h_genTauHadFromZ_eta")->Fill(genParticle[i].eta);
+				}
+			}
+		}
+		else if(genTauVisible[i].decay_mode == 1){
+		int index = genTauVisible[i].gen_index;
+			for (uint i = 0; i < genParticle.size(); i++) {
+				if (i==index){
+					Hist("h_genTauLepFromZ_pt")->Fill(genParticle[i].pt);
+					Hist("h_genTauLepFromZ_eta")->Fill(genParticle[i].eta);
+				}
+			}
+	}
+}	
 	std::vector<myobject> vertex = m->Vertex;
 	std::vector<myobject> goodVertex;
 	goodVertex.clear();
@@ -891,6 +989,21 @@ entries++;
 
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 
+        //gen matching
+	if(Zmumu){
+		for(uint j =0; j < Zcand.size(); j++){
+			for (uint i = 0; i < genParticle.size(); i++) {
+				if(abs(genParticle[i].pdgId)==13 && genParticle[i].mod_pdgId==23){
+					if(deltaR(Zcand[j].eta,Zcand[j].phi,genParticle[i].eta,genParticle[i].phi)<0.01){
+						Hist("h_muMatchedFromZ_pt")->Fill(genParticle[i].pt);
+						Hist("h_muMatchedFromZ_eta")->Fill(genParticle[i].eta);
+					}
+				}
+			}
+		}
+	}
+
+
 	if(!Zmumu)
 	{
 		dMass = 999.;
@@ -954,6 +1067,18 @@ entries++;
 		}
 	}
 
+	if(Zee){
+		for(uint j =0; j < Zcand.size(); j++){
+			for (uint i = 0; i < genParticle.size(); i++) {
+				if(abs(genParticle[i].pdgId)==11 && genParticle[i].mod_pdgId==23){
+					if(deltaR(Zcand[j].eta,Zcand[j].phi,genParticle[i].eta,genParticle[i].phi)<0.01){
+						Hist("h_eleMatchedFromZ_pt")->Fill(genParticle[i].pt);
+						Hist("h_eleMatchedFromZ_eta")->Fill(genParticle[i].eta);
+					}
+				}
+			}
+		}
+	}
 
 	double corrZlep1,corrZlep2;
 	corrZlep1=corrZlep2=1.0;
@@ -961,10 +1086,16 @@ entries++;
 	if(isSimulation && !IgnoreSF){
 		if(Zmumu)
 		{
-			if(is2012_53){
+			if(is2012_53 && NoSFShift_Mu){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
-			}else if(is2012_52){
+			}else if(is2012_53 && SFShiftUp_Mu){
+				corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])+Unc_Trg_Mu_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])+Unc_Trg_Mu_2012_53X(Zcand[1]));
+                        }else if(is2012_53 && SFShiftDown_Mu){
+				corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])-Unc_Trg_Mu_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])-Unc_Trg_Mu_2012_53X(Zcand[1]));
+                        }else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
 			}else{
@@ -973,10 +1104,16 @@ entries++;
 			}
 			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
-			if(is2012_53){
+			if(is2012_53 && NoSFShift_Ele){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
-			}else if(is2012_52){
+			}else if(is2012_53 && SFShiftUp_Ele){
+				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])+Unc_Trg_Ele_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])+Unc_Trg_Ele_2012_53X(Zcand[1]));
+                        }else if(is2012_53 && SFShiftDown_Ele){
+				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])-Unc_Trg_Ele_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])-Unc_Trg_Ele_2012_53X(Zcand[1]));
+                        }else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
 			}else{
@@ -1295,7 +1432,9 @@ entries++;
 		}             
 	}
 
-	if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg;   
+	
+        if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg; 
+ 
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
 	bool eTau = false;
@@ -1398,6 +1537,9 @@ entries++;
 	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,Z_weight);
 
 
+
+
+
 	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
 	// cross-check
 	h_cut_flow->Fill(4,1);
@@ -1465,33 +1607,242 @@ entries++;
 			break;
 	}
 
+if(muE){
+	for (uint i = 0; i < genTauVisible.size(); i++) {
+		if(genTauVisible[i].decay_mode == 2){
+			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+					cout << "muE final state -> tau decaying in mu" << endl;
+					cout << "ID: " << genTauVisible[i].pdgId << endl;
+                                        cout << "STATUS: " << genTauVisible[i].status << endl;
+                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+					cout << "ID: " << genParticle[k].pdgId << endl;
+                                        cout << "STATUS: " << genParticle[k].status << endl;
+                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_muE_muMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_muE_muMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+		if(genTauVisible[i].decay_mode == 1){
+			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+					cout << "muE final state -> tau decaying in e" << endl;
+					cout << "ID: " << genTauVisible[i].pdgId << endl;
+                                        cout << "STATUS: " << genTauVisible[i].status << endl;
+                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+					cout << "ID: " << genParticle[k].pdgId << endl;
+                                        cout << "STATUS: " << genParticle[k].status << endl;
+                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_muE_eMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_muE_eMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+	}
+}
 
+if(eTau){
+	for (uint i = 0; i < genTauVisible.size(); i++) {
+		if(genTauVisible[i].decay_mode == 1){
+			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+					cout << "eTau final state -> tau decaying in e" << endl;
+					cout << "ID: " << genTauVisible[i].pdgId << endl;
+                                        cout << "STATUS: " << genTauVisible[i].status << endl;
+                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+					cout << "ID: " << genParticle[k].pdgId << endl;
+                                        cout << "STATUS: " << genParticle[k].status << endl;
+                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_eTau_eMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_eTau_eMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+		if(genTauVisible[i].decay_mode == 0){
+			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+					cout << "eTau final state -> tau decaying had" << endl;
+					cout << "ID: " << genTauVisible[i].pdgId << endl;
+                                        cout << "STATUS: " << genTauVisible[i].status << endl;
+                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+					cout << "ID: " << genParticle[k].pdgId << endl;
+                                        cout << "STATUS: " << genParticle[k].status << endl;
+                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_eTau_tauHadMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_eTau_tauHadMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+	}
+}
+
+if(muTau){
+	for (uint i = 0; i < genTauVisible.size(); i++) {
+		if(genTauVisible[i].decay_mode == 2){
+			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+					cout << "muTau final state -> tau decaying in mu" << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+					cout << "ID: " << genParticle[k].pdgId << endl;
+                                        cout << "STATUS: " << genParticle[k].status << endl;
+                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_muTau_muMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_muTau_muMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+		if(genTauVisible[i].decay_mode == 0){
+			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+					cout << "muTau final state -> tau decaying had" << endl;
+					cout << "ID: " << genTauVisible[i].pdgId << endl;
+                                        cout << "STATUS: " << genTauVisible[i].status << endl;
+                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+					cout << "ID: " << genParticle[k].pdgId << endl;
+                                        cout << "STATUS: " << genParticle[k].status << endl;
+                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_muTau_tauHadMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_muTau_tauHadMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+if(tauTau){
+	for (uint i = 0; i < genTauVisible.size(); i++) {
+		if(genTauVisible[i].decay_mode == 0){
+			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+				cout << "tauTau final state -> taus decaying had" << endl;
+				cout << "ID: " << genTauVisible[i].pdgId << endl;
+				cout << "STATUS: " << genTauVisible[i].status << endl;
+				cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+						cout << "ID: " << genParticle[k].pdgId << endl;
+						cout << "STATUS: " << genParticle[k].status << endl;
+						cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+						cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+						cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+						cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_tauTau_tau1HadMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_tauTau_tau1HadMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
+				int index = genTauVisible[i].gen_index;
+				cout << "tauTau final state -> taus decaying had" << endl;
+				cout << "ID: " << genTauVisible[i].pdgId << endl;
+				cout << "STATUS: " << genTauVisible[i].status << endl;
+				cout << "INDEX: " << genTauVisible[i].gen_index << endl;
+				for (uint k = 0; k < genParticle.size(); k++) {
+					if (k==index && genParticle[index].Gmod_pdgId == 23){
+						cout << "ID: " << genParticle[k].pdgId << endl;
+						cout << "STATUS: " << genParticle[k].status << endl;
+						cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
+						cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
+						cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
+						cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
+						Hist("h_tauTau_tau2HadMatchedFromZ_pt")->Fill(genParticle[k].pt);
+						Hist("h_tauTau_tau2HadMatchedFromZ_eta")->Fill(genParticle[k].eta);
+					}
+				}
+			}
+		}
+	}
+}
 	double corrHlep1,corrHlep2;
 	corrHlep1=corrHlep2=1.0;
 	if(isSimulation && !IgnoreSF){
 
 		if(muTau)
 		{
-			if(is2012_53){
+			if(is2012_53 && NoSFShift_Mu){
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_53 && SFShiftUp_Mu){
+				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_53 && SFShiftDown_Mu){
+				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
 			}else if(is2012_52){
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand[0]);
 			}
 		}else if(eTau){
-			if(is2012_53){
+			if(is2012_53 && NoSFShift_Ele){
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
-			}else if(is2012_52){
+			}else if(is2012_53 && SFShiftUp_Ele){
+				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0])+Unc_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_53 && SFShiftDown_Ele){
+				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0])-Unc_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
+                        }else if(is2012_52){
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand[0]);
 			}
 		}else if(muE){
-			if(is2012_53){
+			if(is2012_53 && NoSFShift_Mu && NoSFShift_Ele){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
-			}else if(is2012_52){
+			}else if(is2012_53 && SFShiftUp_Mu && SFShiftUp_Ele){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                        }else if(is2012_53 && SFShiftDown_Mu && SFShiftDown_Ele){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                        }else if(is2012_53 && SFShiftUp_Mu && NoSFShift_Ele){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                        }else if(is2012_53 && SFShiftDown_Mu && NoSFShift_Ele){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                        }else if(is2012_53 && NoSFShift_Mu && SFShiftUp_Ele){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                        }else if(is2012_53 && NoSFShift_Mu && SFShiftDown_Ele){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                        }
+                        else if(is2012_52){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012(Hcand[1]);
 			}else{

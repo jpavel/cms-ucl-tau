@@ -110,6 +110,41 @@ private:
     TH1* h_LT_muTau;
     TH1* h_LT_eTau;
 
+        TH1* h_genEleFromZ_pt;
+        TH1* h_genMuFromZ_pt;
+        TH1* h_genEleFromZ_eta;
+        TH1* h_genMuFromZ_eta;
+        TH1* h_genEleFromT_pt;
+        TH1* h_genMuFromT_pt;
+        TH1* h_genEleFromT_eta;
+        TH1* h_genMuFromT_eta;
+        TH1* h_genTauHadFromZ_pt;
+        TH1* h_genTauHadFromZ_eta;
+        TH1* h_genTauLepFromZ_pt;
+        TH1* h_genTauLepFromZ_eta;
+        TH1* h_muMatchedFromZ_pt;
+        TH1* h_muMatchedFromZ_eta;
+        TH1* h_eleMatchedFromZ_pt;
+        TH1* h_eleMatchedFromZ_eta;
+        TH1* h_tauTau_tau1HadMatchedFromZ_pt;
+        TH1* h_tauTau_tau1HadMatchedFromZ_eta;
+        TH1* h_tauTau_tau2HadMatchedFromZ_pt;
+        TH1* h_tauTau_tau2HadMatchedFromZ_eta;
+        TH1* h_muTau_muMatchedFromZ_pt;
+        TH1* h_muTau_muMatchedFromZ_eta;
+        TH1* h_muTau_tauHadMatchedFromZ_pt;
+        TH1* h_muTau_tauHadMatchedFromZ_eta;
+        TH1* h_eTau_eMatchedFromZ_pt;
+        TH1* h_eTau_eMatchedFromZ_eta;
+        TH1* h_eTau_tauHadMatchedFromZ_pt;
+        TH1* h_eTau_tauHadMatchedFromZ_eta;
+        TH1* h_muE_eMatchedFromZ_pt;
+        TH1* h_muE_eMatchedFromZ_eta;
+        TH1* h_muE_muMatchedFromZ_pt;
+        TH1* h_muE_muMatchedFromZ_eta;
+
+
+
     TH1* h_deltaR;
     TH1* h_deltaR_max;
     TH1* h_deltaR_min;
@@ -312,6 +347,12 @@ private:
     bool IgnorePUW;
     bool ShiftTauES_up;
     bool ShiftTauES_down;
+    bool NoSFShift_Mu;
+    bool SFShiftUp_Mu;
+    bool SFShiftDown_Mu;
+    bool NoSFShift_Ele;
+    bool SFShiftUp_Ele;
+    bool SFShiftDown_Ele;
     double SystUncert_ES;
     bool printoutEvents;
 	
