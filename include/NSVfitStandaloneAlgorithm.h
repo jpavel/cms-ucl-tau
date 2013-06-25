@@ -9,6 +9,8 @@
 #include <TArrayF.h>
 #include <TString.h>
 
+#include <assert.h>
+
 using NSVfitStandalone::Vector;
 using NSVfitStandalone::LorentzVector;
 using NSVfitStandalone::MeasuredTauLepton;

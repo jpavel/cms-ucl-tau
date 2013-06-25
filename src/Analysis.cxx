@@ -2,10 +2,11 @@
 
 // Local include(s):
 #include "../include/Analysis.h"
+#include "../include/NSVfitStandaloneAlgorithm.h"
 
 
 #include "Corrector.h"
-
+#include "TVector3.h"
 
 ClassImp( Analysis );
 
@@ -609,6 +610,45 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 
 	double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
 	return tMass_v;
+}
+
+double Analysis::SVmass(myevent *m, myobject tau1, myobject tau2, bool isHad1, bool isHad2)
+{
+	vector<myobject> Met = m->RecMVAMet;
+	TVector3 MET(Met.front().px,Met.front().py, 0.);
+	TMatrixD covMET(2, 2);
+	
+	covMET[0][0] = m->MVAMet_sigMatrix_00;
+	covMET[1][0] = m->MVAMet_sigMatrix_10;
+	covMET[0][1] = m->MVAMet_sigMatrix_01;
+	covMET[1][1] = m->MVAMet_sigMatrix_11;
+	
+	NSVfitStandalone::LorentzVector l1;
+	NSVfitStandalone::LorentzVector l2;
+	
+	l1.SetPxPyPzE(tau1.px,tau1.py,tau1.pz,tau1.E);
+	l2.SetPxPyPzE(tau2.px,tau2.py,tau2.pz,tau2.E);
+	
+	std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+	measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(isHad1 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
+    measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(isHad2 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
+	NSVfitStandaloneAlgorithm algo(measuredTauLeptons, MET, covMET, /*debug=*/3);
+	
+	algo.addLogM(false);
+	algo.integrateMarkovChain();
+	
+	double mass = algo.getMass();
+	 
+	if(algo.isValidSolution()){
+		std::cout << "found mass    = " << mass << std::endl;
+		return mass;
+	}
+	else{
+		std::cout << "sorry -- status of NLL is not valid [" << algo.isValidSolution() << "]" << std::endl;
+		return -999.;
+	}
+  
+
 }
 
 double Analysis::InvMass(myobject o1, myobject o2)

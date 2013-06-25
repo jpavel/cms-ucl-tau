@@ -77,6 +77,7 @@ public:
    double InvMass(myobject o1, myobject o2);
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
+   double SVmass(myevent *m, myobject tau1, myobject tau2, bool isHad1, bool isHad2);
    
    
    
