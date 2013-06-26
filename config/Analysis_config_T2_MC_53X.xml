@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <!-- This config file will run over input defined in input.xml file -->
-<JobConfiguration JobName="AnalysisJob" OutputLevel="VERBOSE">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -77,6 +77,11 @@
                 <Item Name="ShiftTauES_up" Value="False" />
                 <Item Name="ShiftTauES_down" Value="False" />
                 
+        <!-- Output options -->
+        
+				<Item Name="FillPDFInfo" Value="False" />
+				<Item Name="FillSVmassInfo" Value="True" />
+				
 
 		</UserConfig>
 	</Cycle>

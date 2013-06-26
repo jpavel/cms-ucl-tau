@@ -84,6 +84,19 @@ public:
     float MVAMet_sigMatrix_10;
     float MVAMet_sigMatrix_11;
 
+    // PDF info
+
+    double alphaQCD, alphaQED, qScale, weight;
+    bool hasPDF, hasBinningValues;
+    unsigned int signalProcessID;
+    int id_First, id_Second;
+    double scalePDF;
+    double x_First, x_Second;
+    double xPDF_First, xPDF_Second;
+    int binningValueSize;
+    double binningValue0;
+
+
 
 private:
 

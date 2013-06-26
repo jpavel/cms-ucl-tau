@@ -2,11 +2,10 @@
 
 // Local include(s):
 #include "../include/Analysis.h"
-#include "../include/NSVfitStandaloneAlgorithm.h"
 
 
 #include "Corrector.h"
-#include "TVector3.h"
+
 
 ClassImp( Analysis );
 
@@ -57,6 +56,9 @@ Analysis::Analysis()
 		DeclareProperty("ShiftTauES_down",ShiftTauES_down); //sync
 		DeclareProperty("SystUncert_ES",SystUncert_ES); //sync
 		//sync
+		
+		DeclareProperty("FillPDFInfo",FillPDFInfo);
+		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
 		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=15;
 		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=15;
@@ -237,7 +239,37 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 100,-0.5,99.5));
 	h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 100,-0.5,99.5));
 
-	DeclareVariable(out_pt,"el_pt");
+
+	// ntuple definition
+	//DeclareVariable(out_pt,"el_pt");
+	DeclareVariable(o_run,"o_run");
+	DeclareVariable(o_lumi,"o_lumi");
+	DeclareVariable(o_event,"o_event");
+	DeclareVariable(o_pass, "o_pass");
+	DeclareVariable(o_event_weight,"o_event_weight");
+	DeclareVariable(o_px,"o_px");
+	DeclareVariable(o_py,"o_py");
+	DeclareVariable(o_pz,"o_pz");
+	DeclareVariable(o_E,"o_E");
+	DeclareVariable(o_pdg,"o_pdg");
+	DeclareVariable(o_MET,"o_MET"); //(Met_x,Met_y)
+	DeclareVariable(o_covMET,"o_covMET"); // covMatrix(00,01,10,11)
+	//pdf info
+	DeclareVariable(o_pdf_alphaQCD,"o_alphaQCD");
+	DeclareVariable(o_pdf_alphaQED,"o_alphaQED");
+	DeclareVariable(o_pdf_qScale,"o_qScale");
+	DeclareVariable(o_pdf_weight,"o_weight");
+	DeclareVariable(o_pdf_scalePDF,"o_scalePDF");
+	DeclareVariable(o_pdf_binningValue0,"o_binningValue0");
+	DeclareVariable(o_pdf_id,"o_id"); 
+	DeclareVariable(o_pdf_x,"o_x"); 
+	DeclareVariable(o_pdf_xPDF,"o_xPDF"); 
+	DeclareVariable(o_pdf_hasPDF,"o_hasPDF"); 
+	DeclareVariable(o_pdf_hasBinningValues,"o_hasBinningValues"); 
+	DeclareVariable(o_pdf_signalProcessID,"o_signalProcessID"); 
+	DeclareVariable(o_pdf_binningValueSize,"o_binningValueSize"); 
+	
+	
 
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
@@ -612,44 +644,7 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 	return tMass_v;
 }
 
-double Analysis::SVmass(myevent *m, myobject tau1, myobject tau2, bool isHad1, bool isHad2)
-{
-	vector<myobject> Met = m->RecMVAMet;
-	TVector3 MET(Met.front().px,Met.front().py, 0.);
-	TMatrixD covMET(2, 2);
-	
-	covMET[0][0] = m->MVAMet_sigMatrix_00;
-	covMET[1][0] = m->MVAMet_sigMatrix_10;
-	covMET[0][1] = m->MVAMet_sigMatrix_01;
-	covMET[1][1] = m->MVAMet_sigMatrix_11;
-	
-	NSVfitStandalone::LorentzVector l1;
-	NSVfitStandalone::LorentzVector l2;
-	
-	l1.SetPxPyPzE(tau1.px,tau1.py,tau1.pz,tau1.E);
-	l2.SetPxPyPzE(tau2.px,tau2.py,tau2.pz,tau2.E);
-	
-	std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
-	measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(isHad1 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
-    measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(isHad2 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
-	NSVfitStandaloneAlgorithm algo(measuredTauLeptons, MET, covMET, /*debug=*/3);
-	
-	algo.addLogM(false);
-	algo.integrateMarkovChain();
-	
-	double mass = algo.getMass();
-	 
-	if(algo.isValidSolution()){
-		std::cout << "found mass    = " << mass << std::endl;
-		return mass;
-	}
-	else{
-		std::cout << "sorry -- status of NLL is not valid [" << algo.isValidSolution() << "]" << std::endl;
-		return -999.;
-	}
-  
 
-}
 
 double Analysis::InvMass(myobject o1, myobject o2)
 {
@@ -666,7 +661,36 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
 
 		++m_allEvents;
+	// ntuple event info	
+	o_run=m->runNumber;
+	o_lumi=m->lumiNumber;
+	o_event=m->eventNumber;
 	
+	//clearing output vectors
+	o_pass=false;
+	o_event_weight.clear();
+	o_px.clear();
+	o_py.clear();
+	o_pz.clear();
+	o_E.clear();
+	o_pdg.clear();
+	o_MET.clear(); //(Met_x,Met_y)
+	o_covMET.clear(); // covMatrix(00,01,10,11)
+	//pdf info
+	o_pdf_alphaQCD.clear();
+	o_pdf_alphaQED.clear();
+	o_pdf_qScale.clear();
+	o_pdf_weight.clear();
+	o_pdf_scalePDF.clear();
+	o_pdf_binningValue0.clear();
+	o_pdf_id.clear(); //(first,second)
+	o_pdf_x.clear(); //(first,second)
+	o_pdf_xPDF.clear(); //(first,second)
+	o_pdf_hasPDF.clear(); 
+	o_pdf_hasBinningValues.clear(); 
+	o_pdf_signalProcessID.clear(); 
+	o_pdf_binningValueSize.clear(); 
+
     
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
 		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
@@ -734,7 +758,7 @@ entries++;
 	h_cut_flow_weight->Fill(2,PUWeight);
 	
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
 	h_PF_MET_nPU->Fill(nGoodVx,Met.front().et,PUWeight);
@@ -1958,6 +1982,104 @@ entries++;
 	}
 	
 	
+	
+	//ntuple filling
+	
+	o_pass=true;
+	o_event_weight.push_back(weight);
+	o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
+	o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
+	
+	o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
+	o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
+	
+	o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
+	o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
+	
+	o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
+	o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
+	
+	switch(event_type){
+		case 1://MMMT
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 2://MMME
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(11*Hcand[1].charge);
+			break;
+		case 3://MMET
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(11*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 4://MMTT
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(15*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 5://EEMT
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 6://EEME
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(11*Hcand[1].charge);
+			break;
+		case 7://EEET
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(11*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 8://EETT
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(15*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+	}
+	
+	if(FillSVmassInfo){
+		o_MET.push_back(Met.front().px);
+		o_MET.push_back(Met.front().py);
+		
+		
+		o_covMET.push_back(m->MVAMet_sigMatrix_00);
+		o_covMET.push_back(m->MVAMet_sigMatrix_01);
+		o_covMET.push_back(m->MVAMet_sigMatrix_10);
+		o_covMET.push_back(m->MVAMet_sigMatrix_11);
+	}
+	
+	//pdf info
+	if(FillPDFInfo){
+		o_pdf_alphaQCD.push_back(m->alphaQCD);
+		o_pdf_alphaQED.push_back(m->alphaQED);
+		o_pdf_qScale.push_back(m->qScale);
+		o_pdf_weight.push_back(m->weight);
+		o_pdf_scalePDF.push_back(m->scalePDF);
+		o_pdf_binningValue0.push_back(m->binningValue0);
+		o_pdf_id.push_back(m->id_First); o_pdf_id.push_back(m->id_Second); //(first,second) x_First
+		o_pdf_x.push_back(m->x_First); o_pdf_x.push_back(m->x_Second); //(first,second)
+		o_pdf_xPDF.push_back(m->xPDF_First); o_pdf_xPDF.push_back(m->xPDF_Second); //(first,second)
+		o_pdf_hasPDF.push_back(m->hasPDF); 
+		o_pdf_hasBinningValues.push_back(m->hasBinningValues); 
+		o_pdf_signalProcessID.push_back(m->signalProcessID); 
+		o_pdf_binningValueSize.push_back(m->binningValueSize); 
+	}
+
+	
+		
 	return;
 
 }
