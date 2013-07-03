@@ -58,6 +58,8 @@ Analysis::Analysis()
 		DeclareProperty("ShiftTauES_up",ShiftTauES_up); 
 		DeclareProperty("ShiftTauES_down",ShiftTauES_down); 
 		DeclareProperty("SystUncert_ES",SystUncert_ES); 
+                DeclareProperty("onlyTrigger",onlyTrigger);
+                DeclareProperty("onlyIDIso",onlyIDIso);
                 DeclareProperty("NoSFShift_Mu",NoSFShift_Mu);
                 DeclareProperty("SFShiftUp_Mu",SFShiftUp_Mu);
                 DeclareProperty("SFShiftDown_Mu",SFShiftDown_Mu);
@@ -1080,22 +1082,53 @@ entries++;
 		}
 	}
 
-	double corrZlep1,corrZlep2;
-	corrZlep1=corrZlep2=1.0;
-	double Z_weight = PUWeight;
+double corrZlep1,corrZlep2;
+corrZlep1=corrZlep2=1.0;
+double Z_weight = PUWeight;
 	if(isSimulation && !IgnoreSF){
 		if(Zmumu)
 		{
-			if(is2012_53 && NoSFShift_Mu){
+			if(is2012_53 && NoSFShift_Mu && (onlyIDIso || onlyTrigger)){
+                                //cout << "if 1 SIIIII" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
 			}else if(is2012_53 && SFShiftUp_Mu){
-				corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])+Unc_Trg_Mu_2012_53X(Zcand[0]));
-				corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])+Unc_Trg_Mu_2012_53X(Zcand[1]));
-                        }else if(is2012_53 && SFShiftDown_Mu){
-				corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])-Unc_Trg_Mu_2012_53X(Zcand[0]));
-				corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])-Unc_Trg_Mu_2012_53X(Zcand[1]));
-                        }else if(is2012_52){
+				        if(onlyIDIso && !onlyTrigger){
+                                //cout << "if 2" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0]));
+					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1]));
+                                        }else if(!onlyIDIso && onlyTrigger){
+                                //cout << "if 3" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])+Unc_Trg_Mu_2012_53X(Zcand[0]));
+					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])+Unc_Trg_Mu_2012_53X(Zcand[1]));
+                                       }
+				}else if(is2012_53 && SFShiftDown_Mu){
+                                        if(onlyIDIso && !onlyTrigger){
+                                //cout << "if 4" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0]));
+					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1]));
+                                        }else if(!onlyIDIso && onlyTrigger){
+                                //cout << "if 5" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])-Unc_Trg_Mu_2012_53X(Zcand[0]));
+					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])-Unc_Trg_Mu_2012_53X(Zcand[1]));
+                                        }
+				}
+			 else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
 			}else{
@@ -1104,16 +1137,47 @@ entries++;
 			}
 			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
-			if(is2012_53 && NoSFShift_Ele){
+			if(is2012_53 && NoSFShift_Ele && (onlyIDIso || onlyTrigger)){
+                                //cout << "if 6" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
 			}else if(is2012_53 && SFShiftUp_Ele){
-				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])+Unc_Trg_Ele_2012_53X(Zcand[0]));
-				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])+Unc_Trg_Ele_2012_53X(Zcand[1]));
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if 7 SIIIIIIIII" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1]));
+                                }else if(!onlyIDIso && onlyTrigger){
+                                //cout << "if 8" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])+Unc_Trg_Ele_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])+Unc_Trg_Ele_2012_53X(Zcand[1]));
+                               }   
                         }else if(is2012_53 && SFShiftDown_Ele){
-				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])-Unc_Trg_Ele_2012_53X(Zcand[0]));
-				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])-Unc_Trg_Ele_2012_53X(Zcand[1]));
-                        }else if(is2012_52){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if 10" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1]));
+                                }else if(!onlyIDIso && onlyTrigger){
+                                //cout << "if 10 -->SIIIIIIIIIIII" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])-Unc_Trg_Ele_2012_53X(Zcand[0]));
+				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])-Unc_Trg_Ele_2012_53X(Zcand[1]));
+				}
+			}//}
+                         else if(is2012_52){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
 			}else{
@@ -1795,53 +1859,142 @@ if(tauTau){
 	if(isSimulation && !IgnoreSF){
 
 		if(muTau)
-		{
-			if(is2012_53 && NoSFShift_Mu){
+		{       
+                        //if(onlyTrigger && is2012_53){
+			//	corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
+                        //}
+                        //if(onlyIDIso && !onlyTrigger){
+			if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Mu))){
+                                //cout << "if higgs 1 qui" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
 			}else if(is2012_53 && SFShiftUp_Mu){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 2" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
+                                }
 			}else if(is2012_53 && SFShiftDown_Mu){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 3" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
-			}else if(is2012_52){
+                                }
+			}
+                          //  }
+                        else if(is2012_52){
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand[0]);
 			}
 		}else if(eTau){
-			if(is2012_53 && NoSFShift_Ele){
+                        //if(onlyTrigger && is2012_53){
+			//	corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
+                        //}
+                        //if(onlyIDIso && !onlyTrigger){
+			if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele))){
+                                //cout << "if higgs 4" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
 			}else if(is2012_53 && SFShiftUp_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 5 qui" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0])+Unc_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
+                                }
 			}else if(is2012_53 && SFShiftDown_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 6" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0])-Unc_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
-                        }else if(is2012_52){
+                                }
+                        }
+                          // }
+                        else if(is2012_52){
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
 			}else{
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand[0]);
 			}
 		}else if(muE){
-			if(is2012_53 && NoSFShift_Mu && NoSFShift_Ele){
+			//if(is2012_53 && onlyTrigger){
+			//	corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+			//	corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+			//}else 
+                        //if(onlyIDIso && !onlyTrigger){
+			if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele && NoSFShift_Mu))){
+                                //cout << "if higgs 7" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
 			}else if(is2012_53 && SFShiftUp_Mu && SFShiftUp_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 8" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                                }
                         }else if(is2012_53 && SFShiftDown_Mu && SFShiftDown_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 9" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                                }
                         }else if(is2012_53 && SFShiftUp_Mu && NoSFShift_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 10" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                                }
                         }else if(is2012_53 && SFShiftDown_Mu && NoSFShift_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 11" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                                }
                         }else if(is2012_53 && NoSFShift_Mu && SFShiftUp_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 12 qui" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+                                }
                         }else if(is2012_53 && NoSFShift_Mu && SFShiftDown_Ele){
+                                if(onlyIDIso && !onlyTrigger){
+                                //cout << "if higgs 13" << endl;
+                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
+                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
+                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
-                        }
+                                }
+                        }//}
                         else if(is2012_52){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012(Hcand[1]);

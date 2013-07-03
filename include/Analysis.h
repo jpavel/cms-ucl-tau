@@ -103,6 +103,9 @@ private:
 	int entries;
 
 	// cut-flow
+    TH1* prova;
+    TH1* provaUP;
+    TH1* provaDOWN;
     TH1* h_tauPt_EScheck;
     TH1* h_tauPt_EScheck_W;
     TH1* h_tauPt_EScheck_true;
@@ -347,6 +350,8 @@ private:
     bool IgnorePUW;
     bool ShiftTauES_up;
     bool ShiftTauES_down;
+    bool onlyTrigger;
+    bool onlyIDIso;
     bool NoSFShift_Mu;
     bool SFShiftUp_Mu;
     bool SFShiftDown_Mu;
