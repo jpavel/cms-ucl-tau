@@ -43,9 +43,8 @@
 		<Item Name="checkCategories" Value="true"/>
 		<Item Name="isSimulation" Value="true"/>
 		<Item Name="is2011" Value="true"/>
-		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="false"/>
-		<Item Name="useTruePileUp" Value="true"/>
+	
 		<!--
 		Careful - following options veto one of the trigger paths! To be used only with data and caution
 -->

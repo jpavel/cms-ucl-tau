@@ -32,9 +32,7 @@ Analysis::Analysis()
 		DeclareProperty("checkCategories",checkCategories);
 		DeclareProperty("isSimulation",isSimulation);
 		DeclareProperty("is2011",is2011);
-		DeclareProperty("is2012_52",is2012_52);
 		DeclareProperty("is2012_53",is2012_53);
-		DeclareProperty("useTruePileUp",useTruePileUp);
 		DeclareProperty("vetoMuonTrigger",vetoMuonTrigger);
 		DeclareProperty("vetoElectronTrigger", vetoElectronTrigger);
 		
@@ -67,6 +65,9 @@ Analysis::Analysis()
                 DeclareProperty("SFShiftUp_Ele",SFShiftUp_Ele);
                 DeclareProperty("SFShiftDown_Ele",SFShiftDown_Ele);
 		//sync
+		
+		DeclareProperty("FillPDFInfo",FillPDFInfo);
+		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
 		
 		if(Cut_tau_base_Pt< 1e-3 && Cut_tau_base_Pt >= 0) Cut_tau_base_Pt=15;
 		if(Cut_tautau_Pt_1< 1e-3 && Cut_tautau_Pt_1 >= 0) Cut_tautau_Pt_1=15;
@@ -289,7 +290,36 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 100,-0.5,99.5));
 	h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 100,-0.5,99.5));
 
-	DeclareVariable(out_pt,"el_pt");
+
+	// ntuple definition
+	//DeclareVariable(out_pt,"el_pt");
+	DeclareVariable(o_run,"o_run");
+	DeclareVariable(o_lumi,"o_lumi");
+	DeclareVariable(o_event,"o_event");
+	DeclareVariable(o_pass, "o_pass");
+	DeclareVariable(o_event_weight,"o_event_weight");
+	DeclareVariable(o_px,"o_px");
+	DeclareVariable(o_py,"o_py");
+	DeclareVariable(o_pz,"o_pz");
+	DeclareVariable(o_E,"o_E");
+	DeclareVariable(o_pdg,"o_pdg");
+	DeclareVariable(o_MET,"o_MET"); //(Met_x,Met_y)
+	DeclareVariable(o_covMET,"o_covMET"); // covMatrix(00,01,10,11)
+	//pdf info
+	DeclareVariable(o_pdf_alphaQCD,"o_alphaQCD");
+	DeclareVariable(o_pdf_alphaQED,"o_alphaQED");
+	DeclareVariable(o_pdf_qScale,"o_qScale");
+	DeclareVariable(o_pdf_weight,"o_weight");
+	DeclareVariable(o_pdf_scalePDF,"o_scalePDF");
+	DeclareVariable(o_pdf_binningValue0,"o_binningValue0");
+	DeclareVariable(o_pdf_id,"o_id"); 
+	DeclareVariable(o_pdf_x,"o_x"); 
+	DeclareVariable(o_pdf_xPDF,"o_xPDF"); 
+	DeclareVariable(o_pdf_hasPDF,"o_hasPDF"); 
+	DeclareVariable(o_pdf_hasBinningValues,"o_hasBinningValues"); 
+	DeclareVariable(o_pdf_signalProcessID,"o_signalProcessID"); 
+	DeclareVariable(o_pdf_binningValueSize,"o_binningValueSize"); 
+	
 
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
@@ -448,9 +478,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 
 	// Lumi weights
 
-	if(is2012_52) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU.root", "dataPileUpHistogramABCD_True_2012","mcPU","pileup");
-	else if (useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
-	else if (!useTruePileUp && is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU_observed.root", "dataPileUpHistogram_Observed_2011.root","mcPU","pileup");
+    if (is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
 	
@@ -459,7 +487,6 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		 plus.open("plus_events.txt");
 	 }
 	
-	dupl.open("duplicates.txt");
 	
 	lumi.open("lumi.csv");
 	
@@ -484,7 +511,6 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
 
 	if(printoutEvents){ log1.close(); plus.close();}
-	dupl.close();
 	lumi.close();
 	ofstream log2;       
      log2.open("total.txt");
@@ -668,6 +694,8 @@ double Analysis::Tmass(myevent *m, myobject mu) {
 	return tMass_v;
 }
 
+
+
 double Analysis::InvMass(myobject o1, myobject o2)
 {
 		TLorentzVector cand;
@@ -683,12 +711,36 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 entries++;
     
 		++m_allEvents;
-	//	bool found_event = false; 
-	if(m->runNumber == 163255 && m->lumiNumber ==  603)
-    {
-         TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
-         dupl << m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << fileName << std::endl;
-    }
+	// ntuple event info	
+	o_run=m->runNumber;
+	o_lumi=m->lumiNumber;
+	o_event=m->eventNumber;
+	
+	//clearing output vectors
+	o_pass=false;
+	o_event_weight.clear();
+	o_px.clear();
+	o_py.clear();
+	o_pz.clear();
+	o_E.clear();
+	o_pdg.clear();
+	o_MET.clear(); //(Met_x,Met_y)
+	o_covMET.clear(); // covMatrix(00,01,10,11)
+	//pdf info
+	o_pdf_alphaQCD.clear();
+	o_pdf_alphaQED.clear();
+	o_pdf_qScale.clear();
+	o_pdf_weight.clear();
+	o_pdf_scalePDF.clear();
+	o_pdf_binningValue0.clear();
+	o_pdf_id.clear(); //(first,second)
+	o_pdf_x.clear(); //(first,second)
+	o_pdf_xPDF.clear(); //(first,second)
+	o_pdf_hasPDF.clear(); 
+	o_pdf_hasBinningValues.clear(); 
+	o_pdf_signalProcessID.clear(); 
+	o_pdf_binningValueSize.clear(); 
+
     
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
 		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
@@ -698,84 +750,30 @@ entries++;
 	
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
-		Hist("h_nPU_Info")->Fill(m->PUInfo);
-		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
-		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
+	Hist("h_nPU_Info")->Fill(m->PUInfo);
+	Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
+	Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
 
 
 	double PUWeight = 1.0;
 	double nPU = 0.0;
-	if(useTruePileUp || !is2011)  nPU = m->PUInfo_true;
-	else nPU = m->PUInfo_Bunch0;
+	nPU = m->PUInfo_true;
 	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
 		if(IgnorePUW) PUWeight = 1.0;
 	}
 	int eNumber = m->eventNumber;
-	 bool examineThisEvent;
+	bool examineThisEvent;
       if( examineEvent==eNumber) examineThisEvent=true;
       else examineThisEvent=false;
 	 
-	 if(examineThisEvent) std::cout << "NOW EXAMINING EVENT " << eNumber << " WHICH IS # " << m_allEvents << std::endl;
+	if(examineThisEvent) std::cout << "NOW EXAMINING EVENT " << eNumber << " WHICH IS # " << m_allEvents << std::endl;
 	
 	Hist("h_PU_weight")->Fill(PUWeight);
-	if(!useTruePileUp && is2011){ 
-		Hist("h_nPU_raw")->Fill(m->PUInfo_Bunch0);
-		Hist("h_nPU_reweight")->Fill(m->PUInfo_Bunch0,PUWeight);
-	}else{ 
-		Hist("h_nPU_raw")->Fill(m->PUInfo_true);
-		Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
-	}
-
-
-        //printout gen particle informations
-
-	std::vector<myGenobject> genTauVisible = m->RecGenTauVisible;
-	std::vector<myGenobject> genParticle = m->RecGenParticle;
-        for (uint i = 0; i < genParticle.size(); i++) {
-           if(abs(genParticle[i].pdgId)==11 && genParticle[i].status==3 && genParticle[i].mod_pdgId==23){
-              Hist("h_genEleFromZ_pt")->Fill(genParticle[i].pt);
-              Hist("h_genEleFromZ_eta")->Fill(genParticle[i].eta);
-           }
-           if(abs(genParticle[i].pdgId)==11 && genParticle[i].mod_pdgId==15 && genParticle[i].Gmod_pdgId==23){
-		   cout << "electron from taus from Z!" << endl;
-		   Hist("h_genEleFromT_pt")->Fill(genParticle[i].pt);
-		   Hist("h_genEleFromT_eta")->Fill(genParticle[i].eta);
-           }
-           if(abs(genParticle[i].pdgId)==13 && genParticle[i].status==3 && genParticle[i].mod_pdgId==23){
-              Hist("h_genMuFromZ_pt")->Fill(genParticle[i].pt);
-              Hist("h_genMuFromZ_eta")->Fill(genParticle[i].eta);
-           }
-           if(abs(genParticle[i].pdgId)==13 && genParticle[i].mod_pdgId==15 && genParticle[i].Gmod_pdgId==23){
-		   cout << "muon from taus from Z !" << endl;
-		   Hist("h_genMuFromT_pt")->Fill(genParticle[i].pt);
-		   Hist("h_genMuFromT_eta")->Fill(genParticle[i].eta);
-           }
-        }
-
-        //tau visible
-	for (uint i = 0; i < genTauVisible.size(); i++) {
-		//cout << "ID: " << genTauVisible[i].pdgId << " STATUS: " << genTauVisible[i].status << " INDEX: "<< genTauVisible[i].gen_index << endl;
-		if(genTauVisible[i].decay_mode == 0){
-		int index = genTauVisible[i].gen_index;
-			for (uint i = 0; i < genParticle.size(); i++) {
-				if (i==index){
-				//if (i==index && genParticle[index].mod_pdgId == 23){
-					Hist("h_genTauHadFromZ_pt")->Fill(genParticle[i].pt);
-					Hist("h_genTauHadFromZ_eta")->Fill(genParticle[i].eta);
-				}
-			}
-		}
-		else if(genTauVisible[i].decay_mode == 1){
-		int index = genTauVisible[i].gen_index;
-			for (uint i = 0; i < genParticle.size(); i++) {
-				if (i==index){
-					Hist("h_genTauLepFromZ_pt")->Fill(genParticle[i].pt);
-					Hist("h_genTauLepFromZ_eta")->Fill(genParticle[i].eta);
-				}
-			}
-	}
-}	
+	Hist("h_nPU_raw")->Fill(m->PUInfo_true);
+	Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
+	
+	
 	std::vector<myobject> vertex = m->Vertex;
 	std::vector<myobject> goodVertex;
 	goodVertex.clear();
@@ -810,7 +808,7 @@ entries++;
 	h_cut_flow_weight->Fill(2,PUWeight);
 	
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
 	h_PF_MET_nPU->Fill(nGoodVx,Met.front().et,PUWeight);
@@ -1454,7 +1452,7 @@ double Z_weight = PUWeight;
 
 		double relIso = RelIsoMu(goodMuon[i]);
 		bool iso1_muE = (relIso < 0.3);
-		bool iso1_muTau = (relIso < 0.25);
+		bool iso1_muTau = (relIso < 0.3);
 		bool isTightMuon = isGoodMu(goodMuon[i]);
 		if(!checkCategories && !iso1_muE) continue;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
@@ -1508,7 +1506,7 @@ double Z_weight = PUWeight;
 		{
 			if(examineThisEvent) std::cout << "ele1 no. " << i << "out of " << goodElectron.size() << std::endl;
 			//if(Tmass(m,goodElectron[i]) > 30) continue;
-			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.15);
+			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.2);
 			if (!iso1 && !checkCategories) continue;
 			if( goodElectron[i].numLostHitEleInner > 0) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
@@ -2451,6 +2449,104 @@ if(tauTau){
 	}
 	
 	
+	
+	//ntuple filling
+	
+	o_pass=true;
+	o_event_weight.push_back(weight);
+	o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
+	o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
+	
+	o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
+	o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
+	
+	o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
+	o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
+	
+	o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
+	o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
+	
+	switch(event_type){
+		case 1://MMMT
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 2://MMME
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(11*Hcand[1].charge);
+			break;
+		case 3://MMET
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(11*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 4://MMTT
+			o_pdg.push_back(13*Zcand[0].charge);
+			o_pdg.push_back(13*Zcand[1].charge);
+			o_pdg.push_back(15*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 5://EEMT
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 6://EEME
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(13*Hcand[0].charge);
+			o_pdg.push_back(11*Hcand[1].charge);
+			break;
+		case 7://EEET
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(11*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+		case 8://EETT
+			o_pdg.push_back(11*Zcand[0].charge);
+			o_pdg.push_back(11*Zcand[1].charge);
+			o_pdg.push_back(15*Hcand[0].charge);
+			o_pdg.push_back(15*Hcand[1].charge);
+			break;
+	}
+	
+	if(FillSVmassInfo){
+		o_MET.push_back(Met.front().px);
+		o_MET.push_back(Met.front().py);
+		
+		
+		o_covMET.push_back(m->MVAMet_sigMatrix_00);
+		o_covMET.push_back(m->MVAMet_sigMatrix_01);
+		o_covMET.push_back(m->MVAMet_sigMatrix_10);
+		o_covMET.push_back(m->MVAMet_sigMatrix_11);
+	}
+	
+	//pdf info
+	if(FillPDFInfo){
+		o_pdf_alphaQCD.push_back(m->alphaQCD);
+		o_pdf_alphaQED.push_back(m->alphaQED);
+		o_pdf_qScale.push_back(m->qScale);
+		o_pdf_weight.push_back(m->weight);
+		o_pdf_scalePDF.push_back(m->scalePDF);
+		o_pdf_binningValue0.push_back(m->binningValue0);
+		o_pdf_id.push_back(m->id_First); o_pdf_id.push_back(m->id_Second); //(first,second) x_First
+		o_pdf_x.push_back(m->x_First); o_pdf_x.push_back(m->x_Second); //(first,second)
+		o_pdf_xPDF.push_back(m->xPDF_First); o_pdf_xPDF.push_back(m->xPDF_Second); //(first,second)
+		o_pdf_hasPDF.push_back(m->hasPDF); 
+		o_pdf_hasBinningValues.push_back(m->hasBinningValues); 
+		o_pdf_signalProcessID.push_back(m->signalProcessID); 
+		o_pdf_binningValueSize.push_back(m->binningValueSize); 
+	}
+
+	
+		
 	return;
 
 }
