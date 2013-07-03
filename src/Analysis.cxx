@@ -1295,7 +1295,7 @@ entries++;
 
 		double relIso = RelIsoMu(goodMuon[i]);
 		bool iso1_muE = (relIso < 0.3);
-		bool iso1_muTau = (relIso < 0.25);
+		bool iso1_muTau = (relIso < 0.3);
 		bool isTightMuon = isGoodMu(goodMuon[i]);
 		if(!checkCategories && !iso1_muE) continue;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
@@ -1347,7 +1347,7 @@ entries++;
 		{
 			if(examineThisEvent) std::cout << "ele1 no. " << i << "out of " << goodElectron.size() << std::endl;
 			//if(Tmass(m,goodElectron[i]) > 30) continue;
-			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.15);
+			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.2);
 			if (!iso1 && !checkCategories) continue;
 			if( goodElectron[i].numLostHitEleInner > 0) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
