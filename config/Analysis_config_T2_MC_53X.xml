@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <!-- This config file will run over input defined in input.xml file -->
-<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="DEBUG">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -77,6 +77,15 @@
 		<!-- Systematics -->
                 <Item Name="ShiftTauES_up" Value="False" />
                 <Item Name="ShiftTauES_down" Value="False" />
+                
+                <Item Name="onlyTrigger" Value="False" />
+                <Item Name="onlyIDIso" Value="True" />
+                <Item Name="NoSFShift_Mu" Value="True" />
+                <Item Name="NoSFShift_Ele" Value="True" />
+                <Item Name="SFShiftUp_Mu" Value="False" />
+                <Item Name="SFShiftUp_Ele" Value="False" />
+                <Item Name="SFShiftDown_Mu" Value="False" />
+                <Item Name="SFShiftDown_Ele" Value="False" />
                 
 
 		</UserConfig>
