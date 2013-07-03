@@ -989,21 +989,6 @@ entries++;
 
 	m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 
-        //gen matching
-	if(Zmumu){
-		for(uint j =0; j < Zcand.size(); j++){
-			for (uint i = 0; i < genParticle.size(); i++) {
-				if(abs(genParticle[i].pdgId)==13 && genParticle[i].mod_pdgId==23){
-					if(deltaR(Zcand[j].eta,Zcand[j].phi,genParticle[i].eta,genParticle[i].phi)<0.01){
-						Hist("h_muMatchedFromZ_pt")->Fill(genParticle[i].pt);
-						Hist("h_muMatchedFromZ_eta")->Fill(genParticle[i].eta);
-					}
-				}
-			}
-		}
-	}
-
-
 	if(!Zmumu)
 	{
 		dMass = 999.;
@@ -1067,18 +1052,6 @@ entries++;
 		}
 	}
 
-	if(Zee){
-		for(uint j =0; j < Zcand.size(); j++){
-			for (uint i = 0; i < genParticle.size(); i++) {
-				if(abs(genParticle[i].pdgId)==11 && genParticle[i].mod_pdgId==23){
-					if(deltaR(Zcand[j].eta,Zcand[j].phi,genParticle[i].eta,genParticle[i].phi)<0.01){
-						Hist("h_eleMatchedFromZ_pt")->Fill(genParticle[i].pt);
-						Hist("h_eleMatchedFromZ_eta")->Fill(genParticle[i].eta);
-					}
-				}
-			}
-		}
-	}
 
 double corrZlep1,corrZlep2;
 corrZlep1=corrZlep2=1.0;
@@ -1086,99 +1059,59 @@ double Z_weight = PUWeight;
 	if(isSimulation && !IgnoreSF){
 		if(Zmumu)
 		{
-			if(is2012_53 && NoSFShift_Mu && (onlyIDIso || onlyTrigger)){
-                                //cout << "if 1 SIIIII" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+			if(is2012_53 && !NoSFShift_Mu && !onlyIDIso && !onlyTrigger){
+				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
+			}else if(is2012_53 && NoSFShift_Mu && (onlyIDIso || onlyTrigger)){
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
 			}else if(is2012_53 && SFShiftUp_Mu){
 				        if(onlyIDIso && !onlyTrigger){
-                                //cout << "if 2" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0]));
 					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1]));
                                         }else if(!onlyIDIso && onlyTrigger){
-                                //cout << "if 3" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])+Unc_Trg_Mu_2012_53X(Zcand[0]));
 					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])+Unc_Trg_Mu_2012_53X(Zcand[1]));
                                        }
 				}else if(is2012_53 && SFShiftDown_Mu){
                                         if(onlyIDIso && !onlyTrigger){
-                                //cout << "if 4" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0]));
 					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1]));
                                         }else if(!onlyIDIso && onlyTrigger){
-                                //cout << "if 5" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 					corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])-Unc_Trg_Mu_2012_53X(Zcand[0]));
 					corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])-Unc_Trg_Mu_2012_53X(Zcand[1]));
                                         }
 				}
-			 else if(is2012_52){
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
-			}else{
+			else{
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Corr_Trg_Mu_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Corr_Trg_Mu_2011(Zcand[1]);
 			}
 			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
-			if(is2012_53 && NoSFShift_Ele && (onlyIDIso || onlyTrigger)){
-                                //cout << "if 6" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+			if(is2012_53 && !NoSFShift_Ele && !onlyIDIso && !onlyTrigger){
+				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
+				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
+			}else if(is2012_53 && NoSFShift_Ele && (onlyIDIso || onlyTrigger)){
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
 			}else if(is2012_53 && SFShiftUp_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if 7 SIIIIIIIII" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0]));
 				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1]));
                                 }else if(!onlyIDIso && onlyTrigger){
-                                //cout << "if 8" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])+Unc_Trg_Ele_2012_53X(Zcand[0]));
 				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])+Unc_Trg_Ele_2012_53X(Zcand[1]));
                                }   
                         }else if(is2012_53 && SFShiftDown_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if 10" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0]));
 				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1]));
                                 }else if(!onlyIDIso && onlyTrigger){
-                                //cout << "if 10 -->SIIIIIIIIIIII" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])-Unc_Trg_Ele_2012_53X(Zcand[0]));
 				corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])-Unc_Trg_Ele_2012_53X(Zcand[1]));
 				}
-			}//}
-                         else if(is2012_52){
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
-			}else{
+			}
+			else{
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Corr_Trg_Ele_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Corr_Trg_Ele_2011(Zcand[1]);
 			}
@@ -1259,7 +1192,6 @@ double Z_weight = PUWeight;
 		}
 	
 	}
-
 	
 	h_cut_flow->Fill(3,1);
 	h_cut_flow_weight->Fill(3,Z_weight);
@@ -1493,7 +1425,6 @@ double Z_weight = PUWeight;
 			Hindex[1]=j;
 		}             
 	}
-
 	
         if(muTau) m_logger << INFO << " muTau candidate!" << SLogger::endmsg; 
  
@@ -1553,8 +1484,6 @@ double Z_weight = PUWeight;
 		{
 			if(examineThisEvent) std::cout << "tau1 no. " << i << "out of " << goodTau.size() << std::endl;
 			if(goodTau[i].pt < Cut_tautau_Pt_1 && !UseSumPtCut) continue;
-			//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
-			//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
 			bool iso1 = Cut_tautau_MVA_iso ? goodTau[i].byLooseIsolationMVA > 0.5 : goodTau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5; 
 			if(!checkCategories && !iso1) continue;
 			if(examineThisEvent) std::cout << "tau1 no. " << i << " passed pre-selection and iso is " << iso1 << std::endl;
@@ -1568,8 +1497,6 @@ double Z_weight = PUWeight;
 				if(examineThisEvent) std::cout << "sum pt cut" <<  std::endl;
 				if(goodTau[i].charge*goodTau[j].charge >=0) continue;
 				if(examineThisEvent) std::cout << "charge " <<  std::endl;
-				//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
-				//if(goodTau[j].discriminationByMuonMedium <=0.5) continue; 
 				if(examineThisEvent) std::cout << "lepton rejection " <<  std::endl;
 				bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5; 
 				if(examineThisEvent) std::cout << "iso is " << iso2 << std::endl;
@@ -1598,12 +1525,6 @@ double Z_weight = PUWeight;
 	Hist("h_Nvertex_AfterZH")->Fill(nGoodVx);
 	Hist("h_Nvertex_AfterZH_W")->Fill(nGoodVx,Z_weight);
 
-
-
-
-
-	//else m_logger << INFO << "Higgs candidate. Size is " << Hcand.size() << SLogger::endmsg;
-	// cross-check
 	h_cut_flow->Fill(4,1);
 	h_cut_flow_weight->Fill(4,Z_weight);
 	
@@ -1669,334 +1590,88 @@ double Z_weight = PUWeight;
 			break;
 	}
 
-if(muE){
-	for (uint i = 0; i < genTauVisible.size(); i++) {
-		if(genTauVisible[i].decay_mode == 2){
-			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-					cout << "muE final state -> tau decaying in mu" << endl;
-					cout << "ID: " << genTauVisible[i].pdgId << endl;
-                                        cout << "STATUS: " << genTauVisible[i].status << endl;
-                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-					cout << "ID: " << genParticle[k].pdgId << endl;
-                                        cout << "STATUS: " << genParticle[k].status << endl;
-                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_muE_muMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_muE_muMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-		if(genTauVisible[i].decay_mode == 1){
-			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-					cout << "muE final state -> tau decaying in e" << endl;
-					cout << "ID: " << genTauVisible[i].pdgId << endl;
-                                        cout << "STATUS: " << genTauVisible[i].status << endl;
-                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-					cout << "ID: " << genParticle[k].pdgId << endl;
-                                        cout << "STATUS: " << genParticle[k].status << endl;
-                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_muE_eMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_muE_eMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-	}
-}
-
-if(eTau){
-	for (uint i = 0; i < genTauVisible.size(); i++) {
-		if(genTauVisible[i].decay_mode == 1){
-			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-					cout << "eTau final state -> tau decaying in e" << endl;
-					cout << "ID: " << genTauVisible[i].pdgId << endl;
-                                        cout << "STATUS: " << genTauVisible[i].status << endl;
-                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-					cout << "ID: " << genParticle[k].pdgId << endl;
-                                        cout << "STATUS: " << genParticle[k].status << endl;
-                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_eTau_eMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_eTau_eMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-		if(genTauVisible[i].decay_mode == 0){
-			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-					cout << "eTau final state -> tau decaying had" << endl;
-					cout << "ID: " << genTauVisible[i].pdgId << endl;
-                                        cout << "STATUS: " << genTauVisible[i].status << endl;
-                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-					cout << "ID: " << genParticle[k].pdgId << endl;
-                                        cout << "STATUS: " << genParticle[k].status << endl;
-                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_eTau_tauHadMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_eTau_tauHadMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-	}
-}
-
-if(muTau){
-	for (uint i = 0; i < genTauVisible.size(); i++) {
-		if(genTauVisible[i].decay_mode == 2){
-			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-					cout << "muTau final state -> tau decaying in mu" << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-					cout << "ID: " << genParticle[k].pdgId << endl;
-                                        cout << "STATUS: " << genParticle[k].status << endl;
-                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_muTau_muMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_muTau_muMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-		if(genTauVisible[i].decay_mode == 0){
-			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-					cout << "muTau final state -> tau decaying had" << endl;
-					cout << "ID: " << genTauVisible[i].pdgId << endl;
-                                        cout << "STATUS: " << genTauVisible[i].status << endl;
-                                        cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-					cout << "ID: " << genParticle[k].pdgId << endl;
-                                        cout << "STATUS: " << genParticle[k].status << endl;
-                                        cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-                                        cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-                                        cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-                                        cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_muTau_tauHadMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_muTau_tauHadMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-	}
-}
-
-
-if(tauTau){
-	for (uint i = 0; i < genTauVisible.size(); i++) {
-		if(genTauVisible[i].decay_mode == 0){
-			if(deltaR(Hcand[0].eta,Hcand[0].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-				cout << "tauTau final state -> taus decaying had" << endl;
-				cout << "ID: " << genTauVisible[i].pdgId << endl;
-				cout << "STATUS: " << genTauVisible[i].status << endl;
-				cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-						cout << "ID: " << genParticle[k].pdgId << endl;
-						cout << "STATUS: " << genParticle[k].status << endl;
-						cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-						cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-						cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-						cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_tauTau_tau1HadMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_tauTau_tau1HadMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-			if(deltaR(Hcand[1].eta,Hcand[1].phi,genTauVisible[i].eta,genTauVisible[i].phi)<0.01){
-				int index = genTauVisible[i].gen_index;
-				cout << "tauTau final state -> taus decaying had" << endl;
-				cout << "ID: " << genTauVisible[i].pdgId << endl;
-				cout << "STATUS: " << genTauVisible[i].status << endl;
-				cout << "INDEX: " << genTauVisible[i].gen_index << endl;
-				for (uint k = 0; k < genParticle.size(); k++) {
-					if (k==index && genParticle[index].Gmod_pdgId == 23){
-						cout << "ID: " << genParticle[k].pdgId << endl;
-						cout << "STATUS: " << genParticle[k].status << endl;
-						cout << "MOD ID: "<<genParticle[k].mod_pdgId << endl;
-						cout << "MOD STATUS: "<<genParticle[k].mod_status << endl;
-						cout << "GMOD ID: "<<genParticle[k].Gmod_pdgId << endl;
-						cout << "GMOD STATUS: "<<genParticle[k].Gmod_status << endl;
-						Hist("h_tauTau_tau2HadMatchedFromZ_pt")->Fill(genParticle[k].pt);
-						Hist("h_tauTau_tau2HadMatchedFromZ_eta")->Fill(genParticle[k].eta);
-					}
-				}
-			}
-		}
-	}
-}
 	double corrHlep1,corrHlep2;
 	corrHlep1=corrHlep2=1.0;
 	if(isSimulation && !IgnoreSF){
 
 		if(muTau)
 		{       
-                        //if(onlyTrigger && is2012_53){
-			//	corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
-                        //}
-                        //if(onlyIDIso && !onlyTrigger){
-			if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Mu))){
-                                //cout << "if higgs 1 qui" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+			if(is2012_53 && !onlyTrigger && !onlyIDIso && !NoSFShift_Mu){
+				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Mu))){
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
 			}else if(is2012_53 && SFShiftUp_Mu){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 2" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
                                 }
 			}else if(is2012_53 && SFShiftDown_Mu){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 3" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
                                 }
 			}
-                          //  }
-                        else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
-			}else{
+			else{
 				corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand[0]);
 			}
 		}else if(eTau){
-                        //if(onlyTrigger && is2012_53){
-			//	corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
-                        //}
-                        //if(onlyIDIso && !onlyTrigger){
-			if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele))){
+			if(is2012_53 && !onlyTrigger && !onlyIDIso && !NoSFShift_Ele){
                                 //cout << "if higgs 4" << endl;
                                 //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
                                 //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
                                 //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
+			}else if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele))){
+				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
 			}else if(is2012_53 && SFShiftUp_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 5 qui" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0])+Unc_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
                                 }
 			}else if(is2012_53 && SFShiftDown_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 6" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0])-Unc_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
                                 }
                         }
-                          // }
-                        else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
-			}else{
+			else{
 				corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand[0]);
 			}
 		}else if(muE){
-			//if(is2012_53 && onlyTrigger){
-			//	corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
-			//	corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
-			//}else 
-                        //if(onlyIDIso && !onlyTrigger){
-			if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele && NoSFShift_Mu))){
-                                //cout << "if higgs 7" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
+			if(is2012_53 && !onlyTrigger && !onlyIDIso && !NoSFShift_Ele && !NoSFShift_Mu){
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+			}else if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele && NoSFShift_Mu))){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
 			}else if(is2012_53 && SFShiftUp_Mu && SFShiftUp_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 8" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
                                 }
                         }else if(is2012_53 && SFShiftDown_Mu && SFShiftDown_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 9" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
                                 }
                         }else if(is2012_53 && SFShiftUp_Mu && NoSFShift_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 10" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
                                 }
                         }else if(is2012_53 && SFShiftDown_Mu && NoSFShift_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 11" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
                                 }
                         }else if(is2012_53 && NoSFShift_Mu && SFShiftUp_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 12 qui" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
                                 }
                         }else if(is2012_53 && NoSFShift_Mu && SFShiftDown_Ele){
                                 if(onlyIDIso && !onlyTrigger){
-                                //cout << "if higgs 13" << endl;
-                                //cout << "is2012_53" << is2012_53 << "onlyIDIso" << onlyIDIso << "onlyTrigger" << onlyTrigger << endl;
-                                //cout << "NoSFShift_Mu" << NoSFShift_Mu << "SFShiftUp_Mu" << SFShiftUp_Mu << "SFShiftDown_Mu" << SFShiftDown_Mu << endl;
-                                //cout << "NoSFShift_Ele" << NoSFShift_Ele << "SFShiftUp_Ele" << SFShiftUp_Ele << "SFShiftDown_Ele" << SFShiftDown_Ele << endl;
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
                                 }
-                        }//}
-                        else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Mu_Loose_2012(Hcand[0]);
-				corrHlep2=Cor_ID_Iso_Ele_Loose_2012(Hcand[1]);
-			}else{
+                        }
+			else{
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2011(Hcand[1]);
 			}
