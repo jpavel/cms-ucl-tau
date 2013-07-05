@@ -13,7 +13,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-	       <InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+	       <InputData Lumi="0.0" NEventsMax="10000" Type="Data1" Version="Reco">
                  &grid;
                 <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -57,6 +57,10 @@
       
                 <Item Name="AllowTauBOverlap" Value="false" />
                 <Item Name="printoutEvents" Value="true" />
+                
+                <Item Name="IgnorePUW" Value="True" />
+                <Item Name="IgnoreSF" Value="True" />
+                
  
 		</UserConfig>
 	</Cycle>

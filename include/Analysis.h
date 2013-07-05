@@ -80,8 +80,7 @@ public:
    bool TightEleId(myobject o);
    bool LooseEleId(float pt, float eta, double value);
    bool LooseEleId(myobject o);   bool PFMuonID(myobject mu);
-   double RelIsoMu(myobject mu);
-   double RelIsoEl(myobject el);
+   double RelIso(myobject mu);
    bool Trg_MC_12(myevent* m,bool found);
    double Tmass(myevent *m, myobject mu);
    bool WZ_Rej(myevent *m, myobject mu);
@@ -406,6 +405,9 @@ private:
     double Cut_tau_base_Pt;
     double Cut_tautau_Pt_1;
     double Cut_tautau_Pt_2;
+    
+    double Cut_leptau_Pt;
+    
     bool   Cut_tautau_MVA_iso; 	
     
     bool   AllowTauBOverlap;
