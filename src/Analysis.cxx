@@ -1076,7 +1076,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
 	if(printoutEvents){
-		 log1.open("events.txt");
+		 log1.open("eventsAP.txt");
+		 logFR.open("eventsFR.txt");
 		 log_events.open("eventlist.txt");
 		 log_files.open("filelist.txt");
 	 }
@@ -1146,6 +1147,7 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 
 	if(printoutEvents){ 
 		log1.close();
+		logFR.close();
 		log_events.close();
 		log_files.close();
 	}
@@ -1202,7 +1204,21 @@ myobject Analysis::ClosestInCollection(myobject o1, std::vector<myobject> collec
 	}
 	if(index>=0) return collection[index];
 	else return o1;
-}  
+}
+
+double Analysis::DistanceToClosestInCollection(myobject o1, std::vector<myobject> collection)
+{
+	double minDist = 999.;
+	for(uint i = 0; i< collection.size(); i++)
+	{
+		double dR = deltaR(o1,collection[i]);
+		if(dR < minDist)
+		{
+			minDist=dR;
+		}
+	}
+	return minDist;
+}
 
 bool Analysis::TightEleId(float pt, float eta, double value){
 	bool passingId=false;
@@ -1427,20 +1443,20 @@ bool Analysis::AdLepton_et(myevent *m, uint index, std::vector<myobject> generic
 			if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   
     }
-	 //~ if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	 if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
 	//~ 
-	//~ for(uint i = 0; i < genericElectron.size(); i++)
-	//~ {   
-			//~ if(verbose) std::cout << " Ele cand no. " << i << std::endl;
-			//~ if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
-			//~ if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-			//~ if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
-			//~ if(verbose) std::cout << " Is very good? " << TightEleId(genericElectron[i]) << std::endl;
-			//~ if(verbose) std::cout << " Pt is " << genericElectron[i].pt << std::endl;
-			//~ if(verbose) std::cout << " num lost hits is " << genericElectron[i].numLostHitEleInner << std::endl;
-			//~ if(verbose) std::cout << " iso is " << RelIso(genericElectron[i]) << std::endl;
-			//~ if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
-		//~ //	if (!WZ_Rej(m,genericElectron[i])) continue;
+	for(uint i = 0; i < genericElectron.size(); i++)
+	{   
+			if(verbose) std::cout << " Ele cand no. " << i << std::endl;
+			if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
+			if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
+			if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Is very good? " << TightEleId(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " Pt is " << genericElectron[i].pt << std::endl;
+			if(verbose) std::cout << " num lost hits is " << genericElectron[i].numLostHitEleInner << std::endl;
+			if(verbose) std::cout << " iso is " << RelIso(genericElectron[i]) << std::endl;
+			if(verbose) std::cout << " WZ rej is " << WZ_Rej(m,genericElectron[i]) << std::endl;
+		//	if (!WZ_Rej(m,genericElectron[i])) continue;
 			//~ if( genericElectron[i].numLostHitEleInner > 1) continue;
 	//~ 
 			//~ if(verbose) std::cout << " decision: " << LooseEleId(genericElectron[i]) << " " << 	RelIso(genericElectron[i]) << " " << i << " index " << index << std::endl;
@@ -1449,7 +1465,7 @@ bool Analysis::AdLepton_et(myevent *m, uint index, std::vector<myobject> generic
 				//~ Ad_lepton=true;
 			//~ if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
 	   //~ 
-	//~ }
+	}
 	
 	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
 	return Ad_lepton;
@@ -1629,6 +1645,36 @@ double Analysis::PairMass(myobject Hcand1, myobject Hcand2){
     H_2.SetPxPyPzE(Hcand2.px,Hcand2.py,Hcand2.pz,Hcand2.E);
     H_sum = H_1 + H_2;
 	return H_sum.M();
+}
+
+double Analysis::PairPt(myobject Hcand1, myobject Hcand2){
+	TLorentzVector H_1,H_2,H_sum;
+    H_1.SetPxPyPzE(Hcand1.px,Hcand1.py,Hcand1.pz,Hcand1.E);
+    H_2.SetPxPyPzE(Hcand2.px,Hcand2.py,Hcand2.pz,Hcand2.E);
+    H_sum = H_1 + H_2;
+	return H_sum.Pt();
+}
+
+bool Analysis::CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal){
+	
+		bool overlap = false;
+		for(uint j = 0; j < elCollection.size() && !overlap; j++)
+		{
+			if(deltaR(tau,elCollection[j])< maxR && RelIso(elCollection[j]) < isoVal &&  LooseEleId(elCollection[j]) && elCollection[j].numLostHitEleInner <2 ) 
+			overlap = true;
+		}
+	return overlap;	
+}
+
+bool Analysis::CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal){
+	
+		bool overlap = false;
+		for(uint j = 0; j < muCollection.size() && !overlap; j++)
+		{
+			if(deltaR(tau,muCollection[j])< maxR && RelIso(muCollection[j]) < isoVal &&  isLooseMu(muCollection[j])) 
+			overlap = true;
+		}
+	return overlap;	
 }
 
 
@@ -1827,7 +1873,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	//~ 
 	
 	
-	for(int i = 0; i < denomElectron.size(); i++)
+	for(int i = 0; i < int(denomElectron.size()); i++)
 	{
 		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << denomElectron.size() << std::endl;
 		bool removed = false;
@@ -2185,7 +2231,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// Z overlap removal
 	bool Zoverlap = false;
 	
-	for(int i = 0; i < denomMuon.size(); i++)
+	for(int i = 0; i < int(denomMuon.size()); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
@@ -2201,7 +2247,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent && removed) std::cout << " mu overlap with Z" << isLooseMu(denomMuon[i]) << std::endl;
 	}
 	
-	for(int i = 0; i < denomElectron.size(); i++)
+	for(int i = 0; i < int(denomElectron.size()); i++)
 	{
 		bool removed = false;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
@@ -2215,13 +2261,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		if(examineThisEvent && removed) std::cout << " electron overlap with Z" << std::endl;
 	}
-
-	for(int i = 0; i < goodTau.size(); i++)
+//~ 
+	for(int i = 0; i < int(goodTau.size()); i++)
 	{
 		bool removed = false;
+		if(examineThisEvent) std::cout << "Checking tau no. " << i << " with pt " << goodTau[i].pt << std::endl;
 		for(uint j = 0; j < Zcand.size() && !removed; j++)
 		{
-
+			if(examineThisEvent) std::cout << "tau no. " << i << " (" << goodTau[i].pt << ") with Z cand no." << j
+					<< " (" << Zcand[j].pt << ") and distance is " <<  deltaR(goodTau[i],Zcand[j]) << std::endl;
+			
 			if(deltaR(goodTau[i].eta,goodTau[i].phi,Zcand[j].eta,Zcand[j].phi)< maxDeltaR) 
 			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
 
@@ -2230,30 +2279,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	// removing taus overlapping with loose isolated muons and electrons
 	
-	for(int i = 0; i < goodTau.size(); i++)
-	{
-		bool removed = false;
-		for(uint j = 0; j < denomElectron.size() && !removed; j++)
-		{
-
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR && RelIso(denomElectron[j]) < 0.3 &&  LooseEleId(denomElectron[i]) && denomElectron[i].numLostHitEleInner <2 ) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-			if(examineThisEvent && removed) std::cout << " tau " << i << " overlaps with iso loose electron " << j << std::endl;
-		}
-	}
 	
-	for(int i = 0; i < goodTau.size(); i++)
-	{
-		bool removed = false;
-		for(uint j = 0; j < denomMuon.size() && !removed; j++)
-		{
-
-			if(deltaR(goodTau[i].eta,goodTau[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIso(denomMuon[j]) < 0.3 &&  isLooseMu(denomMuon[i])) 
-			{	goodTau.erase(goodTau.begin()+i); i--; removed = true;}
-			if(examineThisEvent && removed) std::cout << " tau " << i << " overlaps with iso loose muon " << j << std::endl;
-		}
-		
-	}
+	
+	
 	
 	//~ 
 	if(examineThisEvent) std::cout << "Checking Z overlap..." << std::endl;
@@ -2319,7 +2347,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hcand_FR.clear();
 	Hcand_type_FR.clear();
 	
-	std::vector<uint> usedTauIdx;
+	std::vector<int> usedTauIdx;
 	usedTauIdx.clear();
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
 	
@@ -2328,24 +2356,35 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
 	for(uint i = 0; i < goodTau.size() ; i++)
 	{
-		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << std::endl;
+		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << " " <<  goodTau[i].charge << " " <<
+		goodTau[i].discriminationByElectronLoose << std::endl;
 		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
 		if(goodTau[i].discriminationByElectronLoose <= 0.5) continue;
 				
 		//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 		//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
 		if(examineThisEvent) std::cout << "   Passed pre-selection" << std::endl;
+		double dZ1=deltaR(goodTau[i],Zcand[0]);
+		double dZ2=deltaR(goodTau[i],Zcand[1]);
+		
 		for(uint j=i+1; j< goodTau.size() && !(category0 && category1 && category2); j++)
 		{
 			bool isFakeRate=false;
-			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << " mass: " << 
-			PairMass(goodTau[i],goodTau[j]) <<std::endl;
+			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << "ch: " << 
+			goodTau[j].charge << " mass: " << PairMass(goodTau[i],goodTau[j]) <<std::endl;
 			
 			
 			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
 			isFakeRate = (goodTau[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+		//	if(!isFakeRate && (dZ1<maxDeltaR || dZ2 < maxDeltaR || deltaR(goodTau[j],Zcand[0]) < maxDeltaR || deltaR(goodTau[j],Zcand[1]) < maxDeltaR)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[i], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[i], denomMuon, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
+			
+			
 			if(isFakeRate && tauTau) continue; // save only one pair
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
 		
@@ -2371,7 +2410,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand.push_back(goodTau[j]);
 				Hcand.push_back(goodTau[i]);
 			}
-			tauTau=true;
+			if(isFakeRate) tauTau=true;
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << goodTau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits << goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits << std::endl;
 			int index = Hcand.size() -2;
@@ -2384,6 +2423,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					category0=true;
 					Hcand_cat0.push_back(Hcand[index]);
 					Hcand_cat0.push_back(Hcand[index+1]);
+					usedTauIdx.push_back(index);
 					if(Zmumu) Hcand_type_cat0.push_back(4);
 					else if(Zee) Hcand_type_cat0.push_back(8);
 				}
@@ -2393,6 +2433,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					category1=true;
 					Hcand_cat1.push_back(Hcand[index]);
 					Hcand_cat1.push_back(Hcand[index+1]);
+					usedTauIdx.push_back(index);
 					if(Zmumu) Hcand_type_cat1.push_back(4);
 					else if(Zee) Hcand_type_cat1.push_back(8);
 				}
@@ -2402,22 +2443,28 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					category2=true;
 					Hcand_cat2.push_back(Hcand[index]);
 					Hcand_cat2.push_back(Hcand[index+1]);
+					usedTauIdx.push_back(index);
 					if(Zmumu) Hcand_type_cat2.push_back(4);
 					else if(Zee) Hcand_type_cat2.push_back(8);
 				}
 			}else{
+				if(examineThisEvent){
+					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					std::cout << "Saving denom fake candidates with pass = " << pass1 << " " << pass2 << 
+					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " " << ClosestJet.pt << " " << 
+					PairMass(Hcand[index],Hcand[index+1]) << std::endl;
+				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				Hcand_pass.push_back(pass1);
 				Hcand_pass.push_back(pass2);
+				usedTauIdx.push_back(index);
 				if(Zmumu) Hcand_type_FR.push_back(4);
 				else if(Zee) Hcand_type_FR.push_back(8);
 			}
 			
 			
 			
-			usedTauIdx.push_back(i);
-			usedTauIdx.push_back(j);
 			if(Zmumu) Hcand_type.push_back(4);
 			else if(Zee) Hcand_type.push_back(8);
 			
@@ -2427,7 +2474,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}
 	
-	if(examineThisEvent) std::cout << " After TT, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
+	if(examineThisEvent) std::cout << " After TT, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2 "<<
+	 Hcand_FR.size() << " FR." <<   std::endl;
 	category0 = false;
 	category1= false;
 	category2=false;     
@@ -2447,18 +2495,34 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j=0; j< goodTau.size() && !(category0 && category1 && category2); j++)
 		{
                        
-			//~ if((j==usedTauIdx[0] || j==usedTauIdx[1]) && examineThisEvent) std::cout << "This tau has been used!" << std::endl;
-			//~ if(j==usedTauIdx[0] || j==usedTauIdx[1]) continue;
+			
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericMuon[i]) << std::endl;
 			bool isFakeRate = (genericMuon[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+		//	if(!isFakeRate && (deltaR(goodTau[j],Zcand[0]) > maxDeltaR || deltaR(goodTau[j],Zcand[1]) > maxDeltaR)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
+			if(examineThisEvent) std::cout << "There are " << genericMuon.size() << " muons." << std::endl;
+			if(isFakeRate && genericMuon.size() > 1) continue;
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
 			if(isFakeRate && !WZ_Rej(m,genericMuon[i])) continue;	
 			if(isFakeRate && muTau) continue; // save only one pair
-			
+			if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
+			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
+			bool usedTau = false;
+			for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
+			{
+				int usedID = -2;
+				usedID=usedTauIdx[iID];
+				int id=j;
+				if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
+			    if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
+			}
+			if(usedTau) continue;
+				
 			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
 		
@@ -2532,8 +2596,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	else if(muE) m_logger << INFO << " muE candidate!" << SLogger::endmsg;                 
 	else m_logger << DEBUG << " Checking no-muon channels" << SLogger::endmsg;
 	bool eTau = false;
-	if(examineThisEvent) std::cout << " After MT, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
-	
+   if(examineThisEvent) std::cout << " After MT, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2 "<<
+	 Hcand_FR.size() << " FR." <<   std::endl;
+		
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
 	category0 = false;
 	category1= false;
@@ -2555,12 +2620,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericElectron[i]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+		//	if(!isFakeRate && (deltaR(goodTau[j],Zcand[0]) > maxDeltaR || deltaR(goodTau[j],Zcand[1]) > maxDeltaR)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
+		
+			if(examineThisEvent) std::cout << "There are " << genericElectron.size() << " electrons	." << std::endl;
+			if(isFakeRate && genericElectron.size() > 1) continue;
 			
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
 			if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;	
 			if(isFakeRate && eTau) continue; // save only one pair	
-			
+			if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
+			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
+			bool usedTau = false;
+			for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
+			{
+				int usedID = -2;
+				usedID=usedTauIdx[iID];
+				int id=j;
+				if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
+			    if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
+			}
+			if(usedTau) continue;	
 			
 			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5) continue;
 			
@@ -2578,6 +2660,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			if(examineThisEvent) verb=true;
 			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) continue;
+			double jetDist = DistanceToClosestInCollection(genericElectron[i],m->RecPFJetsAK5);
+			myobject ClosestJet = ClosestInCollection(genericElectron[i],m->RecPFJetsAK5);
+			if(examineThisEvent) std::cout << "The closest jet distance is " << jetDist << " " << ClosestJet.pt << std::endl;
 			signal = true; 
 			eTau=true;
 			if(examineThisEvent) std::cout << "tau MVA3VTight, eta,Loose:" << goodTau[j].discriminationByElectronMVA3VTight << " " << goodTau[j].eta << " " << goodTau[j].discriminationByElectronLoose << std::endl;
@@ -2634,7 +2719,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		}
 	}
-	if(examineThisEvent) std::cout << " After ET, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
+	if(examineThisEvent) std::cout << " After ET, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2 "<<
+	 Hcand_FR.size() << " FR." <<   std::endl;
 	
 	
 	//emu final state
@@ -2723,11 +2809,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " After EM, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2. "<<   std::endl;
 	
 
-	if(eTau) m_logger << INFO << " eTau candidate!" << SLogger::endmsg;
-	else m_logger << DEBUG << " Checking fully hadronic decay" << SLogger::endmsg;
-	
-	if(examineThisEvent && signal && eTau){ std::cout << "Found etau candidate" << std::endl;}
-	
 	
 	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
 	if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
@@ -2754,78 +2835,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG << " tauTau " << tauTau << SLogger::endmsg;
 
 	if(examineThisEvent) std::cout << " Before type assignment" << std::endl;
-	std::vector<int> event_type;
-	std::vector<double> Hmass;//[3] = {0.0,0.0,0.0};
-	event_type.clear();
-	Hmass.clear();
-	std::vector<myobject> Hcand_sync;
-	Hcand_sync.clear();
+	
+	
 	
 	if(examineThisEvent) std::cout << " There are " << Hcand_type.size() << " event types and " << Hcand.size() << " H candidates." << Hcand_type[0] << std::endl;
 	
-	for(uint i=0; i< Hcand_type.size() ;i++)
-	{
-		if(Hcand_type[i]==8 || Hcand_type[i]==4){
-		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;	
-		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
-		event_type.push_back(Hcand_type[i]);
-		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
-		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
-		Hmass.push_back(mass);
-		Hcand_sync.push_back(Hcand[2*i]);
-		Hcand_sync.push_back(Hcand[2*i+1]);
-		}
-	}
 	
-	for(uint i=0; i< Hcand_type.size() ;i++)
-	{
-		if(Hcand_type[i]==5 || Hcand_type[i]==3){
-		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
-		event_type.push_back(Hcand_type[i]);
-		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
-		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
-		Hmass.push_back(mass);
-		Hcand_sync.push_back(Hcand[2*i]);
-		Hcand_sync.push_back(Hcand[2*i+1]);
-		}
-	}
-	
-	for(uint i=0; i< Hcand_type.size() ;i++)
-	{
-		if(Hcand_type[i]==7 || Hcand_type[i]==1){
-		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
-		event_type.push_back(Hcand_type[i]);
-		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
-		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
-		Hmass.push_back(mass);
-	//	if(examineThisEvent) std::cout << " > Mass is " << Hmass[0] << std::endl;
-		
-		Hcand_sync.push_back(Hcand[2*i]);
-		Hcand_sync.push_back(Hcand[2*i+1]);
-		}
-	}
-	
-		for(uint i=0; i< Hcand_type.size() ;i++)
-	{
-		if(Hcand_type[i]==6 || Hcand_type[i]==2){
-		if(examineThisEvent) std::cout << " Type number " << i << " " << Hcand_type[i] << std::endl;
-		if(examineThisEvent) std::cout << " > Correct type!" << Hcand_type[i] << std::endl;
-		event_type.push_back(Hcand_type[i]);
-		double mass= PairMass(Hcand[2*i],Hcand[2*i+1]);
-		if(examineThisEvent) std::cout << " > Mass is " << mass << std::endl;
-		Hmass.push_back(mass);
-	//	if(examineThisEvent) std::cout << " > Mass is " << Hmass[0] << std::endl;
-		
-		Hcand_sync.push_back(Hcand[2*i]);
-		Hcand_sync.push_back(Hcand[2*i+1]);
-		}
-	}
-		
-		
-	
-	if(examineThisEvent) std::cout << " After type assignment" << std::endl;
 	
 	// efficiency correction;
 
@@ -2868,10 +2883,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	double weight = PUWeight*corrZlep1*corrZlep2*corrHlep1*corrHlep2;
 
-	TLorentzVector eH_eTau,tauH_eTau,H_eTau;
-	TLorentzVector tau1H_tauTau,tau2H_tauTau,H_tauTau;
-	TLorentzVector muH_muTau,tauH_muTau,H_muTau;
-	TLorentzVector muH_muE_tightMuIso,eH_muE_tightMuIso,H_muE_tightMuIso;
+	
 	
 	h_cut_flow->Fill(6,1);
 	h_cut_flow_weight->Fill(6,weight);
@@ -2901,7 +2913,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	if(examineThisEvent) std::cout << " After efficiency" << std::endl;
 	
-    int Event_type=event_type[0];
+  
 		
 		
 	h_cut_flow->Fill(7,1);
@@ -2956,11 +2968,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(bTagVeto)
 	{
-		 //~ if( found_event.size()>0){ 
-			 //~ m_logger << ERROR << " Wrong b-tag! H cand of type " << evt_type[pos[0]] << SLogger::endmsg; // sync 
-			 //~ log_events << m->runNumber << " "  << m->eventNumber << std::endl;
-			//~ log_files << fileName << std::endl;
-		//~ }
+		
 		m_logger << INFO << "B-jet present. Aborting." << SLogger::endmsg;
 		return;
 	}
@@ -2968,11 +2976,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " After b-tag veto" << std::endl;
 	
 	// now we have the cands
-	
-	// sync
-	bool fatal = false;
-	bool used_fatal=false;
-	
 	
 	
 	h_cut_flow->Fill(9,1);
@@ -2982,488 +2985,191 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 	h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
-	    std::vector<bool> PassFail;
-	    PassFail.clear();
-        	TLorentzVector Hcand1,Hcand2,H_boson;
-		if(examineThisEvent) std::cout << " checking isolation " << std::endl;
+	    
+    TLorentzVector Hcand1,Hcand2,H_boson;
+	
+
+	//TLorentzVector Hcand1,Hcand2,H_boson;
+
+	for(uint i =0;i < Hcand.size(); i+=2){
+		Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
+		Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
+		H_boson = Hcand1+Hcand2;
 		
-		if(examineThisEvent) std::cout << "Now evaluating candidates!" << std::endl;
-		for(uint i =0; i < Hcand.size(); i+=2)
-            {
-				switch(event_type[i/2])
-				{
-						//tautau
-					case 4:
-					case 8:
-						PassFail.push_back((Hcand_sync[i].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i].pt > 10.));
-						PassFail.push_back((Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i+1].pt > 10.));
-						break;
-						//mutau
-					case 1:	
-					case 5:
-						PassFail.push_back(RelIso(Hcand_sync[i])<0.3 && isLooseMu(Hcand_sync[i]));
-						PassFail.push_back((Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i+1].pt > 10.));
-						break;
-						//etau
-					case 3:
-					case 7:
-						PassFail.push_back(RelIso(Hcand_sync[i])<0.3 && LooseEleId(Hcand_sync[i]));
-						PassFail.push_back((Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5 && Hcand_sync[i+1].pt > 10.));
-						break;
-				}
-			}
-	
-            for(uint i =0; i < Hcand.size(); i+=2)
-            {
-                myobject ClosestJet = ClosestInCollection(Hcand_sync[i],jet);
-                myobject ClosestJet2 = ClosestInCollection(Hcand_sync[i+1],jet);
-                if(examineThisEvent) std::cout << " -checking Hcand no. " << i << " type is " << event_type[i/2] << std::endl;
-                Hist( "h_event_type" )->Fill(event_type[i/2],weight);
-                Hist("h_denom")->Fill(Hcand_sync[i].pt,weight);
-                h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-                h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-                
-                h_denom_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-                h_denom_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
-                
-                h_denom_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-                h_denom_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight);
-                
-                if(fabs(Hcand_sync[i].eta)<1.2){
-					h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-					h_denom_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					h_denom_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-                }else{
-					h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-					h_denom_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					h_denom_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-                }
-                int isL=0;
-                int isM=0;
-                int isT=0;
-                if(event_type[i/2]%4==3){
-                    if(RelIso(Hcand_sync[i]) < 0.30 && LooseEleId(Hcand_sync[i])){ 
-						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
-						isL++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-					}
-                    if(RelIso(Hcand_sync[i]) < 0.15 && isGoodEl(Hcand_sync[i])){ 
-						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
-						isT++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-							}
-                }
-                if(event_type[i/2]%4==1){
-					if(examineThisEvent) std::cout << " checking muTau isolation " << std::endl;
-	
-                    if(RelIso(Hcand_sync[i]) < 0.30 && isLooseMu(Hcand_sync[i])){ 
-						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
-						isL++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-					}
-                    if(RelIso(Hcand_sync[i]) < 0.25 && isGoodMu(Hcand_sync[i])){ 
-						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight); 
-						isT++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-					 }
-                }
-                if(examineThisEvent) std::cout << " done lepton iso " << std::endl;
-                if(event_type[i/2]%4==0){
-                    h_denom_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-                    h_denom_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
-                    h_denom_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-					h_denom_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
-                
-					h_denom_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-					h_denom_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight);
-               
-					if(fabs(Hcand_sync[i+1].eta)<1.2){
-						h_denom_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-						h_denom_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-						h_denom_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-					}else{
-						h_denom_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-						h_denom_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-						h_denom_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-					}
-					if(examineThisEvent) std::cout << "Checking tau 1 with pt " << Hcand_sync[i].pt << std::endl;
-                    if(Hcand_sync[i].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
-						if(examineThisEvent) std::cout << "Has loose iso!" << Hcand_sync[i].pt << std::endl;
-						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
-						h_loose_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight); 
-						h_loose_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight); 
-						isL++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_loose_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_loose_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-                    }
-                     if(examineThisEvent) std::cout << "Checking tau 2 with pt " << Hcand_sync[i+1].pt << std::endl;
-                   
-                    if(Hcand_sync[i+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
-						if(examineThisEvent) std::cout << "Has loose iso!" << Hcand_sync[i+1].pt << std::endl;
-						
-						Hist("h_event_type_loose")->Fill(event_type[i/2],weight); 
-						h_loose_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
-						h_loose_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
-						
-						h_loose_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight); 
-						h_loose_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
-						h_loose_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight); 
-						h_loose_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight); 
-						isL++;
-						if(fabs(Hcand_sync[i+1].eta)<1.2){
-							h_loose_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-							h_loose_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-							h_loose_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-					
-						}else{
-							h_loose_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-							h_loose_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-							h_loose_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-						}
-                    }
-                    // medium
-                    
-                    if(Hcand_sync[i].byMediumCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
-						if(examineThisEvent) std::cout << "tau 1 Passed medium iso" << std::endl;
-						Hist("h_event_type_medium")->Fill(event_type[i/2],weight); 
-						h_medium_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_medium_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_medium_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
-						h_medium_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight); 
-						h_medium_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight); 
-						isM++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_medium_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-							h_medium_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_medium_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-							h_medium_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-                    }
-                    if(Hcand_sync[i+1].byMediumCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
-						if(examineThisEvent) std::cout << "tau 2 Passed medium iso" << std::endl;
-						Hist("h_event_type_medium")->Fill(event_type[i/2],weight); 
-						h_medium_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
-						h_medium_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
-						
-						h_medium_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight); 
-						h_medium_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
-						h_medium_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight); 
-						h_medium_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight); 
-						isM++;
-						if(fabs(Hcand_sync[i+1].eta)<1.2){
-							h_medium_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-							h_medium_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-							h_medium_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-					
-						}else{
-							h_medium_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-							h_medium_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-							h_medium_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-						}
-                    }
-                    //tight
-                    
-                    if(Hcand_sync[i].byTightCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
-						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].eta,weight);
-						
-						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet.pt,weight); 
-						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet.eta,weight);
-						h_tight_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight); 
-						h_tight_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i].jetEta,weight); 
-						isT++;
-						if(fabs(Hcand_sync[i].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_tight_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-					
-						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].pt,weight);
-							h_tight_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i].jetPt,weight);
-							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet.pt,weight);
-						}
-                    }
-                    if(Hcand_sync[i+1].byTightCombinedIsolationDeltaBetaCorr3Hits >= 0.5){ 
-						Hist("h_event_type_tight")->Fill(event_type[i/2],weight); 
-						h_tight_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight); 
-						h_tight_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].eta,weight);
-						
-						h_tight_jet_types[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight); 
-						h_tight_jet_types_eta[event_type[i/2]-1]->Fill(ClosestJet2.eta,weight);
-						h_tight_jetRef_types[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight); 
-						h_tight_jetRef_types_eta[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetEta,weight); 
-						isT++;
-						if(fabs(Hcand_sync[i+1].eta)<1.2){
-							h_tight_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-							h_tight_jetRef_types_centralEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-							h_tight_jet_types_centralEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-					
-						}else{
-							h_tight_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].pt,weight);
-							h_tight_jetRef_types_externalEtaRegion[event_type[i/2]-1]->Fill(Hcand_sync[i+1].jetPt,weight);
-							h_tight_jet_types_externalEtaRegion[event_type[i/2]-1]->Fill(ClosestJet2.pt,weight);
-						}
-                    }
-                }// end of tautau
-                
-                    
-                Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
-                Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
-                H_boson = Hcand1+Hcand2;
-               // double Hmass = H_boson.M();
-                
-               
-                
-            }
-
-            if(RelIso(Hcand[0]) < 0.25) Hist("h_medium")->Fill(Hcand[0].pt,weight);
-            if(RelIso(Hcand[0]) < 0.10) Hist("h_tight")->Fill(Hcand[0].pt,weight);
-
-            //TLorentzVector Hcand1,Hcand2,H_boson;
-
-            for(uint i =0;i < Hcand.size(); i+=2){
-                Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
-                Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
-                H_boson = Hcand1+Hcand2;
-                h_H_mass_types[Event_type-1]->Fill(H_boson.M(),weight);
-            }
+		h_H_mass_types[Hcand_type[i/2]-1]->Fill(H_boson.M(),weight);
+	}
 
         
 			
-			 if(printoutEvents)
-				{
-					if(examineThisEvent) std::cout << " in printout " << std::endl;
-					for(uint i=0; i < Hcand_cat0.size(); i+=2)
-					{
-						int exp_event_type;
-						std::string name;
-						double mass=PairMass(Hcand_cat0[i],Hcand_cat0[i+1]);
-						switch(Hcand_type_cat0[i/2])
-						{
-							case 1: exp_event_type=30; name="mmmt"; break;
-							case 2: exp_event_type=40; name="mmme"; break;
-							case 3: exp_event_type=20; name="mmet"; break;
-							case 4: exp_event_type=10; name="mmtt"; break;
-							case 5: exp_event_type=60; name="eemt"; break;
-							case 6: exp_event_type=80; name="eeem"; break;
-							case 7: exp_event_type=70; name="eeet"; break;
-							case 8: exp_event_type=50; name="eett"; break;
-							default: exp_event_type=0; break;
-						}
-						std::string status="FF";
-						int new_e_type=90+exp_event_type/10;
-						log1 << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
-						m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
-						
-					}
-					for(uint i=0; i < Hcand_cat1.size(); i+=2)
-					{
-						int exp_event_type;
-						std::string name;
-						double mass=PairMass(Hcand_cat1[i],Hcand_cat1[i+1]);
-						switch(Hcand_type_cat1[i/2])
-						{
-							case 1: exp_event_type=32; name="mmmt"; break;
-							case 2: exp_event_type=42; name="mmme"; break;
-							case 3: exp_event_type=22; name="mmet"; break;
-							case 4: exp_event_type=12; name="mmtt"; break;
-							case 5: exp_event_type=62; name="eemt"; break;
-							case 6: exp_event_type=82; name="eeem"; break;
-							case 7: exp_event_type=72; name="eeet"; break;
-							case 8: exp_event_type=52; name="eett"; break;
-							default: exp_event_type=0; break;
-						}
-						std::string status="FP";
-						int new_e_type=90+exp_event_type/10;
-						log1 << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
-						m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
-						
-					}
-					for(uint i=0; i < Hcand_cat2.size(); i+=2)
-					{
-						int exp_event_type;
-						std::string name;
-						double mass=PairMass(Hcand_cat2[i],Hcand_cat2[i+1]);
-						switch(Hcand_type_cat2[i/2])
-						{
-							case 1: exp_event_type=31; name="mmmt"; break;
-							case 2: exp_event_type=41; name="mmme"; break;
-							case 3: exp_event_type=21; name="mmet"; break;
-							case 4: exp_event_type=11; name="mmtt"; break;
-							case 5: exp_event_type=61; name="eemt"; break;
-							case 7: exp_event_type=71; name="eeet"; break;
-							case 6: exp_event_type=81; name="eeem"; break;
-							case 8: exp_event_type=51; name="eett"; break;
-							default: exp_event_type=0; break;
-						}
-						std::string status="PF";
-						int new_e_type=90+exp_event_type/10;
-						log1 << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
-						m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
-						
-					}
-					
-				}
+	if(printoutEvents)
+	{
+		if(examineThisEvent) std::cout << " in printout " << std::endl;
+		for(uint i=0; i < Hcand_cat0.size(); i+=2)
+		{
+			int exp_event_type;
+			std::string name;
+			double mass=PairMass(Hcand_cat0[i],Hcand_cat0[i+1]);
+			switch(Hcand_type_cat0[i/2])
+			{
+				case 1: exp_event_type=30; name="mmmt"; break;
+				case 2: exp_event_type=40; name="mmme"; break;
+				case 3: exp_event_type=20; name="mmet"; break;
+				case 4: exp_event_type=10; name="mmtt"; break;
+				case 5: exp_event_type=60; name="eemt"; break;
+				case 6: exp_event_type=80; name="eeem"; break;
+				case 7: exp_event_type=70; name="eeet"; break;
+				case 8: exp_event_type=50; name="eett"; break;
+				default: exp_event_type=0; break;
+			}
+			std::string status="FF";
+			int new_e_type=90+exp_event_type/10;
+			log1 << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
+			m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
+			
+		}
+		for(uint i=0; i < Hcand_cat1.size(); i+=2)
+		{
+			int exp_event_type;
+			std::string name;
+			double mass=PairMass(Hcand_cat1[i],Hcand_cat1[i+1]);
+			switch(Hcand_type_cat1[i/2])
+			{
+				case 1: exp_event_type=32; name="mmmt"; break;
+				case 2: exp_event_type=42; name="mmme"; break;
+				case 3: exp_event_type=22; name="mmet"; break;
+				case 4: exp_event_type=12; name="mmtt"; break;
+				case 5: exp_event_type=62; name="eemt"; break;
+				case 6: exp_event_type=82; name="eeem"; break;
+				case 7: exp_event_type=72; name="eeet"; break;
+				case 8: exp_event_type=52; name="eett"; break;
+				default: exp_event_type=0; break;
+			}
+			std::string status="FP";
+			int new_e_type=90+exp_event_type/10;
+			log1 << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
+			m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
+			
+		}
+		for(uint i=0; i < Hcand_cat2.size(); i+=2)
+		{
+			int exp_event_type;
+			std::string name;
+			double mass=PairMass(Hcand_cat2[i],Hcand_cat2[i+1]);
+			switch(Hcand_type_cat2[i/2])
+			{
+				case 1: exp_event_type=31; name="mmmt"; break;
+				case 2: exp_event_type=41; name="mmme"; break;
+				case 3: exp_event_type=21; name="mmet"; break;
+				case 4: exp_event_type=11; name="mmtt"; break;
+				case 5: exp_event_type=61; name="eemt"; break;
+				case 7: exp_event_type=71; name="eeet"; break;
+				case 6: exp_event_type=81; name="eeem"; break;
+				case 8: exp_event_type=51; name="eett"; break;
+				default: exp_event_type=0; break;
+			}
+			std::string status="PF";
+			int new_e_type=90+exp_event_type/10;
+			log1 << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
+			m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
+			
+		}
+		
+		for(uint i=0; i < Hcand_FR.size(); i+=2)
+		{
+			int exp_event_type;
+			std::string name;
+			double mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
+			bool fake1 = false;
+			bool fake12 = false;
+			switch(Hcand_type_FR[i/2])
+			{
+				case 1: exp_event_type=93; name="mmmt"; fake1 = true; break;
+				case 2: exp_event_type=94; name="mmme"; break;
+				case 3: exp_event_type=92; name="mmet"; fake1 = true; break;
+				case 4: exp_event_type=91; name="mmtt"; fake12= true; break;
+				case 5: exp_event_type=96; name="eemt"; fake1 = true; break;
+				case 6: exp_event_type=98; name="eeem"; break;
+				case 7: exp_event_type=97; name="eeet"; fake1 = true; break;
+				case 8: exp_event_type=95; name="eett"; fake12 = true; break;
+				default: exp_event_type=0; break;
+			}
+			std::string status="DD";
+			int new_e_type=exp_event_type;
+			logFR << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
+			m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << std::endl; //"     " << fileName << std::endl;
+			if(Hcand_pass[i] && (fake1 || fake12)){
+				 status="P1";
+				 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
+				 logFR << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
+				 m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << " " <<
+				 Hcand_FR[i].pt << " " << ClosestJet.pt << std::endl; //"     " << fileName << std::endl;
+			 }
+			if(Hcand_pass[i+1] && fake12){
+				 status="P2";
+				 myobject ClosestJet = ClosestInCollection(Hcand_FR[i+1],jet);
+				 logFR << setiosflags(ios::fixed) << std::setprecision(1) << new_e_type << " " << status << " " <<  
+				 m->runNumber << " " << m->lumiNumber << " " << m->eventNumber << " " << Zmass << " " << mass  << " " <<
+				 Hcand_FR[i+1].pt << " " << ClosestJet.pt << std::endl; //"     " << fileName << std::endl;
+			}
+			
+			
+		}
+		
+	}
 				
 				//histo filling
 				
-				for(uint i=0; i < Hcand_cat0.size(); i+=2)
-					{
-						int exp_event_type=Hcand_type_cat0[i/2];
-						myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
-						myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
-						switch(exp_event_type)
-						{
-							case 1:
-							case 3:
-							case 5:
-							case 7: 
-								h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].pt, Hcand_cat0[i].pt); 
-								h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt); 
-								h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].jetPt,Hcand_cat0[i].jetPt); 
-								break;
-							case 2: 
-							case 4: 
-							case 6: 
-							case 8: 
-								h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].pt, Hcand_cat0[i+1].pt);
-								h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt); 
-								h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].jetPt,Hcand_cat0[i+1].jetPt);
-								break;
-							default:
-								break;
-						}
-					}
-				// messed with categories: cat1 = tau fails or e fails	
-				for(uint i=0; i < Hcand_cat1.size(); i+=2)
-				{
-					int exp_event_type=Hcand_type_cat1[i/2];
-					myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
-					myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
-					//~ switch(exp_event_type)
-					//~ {
-						//~ case 1:
-						//~ case 3:
-						//~ case 5:
-						//~ case 7: 
-						//~ case 6: 
-						//~ case 8: 
-						//~ case 2: 
-						//~ case 4: 
-						 //~ 
-							//~ break;
-						//~ default:
-							//~ h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].pt);
-							//~ h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
-							//~ h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i].jetPt); 
-							//~ break;
-						//~ 
-							//~ break;
-					//~ }
-					
-						h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
-						h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
-						h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt);
-											
-				}
-				
-				for(uint i=0; i < Hcand_cat2.size(); i+=2)
-				{
-					int exp_event_type=Hcand_type_cat2[i/2];
-					myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
-					myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
-					h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
-					h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
-					h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
-					//~ switch(exp_event_type)
-					//~ {
-						//~ case 1:
-						//~ case 3:
-						//~ case 5:
-						//~ case 7: 
-						//~ case 6: 
-						//~ case 8:
-					 //~ 
-							//~ break;
-						//~ case 2: 
-						//~ case 4: 				 
-							//~ h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].pt);
-							//~ h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
-							//~ h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i+1].jetPt); 
-							//~ break;
-						//~ default:
-							//~ break;
-					//~ }
-											
-				}
+	for(uint i=0; i < Hcand_cat0.size(); i+=2)
+		{
+			int exp_event_type=Hcand_type_cat0[i/2];
+			myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
+			myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
+			switch(exp_event_type)
+			{
+				case 1:
+				case 3:
+				case 5:
+				case 7: 
+					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].pt, Hcand_cat0[i].pt); 
+					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt); 
+					h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].jetPt,Hcand_cat0[i].jetPt); 
+					break;
+				case 2: 
+				case 4: 
+				case 6: 
+				case 8: 
+					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].pt, Hcand_cat0[i+1].pt);
+					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt); 
+					h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].jetPt,Hcand_cat0[i+1].jetPt);
+					break;
+				default:
+					break;
+			}
+		}
+	// messed with categories: cat1 = tau fails or e fails	
+	for(uint i=0; i < Hcand_cat1.size(); i+=2)
+	{
+		int exp_event_type=Hcand_type_cat1[i/2];
+		myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
+		myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
+		
+		
+			h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
+			h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+			h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt);
+								
+	}
+	
+	for(uint i=0; i < Hcand_cat2.size(); i+=2)
+	{
+		int exp_event_type=Hcand_type_cat2[i/2];
+		myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
+		myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
+		h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
+		h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+		h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
+		
+	}
         
 	return;
 

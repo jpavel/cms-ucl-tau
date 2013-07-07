@@ -67,12 +67,17 @@ public:
    double deltaR(double eta1, double phi1, double eta2, double phi2);
    double deltaR(myobject o1, myobject o2);
    myobject ClosestInCollection(myobject o1, std::vector<myobject> collection, double max);
+   double DistanceToClosestInCollection(myobject o1, std::vector<myobject> collection);
    bool AdLepton(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> Hcand, bool verbose);
    bool AdLepton_mt(myevent *m, uint index, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_et(myevent *m, uint index, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_tt(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, std::vector<myobject> goodTau, myobject Hcand1, myobject Hcand2, bool verbose=false);
    bool AdLepton_em(myevent *m, uint index_e, uint index_m, std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2,bool verbose=false);
    double PairMass(myobject Hcand1, myobject Hcand2);	
+   double PairPt(myobject Hcand1, myobject Hcand2);	
+   bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal);
+   bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
+   
    
    bool DZ_expo(myobject Zcand1, myobject Zcand2, myobject Hcand1, myobject Hcand2, bool verbose=false);
   // bool isLargerPt(myobject o1, myobject o2);		
@@ -359,6 +364,7 @@ private:
         
         reweight::LumiReWeighting* LumiWeights_;
         ofstream log1;
+        ofstream logFR;
         ofstream log_events;
         ofstream log_files;
         

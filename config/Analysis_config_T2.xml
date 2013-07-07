@@ -14,7 +14,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="200000" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -78,9 +78,9 @@
 				
 				<Item Name="UseLongEvent" Value="true" />
                 <Item Name="examineEvent" Value="" />
-                <Item Name="OverM" Value="" />
+                <Item Name="OverM" Value="164" />
                 
-                <Item Name="BelowM" Value="" />
+                <Item Name="BelowM" Value="567456" />
                 <Item Name="removeTauOverlap" Value="true" />
                 
          <Item Name="DoubleM" Value="false" />
