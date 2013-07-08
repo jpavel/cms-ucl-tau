@@ -1737,6 +1737,27 @@ std::vector<myobject> Analysis::SelectGoodElVector(std::vector<myobject> _electr
 	return outEl_;
 }
 
+void Analysis::CrossCleanWithMu(std::vector<myobject> _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso = 0.3, bool _looseMuId = true){
+	
+	for(int i = 0; i < int(_input.size()); i++)
+		{
+			if(verb) std::cout << "Looping over input object no. " << i << " out of " << _input.size() << std::endl;
+			bool removed = false;
+		
+			for(uint j = 0; j < _muon.size() && !removed; j++)
+			{
+				if(verb) std::cout << "Looping over mu no. " << j << " out of " << _muon.size() << " " << 
+				deltaR(_input[i],_muon[j]) << std::endl;
+				if(verb) std::cout << " > Pt is " << _muon[j].pt << " iso is " << RelIso(_muon[j]) << " ID is " << isLooseMu(_muon[j]) << std::endl;
+				bool ID = _looseMuId? isLooseMu(_muon[j]) : true;
+				if(deltaR(_input[i],_muon[j])< _maxDeltaR && RelIso(_muon[j]) < _muIso && ID) 
+				{	_input.erase(_input.begin()+i); i--; removed = true;}
+				if(verb) std::cout << "input removed ? " << removed << std::endl;
+			}
+	
+		}
+}
+
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
@@ -1853,48 +1874,24 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//overlap cleaning
 	
-	//~ for(int i = 0; i < denomMuon.size(); i++)
+	
+	CrossCleanWithMu(denomElectron,denomMuon,examineThisEvent,maxDeltaR);
+	
+	//~ for(int i = 0; i < int(denomElectron.size()); i++)
 	//~ {
-		//~ if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << denomMuon.size() << std::endl;
-		//~ 
+		//~ if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << denomElectron.size() << std::endl;
 		//~ bool removed = false;
-		//~ for(uint j = i+1; j < denomMuon.size() && !removed ; j++)
-		//~ {
-			//~ if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << denomMuon.size() 
-			//~ <<":" << deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
-		//~ 
-			//~ if(deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) 
-			//~ {	denomMuon.erase(denomMuon.begin()+i); i--;removed = true;}
-			//~ if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
-		//~ }
-	//~ }
 	//~ 
-	
-	
-	for(int i = 0; i < int(denomElectron.size()); i++)
-	{
-		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << denomElectron.size() << std::endl;
-		bool removed = false;
-		//~ for(uint j = i+1; j < denomElectron.size() && !removed ; j++)
+		//~ for(uint j = 0; j < denomMuon.size() && !removed; j++)
 		//~ {
-			//~ if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
-			//~ << " " << deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi) << std::endl;
-		//~ 
-			//~ if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) 
+			//~ if(examineThisEvent) std::cout << "Looping over mu no. " << j << " out of " << denomMuon.size() << " " << 
+			//~ deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
+			//~ if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIso(denomMuon[j]) < 0.3 && isLooseMu(denomMuon[i])) 
 			//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-			//~ if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
+			//~ if(examineThisEvent) std::cout << "Muremoved? " << removed << std::endl;
 		//~ }
-
-		for(uint j = 0; j < denomMuon.size() && !removed; j++)
-		{
-			if(examineThisEvent) std::cout << "Looping over mu no. " << j << " out of " << denomMuon.size() << " " << 
-			deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
-			if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIso(denomMuon[j]) < 0.3 && isLooseMu(denomMuon[i])) 
-			{	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-			if(examineThisEvent) std::cout << "Muremoved? " << removed << std::endl;
-		}
-
-	}
+//~ 
+	//~ }
 	//~ 
 	
 	
