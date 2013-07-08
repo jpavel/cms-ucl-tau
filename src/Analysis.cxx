@@ -1655,14 +1655,18 @@ double Analysis::PairPt(myobject Hcand1, myobject Hcand2){
 	return H_sum.Pt();
 }
 
-bool Analysis::CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal){
+bool Analysis::CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb){
 	
+		if(verb) std::cout << "Looking for extra electron!" << std::endl;
 		bool overlap = false;
 		for(uint j = 0; j < elCollection.size() && !overlap; j++)
 		{
+			if(verb) std::cout << "Checking ele no. " << j << "/" << elCollection.size() << " pt iso ID: " << elCollection[j].pt << " " << RelIso(elCollection[j]) <<
+			" " << LooseEleId(elCollection[j]) << " " << elCollection[j].numLostHitEleInner << ": dR = " << deltaR(tau, elCollection[j]) << std::endl;
 			if(deltaR(tau,elCollection[j])< maxR && RelIso(elCollection[j]) < isoVal &&  LooseEleId(elCollection[j]) && elCollection[j].numLostHitEleInner <2 ) 
 			overlap = true;
 		}
+	if(verb) std::cout << "extra loose electron returns " << overlap << std::endl; 
 	return overlap;	
 }
 
@@ -1677,29 +1681,73 @@ bool Analysis::CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muColle
 	return overlap;	
 }
 
+std::vector<myobject> Analysis::SelectGoodVxVector(std::vector<myobject> _vertex, double _normChi2 = 0., int _ndof = 4, double _dZ = 24.){
+	
+	std::vector<myobject> outVx_;
+	outVx_.clear();	
+	for (uint i = 0; i < _vertex.size(); i++) {
+			if (_vertex[i].isValid && _vertex[i].normalizedChi2 > _normChi2 && _vertex[i].ndof > _ndof && fabs(_vertex[i].z) < _dZ)
+			outVx_.push_back(_vertex[i]);
+	}
+	return outVx_;
+}
+	
+std::vector<myobject> Analysis::SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_ =10., double muEta_ = 2.4){
 
+	std::vector<myobject> outMu_;
+	outMu_.clear();
+	for (uint i = 0; i < _muon.size(); i++) {
+	
+			
+			double muPt = _muon[i].pt;
+			double muEta = _muon[i].eta;
+			bool muGlobal = _muon[i].isGlobalMuon;
+			bool muTracker = _muon[i].isTrackerMuon;
+			
+			if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_){
+				if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
+				<< muEta << std::endl;
+	        	outMu_.push_back(_muon[i]);
+			}else{
+				if(verb) std::cout << " pre-_muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
+				muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
+			}
+	}
+	return outMu_;
+}
+
+std::vector<myobject> Analysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =10., double elEta_ = 2.4){
+
+	std::vector<myobject> outEl_;
+	outEl_.clear();
+	for (uint i = 0; i < _electron.size(); i++) {
+	
+			double elPt = _electron[i].pt;
+			double elEta = _electron[i].eta_SC;
+			
+			if (elPt > 10. && fabs(elEta) < 2.5 )
+			{
+				if(verb) std::cout << " pre-_electron " << i << " pt eta etaSC: " << elPt << " " 
+				<< elEta << " " << _electron[i].eta << std::endl;
+				outEl_.push_back(_electron[i]);
+	        }else{
+				if(verb) std::cout << "Pre-_electron no. " << i << " rejected: " << elPt << " " << elEta << std::endl;
+			}
+		}
+	return outEl_;
+}
 
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
-	 // sync part
-	std::vector<bool> found_event; //{false,false,false};
-	std::vector<bool> isLoose;
-	std::vector<bool> isMedium;
-	std::vector<bool> isTight;
-	found_event.clear();
-	isLoose.clear();
-	isMedium.clear();
-	isTight.clear();
-	// end sync
 
 	// bookkepping part
-		++m_allEvents;
+	++m_allEvents;
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
 		lumi << m->runNumber << " " << m->lumiNumber << std::endl;
 		current_run=m->runNumber;
 		current_lumi=m->lumiNumber;
 	}
-	TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName();
+	TString fileName = GetInputTree(InTreeName.c_str())->GetDirectory()->GetFile()->GetName(); // name of the current file
 					
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 	//lumi << m->runNumber << " " << m->eventNumber << std::endl;
@@ -1714,13 +1762,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	
 
-	double PUWeight = 1.0;
-	double nPU = 0.0;
-	nPU = m->PUInfo_true;
-	if(isSimulation){	
-		PUWeight = LumiWeights_->weight( nPU );
-		if(IgnorePUW) PUWeight = 1.0;
-	}
+	
+	// for debug printout for a given event
 	long eNumber = m->eventNumber;
 	bool examineThisEvent;
 	long examineNumber;
@@ -1732,26 +1775,31 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	else examineThisEvent=false;
 	
 	if(examineThisEvent) std::cout << "Examining! Event number " << eNumber << " ENTRY: " << m_allEvents << std::endl;
+	
+	
+	double PUWeight = 1.0;
+	double nPU = 0.0;
+	nPU = m->PUInfo_true;
+	if(isSimulation){	
+		PUWeight = LumiWeights_->weight( nPU );
+		if(IgnorePUW) PUWeight = 1.0;
+	}
+	
 	Hist("h_PU_weight")->Fill(PUWeight);
 	Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 	Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
-	
-
-	
-        //vertex selection
-	std::vector<myobject> vertex = m->Vertex;
-	std::vector<myobject> goodVertex;
-	goodVertex.clear();
-	for (uint i = 0; i < vertex.size(); i++) {
-		if (vertex[i].isValid && vertex[i].normalizedChi2 > 0 && vertex[i].ndof > 4 && fabs(vertex[i].z) < 24)
-		goodVertex.push_back(vertex[i]);
-	}
-	short nGoodVx=goodVertex.size();
-
 	Hist("h_nPU_Info_W")->Fill(m->PUInfo,PUWeight);
 	Hist("h_nPU_InfoTrue_W")->Fill(m->PUInfo_true,PUWeight);
 	Hist("h_nPU_Bunch0_W")->Fill(m->PUInfo_Bunch0,PUWeight);
 
+
+	
+    //vertex selection
+	std::vector<myobject> vertex = m->Vertex;
+	std::vector<myobject> goodVertex = SelectGoodVxVector(vertex);
+	short nGoodVx=goodVertex.size();
+
+	
 	h_cut_flow->Fill(0.0,1.0);
 	h_cut_flow_weight->Fill(0.0,PUWeight);
 
@@ -1759,20 +1807,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_Nvertex_NoCut_W")->Fill(nGoodVx,PUWeight);
 
 	bool trigPass;
-	
 	trigPass = Trg_MC_12(m,examineThisEvent);
-	
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
 		if(examineThisEvent) std::cout << "Trigger fail! " << examineEvent << std::endl;
-	
 		return;
 	}
 	
 	h_cut_flow->Fill(1,1);
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
+	// at least one good vertex
 	if(nGoodVx < 1) return;
 	
 	h_cut_flow->Fill(2,1);
@@ -1784,69 +1830,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
 	h_PF_MET_nPU->Fill(nGoodVx,Met.front().et,PUWeight);
 
-	std::vector<myobject> goodMuon;
-	goodMuon.clear();
-	std::vector<myobject> denomMuon;
-	denomMuon.clear();
-
-
+	
+	// looseMuons
 	std::vector<myobject> muon = m->PreSelectedMuons;
 	if(examineThisEvent) std::cout << " There are " << muon.size() << " preselected muons " << std::endl;
+	std::vector<myobject> denomMuon = SelectGoodMuVector(muon,examineThisEvent);
+	if(examineThisEvent) std::cout << " There are " << denomMuon.size() << " selected muons " << std::endl;
+	Hist("h_n_goodMu")->Fill(denomMuon.size(),PUWeight);
 
-	for (uint i = 0; i < muon.size(); i++) {
 
-		double muPt = muon[i].pt;
-		double muEta = muon[i].eta;
-		bool muGlobal = muon[i].isGlobalMuon;
-		bool muTracker = muon[i].isTrackerMuon;
-		double relIso = RelIso(muon[i]);
-		bool pfID = PFMuonID(muon[i]);	
-
-		if ((muGlobal || muTracker) && muPt > 10. && fabs(muEta) < 2.4){
-		
-			if (muGlobal && muTracker && muPt > 10. && fabs(muEta) < 2.4 && pfID)
-			{
-				goodMuon.push_back(muon[i]);
-				Hist("h_mu_relIso")->Fill(relIso,PUWeight);
-			}
-        		denomMuon.push_back(muon[i]);
-		}else{
-			if(examineThisEvent) std::cout << " pre-muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
-			muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
-		}
-    }
-
-	Hist("h_n_goodMu")->Fill(goodMuon.size(),PUWeight);
-
-	std::vector<myobject> goodElectron;
-	goodElectron.clear();
-        std::vector<myobject> denomElectron;
-        denomElectron.clear();
-   
+	// looseElectrons
 	std::vector<myobject> electron = m->PreSelectedElectrons;
 	if(examineThisEvent) std::cout << " There are " << electron.size() << " preselected electrons " << std::endl;
+	std::vector<myobject> denomElectron = SelectGoodElVector(electron,examineThisEvent);
+	Hist("h_n_goodEl")->Fill(denomElectron.size(),PUWeight);
 	
-	for (uint i = 0; i < electron.size(); i++) {
-
-		double elPt = electron[i].pt;
-		double elEta = electron[i].eta_SC;
-		int missingHits = electron[i].numLostHitEleInner;
-		bool elID =  LooseEleId(elPt,electron[i].eta_SC,electron[i].Id_mvaNonTrg);
-		double relIso = RelIso(electron[i]);
-
-		if (elPt > 10. && fabs(elEta) < 2.5 )
-		{
-			if(examineThisEvent) std::cout << " pre-electron " << i << " pt eta etaSC: " << elPt << " " 
-			<< elEta << " " << electron[i].eta << std::endl;
-			if(elID){
-				goodElectron.push_back(electron[i]);
-				Hist("h_el_relIso")->Fill(relIso,PUWeight);
-			}
-				denomElectron.push_back(electron[i]);
-        }else{
-			if(examineThisEvent) std::cout << "Pre-electron no. " << i << " rejected: " << elPt << " " << elEta << " " << missingHits <<std::endl;
-		}
-	}
 	
 	
 	// Z compatibility
@@ -1901,12 +1899,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	
 
-	int muCandZ = goodMuon.size();
-	int elCandZ = goodElectron.size();
-	if(examineThisEvent) std::cout << " There are " << elCandZ << " good electrons and " << denomElectron.size() << " denom electrons" << std::endl;
+	if(examineThisEvent) std::cout << " There are " << denomElectron.size() << " denom electrons" << std::endl;
 	
 	
-	Hist("h_n_goodEl")->Fill(goodElectron.size(),PUWeight);
 	
 	bool Zmumu = false;
 	bool Zee = false;
@@ -1914,7 +1909,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Zmucand=Zelcand=false;
 	double dMass=999.0;
 	int Zindex[2] = {-1,-1};
-	if(examineThisEvent) std::cout << "Finding Z out of " << goodMuon.size() << " muons " << std::endl;
+	if(examineThisEvent) std::cout << "Finding Z out of " << denomMuon.size() << " muons " << std::endl;
 	if(!DoubleE){
 	for(uint i = 0; i < denomMuon.size(); i++)
 	{
@@ -1981,7 +1976,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	
 
-	m_logger << VERBOSE << " There are " << goodMuon.size() << " remaining good muons " << SLogger::endmsg;
 
 	if(!Zmumu && !DoubleM)
 	{
@@ -2122,8 +2116,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist( "h_Z_lep2_phi")->Fill(ele2.Phi(),Z_weight);
 	}
 
-	m_logger << VERBOSE << " There are " << goodElectron.size() << " remaining good electrons " << SLogger::endmsg;
-
+	
 	if(Zmumu||Zee){
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
 		if(examineThisEvent) std::cout << " Z mass is " << Zmass << std::endl;
@@ -2290,8 +2283,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//if(Zoverlap) return;
 
-	Hist("h_n_goodEl_Hcand")->Fill(goodElectron.size());	
-    if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " good electrons and " << denomElectron.size() << " denom electrons after Zremoval" << std::endl;
+	Hist("h_n_goodEl_Hcand")->Fill(denomElectron.size());	
+    if(examineThisEvent) std::cout << " There are " << denomElectron.size() << " denom electrons after Zremoval" << std::endl;
 	
         //generic vector definitions for MUONS and ELECTRONS
 	std::vector<myobject> genericMuon;
@@ -2378,9 +2371,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
 			isFakeRate = (goodTau[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+			bool verb=false;
+			if(examineThisEvent) verb=true;
 		//	if(!isFakeRate && (dZ1<maxDeltaR || dZ2 < maxDeltaR || deltaR(goodTau[j],Zcand[0]) < maxDeltaR || deltaR(goodTau[j],Zcand[1]) < maxDeltaR)) continue;
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[i], denomElectron, maxDeltaR, 0.3)) continue;
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[i], denomElectron, maxDeltaR, 0.3,verb)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3,verb)) continue;
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[i], denomMuon, maxDeltaR, 0.3)) continue;
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
@@ -2395,8 +2390,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
 			
-			bool verb=false;
-			if(examineThisEvent) verb=true;
 			
 			if(AdLepton_tt(genericMuon,genericElectron,goodTau,goodTau[i],goodTau[j],verb)){
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
@@ -2500,8 +2493,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericMuon[i]) << std::endl;
 			bool isFakeRate = (genericMuon[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+			bool verb=false;
+			if(examineThisEvent) verb=true;
+			
 		//	if(!isFakeRate && (deltaR(goodTau[j],Zcand[0]) > maxDeltaR || deltaR(goodTau[j],Zcand[1]) > maxDeltaR)) continue;
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
 			if(examineThisEvent) std::cout << "There are " << genericMuon.size() << " muons." << std::endl;
@@ -2529,8 +2525,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;  
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
-			bool verb=false;
-			if(examineThisEvent) verb=true;
 			if(AdLepton_mt(m,i,genericMuon,genericElectron,goodTau,genericMuon[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << " Aborting due to additional lepton" << std::endl;
 				continue;}
@@ -2620,8 +2614,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericElectron[i]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+			bool verb=false;
+			if(examineThisEvent) verb=true;
 		//	if(!isFakeRate && (deltaR(goodTau[j],Zcand[0]) > maxDeltaR || deltaR(goodTau[j],Zcand[1]) > maxDeltaR)) continue;
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 		
 			if(examineThisEvent) std::cout << "There are " << genericElectron.size() << " electrons	." << std::endl;
@@ -2652,8 +2648,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
 			
-			bool verb = false;
-			if(examineThisEvent) verb = true;
 			if(AdLepton_et(m,i,genericMuon,genericElectron,goodTau,genericElectron[i],goodTau[j],verb)){ 
 				if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
 				continue;
