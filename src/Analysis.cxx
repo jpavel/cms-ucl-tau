@@ -1758,6 +1758,70 @@ void Analysis::CrossCleanWithMu(std::vector<myobject> _input, std::vector<myobje
 		}
 }
 
+bool Analysis::FindZ(std::vector<myobject>* _lepton, std::vector<myobject>* _Zcand, bool _isMu, bool verb, double _maxDeltaR, double _bestMass,
+double _massLow = 60., double _massHi = 120., double _relIso = 0.3){
+	
+	bool Zll = false;
+	bool Zcand=false;
+	double dMass=999.0;
+	int Zindex[2] = {-1,-1};
+	if(verb && _isMu) std::cout << " Looking for Zmm." << std::endl;
+	if(verb && !_isMu) std::cout << " Looking for Zee." << std::endl;
+	for(uint i = 0; i < _lepton->size(); i++)
+		{
+			if(verb) std::cout << "  ->loose lepton no. "<< i << "/" << _lepton->size() << " has pt "<<  (_lepton->at(i)).pt << " and charge " << (_lepton->at(i)).charge << " "  << std::endl;
+			if(Zll) continue;
+			if(RelIso(_lepton->at(i)) > _relIso) continue;
+			if(_isMu && !isLooseMu(_lepton->at(i))) continue;
+			else if(!LooseEleId(_lepton->at(i))|| (_lepton->at(i)).numLostHitEleInner>1) continue;
+			if(verb) std::cout << "  -> Passed pre-selection " << std::endl;
+			for(uint j = i+1; j < _lepton->size() && !Zll; j++)
+			{
+				if(verb) std::cout << "  -->second lepton no. "<< j << " has pt "<<  (_lepton->at(j)).pt << " and charge " << (_lepton->at(j)).charge << " " << std::endl;
+				if(RelIso(_lepton->at(j)) > _relIso) continue;
+				if(_isMu && !isLooseMu(_lepton->at(j))) continue;
+				else if(!LooseEleId(_lepton->at(j))|| (_lepton->at(j)).numLostHitEleInner>1) continue;
+				if((_lepton->at(i)).charge*(_lepton->at(j)).charge >=0.) continue;
+				if(deltaR(_lepton->at(i),_lepton->at(j))< _maxDeltaR) continue;
+				if(verb) std::cout << " Passed pre-selection " << std::endl;
+				
+				double mass = PairMass(_lepton->at(i),_lepton->at(j));
+				if(verb) std::cout << " mass " << mass << std::endl;
+				
+				if(mass > _massLow && mass < _massHi){
+					Zll=true;
+					double dM = 999.;
+					if(_bestMass > 0.0){
+						Zll=false;
+						dM=fabs(mass-BestMassForZ);	
+						if(dM < dMass){
+							Zindex[0]=i;
+							Zindex[1]=j;
+							dMass=dM;
+							Zcand=true;
+						}
+					}else{
+						Zcand=true;
+						Zindex[0]=i;
+						Zindex[1]=j;
+					}
+				}
+			}
+		}
+		if(Zindex[0] > -1 && Zindex[1] > -1 && Zcand){
+	        int i = Zindex[0];
+			int j = Zindex[1];
+		if((_lepton->at(i)).pt > 20.){
+			_Zcand->push_back(_lepton->at(i));
+			_Zcand->push_back(_lepton->at(j));
+			_lepton->erase(_lepton->begin()+i);
+			_lepton->erase(_lepton->begin()+j-1);
+			Zll=true;
+		}
+	}
+	return Zll;	
+}
+
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
@@ -1866,174 +1930,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> denomElectron = SelectGoodElVector(electron,examineThisEvent);
 	Hist("h_n_goodEl")->Fill(denomElectron.size(),PUWeight);
 	
+	//overlap cleaning
+	CrossCleanWithMu(denomElectron,denomMuon,examineThisEvent,maxDeltaR);
+	if(examineThisEvent) std::cout << " There are " << denomElectron.size() << " denom electrons" << std::endl;
 	
 	
 	// Z compatibility
 	std::vector<myobject> Zcand;
 	Zcand.clear();
 	
-	//overlap cleaning
-	
-	
-	CrossCleanWithMu(denomElectron,denomMuon,examineThisEvent,maxDeltaR);
-	
-	//~ for(int i = 0; i < int(denomElectron.size()); i++)
-	//~ {
-		//~ if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << denomElectron.size() << std::endl;
-		//~ bool removed = false;
-	//~ 
-		//~ for(uint j = 0; j < denomMuon.size() && !removed; j++)
-		//~ {
-			//~ if(examineThisEvent) std::cout << "Looping over mu no. " << j << " out of " << denomMuon.size() << " " << 
-			//~ deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi) << std::endl;
-			//~ if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR && RelIso(denomMuon[j]) < 0.3 && isLooseMu(denomMuon[i])) 
-			//~ {	denomElectron.erase(denomElectron.begin()+i); i--; removed = true;}
-			//~ if(examineThisEvent) std::cout << "Muremoved? " << removed << std::endl;
-		//~ }
-//~ 
-	//~ }
-	//~ 
-	
-	
-
-	if(examineThisEvent) std::cout << " There are " << denomElectron.size() << " denom electrons" << std::endl;
-	
-	
 	
 	bool Zmumu = false;
 	bool Zee = false;
-	bool Zmucand, Zelcand;
-	Zmucand=Zelcand=false;
-	double dMass=999.0;
-	int Zindex[2] = {-1,-1};
+	
 	if(examineThisEvent) std::cout << "Finding Z out of " << denomMuon.size() << " muons " << std::endl;
 	if(!DoubleE){
-	for(uint i = 0; i < denomMuon.size(); i++)
-	{
-		m_logger << VERBOSE << "  ->denom muon no. "<< i << " has pt "<<  denomMuon[i].pt << " and charge " << denomMuon[i].charge << SLogger::endmsg;
-		if(examineThisEvent) std::cout << "  ->denom muon no. "<< i << " has pt "<<  denomMuon[i].pt << " and charge " << denomMuon[i].charge << std::endl;
-		if(Zmumu) continue;
-		if(RelIso(denomMuon[i]) > 0.3) continue;
-		if(!isLooseMu(denomMuon[i])) continue;
-		if(examineThisEvent) std::cout << "  -> Passed pre-selection " << std::endl;
-		for(uint j = i+1; j < denomMuon.size() && !Zmumu; j++)
-		{
-			m_logger << VERBOSE << "  -->second muon no. "<< j << " has pt "<<  denomMuon[j].pt << " and charge " << denomMuon[j].charge << SLogger::endmsg;
-			if(examineThisEvent) std::cout << "  -->second muon no. "<< j << " has pt "<<  denomMuon[j].pt << " and charge " << denomMuon[j].charge << std::endl;
-			if(RelIso(denomMuon[j]) > 0.3) continue;
-			if(!isLooseMu(denomMuon[j])) continue;
-			if(denomMuon[i].charge*denomMuon[j].charge >=0.) continue;
-			if(deltaR(denomMuon[i].eta,denomMuon[i].phi,denomMuon[j].eta,denomMuon[j].phi)< maxDeltaR) continue;
-			if(examineThisEvent) std::cout << " Passed pre-selection " << std::endl;
-			
-			TLorentzVector cand;
-			cand.SetPxPyPzE(denomMuon[i].px+denomMuon[j].px,
-					denomMuon[i].py+denomMuon[j].py,
-					denomMuon[i].pz+denomMuon[j].pz,
-					denomMuon[i].E+denomMuon[j].E);
-			double mass = cand.M();
-			m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-			if(examineThisEvent) std::cout << " mass " << mass << std::endl;
-			
-			if(mass > 60. && mass < 120.){
-				Zmumu=true;
-				double dM = 999.;
-				if(BestMassForZ > 0.0){
-					Zmumu=false;
-					dM=fabs(mass-BestMassForZ);
-
-					if(dM < dMass){
-						Zindex[0]=i;
-						Zindex[1]=j;
-						dMass=dM;
-						Zmucand=true;
-					}
-				}else{
-					Zmucand=true;
-					Zindex[0]=i;
-					Zindex[1]=j;
-				}
-			}
-		}
-	}
-	}
-	if(Zindex[0] > -1 && Zindex[1] > -1 && Zmucand){
-		        
-            int i = Zindex[0];
-			int j = Zindex[1];
-	
-		if(denomMuon[i].pt > 20.){
-			Zcand.push_back(denomMuon[i]);
-			Zcand.push_back(denomMuon[j]);
-			denomMuon.erase(denomMuon.begin()+i);
-			denomMuon.erase(denomMuon.begin()+j-1);
-	
-			Zmumu=true;
-		}
+		Zmumu=FindZ(&denomMuon, &Zcand, true, examineThisEvent, maxDeltaR, BestMassForZ);
 	}
 	
-
-
 	if(!Zmumu && !DoubleM)
 	{
-		dMass = 999.;
-		for(uint i = 0; i < denomElectron.size(); i++)
-		{
-			if(examineThisEvent) std::cout << " ->denom electron no. "<< i << " has pt "<<  denomElectron[i].pt << " and charge " << denomElectron[i].charge << std::endl;
-			if(Zee) continue;
-			if(RelIso(denomElectron[i]) > 0.3) continue;
-			if(!LooseEleId(denomElectron[i])) continue;
-			if(denomElectron[i].numLostHitEleInner>1) continue;
-			for(uint j = i+1; j < denomElectron.size() && !Zee; j++)
-			{
-				m_logger << VERBOSE << "  -->second electron no. "<< j << " has pt "<<  denomElectron[j].pt << " and charge " << denomElectron[j].charge << SLogger::endmsg;
-				if(RelIso(denomElectron[j]) > 0.3) continue;	
-				if(!LooseEleId(denomElectron[j])) continue;
-				if(denomElectron[j].numLostHitEleInner>1) continue;
-				if(denomElectron[i].charge*denomElectron[j].charge >=0.) continue;
-				if(deltaR(denomElectron[i].eta,denomElectron[i].phi,denomElectron[j].eta,denomElectron[j].phi)< maxDeltaR) continue;
-
-				TLorentzVector cand;
-				cand.SetPxPyPzE(denomElectron[i].px+denomElectron[j].px,
-						denomElectron[i].py+denomElectron[j].py,
-						denomElectron[i].pz+denomElectron[j].pz,
-						denomElectron[i].E+denomElectron[j].E);
-				double mass = cand.M();
-				m_logger << VERBOSE << "  -->Candidate mass is " << mass << SLogger::endmsg;
-				if(mass > 60. && mass < 120.){ 
-					Zee=true;
-					double dM = 999.; 
-					if(BestMassForZ > 0.0){
-						Zee=false;
-						dM=fabs(mass-BestMassForZ);
-						if(dM < dMass){
-							Zindex[0]=i;
-							Zindex[1]=j;
-							dMass=dM;
-							Zelcand=true;
-						}
-					}else{
-						Zelcand=true;
-						Zindex[0]=i;
-						Zindex[1]=j;
-					} 
-
-				}
-			}
-		}
-	
-		if(Zindex[0] > -1 && Zindex[1] > -1 && Zelcand){
-				int i = Zindex[0];
-				int j = Zindex[1];
-		
-			if(denomElectron[i].pt > 20.){			
-				Zcand.push_back(denomElectron[i]);
-				Zcand.push_back(denomElectron[j]);	
-				denomElectron.erase(denomElectron.begin()+i);
-				denomElectron.erase(denomElectron.begin()+j-1);
-				Zee=true;
-			}
-		}
+		Zee=FindZ(&denomElectron, &Zcand, false, examineThisEvent, maxDeltaR, BestMassForZ);	
 	}
 
 	

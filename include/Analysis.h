@@ -81,6 +81,8 @@ public:
    std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_, double muEta_);
    std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
    void CrossCleanWithMu(std::vector<myobject> _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso, bool _looseMuId);
+   bool FindZ(std::vector<myobject>* _lepton, std::vector<myobject>* _Zcand, bool _isMu, bool verb, double _maxDeltaR, double _bestMass,
+	double _massLow, double _massHi, double _relIso);
 
 
 
