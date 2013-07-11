@@ -1737,21 +1737,21 @@ std::vector<myobject> Analysis::SelectGoodElVector(std::vector<myobject> _electr
 	return outEl_;
 }
 
-void Analysis::CrossCleanWithMu(std::vector<myobject> _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso = 0.3, bool _looseMuId = true){
+void Analysis::CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso = 0.3, bool _looseMuId = true){
 	
-	for(int i = 0; i < int(_input.size()); i++)
+	for(int i = 0; i < int(_input->size()); i++)
 		{
-			if(verb) std::cout << "Looping over input object no. " << i << " out of " << _input.size() << std::endl;
+			if(verb) std::cout << "Looping over input object no. " << i << " out of " << _input->size() << std::endl;
 			bool removed = false;
 		
 			for(uint j = 0; j < _muon.size() && !removed; j++)
 			{
 				if(verb) std::cout << "Looping over mu no. " << j << " out of " << _muon.size() << " " << 
-				deltaR(_input[i],_muon[j]) << std::endl;
+				deltaR(_input->at(i),_muon[j]) << std::endl;
 				if(verb) std::cout << " > Pt is " << _muon[j].pt << " iso is " << RelIso(_muon[j]) << " ID is " << isLooseMu(_muon[j]) << std::endl;
 				bool ID = _looseMuId? isLooseMu(_muon[j]) : true;
-				if(deltaR(_input[i],_muon[j])< _maxDeltaR && RelIso(_muon[j]) < _muIso && ID) 
-				{	_input.erase(_input.begin()+i); i--; removed = true;}
+				if(deltaR(_input->at(i),_muon[j])< _maxDeltaR && RelIso(_muon[j]) < _muIso && ID) 
+				{	_input->erase(_input->begin()+i); i--; removed = true;}
 				if(verb) std::cout << "input removed ? " << removed << std::endl;
 			}
 	
@@ -1931,19 +1931,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_n_goodEl")->Fill(denomElectron.size(),PUWeight);
 	
 	//overlap cleaning
-	CrossCleanWithMu(denomElectron,denomMuon,examineThisEvent,maxDeltaR);
-	if(examineThisEvent) std::cout << " There are " << denomElectron.size() << " denom electrons" << std::endl;
+	CrossCleanWithMu(&denomElectron,denomMuon,examineThisEvent,maxDeltaR);
+	if(examineThisEvent) std::cout << " There are " << denomElectron.size() << " selected electrons" << std::endl;
 	
 	
 	// Z compatibility
 	std::vector<myobject> Zcand;
 	Zcand.clear();
-	
-	
 	bool Zmumu = false;
 	bool Zee = false;
 	
-	if(examineThisEvent) std::cout << "Finding Z out of " << denomMuon.size() << " muons " << std::endl;
 	if(!DoubleE){
 		Zmumu=FindZ(&denomMuon, &Zcand, true, examineThisEvent, maxDeltaR, BestMassForZ);
 	}
