@@ -2412,23 +2412,26 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
 			if(examineThisEvent) std::cout << "There are " << genericMuon.size() << " muons." << std::endl;
-			if(isFakeRate && genericMuon.size() > 1) continue;
+			//if(isFakeRate && genericMuon.size() > 1) continue;
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
+			if(examineThisEvent) std::cout << "Passed pt cut" << std::endl;
 			if(isFakeRate && !WZ_Rej(m,genericMuon[i])) continue;	
+			if(examineThisEvent) std::cout << "Passed WZ rejection" << std::endl;
 			if(isFakeRate && muTau) continue; // save only one pair
-			if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
-			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
-			bool usedTau = false;
-			for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
-			{
-				int usedID = -2;
-				usedID=usedTauIdx[iID];
-				int id=j;
-				if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
-			    if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
-			}
-			if(usedTau) continue;
+			if(examineThisEvent) std::cout << "Passed uniqueness cut" << std::endl;
+		//	if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
+		//	if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
+			//~ bool usedTau = false;
+			//~ for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
+			//~ {
+				//~ int usedID = -2;
+				//~ usedID=usedTauIdx[iID];
+				//~ int id=j;
+				//~ if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
+			    //~ if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
+			//~ }
+			//~ if(usedTau) continue;
 				
 			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
@@ -2442,7 +2445,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) continue;
 			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
 			signal = true; 
-			muTau=true;
+			if(isFakeRate) muTau=true;
 			Hcand.push_back(genericMuon[i]);
 			Hcand.push_back(goodTau[j]);
 			int index = Hcand.size() -2;
@@ -2482,6 +2485,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					else if(Zee) Hcand_type_cat2.push_back(5);
 				}
 			}else{
+				if(examineThisEvent){
+					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					std::cout << "Saving denom fake candidates with pass = " << pass1 << " " << pass2 << 
+					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " " << ClosestJet.pt << " " << 
+					PairMass(Hcand[index],Hcand[index+1]) << std::endl;
+				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				Hcand_pass.push_back(pass1);
@@ -2532,24 +2541,25 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 		
 			if(examineThisEvent) std::cout << "There are " << genericElectron.size() << " electrons	." << std::endl;
-			if(isFakeRate && genericElectron.size() > 1) continue;
+			//if(isFakeRate && genericElectron.size() > 1) continue;
 			
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
-			if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;	
+			if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;
+			if(examineThisEvent) std::cout << "Passed Pt cuts and WZ rej" << std::endl;	
 			if(isFakeRate && eTau) continue; // save only one pair	
-			if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
+			//if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
 			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
-			bool usedTau = false;
-			for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
-			{
-				int usedID = -2;
-				usedID=usedTauIdx[iID];
-				int id=j;
-				if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
-			    if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
-			}
-			if(usedTau) continue;	
+			//~ bool usedTau = false;
+			//~ for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
+			//~ {
+				//~ int usedID = -2;
+				//~ usedID=usedTauIdx[iID];
+				//~ int id=j;
+				//~ if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
+			    //~ if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
+			//~ }
+			//~ if(usedTau) continue;	
 			
 			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5) continue;
 			
@@ -2569,7 +2579,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			myobject ClosestJet = ClosestInCollection(genericElectron[i],m->RecPFJetsAK5);
 			if(examineThisEvent) std::cout << "The closest jet distance is " << jetDist << " " << ClosestJet.pt << std::endl;
 			signal = true; 
-			eTau=true;
+			if(isFakeRate) eTau=true;
 			if(examineThisEvent) std::cout << "tau MVA3VTight, eta,Loose:" << goodTau[j].discriminationByElectronMVA3VTight << " " << goodTau[j].eta << " " << goodTau[j].discriminationByElectronLoose << std::endl;
 			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
 			Hcand.push_back(genericElectron[i]);
@@ -2612,6 +2622,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					else if(Zee) Hcand_type_cat2.push_back(7);
 				}
 			}else{
+				if(examineThisEvent){
+					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					std::cout << "Saving denom fake candidates with pass = " << pass1 << " " << pass2 << 
+					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " " << ClosestJet.pt << " " << 
+					PairMass(Hcand[index],Hcand[index+1]) << std::endl;
+				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				Hcand_pass.push_back(pass1);
