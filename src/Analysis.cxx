@@ -2333,8 +2333,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
-			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt && (pt1+pt2) > Cut_tautau_sumPt);
-			signal = pass1 && pass2 && signalPtCuts &&!isFakeRate;
+			double sumPt = pt1+pt2;
+			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt);
+			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
+			signal = pass1 && pass2 && signalPtCuts && !isFakeRate && LTcut;
 			if(signal) tauTau=true;
 			if(!isFakeRate&&!signal){
 				if(!pass1 && !pass2 && !category0)
