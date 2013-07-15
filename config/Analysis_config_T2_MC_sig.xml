@@ -78,7 +78,7 @@
         <Item Name="maxDeltaR_H" Value="0.3" />            
 				
 				<Item Name="UseLongEvent" Value="false" />
-                <Item Name="examineEvent" Value="17174" />
+                <Item Name="examineEvent" Value="44487" />
                 <Item Name="OverM" Value="" />
                 
                 <Item Name="BelowM" Value="" />
