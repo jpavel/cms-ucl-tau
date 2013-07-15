@@ -375,6 +375,7 @@ private:
         reweight::LumiReWeighting* LumiWeights_;
         ofstream log1;
         ofstream logFR;
+        ofstream logS;
         ofstream log_events;
         ofstream log_files;
         
@@ -430,7 +431,8 @@ private:
     
     bool UseSumPtCut;
     double Cut_tautau_sumPt;
-    double Cut_leptau_sumPt;
+    double Cut_mutau_sumPt;
+    double Cut_etau_sumPt;
     double Cut_leplep_sumPt;
     
     bool IgnoreAdditionalTaus;

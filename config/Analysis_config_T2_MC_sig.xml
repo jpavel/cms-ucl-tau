@@ -45,7 +45,7 @@
 
 		
 		<Item Name="checkCategories" Value="true"/>
-		<Item Name="isSimulation" Value="false"/>
+		<Item Name="isSimulation" Value="true"/>
 		<Item Name="is2011" Value="false"/>
 		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="true"/>
@@ -57,7 +57,7 @@
         <Item Name="vetoElectronTrigger" Value="false" />
         
  <!-- Selection cuts -->       
-        <Item Name="Cut_tau_base_Pt" Value="20" />
+        <Item Name="Cut_tau_base_Pt" Value="15" />
 		<Item Name="Cut_tautau_Pt_1" Value="10" />
 		<Item Name="Cut_tautau_Pt_2" Value="10" />
 		<Item Name="Cut_leptau_Pt" Value="5" />
@@ -77,15 +77,15 @@
 		<Item Name="maxDeltaR" Value="0.1" />            
         <Item Name="maxDeltaR_H" Value="0.3" />            
 				
-				<Item Name="UseLongEvent" Value="true" />
-                <Item Name="examineEvent" Value="" />
-                <Item Name="OverM" Value="48" />
+				<Item Name="UseLongEvent" Value="false" />
+                <Item Name="examineEvent" Value="17174" />
+                <Item Name="OverM" Value="" />
                 
-                <Item Name="BelowM" Value="557037" />
+                <Item Name="BelowM" Value="" />
                 <Item Name="removeTauOverlap" Value="true" />
                 
          <Item Name="DoubleM" Value="false" />
-         <Item Name="DoubleE" Value="true" />
+         <Item Name="DoubleE" Value="false" />
          
          <Item Name="IgnorePUW" Value="True" />
          <Item Name="IgnoreSF" Value="True" />
