@@ -3,8 +3,7 @@
 // Local include(s):
 #include "../include/Analysis.h"
 
-#include "Corrector.h"
-
+#include "Corrector_new.h"
 
 ClassImp( Analysis );
 
@@ -74,7 +73,23 @@ Analysis::Analysis()
 		DeclareProperty("DoubleE",DoubleE);
 		DeclareProperty("DoubleM",DoubleM);
 		
-   
+		
+		//syst
+		DeclareProperty("ShiftTauES_up",ShiftTauES_up); 
+		DeclareProperty("ShiftTauES_down",ShiftTauES_down); 
+		DeclareProperty("SystUncert_ES",SystUncert_ES); 
+		DeclareProperty("onlyTrigger",onlyTrigger);
+		DeclareProperty("onlyIDIso",onlyIDIso);
+		DeclareProperty("SFShiftUp_Mu",SFShiftUp_Mu);
+		DeclareProperty("SFShiftDown_Mu",SFShiftDown_Mu);
+		DeclareProperty("SFShiftUp_Ele",SFShiftUp_Ele);
+		DeclareProperty("SFShiftDown_Ele",SFShiftDown_Ele);
+		
+		//ntuple out
+		
+		DeclareProperty("FillPDFInfo",FillPDFInfo);
+		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
+
 	}
 
 Analysis::~Analysis() {
@@ -111,6 +126,36 @@ int Analysis::EventTypeConv(int e_type_in)
 }
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
+	
+	
+	// ntuple definition
+	//DeclareVariable(out_pt,"el_pt");
+	DeclareVariable(o_run,"o_run");
+	DeclareVariable(o_lumi,"o_lumi");
+	DeclareVariable(o_event,"o_event");
+	DeclareVariable(o_pass, "o_pass");
+	DeclareVariable(o_event_weight,"o_event_weight");
+	DeclareVariable(o_px,"o_px");
+	DeclareVariable(o_py,"o_py");
+	DeclareVariable(o_pz,"o_pz");
+	DeclareVariable(o_E,"o_E");
+	DeclareVariable(o_pdg,"o_pdg");
+	DeclareVariable(o_MET,"o_MET"); //(Met_x,Met_y)
+	DeclareVariable(o_covMET,"o_covMET"); // covMatrix(00,01,10,11)
+	//pdf info
+	DeclareVariable(o_pdf_alphaQCD,"o_alphaQCD");
+	DeclareVariable(o_pdf_alphaQED,"o_alphaQED");
+	DeclareVariable(o_pdf_qScale,"o_qScale");
+	DeclareVariable(o_pdf_weight,"o_weight");
+	DeclareVariable(o_pdf_scalePDF,"o_scalePDF");
+	DeclareVariable(o_pdf_binningValue0,"o_binningValue0");
+	DeclareVariable(o_pdf_id,"o_id"); 
+	DeclareVariable(o_pdf_x,"o_x"); 
+	DeclareVariable(o_pdf_xPDF,"o_xPDF"); 
+	DeclareVariable(o_pdf_hasPDF,"o_hasPDF"); 
+	DeclareVariable(o_pdf_hasBinningValues,"o_hasBinningValues"); 
+	DeclareVariable(o_pdf_signalProcessID,"o_signalProcessID"); 
+	DeclareVariable(o_pdf_binningValueSize,"o_binningValueSize"); 
 
 	h_deltaR                       			 = Book(TH1D("h_deltaR","deltaR distributions", 100,0,10));
 	h_deltaR_max                    		 = Book(TH1D("h_deltaR_max","maxDeltaR distributions", 100,0,10));
@@ -830,7 +875,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_Nvertex_AfterZH = Book(TH1D("h_Nvertex_AfterZH","Number of vertices - selected Z and H", 50, -0.5,49.5));
 	h_Nvertex_AfterZH_W = Book(TH1D("h_Nvertex_AfterZH_W","Number of vertices - selected Z and H (PU weight)", 50, -0.5,49.5));
 
-	DeclareVariable(out_pt,"el_pt");
+	
 
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
@@ -1097,14 +1142,22 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 
 	std::cout << "Event type summary: " << std::endl;
-	std::cout << "Z(mumu)H(mutau)   : " << h_event_type->GetBinContent(1) << std::endl;
-	std::cout << "Z(mumu)H(muE)     : " << h_event_type->GetBinContent(2) << std::endl;
-	std::cout << "Z(mumu)H(Etau)    : " << h_event_type->GetBinContent(3) << std::endl;
-	std::cout << "Z(mumu)H(tautau)  : " << h_event_type->GetBinContent(4) << std::endl;
-	std::cout << "Z(EE)H(mutau)     : " << h_event_type->GetBinContent(5) << std::endl;
-	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << std::endl;
-	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
-	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
+	std::cout << "Z(mumu)H(mutau)   : " << h_event_type->GetBinContent(1) << 
+	" (" << h_event_type_raw->GetBinContent(1) << ")"<< std::endl;
+	std::cout << "Z(mumu)H(muE)     : " << h_event_type->GetBinContent(2) << 
+	" (" << h_event_type_raw->GetBinContent(2) << ")"<< std::endl;
+	std::cout << "Z(mumu)H(Etau)    : " << h_event_type->GetBinContent(3) << 
+	" (" << h_event_type_raw->GetBinContent(3) << ")"<< std::endl;
+	std::cout << "Z(mumu)H(tautau)  : " << h_event_type->GetBinContent(4) << 
+	" (" << h_event_type_raw->GetBinContent(4) << ")"<< std::endl;
+	std::cout << "Z(EE)H(mutau)     : " << h_event_type->GetBinContent(5) << 
+	" (" << h_event_type_raw->GetBinContent(5) << ")"<< std::endl;
+	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << 
+	" (" << h_event_type_raw->GetBinContent(6) << ")"<< std::endl;
+	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << 
+	" (" << h_event_type_raw->GetBinContent(7) << ")"<< std::endl;
+	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << 
+	" (" << h_event_type_raw->GetBinContent(8) << ")"<< std::endl;
 
 	std::cout << "Iso < 0.3 summary: " << std::endl;
        
@@ -1875,6 +1928,35 @@ double _massLow = 60., double _massHi = 120., double _relIso = 0.3){
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
+	o_run.clear();
+	o_lumi.clear();
+	o_event.clear();
+	
+	//clearing output vectors
+	o_pass.clear();
+	o_event_weight.clear();
+	o_px.clear();
+	o_py.clear();
+	o_pz.clear();
+	o_E.clear();
+	o_pdg.clear();
+	o_MET.clear(); //(Met_x,Met_y)
+	o_covMET.clear(); // covMatrix(00,01,10,11)
+	//pdf info
+	o_pdf_alphaQCD.clear();
+	o_pdf_alphaQED.clear();
+	o_pdf_qScale.clear();
+	o_pdf_weight.clear();
+	o_pdf_scalePDF.clear();
+	o_pdf_binningValue0.clear();
+	o_pdf_id.clear(); //(first,second)
+	o_pdf_x.clear(); //(first,second)
+	o_pdf_xPDF.clear(); //(first,second)
+	o_pdf_hasPDF.clear(); 
+	o_pdf_hasBinningValues.clear(); 
+	o_pdf_signalProcessID.clear(); 
+	o_pdf_binningValueSize.clear(); 
+
 	// bookkepping part
 	++m_allEvents;
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
@@ -2000,27 +2082,59 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	double corrZlep1,corrZlep2;
 	corrZlep1=corrZlep2=1.0;
 	double Z_weight = PUWeight;
+	
 	if(isSimulation && !IgnoreSF){
 		if(Zmumu)
 		{
-			if(is2012_53){
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);;
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);;
-			}else if(is2012_52){
-				corrZlep1=Cor_ID_Iso_Mu_Loose_2012(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Mu_Loose_2012(Zcand[1]);
-			}else{
+			if(is2012_53){ 
+				if(SFShiftUp_Mu){
+				    if(onlyIDIso && !onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1]));
+                    }else if(!onlyIDIso && onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])+Unc_Trg_Mu_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])+Unc_Trg_Mu_2012_53X(Zcand[1]));
+                    }
+				}else if(SFShiftDown_Mu){
+					if(onlyIDIso && !onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1]));
+                    }else if(!onlyIDIso && onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Mu_2012_53X(Zcand[0])-Unc_Trg_Mu_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Mu_2012_53X(Zcand[1])-Unc_Trg_Mu_2012_53X(Zcand[1]));
+                    }
+				}else{ 
+					corrZlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[0])*Corr_Trg_Mu_2012_53X(Zcand[0]);
+					corrZlep2=Cor_ID_Iso_Mu_Loose_2012_53X(Zcand[1])*Corr_Trg_Mu_2012_53X(Zcand[1]);
+				}
+			}
+			else{
 				corrZlep1=Cor_ID_Iso_Mu_Loose_2011(Zcand[0])*Corr_Trg_Mu_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Mu_Loose_2011(Zcand[1])*Corr_Trg_Mu_2011(Zcand[1]);
 			}
 			Z_weight *= corrZlep1* corrZlep2;	
 		}else if(Zee){
-			if(is2012_53){
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);;
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);;
-			}else if(is2012_52){
-				corrZlep1=Cor_ID_Iso_Ele_Loose_2012(Zcand[0]);
-				corrZlep2=Cor_ID_Iso_Ele_Loose_2012(Zcand[1]);
+			if(is2012_53){ 
+				if(SFShiftUp_Ele){
+					if(onlyIDIso && !onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])+Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1]));
+                    }else if(!onlyIDIso && onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])+Unc_Trg_Ele_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])+Unc_Trg_Ele_2012_53X(Zcand[1]));
+                    }   
+                }else if(SFShiftDown_Ele){
+					if(onlyIDIso && !onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])-Unc_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1]));
+					}else if(!onlyIDIso && onlyTrigger){
+						corrZlep1=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0]))*(Corr_Trg_Ele_2012_53X(Zcand[0])-Unc_Trg_Ele_2012_53X(Zcand[0]));
+						corrZlep2=(Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1]))*(Corr_Trg_Ele_2012_53X(Zcand[1])-Unc_Trg_Ele_2012_53X(Zcand[1]));
+					}
+				}else{
+					corrZlep1=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[0])*Corr_Trg_Ele_2012_53X(Zcand[0]);
+					corrZlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Zcand[1])*Corr_Trg_Ele_2012_53X(Zcand[1]);
+				} 
 			}else{
 				corrZlep1=Cor_ID_Iso_Ele_Loose_2011(Zcand[0])*Corr_Trg_Ele_2011(Zcand[0]);
 				corrZlep2=Cor_ID_Iso_Ele_Loose_2011(Zcand[1])*Corr_Trg_Ele_2011(Zcand[1]);
@@ -2028,6 +2142,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Z_weight *= corrZlep1* corrZlep2;	
 		}
 	}
+	
 	double Zmass = -100.;
 	if(Zmumu){
 		TLorentzVector muon1;
@@ -2103,11 +2218,39 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double tauEta = tau[i].eta;
 		bool LooseMuon = (tau[i].discriminationByMuonLoose2 > 0.5);
 		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
-
-		
+		double tauPt;
+		double tauPx;
+		double tauPy;
+		double tauPz;
+		double tauE;
+                //shift the pt of the tau by 1 sigma
+		if(ShiftTauES_up && !ShiftTauES_down){
+                  tauPt = tau[i].pt + SystUncert_ES * tau[i].pt;
+				  tauPx = tau[i].px + SystUncert_ES * tau[i].px;
+				  tauPy = tau[i].py + SystUncert_ES * tau[i].py;
+				  tauPz = tau[i].pz + SystUncert_ES * tau[i].pz;
+				  tauE = tau[i].E + SystUncert_ES * tau[i].E; 	
+		}else if(ShiftTauES_down && !ShiftTauES_up){
+                  tauPt = tau[i].pt - SystUncert_ES * tau[i].pt;
+                  tauPx = tau[i].px - SystUncert_ES * tau[i].px;
+				  tauPy = tau[i].py - SystUncert_ES * tau[i].py;
+				  tauPz = tau[i].pz - SystUncert_ES * tau[i].pz;
+				  tauE = tau[i].E - SystUncert_ES * tau[i].E;         
+         }else{ 
+                  tauPt = tau[i].pt;
+                  tauPx = tau[i].px;
+                  tauPy = tau[i].py;
+                  tauPz = tau[i].pz;
+                  tauE = tau[i].E;
+               }
 
 		if (fabs(tauEta) < 2.3 && LooseMuon && DecayMode){
 			goodTau.push_back(tau[i]);
+			goodTau[goodTau.size()-1].pt = tauPt;
+			goodTau[goodTau.size()-1].px = tauPx;
+			goodTau[goodTau.size()-1].py = tauPy;
+			goodTau[goodTau.size()-1].pz = tauPz;
+			goodTau[goodTau.size()-1].E = tauE;
 			if(examineThisEvent){
 					std::cout << ">Possible MT candidates: " << std::endl;
 					for(uint iMu=0; iMu < denomMuon.size(); iMu++)
@@ -2460,7 +2603,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	category1= false;
 	category2=false;     
 	
-	for(uint i = 0; i < genericMuon.size() ; i++)
+	for(uint i = 0; i < genericMuon.size()  ; i++)
 	{
 	
 		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
@@ -2472,7 +2615,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Mu candidate i= " << i << " " << genericMuon[i].pt << " " << genericMuon[i].charge << std::endl;
 		//if(!WZ_Rej(m,genericMuon[i])) continue;
 		if(examineThisEvent) std::cout << " Passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;	
-		for(uint j=0; j< goodTau.size() && !(category0 && category1 && category2 && signal); j++)
+		for(uint j=0; j< goodTau.size() && !(category0 && category1 && category2 && signal) ; j++)
 		{
                        
 			
@@ -2483,12 +2626,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool verb=false;
 			if(examineThisEvent) verb=true;
 			
-		//	if(!isFakeRate && (deltaR(goodTau[j],Zcand[0]) > maxDeltaR || deltaR(goodTau[j],Zcand[1]) > maxDeltaR)) continue;
+		
 			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
 			if(examineThisEvent) std::cout << "There are " << genericMuon.size() << " muons." << std::endl;
-			//if(isFakeRate && genericMuon.size() > 1) continue;
+			
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
 			if(examineThisEvent) std::cout << "Passed pt cut" << std::endl;
@@ -2496,18 +2639,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "Passed WZ rejection" << std::endl;
 			if(isFakeRate && muTau) continue; // save only one pair
 			if(examineThisEvent) std::cout << "Passed uniqueness cut" << std::endl;
-		//	if(isFakeRate && (Hcand_cat0.size() + Hcand_cat1.size() + Hcand_cat2.size() > 0)) continue;
-		//	if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
-			//~ bool usedTau = false;
-			//~ for(uint iID = 0; iID < usedTauIdx.size() && isFakeRate && !usedTau; iID++)
-			//~ {
-				//~ int usedID = -2;
-				//~ usedID=usedTauIdx[iID];
-				//~ int id=j;
-				//~ if((id==usedID || id==(usedID+1)) && examineThisEvent && isFakeRate) std::cout << "This tau has been used!" << std::endl;
-			    //~ if((id==usedID || id==(usedID+1)) && isFakeRate) usedTau=true;
-			//~ }
-			//~ if(usedTau) continue;
+	
 				
 			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
 			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
@@ -2603,8 +2735,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				saved_signal=true;
 			}
 			
-			//~ if(Zmumu) Hcand_type.push_back(1);
-			//~ else if(Zee) Hcand_type.push_back(5);
+		
 			
 		}             
 	}
@@ -2620,30 +2751,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	category1= false;
 	category2=false;     
 	
-	for(uint i = 0; i < genericElectron.size() ; i++)
+	for(uint i = 0; i < genericElectron.size()  ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
 		
 		if(genericElectron[i].numLostHitEleInner > 1) continue;
 		if(examineThisEvent) std::cout << " Checking for eTau " << std::endl;
-		//if (!WZ_Rej(m,genericElectron[i])) continue;
+	
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
-		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2); j++)
+		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2)  ; j++)
 		{
-			//~ if((j==usedTauIdx[0] || j==usedTauIdx[1]) && examineThisEvent) std::cout << "This tau has been used!" << std::endl;
-			//~ if(j==usedTauIdx[0] || j==usedTauIdx[1]) continue;
+			
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericElectron[i]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*goodTau[j].charge  > 0);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
-		//	if(!isFakeRate && (deltaR(goodTau[j],Zcand[0]) > maxDeltaR || deltaR(goodTau[j],Zcand[1]) > maxDeltaR)) continue;
+	
 			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 		
 			if(examineThisEvent) std::cout << "There are " << genericElectron.size() << " electrons	." << std::endl;
-			//if(isFakeRate && genericElectron.size() > 1) continue;
+		
 			
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
@@ -2753,8 +2883,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				else if(Zee) Hcand_type_signal.push_back(7);
 				saved_signal=true;
 			}
-			//~ if(Zmumu) Hcand_type.push_back(3);
-			//~ else if(Zee) Hcand_type.push_back(7);
+		
 		
 		}
 	}
@@ -2775,9 +2904,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		if(genericElectron[i].numLostHitEleInner > 1) continue;
 		if(examineThisEvent) std::cout << " Checking for eMu " << std::endl;
-		//if (!WZ_Rej(m,genericElectron[i])) continue;
+		
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << genericMuon.size() << " muons." << std::endl;
-		for(uint j=0; j< genericMuon.size() && !(category0 && category1 && category2 && signal); j++)
+		for(uint j=0; j< genericMuon.size() && !(category0 && category1 && category2 && signal) ; j++)
 		{
 			
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
@@ -2789,10 +2918,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			bool verb = false;
 			if(examineThisEvent) verb = true;
-			//~ if(AdLepton_em(m,i,j,genericMuon,genericElectron,genericElectron[i],genericMuon[j],verb)){ 
-				//~ if(examineThisEvent) std::cout << "   > j failed overlap check." << std::endl;				
-				//~ continue;
-			//~ }
+		
 			
 			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],genericMuon[j], verb)) continue;
 			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
@@ -2860,9 +2986,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				saved_signal=true;
 			}
 			
-			//~ if(Zmumu) Hcand_type.push_back(2);
-			//~ else if(Zee) Hcand_type.push_back(6);
-			
+	
 			
 			
 		}
@@ -2875,7 +2999,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	
 	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
-	//if(Hcand_type.size()!=Hcand.size()/2) m_logger << FATAL << " Mismatch in size of type vector: " << Hcand_type.size() << " is not 1/2 of " << Hcand.size() << SLogger::endmsg; 
 	if((Hcand_cat2.size() + Hcand_cat1.size() + Hcand_cat0.size() + Hcand_FR.size() + Hcand_signal.size()) ==0){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
 	
@@ -2912,39 +3035,56 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	double corrHlep1,corrHlep2;
 	corrHlep1=corrHlep2=1.0;
-	if(isSimulation && !IgnoreSF){
-
-		if(muTau)
+	if(isSimulation && !IgnoreSF && Hcand_signal.size()>0){
+		int event_type = Hcand_type_signal[0];
+		if(event_type%4==1) //mutau
 		{
 			if(is2012_53){
-				corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand[0]);
-			}else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Mu_Tight_2012(Hcand[0]);
+				if(SFShiftUp_Mu && onlyIDIso){
+					corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand_signal[0])+Unc_ID_Iso_Mu_Tight_2012_53X(Hcand_signal[0]);
+				}else if(SFShiftDown_Mu && onlyIDIso){
+					corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand_signal[0])-Unc_ID_Iso_Mu_Tight_2012_53X(Hcand_signal[0]);
+				}else{
+					corrHlep1=Cor_ID_Iso_Mu_Tight_2012_53X(Hcand_signal[0]);
+				}
 			}else{
-				corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand[0]);
+				corrHlep1=Cor_ID_Iso_Mu_Tight_2011(Hcand_signal[0]);
 			}
-		}else if(eTau){
+		}else if(event_type%4==3){ //etau
 			if(is2012_53){
-				corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand[0]);
-			}else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Ele_Tight_2012(Hcand[0]);
+				if(SFShiftUp_Ele && onlyIDIso){
+					corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand_signal[0])+Unc_ID_Iso_Ele_Tight_2012_53X(Hcand_signal[0]);
+				}else if(SFShiftDown_Ele && onlyIDIso){
+					corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand_signal[0])-Unc_ID_Iso_Ele_Tight_2012_53X(Hcand_signal[0]);
+				}else{
+					corrHlep1=Cor_ID_Iso_Ele_Tight_2012_53X(Hcand_signal[0]);
+				}
 			}else{
-				corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand[0]);
+				corrHlep1=Cor_ID_Iso_Ele_Tight_2011(Hcand_signal[0]);
 			}
-		}else if(muE){
+		}else if(event_type%4==2){ //eMu
 			if(is2012_53){
-				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
-				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
-			}else if(is2012_52){
-				corrHlep1=Cor_ID_Iso_Mu_Loose_2012(Hcand[0]);
-				corrHlep2=Cor_ID_Iso_Ele_Loose_2012(Hcand[1]);
+				if(SFShiftUp_Mu && onlyIDIso){
+					corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand_signal[1])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand_signal[1]);
+					corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand_signal[0])+Unc_ID_Iso_Ele_Loose_2012_53X(Hcand_signal[0]);
+				}else if(SFShiftDown_Mu && onlyIDIso){
+					corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand_signal[1])-Unc_ID_Iso_Mu_Loose_2012_53X(Hcand_signal[1]);
+					corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand_signal[0])-Unc_ID_Iso_Ele_Loose_2012_53X(Hcand_signal[0]);
+				}else{
+					
+					corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand_signal[1]);
+					corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand_signal[0]);
+				
+				}
 			}else{
-				corrHlep1=Cor_ID_Iso_Mu_Loose_2011(Hcand[0]);
-				corrHlep2=Cor_ID_Iso_Ele_Loose_2011(Hcand[1]);
+				corrHlep1=Cor_ID_Iso_Mu_Loose_2011(Hcand_signal[1]);
+				corrHlep2=Cor_ID_Iso_Ele_Loose_2011(Hcand_signal[0]);
 			}
 		}
 	}
-
+	
+	//corrHlep1=corrHlep2=1.0;
+	
 	double weight = PUWeight*corrZlep1*corrZlep2*corrHlep1*corrHlep2;
 
 	
@@ -3052,17 +3192,118 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     TLorentzVector Hcand1,Hcand2,H_boson;
 	
 
-	//TLorentzVector Hcand1,Hcand2,H_boson;
+	
 
-	//~ for(uint i =0;i < Hcand.size(); i+=2){
-		//~ Hcand1.SetPxPyPzE(Hcand[i].px,Hcand[i].py,Hcand[i].pz,Hcand[i].E);
-		//~ Hcand2.SetPxPyPzE(Hcand[i+1].px,Hcand[i+1].py,Hcand[i+1].pz,Hcand[i+1].E);
-		//~ H_boson = Hcand1+Hcand2;
-		//~ 
-		//~ h_H_mass_types[Hcand_type[i/2]-1]->Fill(H_boson.M(),weight);
-	//~ }
-
-        
+	// histogramming
+	
+	// signal saving
+	if(Hcand_signal.size() > 0)
+		{
+			 int event_type = Hcand_type_signal[0];
+			 Hist( "h_event_type" )->Fill(event_type,weight);
+			 Hist( "h_event_type_raw" )->Fill(event_type);
+			 
+			 //ntuple filling
+			o_run.push_back(m->runNumber);
+			o_lumi.push_back(m->lumiNumber);
+			o_event.push_back(m->eventNumber);
+			
+			o_pass.push_back(true);
+			o_event_weight.push_back(weight);
+			o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
+			o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
+			
+			o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
+			o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
+			
+			o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
+			o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
+			
+			o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
+			o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
+			
+			switch(event_type){
+				case 1://MMMT
+					o_pdg.push_back(13*Zcand[0].charge);
+					o_pdg.push_back(13*Zcand[1].charge);
+					o_pdg.push_back(13*Hcand[0].charge);
+					o_pdg.push_back(15*Hcand[1].charge);
+					break;
+				case 2://MMME
+					o_pdg.push_back(13*Zcand[0].charge);
+					o_pdg.push_back(13*Zcand[1].charge);
+					o_pdg.push_back(13*Hcand[0].charge);
+					o_pdg.push_back(11*Hcand[1].charge);
+					break;
+				case 3://MMET
+					o_pdg.push_back(13*Zcand[0].charge);
+					o_pdg.push_back(13*Zcand[1].charge);
+					o_pdg.push_back(11*Hcand[0].charge);
+					o_pdg.push_back(15*Hcand[1].charge);
+					break;
+				case 4://MMTT
+					o_pdg.push_back(13*Zcand[0].charge);
+					o_pdg.push_back(13*Zcand[1].charge);
+					o_pdg.push_back(15*Hcand[0].charge);
+					o_pdg.push_back(15*Hcand[1].charge);
+					break;
+				case 5://EEMT
+					o_pdg.push_back(11*Zcand[0].charge);
+					o_pdg.push_back(11*Zcand[1].charge);
+					o_pdg.push_back(13*Hcand[0].charge);
+					o_pdg.push_back(15*Hcand[1].charge);
+					break;
+				case 6://EEME
+					o_pdg.push_back(11*Zcand[0].charge);
+					o_pdg.push_back(11*Zcand[1].charge);
+					o_pdg.push_back(13*Hcand[0].charge);
+					o_pdg.push_back(11*Hcand[1].charge);
+					break;
+				case 7://EEET
+					o_pdg.push_back(11*Zcand[0].charge);
+					o_pdg.push_back(11*Zcand[1].charge);
+					o_pdg.push_back(11*Hcand[0].charge);
+					o_pdg.push_back(15*Hcand[1].charge);
+					break;
+				case 8://EETT
+					o_pdg.push_back(11*Zcand[0].charge);
+					o_pdg.push_back(11*Zcand[1].charge);
+					o_pdg.push_back(15*Hcand[0].charge);
+					o_pdg.push_back(15*Hcand[1].charge);
+					break;
+			}
+			
+			if(FillSVmassInfo){
+				o_MET.push_back(Met.front().px);
+				o_MET.push_back(Met.front().py);
+				
+				
+				o_covMET.push_back(m->MVAMet_sigMatrix_00);
+				o_covMET.push_back(m->MVAMet_sigMatrix_01);
+				o_covMET.push_back(m->MVAMet_sigMatrix_10);
+				o_covMET.push_back(m->MVAMet_sigMatrix_11);
+			}
+			
+			//pdf info
+			if(FillPDFInfo){
+				o_pdf_alphaQCD.push_back(m->alphaQCD);
+				o_pdf_alphaQED.push_back(m->alphaQED);
+				o_pdf_qScale.push_back(m->qScale);
+				o_pdf_weight.push_back(m->weight);
+				o_pdf_scalePDF.push_back(m->scalePDF);
+				o_pdf_binningValue0.push_back(m->binningValue0);
+				o_pdf_id.push_back(m->id_First); o_pdf_id.push_back(m->id_Second); //(first,second) x_First
+				o_pdf_x.push_back(m->x_First); o_pdf_x.push_back(m->x_Second); //(first,second)
+				o_pdf_xPDF.push_back(m->xPDF_First); o_pdf_xPDF.push_back(m->xPDF_Second); //(first,second)
+				o_pdf_hasPDF.push_back(m->hasPDF); 
+				o_pdf_hasBinningValues.push_back(m->hasBinningValues); 
+				o_pdf_signalProcessID.push_back(m->signalProcessID); 
+				o_pdf_binningValueSize.push_back(m->binningValueSize); 
+			}
+			 
+		 }
+    
+    
 			
 	if(printoutEvents)
 	{
@@ -3246,6 +3487,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
 		
 	}
+	
+	
+	
         
 	return;
 

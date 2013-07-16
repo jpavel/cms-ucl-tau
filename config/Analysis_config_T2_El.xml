@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input_signal.xml" >]>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <!-- This config file will run over input defined in input.xml file -->
 <JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
@@ -45,7 +45,7 @@
 
 		
 		<Item Name="checkCategories" Value="true"/>
-		<Item Name="isSimulation" Value="true"/>
+		<Item Name="isSimulation" Value="false"/>
 		<Item Name="is2011" Value="false"/>
 		<Item Name="is2012_52" Value="false"/>
 		<Item Name="is2012_53" Value="true"/>
@@ -85,10 +85,10 @@
 		<Item Name="removeTauOverlap" Value="true" />
 		
 		<Item Name="DoubleM" Value="false" />
-		<Item Name="DoubleE" Value="false" />
+		<Item Name="DoubleE" Value="true" />
 	 
 		<Item Name="IgnorePUW" Value="True" />
-		<Item Name="IgnoreSF" Value="False" />
+		<Item Name="IgnoreSF" Value="True" />
 				
 <!--   Systematics -->
 				<Item Name="ShiftTauES_up" Value="False" />

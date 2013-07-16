@@ -450,6 +450,19 @@ private:
     
     bool DoubleE;
     bool DoubleM;
+    
+     bool ShiftTauES_up;
+    bool ShiftTauES_down;
+    bool onlyTrigger;
+    bool onlyIDIso;
+    bool SFShiftUp_Mu;
+    bool SFShiftDown_Mu;
+    bool SFShiftUp_Ele;
+    bool SFShiftDown_Ele;
+    double SystUncert_ES;
+    
+    bool FillPDFInfo;
+    bool FillSVmassInfo;
             
     
     
@@ -462,7 +475,32 @@ private:
 
 
 // output variables
-std::vector<float> out_pt;
+std::vector<Int_t> o_run;
+std::vector<Int_t> o_lumi;
+std::vector<Int_t> o_event;
+std::vector<Bool_t> o_pass;
+std::vector<Float_t> o_event_weight;
+std::vector<Float_t> o_px;
+std::vector<Float_t> o_py;
+std::vector<Float_t> o_pz;
+std::vector<Float_t> o_E;
+std::vector<Int_t> o_pdg;
+std::vector<Float_t> o_MET; //(Met_x,Met_y)
+std::vector<Float_t> o_covMET; // covMatrix(00,01,10,11)
+//pdf info
+std::vector<Float_t> o_pdf_alphaQCD;
+std::vector<Float_t> o_pdf_alphaQED;
+std::vector<Float_t> o_pdf_qScale;
+std::vector<Float_t> o_pdf_weight;
+std::vector<Float_t> o_pdf_scalePDF;
+std::vector<Float_t> o_pdf_binningValue0;
+std::vector<Float_t> o_pdf_id; //(first,second)
+std::vector<Float_t> o_pdf_x; //(first,second)
+std::vector<Float_t> o_pdf_xPDF; //(first,second)
+std::vector<Bool_t> o_pdf_hasPDF; 
+std::vector<Bool_t> o_pdf_hasBinningValues; 
+std::vector<UInt_t> o_pdf_signalProcessID; 
+std::vector<Int_t> o_pdf_binningValueSize; 
 
    // Macro adding the functions for dictionary generation
    ClassDef( Analysis, 0 );
