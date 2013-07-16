@@ -124,13 +124,32 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_event,"o_event");
 	DeclareVariable(o_pass, "o_pass");
 	DeclareVariable(o_event_weight,"o_event_weight");
-	DeclareVariable(o_px,"o_px");
-	DeclareVariable(o_py,"o_py");
-	DeclareVariable(o_pz,"o_pz");
-	DeclareVariable(o_E,"o_E");
-	DeclareVariable(o_pdg,"o_pdg");
-	DeclareVariable(o_MET,"o_MET"); //(Met_x,Met_y)
-	DeclareVariable(o_covMET,"o_covMET"); // covMatrix(00,01,10,11)
+	DeclareVariable(o_px_Z1,"o_px_Z1");
+	DeclareVariable(o_px_Z2,"o_px_Z2");
+	DeclareVariable(o_px_H1,"o_px_H1");
+	DeclareVariable(o_px_H2,"o_px_H2");
+	DeclareVariable(o_py_Z1,"o_py_Z1");
+	DeclareVariable(o_py_Z2,"o_py_Z2");
+	DeclareVariable(o_py_H1,"o_py_H1");
+	DeclareVariable(o_py_H2,"o_py_H2");
+	DeclareVariable(o_pz_Z1,"o_pz_Z1");
+	DeclareVariable(o_pz_Z2,"o_pz_Z2");
+	DeclareVariable(o_pz_H1,"o_pz_H1");
+	DeclareVariable(o_pz_H2,"o_pz_H2");
+	DeclareVariable(o_E_Z1,"o_E_Z1");
+	DeclareVariable(o_E_Z2,"o_E_Z2");
+	DeclareVariable(o_E_H1,"o_E_H1");
+	DeclareVariable(o_E_H2,"o_E_H2");
+	DeclareVariable(o_pdg_Z1,"o_pdg_Z1");
+	DeclareVariable(o_pdg_Z2,"o_pdg_Z2");
+	DeclareVariable(o_pdg_H1,"o_pdg_H1");
+	DeclareVariable(o_pdg_H2,"o_pdg_H2");
+	DeclareVariable(o_MET_x,"o_MET_x");
+	DeclareVariable(o_MET_y,"o_MET_y");
+	DeclareVariable(o_covMET_00,"o_covMET_00");
+	DeclareVariable(o_covMET_01,"o_covMET_01"); 
+	DeclareVariable(o_covMET_10,"o_covMET_10");
+	DeclareVariable(o_covMET_11,"o_covMET_11");
 	//pdf info
 	DeclareVariable(o_pdf_alphaQCD,"o_alphaQCD");
 	DeclareVariable(o_pdf_alphaQED,"o_alphaQED");
@@ -138,9 +157,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_pdf_weight,"o_weight");
 	DeclareVariable(o_pdf_scalePDF,"o_scalePDF");
 	DeclareVariable(o_pdf_binningValue0,"o_binningValue0");
-	DeclareVariable(o_pdf_id,"o_id"); 
-	DeclareVariable(o_pdf_x,"o_x"); 
-	DeclareVariable(o_pdf_xPDF,"o_xPDF"); 
+	DeclareVariable(o_pdf_id_1,"o_id_1");
+	DeclareVariable(o_pdf_id_2,"o_id_2");
+	DeclareVariable(o_pdf_x_1,"o_x_1");
+	DeclareVariable(o_pdf_x_2,"o_x_2");
+	DeclareVariable(o_pdf_xPDF_1,"o_xPDF_1");
+	DeclareVariable(o_pdf_xPDF_2,"o_xPDF_2");
 	DeclareVariable(o_pdf_hasPDF,"o_hasPDF"); 
 	DeclareVariable(o_pdf_hasBinningValues,"o_hasBinningValues"); 
 	DeclareVariable(o_pdf_signalProcessID,"o_signalProcessID"); 
@@ -1746,34 +1768,56 @@ double _massLow = 60., double _massHi = 120., double _relIso = 0.3){
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
-	o_run.clear();
-	o_lumi.clear();
-	o_event.clear();
+	o_run=0;
+	o_lumi=0;
+	o_event=0;
 	
 	//clearing output vectors
-	o_pass.clear();
-	o_event_weight.clear();
-	o_px.clear();
-	o_py.clear();
-	o_pz.clear();
-	o_E.clear();
-	o_pdg.clear();
-	o_MET.clear(); //(Met_x,Met_y)
-	o_covMET.clear(); // covMatrix(00,01,10,11)
+	o_pass=false;
+	o_event_weight=0.;
+	o_px_Z1=0.;
+	o_px_Z2=0.;
+	o_px_H1=0.;
+	o_px_H2=0.;
+	o_py_Z1=0.;
+	o_py_Z2=0.;
+	o_py_H1=0.;
+	o_py_H2=0.;
+	o_pz_Z1=0.;
+	o_pz_Z2=0.;
+	o_pz_H1=0.;
+	o_pz_H2=0.;
+	o_E_Z1=0.;
+	o_E_Z2=0.;
+	o_E_H1=0.;
+	o_E_H2=0.;
+	o_pdg_Z1=0.;
+	o_pdg_Z2=0.;
+	o_pdg_H1=0.;
+	o_pdg_H2=0.;
+	o_MET_x=0;
+	o_MET_y=0;
+	o_covMET_00=0;
+	o_covMET_01=0;
+	o_covMET_10=0;
+	o_covMET_11=0;
 	//pdf info
-	o_pdf_alphaQCD.clear();
-	o_pdf_alphaQED.clear();
-	o_pdf_qScale.clear();
-	o_pdf_weight.clear();
-	o_pdf_scalePDF.clear();
-	o_pdf_binningValue0.clear();
-	o_pdf_id.clear(); //(first,second)
-	o_pdf_x.clear(); //(first,second)
-	o_pdf_xPDF.clear(); //(first,second)
-	o_pdf_hasPDF.clear(); 
-	o_pdf_hasBinningValues.clear(); 
-	o_pdf_signalProcessID.clear(); 
-	o_pdf_binningValueSize.clear(); 
+	o_pdf_alphaQCD=0;
+	o_pdf_alphaQED=0;
+	o_pdf_qScale=0;
+	o_pdf_weight=0;
+	o_pdf_scalePDF=0;
+	o_pdf_binningValue0=0;
+	o_pdf_id_1=0;
+	o_pdf_id_2=0;
+	o_pdf_x_1=0;
+	o_pdf_x_2=0;
+	o_pdf_xPDF_1=0;
+	o_pdf_xPDF_2=0;
+	o_pdf_hasPDF=0; 
+	o_pdf_hasBinningValues=0; 
+	o_pdf_signalProcessID=0; 
+	o_pdf_binningValueSize=0; 
 
 	// bookkepping part
 	++m_allEvents;
@@ -2973,101 +3017,109 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 			 h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
 			 //ntuple filling
-			o_run.push_back(m->runNumber);
-			o_lumi.push_back(m->lumiNumber);
-			o_event.push_back(m->eventNumber);
+			o_run=m->runNumber;
+			o_lumi=m->lumiNumber;
+			o_event=m->eventNumber;
 			
-			o_pass.push_back(true);
-			o_event_weight.push_back(weight);
-			o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
-			o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
-			
-			o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
-			o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
-			
-			o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
-			o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
-			
-			o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
-			o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
-			
+			o_pass=true;
+			o_event_weight=weight;
+			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
+			o_px_H1=Hcand[0].px;o_px_H2=Hcand[1].px;
+			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
+			o_py_H1=Hcand[0].py;o_py_H2=Hcand[1].py;
+			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
+			o_pz_H1=Hcand[0].pz;o_pz_H2=Hcand[1].pz;
+			o_E_Z1=Zcand[0].E;o_E_Z2=Zcand[1].E;
+			o_E_H1=Hcand[0].E;o_E_H2=Hcand[1].E;
+			//~ o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
+			//~ o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
+			//~ 
+			//~ o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
+			//~ o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
+			//~ 
+			//~ o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
+			//~ o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
+			//~ 
+			//~ o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
+			//~ o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
+			//~ 
 			switch(event_type){
 				case 1://MMMT
-					o_pdg.push_back(13*Zcand[0].charge);
-					o_pdg.push_back(13*Zcand[1].charge);
-					o_pdg.push_back(13*Hcand[0].charge);
-					o_pdg.push_back(15*Hcand[1].charge);
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
 					break;
 				case 2://MMME
-					o_pdg.push_back(13*Zcand[0].charge);
-					o_pdg.push_back(13*Zcand[1].charge);
-					o_pdg.push_back(13*Hcand[0].charge);
-					o_pdg.push_back(11*Hcand[1].charge);
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=11*Hcand[1].charge;
 					break;
 				case 3://MMET
-					o_pdg.push_back(13*Zcand[0].charge);
-					o_pdg.push_back(13*Zcand[1].charge);
-					o_pdg.push_back(11*Hcand[0].charge);
-					o_pdg.push_back(15*Hcand[1].charge);
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=11*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
 					break;
 				case 4://MMTT
-					o_pdg.push_back(13*Zcand[0].charge);
-					o_pdg.push_back(13*Zcand[1].charge);
-					o_pdg.push_back(15*Hcand[0].charge);
-					o_pdg.push_back(15*Hcand[1].charge);
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=15*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
 					break;
 				case 5://EEMT
-					o_pdg.push_back(11*Zcand[0].charge);
-					o_pdg.push_back(11*Zcand[1].charge);
-					o_pdg.push_back(13*Hcand[0].charge);
-					o_pdg.push_back(15*Hcand[1].charge);
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
 					break;
 				case 6://EEME
-					o_pdg.push_back(11*Zcand[0].charge);
-					o_pdg.push_back(11*Zcand[1].charge);
-					o_pdg.push_back(13*Hcand[0].charge);
-					o_pdg.push_back(11*Hcand[1].charge);
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=11*Hcand[1].charge;
 					break;
 				case 7://EEET
-					o_pdg.push_back(11*Zcand[0].charge);
-					o_pdg.push_back(11*Zcand[1].charge);
-					o_pdg.push_back(11*Hcand[0].charge);
-					o_pdg.push_back(15*Hcand[1].charge);
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=11*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
 					break;
 				case 8://EETT
-					o_pdg.push_back(11*Zcand[0].charge);
-					o_pdg.push_back(11*Zcand[1].charge);
-					o_pdg.push_back(15*Hcand[0].charge);
-					o_pdg.push_back(15*Hcand[1].charge);
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=15*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
 					break;
 			}
 			
 			if(FillSVmassInfo){
-				o_MET.push_back(Met.front().px);
-				o_MET.push_back(Met.front().py);
+				o_MET_x=Met.front().px;
+				o_MET_y=Met.front().py;
 				
 				
-				o_covMET.push_back(m->MVAMet_sigMatrix_00);
-				o_covMET.push_back(m->MVAMet_sigMatrix_01);
-				o_covMET.push_back(m->MVAMet_sigMatrix_10);
-				o_covMET.push_back(m->MVAMet_sigMatrix_11);
+				o_covMET_00=m->MVAMet_sigMatrix_00;
+				o_covMET_01=m->MVAMet_sigMatrix_01;
+				o_covMET_10=m->MVAMet_sigMatrix_10;
+				o_covMET_11=m->MVAMet_sigMatrix_11;
 			}
 			
 			//pdf info
 			if(FillPDFInfo){
-				o_pdf_alphaQCD.push_back(m->alphaQCD);
-				o_pdf_alphaQED.push_back(m->alphaQED);
-				o_pdf_qScale.push_back(m->qScale);
-				o_pdf_weight.push_back(m->weight);
-				o_pdf_scalePDF.push_back(m->scalePDF);
-				o_pdf_binningValue0.push_back(m->binningValue0);
-				o_pdf_id.push_back(m->id_First); o_pdf_id.push_back(m->id_Second); //(first,second) x_First
-				o_pdf_x.push_back(m->x_First); o_pdf_x.push_back(m->x_Second); //(first,second)
-				o_pdf_xPDF.push_back(m->xPDF_First); o_pdf_xPDF.push_back(m->xPDF_Second); //(first,second)
-				o_pdf_hasPDF.push_back(m->hasPDF); 
-				o_pdf_hasBinningValues.push_back(m->hasBinningValues); 
-				o_pdf_signalProcessID.push_back(m->signalProcessID); 
-				o_pdf_binningValueSize.push_back(m->binningValueSize); 
+				o_pdf_alphaQCD=m->alphaQCD;
+				o_pdf_alphaQED=m->alphaQED;
+				o_pdf_qScale=m->qScale;
+				o_pdf_weight=m->weight;
+				o_pdf_scalePDF=m->scalePDF;
+				o_pdf_binningValue0=m->binningValue0;
+				o_pdf_id_1=m->id_First; o_pdf_id_2=m->id_Second; //(first,second) x_First
+				o_pdf_x_1=m->x_First; o_pdf_x_2=m->x_Second; //(first,second)
+				o_pdf_xPDF_1=m->xPDF_First; o_pdf_xPDF_2=m->xPDF_Second; //(first,second)
+				o_pdf_hasPDF=m->hasPDF; 
+				o_pdf_hasBinningValues=m->hasBinningValues; 
+				o_pdf_signalProcessID=m->signalProcessID; 
+				o_pdf_binningValueSize=m->binningValueSize; 
 			}
 			 
 		 }
