@@ -160,38 +160,20 @@ private:
     TH1* h_muon_num_medium;
     TH1* h_muon_num_tight;
 
-    TH1* h_deltaR;
-    TH1* h_deltaR_max;
-    TH1* h_deltaR_min;
+   
 
     TH1* h_cut_flow_weight;
     TH1* h_cut_flow;
     
-    TH1* h_cut_flow_signal;
-    TH1* h_cut_flow_cat0;
-    TH1* h_cut_flow_cat1;
-    TH1* h_cut_flow_cat2;
-
-    TH1* h_cut_flow_signal_weight;
-    TH1* h_cut_flow_cat0_weight;
-    TH1* h_cut_flow_cat1_weight;
-    TH1* h_cut_flow_cat2_weight;
    
-    TH1* h_cat0_FR_medium;
-    TH1* h_cat1_FR_medium;
-    TH1* h_cat2_FR_medium;
-    TH1* h_cat0_FR_tight;
-    TH1* h_cat1_FR_tight;
-    TH1* h_cat2_FR_tight;
-
+   
+   
 	// histograms
-        TH1* h_el_n;
-        TH1* h_el_cut;
+       
+   
         TH1* h_event_type;
         TH1* h_event_type_raw;
-        TH1* h_event_type_medium;
-        TH1* h_event_type_loose;
-        TH1* h_event_type_tight;
+       
         TH1* h_mu1Z_pt;
         TH1* h_mu2Z_pt;
         TH1* h_Zmass_mumu;
@@ -200,8 +182,7 @@ private:
         TH1* h_ele2Z_pt;
         TH1* h_Zmass_ee;
         TH1* h_Zpt_ee;
-        TH1* h_Zmass;
-        TH1* h_Zpt;
+        
         TH1* h_Z_eta;
         TH1* h_Z_phi;
         
@@ -211,37 +192,7 @@ private:
         TH1* h_Z_lep2_eta;
         TH1* h_Z_lep2_phi;
         
-        TH1* h_eH_eTau_pt;
-        TH1* h_tauH_eTau_pt;
-        TH1* h_H_eTau_pt;
-        TH1* h_H_eTau_mass;
-        TH1* h_muH_muTau_pt;
-        TH1* h_tauH_muTau_pt;
-        TH1* h_H_muTau_pt;
-        TH1* h_H_muTau_mass;
-        TH1* h_muH_muE_tightMuIso_pt;
-        TH1* h_eH_muE_tightMuIso_pt;
-        TH1* h_H_muE_tightMuIso_pt;
-        TH1* h_H_muE_tightMuIso_mass;
-        TH1* h_muH_muE_looseMuIso_pt;
-        TH1* h_eH_muE_looseMuIso_pt;
-        TH1* h_H_muE_looseMuIso_pt;
-        TH1* h_H_muE_looseMuIso_mass;
-        TH1* h_tau1H_tauTau_pt;
-        TH1* h_tau2H_tauTau_pt;
-        TH1* h_H_tauTau_pt;
-        TH1* h_H_tauTau_mass;
-        TH1* h_H_pt;
-        TH1* h_H_mass;
-        
-        TH1* h_H_eta;
-        TH1* h_H_phi;
-        
-        TH1* h_H_lep1_eta;
-        TH1* h_H_lep1_phi;
-        
-        TH1* h_H_lep2_eta;
-        TH1* h_H_lep2_phi;
+     
         
         
         TH1* h_n_goodEl;
@@ -265,12 +216,8 @@ private:
         TH1* h_PF_MET_selected;
         TProfile* h_PF_MET_nPU_selected;
 
-        TH1* h_nbjets;
-        TH1* h_nbjets_signal;
-        TH1* h_nbjets_afterVeto;
-        TH1* h_nbjets_afterVeto_signal;   
-        TH1* h_nbjetsVetoed;
-        TH1* h_Tmass;
+        
+      
      
         TH1* h_nPU_Info;
         TH1* h_nPU_InfoTrue;
@@ -278,17 +225,7 @@ private:
         TH1* h_nPU_Info_W;
         TH1* h_nPU_InfoTrue_W;
         TH1* h_nPU_Bunch0_W;
-        
-        TH1* h_signal_pt1;
-        TH1* h_signal_pt2;
-        
-        TH2* h_category0_pt;
-        TH1* h_category1_pt;
-        TH1* h_category2_pt;
-        
-	TH1* h_medium;
-	TH1* h_tight;
-	TH1*  h_denom;
+     
 
 	std::vector<TH1*>  h_denom_types;
 	std::vector<TH1*>  h_loose_types;
@@ -385,23 +322,12 @@ private:
 
 // properties
 	std::string InTreeName;
-	double Ptcut;
 	double maxDeltaR;
-	double maxDeltaR_H;
 	double BestMassForZ;
 	double dZvertex;
 	double bTagValue;
-	double maxEvent;
-	double p0_tight;
-	double p1_tight;
-	double p2_tight;
-	double p0_medium;
-	double p1_medium;
-	double p2_medium;
-	double FR_MMed;
-	double FR_MTig;
-	double FR_EMed;
-	double FR_ETig;
+	
+	
 	
 	std::string doubEle;
 	std::string doubEle2;
@@ -410,13 +336,13 @@ private:
     std::string doubMu2;
     std::string doubMu3;
     
-    bool switchToFakeRate;
-    bool  checkCategories;
+   
+   
     bool isSimulation;
     bool is2011;
-    bool is2012_52;
+   
     bool is2012_53;
-    bool useTruePileUp;
+   
     bool vetoMuonTrigger;
     bool vetoElectronTrigger;
     
@@ -426,9 +352,9 @@ private:
     
     double Cut_leptau_Pt;
     
-    bool   Cut_tautau_MVA_iso; 	
+  
     
-    bool   AllowTauBOverlap;
+   
     
     bool UseSumPtCut;
     double Cut_tautau_sumPt;
@@ -436,7 +362,7 @@ private:
     double Cut_etau_sumPt;
     double Cut_leplep_sumPt;
     
-    bool IgnoreAdditionalTaus;
+   
     bool IgnoreSF;
     bool IgnorePUW;
 	
