@@ -346,6 +346,8 @@ private:
     bool IgnoreAdditionalTaus;
     bool IgnoreSF;
     bool IgnorePUW;
+    bool ShiftPU_up;
+    bool ShiftPU_down;
     bool ShiftTauES_up;
     bool ShiftTauES_down;
     bool onlyTrigger;

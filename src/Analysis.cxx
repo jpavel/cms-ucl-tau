@@ -53,6 +53,8 @@ Analysis::Analysis()
 		DeclareProperty("printoutEvents",printoutEvents);
 		DeclareProperty("examineEvent",examineEvent); 
                 //systematics
+		DeclareProperty("ShiftPU_up",ShiftPU_up); 
+		DeclareProperty("ShiftPU_down",ShiftPU_down); 
 		DeclareProperty("ShiftTauES_up",ShiftTauES_up); 
 		DeclareProperty("ShiftTauES_down",ShiftTauES_down); 
 		DeclareProperty("SystUncert_ES",SystUncert_ES); 
@@ -479,8 +481,14 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	// Lumi weights
 
     if (is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
-	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
-
+	else {
+             if(ShiftPU_up) LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012_up.root","mcPU","pileup");
+             else if(ShiftPU_down){
+                LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012_down.root","mcPU","pileup");
+                cout << "sono qui " << endl;
+                }
+             else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
+             }
 	
 	if(printoutEvents){
 		 log1.open("events.txt");
@@ -776,7 +784,13 @@ entries++;
       else examineThisEvent=false;
 	 
 	if(examineThisEvent) std::cout << "NOW EXAMINING EVENT " << eNumber << " WHICH IS # " << m_allEvents << std::endl;
-	
+
+        //if(ShiftPU_up)   PUWeight = 1.05*PUWeight;
+        //else if(ShiftPU_down) PUWeight = 0.95*PUWeight;
+        //else PUWeight = PUWeight;
+        
+        cout << "after shifting : " << PUWeight  << endl;
+
 	Hist("h_PU_weight")->Fill(PUWeight);
 	Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 	Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
@@ -1174,7 +1188,6 @@ double Z_weight = PUWeight;
 
 	if(Zmumu||Zee){
 		m_logger << DEBUG << " There is a Z candidate! " << SLogger::endmsg;
-                //Z mass plot for all events
                 Hist( "h_Zmass_afterZselection" )->Fill(Zmass,Z_weight);
         }
 
