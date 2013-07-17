@@ -235,579 +235,37 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         h_nPU_Info_W                    		 = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",50,0,50));
         h_nPU_InfoTrue_W               			 = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",50,0,50));
         h_nPU_Bunch0_W                 			 = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",50,0,50));
+        
+        
+        // FR plots
+        
+        h_FR_tau_denom 	= Book(TH1D("h_FR_tau_denom","Tau FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_mu_denom 	= Book(TH1D("h_FR_mu_denom","Mu FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_el_denom 	= Book(TH1D("h_FR_el_denom","El FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        
+        h_FR_tau_num 	= Book(TH1D("h_FR_tau_num","Tau FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_mu_num		= Book(TH1D("h_FR_mu_num","Mu FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_el_num		= Book(TH1D("h_FR_el_num","El FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
 
-
-       h_denom_types.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_types.push_back(h_temp);
-        }
-       h_denom_types_eta.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_denom_types_eta.push_back(h_temp);
-        }
-       h_denom_types_centralEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_types_centralEtaRegion.push_back(h_temp);
-        }
-       h_denom_types_externalEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_types_externalEtaRegion.push_back(h_temp);
-        }
-        //////////////////////////////////
-       h_denom_jet_types.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jet_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_jet_types.push_back(h_temp);
-        }
-       h_denom_jet_types_eta.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jet_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_denom_jet_types_eta.push_back(h_temp);
-        }
-       h_denom_jet_types_centralEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jet_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_jet_types_centralEtaRegion.push_back(h_temp);
-        }
-       h_denom_jet_types_externalEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jet_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_jet_types_externalEtaRegion.push_back(h_temp);
-        }
-        ///////////////////////////
-               h_denom_jetRef_types.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jetRef_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_jetRef_types.push_back(h_temp);
-        }
-       h_denom_jetRef_types_eta.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jetRef_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_denom_jetRef_types_eta.push_back(h_temp);
-        }
-       h_denom_jetRef_types_centralEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jetRef_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_jetRef_types_centralEtaRegion.push_back(h_temp);
-        }
-       h_denom_jetRef_types_externalEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_denom_jetRef_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_denom_jetRef_types_externalEtaRegion.push_back(h_temp);
-        }
+		h_FR_tau_denom_EC 	= Book(TH1D("h_FR_tau_denom_EC","Tau FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_mu_denom_EC 	= Book(TH1D("h_FR_mu_denom_EC","Mu FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_el_denom_EC 	= Book(TH1D("h_FR_el_denom_EC","El FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         
-        //loose
-        h_loose_types.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_types.push_back(h_temp);
-        }
-        h_loose_types_eta.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_loose_types_eta.push_back(h_temp);
-        }
-        h_loose_types_centralEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_types_centralEtaRegion.push_back(h_temp);
-        }
-        h_loose_types_externalEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_types_externalEtaRegion.push_back(h_temp);
-        }
+        h_FR_tau_num_EC 	= Book(TH1D("h_FR_tau_num_EC","Tau FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_mu_num_EC		= Book(TH1D("h_FR_mu_num_EC","Mu FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_el_num_EC		= Book(TH1D("h_FR_el_num_EC","El FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+      
+		
+		h_FR_muT_denom 	= Book(TH1D("h_FR_muT_denom","Tight Mu FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_elT_denom 	= Book(TH1D("h_FR_elT_denom","Tight El FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+		h_FR_muT_denom_EC 	= Book(TH1D("h_FR_muT_denom_EC","Tight Mu FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_elT_denom_EC 	= Book(TH1D("h_FR_elT_denom_EC","Tight El FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         
-         //loose_jet
-        h_loose_jet_types.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jet_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_jet_types.push_back(h_temp);
-        }
-        h_loose_jet_types_eta.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jet_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_loose_jet_types_eta.push_back(h_temp);
-        }
-        h_loose_jet_types_centralEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jet_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_jet_types_centralEtaRegion.push_back(h_temp);
-        }
-        h_loose_jet_types_externalEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jet_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_jet_types_externalEtaRegion.push_back(h_temp);
-        }
+		h_FR_muT_num 	= Book(TH1D("h_FR_muT_num","Tight Mu FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_elT_num 	= Book(TH1D("h_FR_elT_num","Tight El FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+		h_FR_muT_num_EC 	= Book(TH1D("h_FR_muT_num_EC","Tight Mu FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_elT_num_EC 	= Book(TH1D("h_FR_elT_num_EC","Tight El FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         
-         //loose_jetRef
-        h_loose_jetRef_types.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jetRef_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_jetRef_types.push_back(h_temp);
-        }
-        h_loose_jetRef_types_eta.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jetRef_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_loose_jetRef_types_eta.push_back(h_temp);
-        }
-        h_loose_jetRef_types_centralEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jetRef_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_jetRef_types_centralEtaRegion.push_back(h_temp);
-        }
-        h_loose_jetRef_types_externalEtaRegion.clear();
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_loose_jetRef_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.3 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_loose_jetRef_types_externalEtaRegion.push_back(h_temp);
-        }
-		// medium
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_types.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_medium_types_eta.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_types_centralEtaRegion.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_types_externalEtaRegion.push_back(h_temp);
-        }
-
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_types.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_tight_types_eta.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_types_centralEtaRegion.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_types_externalEtaRegion.push_back(h_temp);
-        }
-        
-        //m+t jet
-        
-         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_jet_types.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_medium_jet_types_eta.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_jet_types_centralEtaRegion.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_jet_types_externalEtaRegion.push_back(h_temp);
-        }
-
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_jet_types.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_tight_jet_types_eta.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_jet_types_centralEtaRegion.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_jet_types_externalEtaRegion.push_back(h_temp);
-        }
-        
-        //jetRef
-        
-         for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_jetRef_types.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_medium_jetRef_types_eta.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_jetRef_types_centralEtaRegion.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_medium_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Medium iso for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_medium_jetRef_types_externalEtaRegion.push_back(h_temp);
-        }
-
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_jetRef_types.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_ETA_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";#eta";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,-3,3));
-                h_tight_jetRef_types_eta.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_centralEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_jetRef_types_centralEtaRegion.push_back(h_temp);
-        }
-        for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
-        {
-                std::stringstream s;
-                s << "h_tight_type_externalEtaRegion_" << i;
-                std::string name = s.str();
-                std::stringstream ss;
-                ss <<  "Iso < 0.1 for events of type " << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}";
-                std::string title = ss.str();
-                TH1D* h_temp =  Book(TH1D(TString(name),TString(title),100,0.,100.));
-                h_tight_jetRef_types_externalEtaRegion.push_back(h_temp);
-        }
-
 	
 	h_Nvertex_NoCut = Book(TH1D("h_Nvertex_NoCut","Number of vertices - no cut", 50, -0.5,49.5));
 	h_Nvertex_NoCut_W = Book(TH1D("h_Nvertex_NoCut_W","Number of vertices - no cut (PU weight)", 50, -0.5,49.5));
@@ -2013,10 +1471,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		muon1.SetPxPyPzE(Zcand[0].px,Zcand[0].py,Zcand[0].pz,Zcand[0].E);        
 		muon2.SetPxPyPzE(Zcand[1].px,Zcand[1].py,Zcand[1].pz,Zcand[1].E);        
 		Zmumu_=muon1+muon2;        
-
+		Zmass=Zmumu_.M();
 		Hist( "h_mu1Z_pt" )->Fill(muon1.Pt(),Z_weight);
 		Hist( "h_mu2Z_pt" )->Fill(muon2.Pt(),Z_weight);
-		Hist( "h_Zmass_mumu" )->Fill(Zmumu_.M(),Z_weight);
+		Hist( "h_Zmass_mumu" )->Fill(Zmass,Z_weight);
 		Hist( "h_Zpt_mumu" )->Fill(Zmumu_.Pt(),Z_weight);	
 		Hist( "h_Z_eta")->Fill(Zmumu_.Eta(),Z_weight);
 		Hist( "h_Z_phi")->Fill(Zmumu_.Phi(),Z_weight);
@@ -2032,9 +1490,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		ele1.SetPxPyPzE(Zcand[0].px,Zcand[0].py,Zcand[0].pz,Zcand[0].E);        
 		ele2.SetPxPyPzE(Zcand[1].px,Zcand[1].py,Zcand[1].pz,Zcand[1].E);        
 		Zee_=ele1+ele2;
+		Zmass=Zee_.M();
 		Hist( "h_ele1Z_pt" )->Fill(ele1.Pt(),Z_weight);
 		Hist( "h_ele2Z_pt" )->Fill(ele2.Pt(),Z_weight);
-		Hist( "h_Zmass_ee" )->Fill(Zee_.M(),Z_weight);
+		Hist( "h_Zmass_ee" )->Fill(Zmass,Z_weight);
 		Hist( "h_Zpt_ee" )->Fill(Zee_.Pt(),Z_weight);
 		Hist( "h_Z_eta")->Fill(Zee_.Eta(),Z_weight);
 		Hist( "h_Z_phi")->Fill(Zee_.Phi(),Z_weight);
@@ -2373,6 +1832,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double sumPt = pt1+pt2;
 			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
+			if(!LTcut) continue;
 			signal = pass1 && pass2 && signalPtCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2429,6 +1889,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
+				
 				Hcand_pass.push_back(pass1);
 				Hcand_pass.push_back(pass2);
 				usedTauIdx.push_back(index);
@@ -2519,8 +1980,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
-			bool signalCuts = ( pt2 > Cut_tau_base_Pt && isGoodMu(Hcand[index]));
+			bool tightFR=isGoodMu(Hcand[index]);
+			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_mutau_sumPt);
+			if(!LTcut) continue;
+			
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2579,7 +2043,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
-				Hcand_pass.push_back(pass1);
+				int result = pass1? 1:0;
+				int tight = tightFR? 1:0;
+				if(pass1) result+=tightFR;
+				Hcand_pass.push_back(result);
 				Hcand_pass.push_back(pass2);
 				if(Zmumu) Hcand_type_FR.push_back(1);
 				else if(Zee) Hcand_type_FR.push_back(5);
@@ -2669,7 +2136,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
-			bool signalCuts = ( pt2 > Cut_tau_base_Pt && TightEleId(Hcand[index]));
+			bool tightFR=TightEleId(Hcand[index]);
+			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_etau_sumPt);
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
@@ -2728,7 +2196,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
-				Hcand_pass.push_back(pass1);
+				int result = pass1? 1:0;
+				int tight = tightFR? 1:0;
+				if(pass1) result+=tightFR;
+				Hcand_pass.push_back(result);
 				Hcand_pass.push_back(pass2);
 				if(Zmumu) Hcand_type_FR.push_back(3);
 				else if(Zee) Hcand_type_FR.push_back(7);
@@ -3256,6 +2727,81 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 				
 				//histo filling
+				
+	for(uint i=0; i < Hcand_FR.size(); i+=2)
+	{
+		 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
+		 myobject ClosestJet2 = ClosestInCollection(Hcand_FR[i+1],jet);
+		 bool barrel1= fabs(ClosestJet.eta) < 1.4 ? true : false;
+		 bool barrel2= fabs(ClosestJet.eta) < 1.4 ? true : false;
+		 
+		 int exp_event_type=Hcand_type_FR[i/2];
+		 switch(exp_event_type)
+			{
+				case 4:
+				case 8:
+					barrel1 ? Hist("h_FR_tau_denom")->Fill(ClosestJet.pt) : Hist("h_FR_tau_denom_EC")->Fill(ClosestJet.pt);
+					barrel2 ? Hist("h_FR_tau_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tau_denom_EC")->Fill(ClosestJet2.pt);
+					break;
+				case 1:
+				case 5:
+					barrel1 ? Hist("h_FR_mu_denom")->Fill(ClosestJet.pt) : Hist("h_FR_mu_denom_EC")->Fill(ClosestJet.pt);
+					break;
+				case 3:
+				case 7:
+					barrel1 ? Hist("h_FR_el_denom")->Fill(ClosestJet.pt) : Hist("h_FR_el_denom_EC")->Fill(ClosestJet.pt);
+					break;
+				default:
+					break;
+			}
+		if(Hcand_pass[i]>0){
+			switch(exp_event_type)
+			{
+				case 4:
+				case 8:
+					barrel1 ? Hist("h_FR_tau_num")->Fill(ClosestJet.pt) : Hist("h_FR_tau_num_EC")->Fill(ClosestJet.pt);
+					break;
+				case 1:
+				case 5:
+					barrel1 ? Hist("h_FR_mu_num")->Fill(ClosestJet.pt) : Hist("h_FR_mu_num_EC")->Fill(ClosestJet.pt);
+					break;
+				case 3:
+				case 7:
+					barrel1 ? Hist("h_FR_el_num")->Fill(ClosestJet.pt) : Hist("h_FR_el_num_EC")->Fill(ClosestJet.pt);
+					break;
+				default:
+					break;
+			}
+		}
+		if(Hcand_pass[i]==2){
+			switch(exp_event_type)
+			{
+				
+				case 1:
+				case 5:
+					barrel1 ? Hist("h_FR_muT_num")->Fill(ClosestJet.pt) : Hist("h_FR_muT_num_EC")->Fill(ClosestJet.pt);
+					break;
+				case 3:
+				case 7:
+					barrel1 ? Hist("h_FR_elT_num")->Fill(ClosestJet.pt) : Hist("h_FR_elT_num_EC")->Fill(ClosestJet.pt);
+					break;
+				default:
+					break;
+			}
+		}
+		if(Hcand_pass[i+1]==1){
+			switch(exp_event_type)
+			{
+				case 4:
+				case 8:
+					barrel2 ? Hist("h_FR_tau_num")->Fill(ClosestJet2.pt) : Hist("h_FR_tau_num_EC")->Fill(ClosestJet2.pt);
+					break;
+				default:
+					break;
+			}
+		}
+		 
+	}
 				
 	for(uint i=0; i < Hcand_cat0.size(); i+=2)
 		{
