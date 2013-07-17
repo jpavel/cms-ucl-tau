@@ -21,3 +21,31 @@ config/CONDOR/*/*
 config/CONDOR/*.out
 config/CONDOR/*.err
 config/CONDOR/resubmit
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+#dynamically generated code
+SFrame/bin/sframe_main
+SFrame/cintex/src/SFrameCintex_Dict.cxx
+SFrame/cintex/src/SFrameCintex_Dict.h
+SFrame/core/src/SFrameCore_Dict.cxx
+SFrame/core/src/SFrameCore_Dict.h
+SFrame/lib/
+SFrame/plug-ins/src/SFramePlugIns_Dict.cxx
+SFrame/plug-ins/src/SFramePlugIns_Dict.h
+SFrame/python/PARHelpers.pyc
+SFrame/user/src/SFrameUser_Dict.cxx
+SFrame/user/src/SFrameUser_Dict.h
+ZHtautauAnalysis/src/ZHtautauAnalysis_Dict.cxx
+ZHtautauAnalysis/src/ZHtautauAnalysis_Dict.h
