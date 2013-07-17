@@ -256,9 +256,9 @@ private:
 
 	
 
-	std::vector<TH1*>  h_H_mass_types;
-	std::vector<TH1*>  h_H_mass_signal_types;
-        std::vector<TH1*>  h_H_mass_cat0_types;
+		std::vector<TH1*>  h_H_mass_FR_types;
+		std::vector<TH1*>  h_H_mass_signal_types;
+        std::vector<TH1*>  h_H_mass_FRt_types;
         std::vector<TH1*>  h_H_mass_cat1_types;
         std::vector<TH1*>  h_H_mass_cat2_types;
         
@@ -274,6 +274,15 @@ private:
         std::vector<TH2*> h_category0_jet_pt_types;
         std::vector<TH1*> h_category1_jet_pt_types;
         std::vector<TH1*> h_category2_jet_pt_types;
+        
+        std::vector<TH2*> h_category0_jet_BB_pt_types;
+        std::vector<TH2*> h_category0_jet_EE_pt_types;
+        std::vector<TH2*> h_category0_jet_EB_pt_types;
+        std::vector<TH2*> h_category0_jet_BE_pt_types;
+        
+        std::vector<TH1*> h_category1_jet_EC_pt_types;
+        std::vector<TH1*> h_category2_jet_EC_pt_types;
+        
         
         std::vector<TH2*> h_category0_jetRef_pt_types;
         std::vector<TH1*> h_category1_jetRef_pt_types;
@@ -366,6 +375,9 @@ private:
     
     bool FillPDFInfo;
     bool FillSVmassInfo;
+    
+    double tau_shape_iso_cut;
+    double lep_shape_iso_cut;
             
     
     

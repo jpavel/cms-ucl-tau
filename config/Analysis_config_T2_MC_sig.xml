@@ -69,13 +69,19 @@
         <Item Name="Cut_etau_sumPt" Value="25" />
         <Item Name="Cut_mutau_sumPt" Value="35" />
         <Item Name="Cut_leplep_sumPt" Value="35" />  
+        
+        <!-- Shape -->
+        
+        <Item Name="tau_shape_iso_cut" Value = "0.3" /> <!-- Lower MVA2 cut -->
+        <Item Name="lep_shape_iso_cut" Value = "2.0" /> <!-- Upper RelPFIso -->
+        
 		
 		<Item Name="printoutEvents" Value="true" />
 		<Item Name="maxDeltaR" Value="0.1" />            
        
 				
 		<Item Name="UseLongEvent" Value="false" />
-		<Item Name="examineEvent" Value="44487" />
+		<Item Name="examineEvent" Value="7787" />
 		<Item Name="OverM" Value="" />
 		
 		<Item Name="BelowM" Value="" />

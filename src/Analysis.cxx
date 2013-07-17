@@ -62,6 +62,10 @@ Analysis::Analysis()
 		DeclareProperty("DoubleE",DoubleE);
 		DeclareProperty("DoubleM",DoubleM);
 		
+		//shape
+		
+		DeclareProperty("tau_shape_iso_cut",tau_shape_iso_cut);
+		DeclareProperty("lep_shape_iso_cut",lep_shape_iso_cut);
 		
 		//syst
 		DeclareProperty("ShiftTauES_up",ShiftTauES_up); 
@@ -332,9 +336,9 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	
 	
-	h_H_mass_types.clear();
+	h_H_mass_FR_types.clear();
 	h_H_mass_signal_types.clear();
-	h_H_mass_cat0_types.clear();
+	h_H_mass_FRt_types.clear();
 	h_H_mass_cat1_types.clear();
 	h_H_mass_cat2_types.clear();
 	
@@ -349,10 +353,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         
 	for(uint i = 1; i <= (uint)h_event_type->GetNbinsX(); i++)
 	{
-		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2,sumPt,jet_cat0,jet_cat1,jet_cat2,jetRef_cat0,jetRef_cat1,jetRef_cat2;
-		s << "h_H_mass_type_" << i;
+		std::stringstream s,sig_1,sig_2,cat0,cat1,cat2,mass_sig,mass_cat0,mass_cat1,mass_cat2,sumPt,jet_cat0,jet_cat1,jet_cat2,
+		jet_EE_cat0,jet_EB_cat0,jet_BE_cat0,jet_BB_cat0,
+		jet_EC_cat1,jet_EC_cat2,jetRef_cat0,jetRef_cat1,jetRef_cat2;
+		s << "h_H_mass_FR_type_" << i;
 		mass_sig << "h_H_mass_signal_type_" << i;
-		mass_cat0 << "h_H_mass_cat0_type_" << i;
+		mass_cat0 << "h_H_mass_FRt_type_" << i;
 		mass_cat1 << "h_H_mass_cat1_type_" << i;
 		mass_cat2 << "h_H_mass_cat2_type_" << i;
 		
@@ -366,6 +372,14 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		jet_cat0 << "h_jet_category0_jet_pt_" << i;
 		jet_cat1 << "h_jet_category1_jet_pt_" << i;
 		jet_cat2 << "h_jet_category2_jet_pt_" << i;
+		
+		jet_EE_cat0 << "h_jet_EE_category0_jet_EE_pt_" << i;
+		jet_EB_cat0 << "h_jet_EB_category0_jet_EB_pt_" << i;
+		jet_BE_cat0 << "h_jet_BE_category0_jet_BE_pt_" << i;
+		jet_BB_cat0 << "h_jet_BB_category0_jet_BB_pt_" << i;
+		
+		jet_EC_cat1 << "h_jet_EC_category1_jet_EC_pt_" << i;
+		jet_EC_cat2 << "h_jet_EC_category2_jet_EC_pt_" << i;
 		
 		
 		jetRef_cat0 << "h_jetRef_category0_jetRef_pt_" << i;
@@ -386,13 +400,24 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::string name_cat2 = cat2.str(); 
 		std::string name_jet_cat0 = jet_cat0.str(); 
 		std::string name_jet_cat1 = jet_cat1.str(); 
-		std::string name_jet_cat2 = jet_cat2.str(); 
+		std::string name_jet_cat2 = jet_cat2.str();
+		
+		std::string name_jet_EE_cat0 = jet_EE_cat0.str(); 
+		std::string name_jet_EB_cat0 = jet_EB_cat0.str(); 
+		std::string name_jet_BE_cat0 = jet_BE_cat0.str(); 
+		std::string name_jet_BB_cat0 = jet_BB_cat0.str(); 
+		
+		std::string name_jet_EC_cat1 = jet_EC_cat1.str(); 
+		std::string name_jet_EC_cat2 = jet_EC_cat2.str(); 
 		
 		std::string name_jetRef_cat0 = jetRef_cat0.str(); 
 		std::string name_jetRef_cat1 = jetRef_cat1.str(); 
 		std::string name_jetRef_cat2 = jetRef_cat2.str(); 
 		
-		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2,tit_sumPt,tit_jet_cat0,tit_jet_cat1,tit_jet_cat2,tit_jetRef_cat0,tit_jetRef_cat1,tit_jetRef_cat2;
+		std::stringstream ss,tit_sig_1,tit_sig_2,tit_cat0,tit_cat1,tit_cat2,tit_sumPt,tit_jet_cat0,tit_jet_cat1,tit_jet_cat2,
+		tit_jet_EE_cat0,tit_jet_EB_cat0,tit_jet_BE_cat0,tit_jet_BB_cat0,
+		tit_jet_EC_cat1,tit_jet_EC_cat2,
+		tit_jetRef_cat0,tit_jetRef_cat1,tit_jetRef_cat2;
 		ss <<  h_event_type->GetXaxis()->GetBinLabel(i) << ";m_{H}[GeV]";
 		
 		tit_sig_1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
@@ -404,6 +429,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		tit_jet_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
 		tit_jet_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_jet_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+		tit_jet_EE_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
+		tit_jet_EB_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
+		tit_jet_BE_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
+		tit_jet_BB_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
+		tit_jet_EC_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
+		tit_jet_EC_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 			tit_jetRef_cat0 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T1}[GeV];P_{T2}[GeV]";
 		tit_jetRef_cat1 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
 		tit_jetRef_cat2 << h_event_type->GetXaxis()->GetBinLabel(i) << ";P_{T}[GeV]";
@@ -419,6 +450,13 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		std::string title_jet_cat0 = tit_jet_cat0.str(); 
 		std::string title_jet_cat1 = tit_jet_cat1.str(); 
 		std::string title_jet_cat2 = tit_jet_cat2.str();
+		std::string title_jet_EE_cat0 = tit_jet_EE_cat0.str();
+		std::string title_jet_EB_cat0 = tit_jet_EB_cat0.str();
+		std::string title_jet_BE_cat0 = tit_jet_BE_cat0.str();
+		std::string title_jet_BB_cat0 = tit_jet_BB_cat0.str();
+		 
+		std::string title_jet_EC_cat1 = tit_jet_EC_cat1.str(); 
+		std::string title_jet_EC_cat2 = tit_jet_EC_cat2.str();
 		std::string title_jetRef_cat0 = tit_jetRef_cat0.str(); 
 		std::string title_jetRef_cat1 = tit_jetRef_cat1.str(); 
 		std::string title_jetRef_cat2 = tit_jetRef_cat2.str();
@@ -437,18 +475,25 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		TH1D* h_category1_temp_pt			= Book(TH1D(TString(name_cat1), TString(title_cat1),100,0,100));
 		TH1D* h_category2_temp_pt			= Book(TH1D(TString(name_cat2), TString(title_cat2),100,0,100));
 		
-		TH2D* h_category0_temp_jet_pt			= Book(TH2D(TString(name_jet_cat0), TString(title_jet_cat0),100,0,100,100,0,100));
-		TH1D* h_category1_temp_jet_pt			= Book(TH1D(TString(name_jet_cat1), TString(title_jet_cat1),100,0,100));
-		TH1D* h_category2_temp_jet_pt			= Book(TH1D(TString(name_jet_cat2), TString(title_jet_cat2),100,0,100));
+		TH2D* h_category0_temp_jet_pt			= Book(TH2D(TString(name_jet_cat0), TString(title_jet_cat0),300,0,300,300,0,300));
+		TH1D* h_category1_temp_jet_pt			= Book(TH1D(TString(name_jet_cat1), TString(title_jet_cat1),300,0,300));
+		TH1D* h_category2_temp_jet_pt			= Book(TH1D(TString(name_jet_cat2), TString(title_jet_cat2),300,0,300));
+		TH2D* h_category0_temp_jet_EE_pt			= Book(TH2D(TString(name_jet_EE_cat0), TString(title_jet_EE_cat0),300,0,300,300,0,300));
+		TH2D* h_category0_temp_jet_BE_pt			= Book(TH2D(TString(name_jet_BE_cat0), TString(title_jet_BE_cat0),300,0,300,300,0,300));
+		TH2D* h_category0_temp_jet_EB_pt			= Book(TH2D(TString(name_jet_EB_cat0), TString(title_jet_EB_cat0),300,0,300,300,0,300));
+		TH2D* h_category0_temp_jet_BB_pt			= Book(TH2D(TString(name_jet_BB_cat0), TString(title_jet_BB_cat0),300,0,300,300,0,300));
+		
+		TH1D* h_category1_temp_jet_EC_pt			= Book(TH1D(TString(name_jet_EC_cat1), TString(title_jet_EC_cat1),300,0,300));
+		TH1D* h_category2_temp_jet_EC_pt			= Book(TH1D(TString(name_jet_EC_cat2), TString(title_jet_EC_cat2),300,0,300));
 		
 		
 		TH2D* h_category0_temp_jetRef_pt			= Book(TH2D(TString(name_jetRef_cat0), TString(title_jetRef_cat0),100,0,100,100,0,100));
 		TH1D* h_category1_temp_jetRef_pt			= Book(TH1D(TString(name_jetRef_cat1), TString(title_jetRef_cat1),100,0,100));
 		TH1D* h_category2_temp_jetRef_pt			= Book(TH1D(TString(name_jetRef_cat2), TString(title_jetRef_cat2),100,0,100));
 		
-		h_H_mass_types.push_back(h_temp);
+		h_H_mass_FR_types.push_back(h_temp);
 		h_H_mass_signal_types.push_back(h_mass_sig_temp);
-		h_H_mass_cat0_types.push_back(h_mass_cat0_temp);
+		h_H_mass_FRt_types.push_back(h_mass_cat0_temp);
 		h_H_mass_cat1_types.push_back(h_mass_cat1_temp);
 		h_H_mass_cat2_types.push_back(h_mass_cat2_temp);
 		
@@ -463,6 +508,14 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		h_category0_jet_pt_types.push_back(h_category0_temp_jet_pt);
 		h_category1_jet_pt_types.push_back(h_category1_temp_jet_pt);
 		h_category2_jet_pt_types.push_back(h_category2_temp_jet_pt);
+		
+		h_category0_jet_EE_pt_types.push_back(h_category0_temp_jet_EE_pt);
+		h_category0_jet_EB_pt_types.push_back(h_category0_temp_jet_EB_pt);
+		h_category0_jet_BE_pt_types.push_back(h_category0_temp_jet_BE_pt);
+		h_category0_jet_BB_pt_types.push_back(h_category0_temp_jet_BB_pt);
+		
+		h_category1_jet_EC_pt_types.push_back(h_category1_temp_jet_EC_pt);
+		h_category2_jet_EC_pt_types.push_back(h_category2_temp_jet_EC_pt);
     
 		h_category0_jetRef_pt_types.push_back(h_category0_temp_jetRef_pt);
 		h_category1_jetRef_pt_types.push_back(h_category1_temp_jetRef_pt);
@@ -1748,6 +1801,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> Hcand_FR;
 	std::vector<int> Hcand_pass;
 	std::vector<int> Hcand_type_FR;
+	std::vector<int> Hcand_shape_pass;
+	
 	std::vector<myobject> Hcand_signal;
 	std::vector<int> Hcand_type_signal;
 	Hcand.clear();
@@ -1827,6 +1882,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			bool pass1 = Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
+			bool shapePass1 = Hcand[index].byIsolationMVA2raw > tau_shape_iso_cut;
+			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;			
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
@@ -1892,6 +1949,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				
 				Hcand_pass.push_back(pass1);
 				Hcand_pass.push_back(pass2);
+				if(shapePass1 && shapePass2) Hcand_shape_pass.push_back(1);
+				else Hcand_shape_pass.push_back(0);
 				usedTauIdx.push_back(index);
 				if(Zmumu) Hcand_type_FR.push_back(4);
 				else if(Zee) Hcand_type_FR.push_back(8);
@@ -1976,6 +2035,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			bool pass2 = (RelIso(Hcand[index])<0.3 && isLooseMu(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
+			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && isLooseMu(Hcand[index]));
+			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
@@ -2048,6 +2109,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(pass1) result+=tightFR;
 				Hcand_pass.push_back(result);
 				Hcand_pass.push_back(pass2);
+				if(shapePass1 && shapePass2){
+					if(tightFR) Hcand_shape_pass.push_back(2);
+					else Hcand_shape_pass.push_back(1);
+				}else Hcand_shape_pass.push_back(0);
 				if(Zmumu) Hcand_type_FR.push_back(1);
 				else if(Zee) Hcand_type_FR.push_back(5);
 			}else if(signal && !saved_signal){
@@ -2132,6 +2197,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					
 			bool pass2 = (RelIso(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
+			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
+			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
+			
 			
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
@@ -2201,6 +2269,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(pass1) result+=tightFR;
 				Hcand_pass.push_back(result);
 				Hcand_pass.push_back(pass2);
+				if(shapePass1 && shapePass2){
+					if(tightFR) Hcand_shape_pass.push_back(2);
+					else Hcand_shape_pass.push_back(1);
+				}else Hcand_shape_pass.push_back(0);	
 				if(Zmumu) Hcand_type_FR.push_back(3);
 				else if(Zee) Hcand_type_FR.push_back(7);
 			}else if(signal && !saved_signal){
@@ -2242,7 +2314,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
-			if(genericElectron[i].charge*genericMuon[j].charge > 0) continue;
+			bool isFakeRate = (genericElectron[i].charge*genericMuon[j].charge > 0);
+			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+			
 			if(deltaR(genericMuon[j],genericElectron[i])< maxDeltaR) continue;
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(genericMuon[j],genericElectron[i]) << std::endl;            
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
@@ -2259,6 +2333,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			bool pass1 = (RelIso(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
 			bool pass2 = (RelIso(Hcand[index+1])<0.3 && isLooseMu(Hcand[index+1]));
+			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
+			bool shapePass2 = (RelIso(Hcand[index+1])< lep_shape_iso_cut && isLooseMu(Hcand[index+1]));
+			
+			
 		    if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
 			
@@ -2266,7 +2344,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
 			bool LTcut = UseSumPtCut && (sumPt > Cut_leplep_sumPt);
-			signal = pass1 && pass2 && LTcut;
+			if(!LTcut) continue;
+			signal = pass1 && pass2 && LTcut && !isFakeRate;
 			bool Ad_lepton=false;
 			if(signal){
 				if(AdLepton_sig(genericMuon,genericElectron,goodTau,genericElectron[i],genericMuon[j],verb)){
@@ -2277,7 +2356,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Ad_lepton) continue;
 			if(signal && !saved_signal ) eMu=true;
 			
-			if(!signal){
+			if(!signal && !isFakeRate){
 				if( !pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
@@ -2315,7 +2394,25 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_signal.push_back(2);
 				else if(Zee) Hcand_type_signal.push_back(6);
 				saved_signal=true;
+			}else if(isFakeRate && shapePass1 && shapePass2){
+				if(examineThisEvent){
+					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					std::cout << "Saving shape fake candidates with pass = " << shapePass1 << " " << shapePass2 << 
+					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " " << ClosestJet.pt << " " << 
+					PairMass(Hcand[index],Hcand[index+1]) << std::endl;
+				}
+				Hcand_FR.push_back(Hcand[index]);
+				Hcand_FR.push_back(Hcand[index+1]);
+				Hcand_pass.push_back(0);
+				Hcand_pass.push_back(0);
+				if(shapePass1 && shapePass2){
+					Hcand_shape_pass.push_back(1);
+				}else Hcand_shape_pass.push_back(0);	
+				if(Zmumu) Hcand_type_FR.push_back(2);
+				else if(Zee) Hcand_type_FR.push_back(6);
 			}
+			
+			
 			
 	
 			
@@ -2725,8 +2822,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		
 	}
-				
+			
+	if(examineThisEvent) std::cout << " filling signal histo " << std::endl;	
 				//histo filling
+	if(Hcand_signal.size() > 0)
+		{	
+			int event_type = Hcand_type_signal[0];
+			double mass=PairMass(Hcand_signal[0],Hcand_signal[1]);	
+			h_H_mass_signal_types[event_type-1]->Fill(mass,weight);	
+		}
+	if(examineThisEvent) std::cout << " filling FR histo " << std::endl;
 				
 	for(uint i=0; i < Hcand_FR.size(); i+=2)
 	{
@@ -2736,6 +2841,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 bool barrel2= fabs(ClosestJet.eta) < 1.4 ? true : false;
 		 
 		 int exp_event_type=Hcand_type_FR[i/2];
+		 double mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
+		 
+		 if(Hcand_shape_pass[i/2] > 0) h_H_mass_FR_types[exp_event_type-1]->Fill(mass,weight);
+		 if(Hcand_shape_pass[i/2] > 1) h_H_mass_FRt_types[exp_event_type-1]->Fill(mass,weight);
+		 	
+		 if(examineThisEvent) std::cout << " filled mass " << std::endl;
+	
 		 switch(exp_event_type)
 			{
 				case 4:
@@ -2803,11 +2915,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 	}
 				
+	if(examineThisEvent) std::cout << " filling AP histo cat0 " << std::endl;
 	for(uint i=0; i < Hcand_cat0.size(); i+=2)
 		{
 			int exp_event_type=Hcand_type_cat0[i/2];
 			myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
 			myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
+			bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
+			bool B2= fabs(ClosestJet.eta) < 1.4 ? true : false;
 			switch(exp_event_type)
 			{
 				case 1:
@@ -2816,6 +2931,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 7: 
 					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].pt, Hcand_cat0[i].pt); 
 					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt); 
+					if(B1&&B2) h_category0_jet_BB_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);  
+					else if(!B1&&B2) h_category0_jet_BE_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);
+					else if(B1&&!B2) h_category0_jet_EB_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);
+					else if(!B1&&!B2) h_category0_jet_EE_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);
 					h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].jetPt,Hcand_cat0[i].jetPt); 
 					break;
 				case 2: 
@@ -2823,34 +2942,41 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 6: 
 				case 8: 
 					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].pt, Hcand_cat0[i+1].pt);
-					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt); 
+					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);
+					if(B1&&B2) h_category0_jet_BB_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);  
+					else if(!B1&&B2) h_category0_jet_EB_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);
+					else if(B1&&!B2) h_category0_jet_BE_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);
+					else if(!B1&&!B2) h_category0_jet_EE_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt); 
 					h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].jetPt,Hcand_cat0[i+1].jetPt);
 					break;
 				default:
 					break;
 			}
 		}
+	if(examineThisEvent) std::cout << " filling AP histo cat1 " << std::endl;
+	
 	// messed with categories: cat1 = tau fails or e fails	
 	for(uint i=0; i < Hcand_cat1.size(); i+=2)
 	{
 		int exp_event_type=Hcand_type_cat1[i/2];
-		myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
 		myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
-		
+		bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 		
 			h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
-			h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt); 
+			B2? h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt) : h_category1_jet_EC_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt);
 			h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt);
 								
 	}
+	if(examineThisEvent) std::cout << " filling AP histo cat2 " << std::endl;
 	
 	for(uint i=0; i < Hcand_cat2.size(); i+=2)
 	{
 		int exp_event_type=Hcand_type_cat2[i/2];
 		myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
-		myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
+		bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
+		
 		h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
-		h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt); 
+		B1? h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt) : h_category2_jet_EC_pt_types[exp_event_type-1]->Fill(ClosestJet.pt);
 		h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
 		
 	}
