@@ -1,22 +1,28 @@
 ### installation with GIT
-# 1) make sure you have set-up the ROOT environment
+# 1) make sure you have set-up the CMSSW environment
+cmsrel CMSSW_5_3_3 # or newer from 53x family
+cd CMSSW_5_3_3/src/
+cmsenv
 
-# 2) checkout and compile SFRAME (one can also checkout newer ones (see http://sourceforge.net/p/sframe/code/HEAD/tree/SFrame/tags/) but this one works quite nicely)
-svn co svn://svn.code.sf.net/p/sframe/code/SFrame/tags/SFrame-03-06-20 SFrame
-cd SFrame
+
+# 2) checkout and compile analysis code 
+git clone git@github.com:jpavel/cms-ucl-tau.git .
+cd SFrame/
 source setup.sh
+make
+cd ../ZHtautauAnalysis/
 make
 cd ..
 
-# 2.5) Become member of cms-ucl-tau egroup (https://groups.cern.ch/Pages/GroupSearch.aspx?k=cms-ucl-tau)
-
-# 3) checkout and compile analysis package
-git clone https://jez@git.cern.ch/reps/cms-ucl-tau ZHtautauAnalysis
-cd ZHtautauAnalysis
-make
+# 3) compile FWlite code for di-tau mass reco
+cd TauAnalysis/CandidateTools/
+emacs -nw bin/nsvfitStandalone.cc 
+scram b -j 9
+cd ../../
+cmsenv # important to do after every recompillation
 
 # 4) RUN! (change input file defined in Analysis_config.xml appropriatelly)
-cd config
+cd ZHtautauAnalysis/config
 sframe-main  Analysis_config.xml 
 
 
