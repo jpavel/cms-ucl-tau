@@ -1,15 +1,17 @@
-### installation
+### installation with GIT
 # 1) make sure you have set-up the ROOT environment
 
-# 2) checkout and compile SFRAME
-svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
+# 2) checkout and compile SFRAME (one can also checkout newer ones (see http://sourceforge.net/p/sframe/code/HEAD/tree/SFrame/tags/) but this one works quite nicely)
+svn co svn://svn.code.sf.net/p/sframe/code/SFrame/tags/SFrame-03-06-20 SFrame
 cd SFrame
 source setup.sh
 make
 cd ..
 
+# 2.5) Become member of cms-ucl-tau egroup (https://groups.cern.ch/Pages/GroupSearch.aspx?k=cms-ucl-tau)
+
 # 3) checkout and compile analysis package
-svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.2 ZHtautauAnalysis
+git clone https://jez@git.cern.ch/reps/cms-ucl-tau ZHtautauAnalysis
 cd ZHtautauAnalysis
 make
 
@@ -18,13 +20,54 @@ cd config
 sframe-main  Analysis_config.xml 
 
 
-########### misc
-##making a tag
-svn copy svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.1 -m "new tag"
 
-## switching to a new tag
-svn switch  svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/tags/v-0.3
+########### misc (see http://git-scm.com/book for more help)
+## adress of a git repository
+https://git.cern.ch/web/?p=cms-ucl-tau.git;a=summary #for browsing via web
+#for downloading the code
+https://<USER>@git.cern.ch/kerberos/cms-ucl-tau #With valid kerberos credentials
+https://git.cern.ch/reps/cms-ucl-tau #LDAP authentication
 
+## 
+
+## Obtaining Kerberos ticket from CERN for 24h password-less access to CERN
+# use setup described e.g. here: http://david.decotigny.free.fr/wiki/wakka.php?wiki=AfsOnUbuntu
+kinit <AFSuserName>@CERN.CH
+
+##making a lightweight tag 
+git tag v1.4
+
+### making an annotated tag (recommended) 
+git tag -a v1.4 -m "making tag v1.4" 
+
+## switching to a new tag or branch
+git checkout v1.4
+
+## create new branch
+git branch myNewBranch
+
+## switch to branch
+git checkout myNewBranch
+
+## pushing to a server
+git push
+
+## review status of work directory
+git status
+
+## adding remote repository (on top of origin that is defined automatically if you use clone as above)
+
+git remote add <MyRepositoryNickname> <MyRepositoryURL> # e.g. git remote add pb git://github.com/paulboone/ticgit.git
+
+## check what is new in the repository (pushes by other users)
+git fetch # it is possible to specify repository nickname as a first argument. This command will not do anything with your local repository, only inform about changes in the remote
+
+## update your local repository and merge with remote
+git pull # if merging is not possible due to conflicts, git will inform you
+
+## inspecting a remote
+git remote show origin
+ 
 ##################################
 ## Running at ULB cluster 
 ##################################
@@ -34,21 +77,13 @@ cmsrel CMSSW_5_3_3_patch3 #prepare the CMSSW area
 # Standard stuff
 cd CMSSW_5_3_3_patch3/src/
 cmsenv 
-# checkout and compile SFRAME
-svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
-cd SFrame
-source setup.sh
-make
-cd ..
-# checkout and compile analysis package
-svn co svn+ssh://svn.cern.ch/reps/tautriganal/CMS/analysis/ZHtautauAnalysis/trunk ZHtautauAnalysis
-cd ZHtautauAnalysis
-make
+
+# checkout and compile SFRAME and analysis as above
 
 # make grid proxy (.globus with certificate necesssary at home dir)
 voms-proxy-init --voms cms:/cms/becms
 
-# define input in Analysis_config.xml - If the location is /pnfs/iihe/cms/store/user/jez/ZHTo2TauAna_52x_test0/output_Ntuples_10_1_rCX.root, the input file tag should read
+# define input in Analysis_config.xml - If the location is e.g. /pnfs/iihe/cms/store/user/jez/ZHTo2TauAna_52x_test0/output_Ntuples_10_1_rCX.root, the input file tag should read
 # <In FileName="dcap://maite.iihe.ac.be/pnfs/iihe/cms/store/user/jez/ZHTo2TauAna_52x_test0/output_Ntuples_10_1_rCX.root"  Lumi="1.0" />
 
 # RUN! 

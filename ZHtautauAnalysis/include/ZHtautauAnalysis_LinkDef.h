@@ -22,9 +22,9 @@
 #pragma link C++ class std::vector<std::vector<double> >+;
 //#pragma link C++ class TLorentzVector+;
 
-#pragma link C++ class FakeRate+;
 
-#pragma link C++ class Filter+;
+
+
 #pragma link C++ class vector<myobject>;
 #pragma link C++ class vector<myobject>::iterator;
 #pragma link C++ function operator==(const vector<myobject>::iterator&,const vector<myobject>::iterator&); 

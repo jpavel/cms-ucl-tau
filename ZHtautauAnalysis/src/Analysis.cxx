@@ -127,6 +127,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_lumi,"o_lumi");
 	DeclareVariable(o_event,"o_event");
 	DeclareVariable(o_pass, "o_pass");
+	DeclareVariable(o_FR, "o_FR");
+	DeclareVariable(o_FRt, "o_FRt");
 	DeclareVariable(o_event_weight,"o_event_weight");
 	DeclareVariable(o_px_Z1,"o_px_Z1");
 	DeclareVariable(o_px_Z2,"o_px_Z2");
@@ -1285,6 +1287,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//clearing output vectors
 	o_pass=false;
+	o_FR=false;
+	o_FRt=false;
 	o_event_weight=0.;
 	o_px_Z1=0.;
 	o_px_Z2=0.;
@@ -2691,8 +2695,120 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			 
 		 }
-    
-    
+    // save mass info in SS events to get background shape
+    for(uint i=0; i < Hcand_FR.size(); i+=2)
+		{
+			 if(Hcand_shape_pass[i/2] <1) continue; // did not pass loose ID+iso cuts
+			 int event_type = Hcand_type_FR[i/2];
+			 
+			 //ntuple filling
+			o_run=m->runNumber;
+			o_lumi=m->lumiNumber;
+			o_event=m->eventNumber;
+			
+			o_FR=true; 
+			if(Hcand_shape_pass[i/2] >1) o_FRt=true; // passed tight ID cuts
+			o_event_weight=weight;
+			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
+			o_px_H1=Hcand[0].px;o_px_H2=Hcand[1].px;
+			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
+			o_py_H1=Hcand[0].py;o_py_H2=Hcand[1].py;
+			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
+			o_pz_H1=Hcand[0].pz;o_pz_H2=Hcand[1].pz;
+			o_E_Z1=Zcand[0].E;o_E_Z2=Zcand[1].E;
+			o_E_H1=Hcand[0].E;o_E_H2=Hcand[1].E;
+			//~ o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
+			//~ o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
+			//~ 
+			//~ o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
+			//~ o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
+			//~ 
+			//~ o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
+			//~ o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
+			//~ 
+			//~ o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
+			//~ o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
+			//~ 
+			switch(event_type){
+				case 1://MMMT
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
+					break;
+				case 2://MMME
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=11*Hcand[1].charge;
+					break;
+				case 3://MMET
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=11*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
+					break;
+				case 4://MMTT
+					o_pdg_Z1=13*Zcand[0].charge;
+					o_pdg_Z2=13*Zcand[1].charge;
+					o_pdg_H1=15*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
+					break;
+				case 5://EEMT
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
+					break;
+				case 6://EEME
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=13*Hcand[0].charge;
+					o_pdg_H2=11*Hcand[1].charge;
+					break;
+				case 7://EEET
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=11*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
+					break;
+				case 8://EETT
+					o_pdg_Z1=11*Zcand[0].charge;
+					o_pdg_Z2=11*Zcand[1].charge;
+					o_pdg_H1=15*Hcand[0].charge;
+					o_pdg_H2=15*Hcand[1].charge;
+					break;
+			}
+			
+			if(FillSVmassInfo){
+				o_MET_x=Met.front().px;
+				o_MET_y=Met.front().py;
+				
+				
+				o_covMET_00=m->MVAMet_sigMatrix_00;
+				o_covMET_01=m->MVAMet_sigMatrix_01;
+				o_covMET_10=m->MVAMet_sigMatrix_10;
+				o_covMET_11=m->MVAMet_sigMatrix_11;
+			}
+			
+			//pdf info
+			if(FillPDFInfo){
+				o_pdf_alphaQCD=m->alphaQCD;
+				o_pdf_alphaQED=m->alphaQED;
+				o_pdf_qScale=m->qScale;
+				o_pdf_weight=m->weight;
+				o_pdf_scalePDF=m->scalePDF;
+				o_pdf_binningValue0=m->binningValue0;
+				o_pdf_id_1=m->id_First; o_pdf_id_2=m->id_Second; //(first,second) x_First
+				o_pdf_x_1=m->x_First; o_pdf_x_2=m->x_Second; //(first,second)
+				o_pdf_xPDF_1=m->xPDF_First; o_pdf_xPDF_2=m->xPDF_Second; //(first,second)
+				o_pdf_hasPDF=m->hasPDF; 
+				o_pdf_hasBinningValues=m->hasBinningValues; 
+				o_pdf_signalProcessID=m->signalProcessID; 
+				o_pdf_binningValueSize=m->binningValueSize; 
+			}
+			 
+		 }
 			
 	if(printoutEvents)
 	{

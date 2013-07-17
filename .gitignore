@@ -4,10 +4,10 @@
 *~
 src/*_Dict.cxx
 src/*_Dict.h
-config/Analysis*.root
-config/2012.root
-config/*.txt
-config/*.csv
+ZHtautauAnalysis/config/Analysis*.root
+ZHtautauAnalysis/config/2012.root
+ZHtautauAnalysis/config/*.txt
+ZHtautauAnalysis/config/*.csv
 config/input.xml
 config/jobTempOutput*
 macros/Filter/*.txt
