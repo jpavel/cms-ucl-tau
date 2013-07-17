@@ -66,7 +66,7 @@ mv toKeep.list temp_input.1
 
 
 
-
+total=`more temp_input.1 | wc -l`
 
 
 more temp_input.1 |while read line

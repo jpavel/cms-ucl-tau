@@ -6,6 +6,22 @@ config=`echo $5`
 results=`echo $6`
 time=`date "+%Y%m%d"`
 
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  echo script not sourced! Exiting...
+  exit 1
+fi
+
+
+if [ $# -ne 6 ]; then
+    echo "Wrong number of input arguments!"
+    echo "Usage: source Prepare_listdir.sh <inputDir> <taskName> <listOfSubdirs> <filesPerJob> <configXML> <resultsOutputDir>"
+    echo "e.g. source source Prepare_listdir.sh /storage/data/cms/store/user/jez/ZHttNtuples_v2/53X/Data/ CD_2012 CD.condor.list 50 Analysis_config_T2.xml results"
+    return 2
+fi
+
+
+
+
 total=`more ${input_list} | wc -l`
 echo "Total number of input directories is" $total
 
@@ -13,9 +29,9 @@ touch ${time}_${NAME}_PrepareJobs.sh
 rm -f ${time}_${NAME}_PrepareJobs.sh
 touch ${time}_${NAME}_PrepareJobs.sh
 
-echo "touch {time}_${NAME}_RunAll.sh" >> ${time}_${NAME}_PrepareJobs.sh
-echo "rm -f {time}_${NAME}_RunAll.sh" >> ${time}_${NAME}_PrepareJobs.sh
-echo "touch {time}_${NAME}_RunAll.sh" >> ${time}_${NAME}_PrepareJobs.sh
+echo "touch ${time}_${NAME}_RunAll.sh" >> ${time}_${NAME}_PrepareJobs.sh
+echo "rm -f ${time}_${NAME}_RunAll.sh" >> ${time}_${NAME}_PrepareJobs.sh
+echo "touch ${time}_${NAME}_RunAll.sh" >> ${time}_${NAME}_PrepareJobs.sh
 
 
 more ${input_list} | while read line
