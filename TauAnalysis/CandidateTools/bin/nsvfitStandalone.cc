@@ -88,61 +88,105 @@ void eventsFromTree(int argc, char* argv[])
   std::cout << "My Tree has "<< tree->GetEntries() << " entries. " << std::endl; 
   // input variables
   Bool_t  o_pass;
-  std::vector<Float_t>* o_event_weight = 0;
-  std::vector<Float_t>* o_px = 0;
-  std::vector<Float_t>* o_py = 0;
-  std::vector<Float_t>* o_pz = 0;
-  std::vector<Float_t>* o_E = 0;
-  std::vector<Int_t>* o_pdg = 0;
-  std::vector<Float_t>* o_MET = 0; //(Met_x,Met_y)
-  std::vector<Float_t>* o_covMET = 0; // covMatrix(00,01,10,11)
+  Bool_t o_FR;
+  Bool_t o_FRt;
+  Float_t o_event_weight;
+  Float_t o_px_Z1;
+  Float_t o_px_Z2;
+  Float_t o_px_H1;
+  Float_t o_px_H2;
+
+  Float_t o_py_Z1;
+  Float_t o_py_Z2;
+  Float_t o_py_H1;
+  Float_t o_py_H2;
+
+  Float_t o_pz_Z1;
+  Float_t o_pz_Z2;
+  Float_t o_pz_H1;
+  Float_t o_pz_H2;
+
+  Float_t o_E_Z1;
+  Float_t o_E_Z2;
+  Float_t o_E_H1;
+  Float_t o_E_H2;
+
+  Float_t o_pdg_Z1;
+  Float_t o_pdg_Z2;
+  Float_t o_pdg_H1;
+  Float_t o_pdg_H2;
+
+  Float_t o_MET_x;
+  Float_t o_MET_y;
+  Float_t o_covMET_00;
+  Float_t o_covMET_01;
+  Float_t o_covMET_10;
+  Float_t o_covMET_11;
+
   // new branch
-  std::vector<Float_t> *o_svMass = new std::vector<Float_t>;
-//   float met, metPhi;
-//   float covMet11, covMet12; 
-//   float covMet21, covMet22;
-//   float l1M, l1Px, l1Py, l1Pz;
-//   float l2M, l2Px, l2Py, l2Pz;
-//   float mTrue;
+  Float_t o_svMass=-100.;
+  Float_t o_svMass_unc=-100.;
 //   // branch adresses
   tree->SetBranchAddress("o_pass", &o_pass);
+  tree->SetBranchAddress("o_FR", &o_FR);
+  tree->SetBranchAddress("o_FRt", &o_FRt);
   tree->SetBranchAddress("o_event_weight"          , &o_event_weight       );
-  tree->SetBranchAddress("o_px"         , &o_px     );
-  tree->SetBranchAddress("o_py"      , &o_py   );
-  tree->SetBranchAddress("o_pz"      , &o_pz   );
-  tree->SetBranchAddress("o_E"      , &o_E   );
-  tree->SetBranchAddress("o_pdg"      , &o_pdg   );
-  tree->SetBranchAddress("o_MET"         , &o_MET        );
-  tree->SetBranchAddress("o_covMET"        , &o_covMET       );
+  tree->SetBranchAddress("o_px_Z1"         , &o_px_Z1     );
+  tree->SetBranchAddress("o_px_Z2"         , &o_px_Z2     );
+  tree->SetBranchAddress("o_px_H1"         , &o_px_H1     );
+  tree->SetBranchAddress("o_px_H2"         , &o_px_H2     );
+  tree->SetBranchAddress("o_py_Z1"         , &o_py_Z1     );
+  tree->SetBranchAddress("o_py_Z2"         , &o_py_Z2     );
+  tree->SetBranchAddress("o_py_H1"         , &o_py_H1     );
+  tree->SetBranchAddress("o_py_H2"         , &o_py_H2     );
+  tree->SetBranchAddress("o_pz_Z1"         , &o_pz_Z1     );
+  tree->SetBranchAddress("o_pz_Z2"         , &o_pz_Z2     );
+  tree->SetBranchAddress("o_pz_H1"         , &o_pz_H1     );
+  tree->SetBranchAddress("o_pz_H2"         , &o_pz_H2     );
+  tree->SetBranchAddress("o_E_Z1"         , &o_E_Z1     );
+  tree->SetBranchAddress("o_E_Z2"         , &o_E_Z2     );
+  tree->SetBranchAddress("o_E_H1"         , &o_E_H1     );
+  tree->SetBranchAddress("o_E_H2"         , &o_E_H2     );
+  tree->SetBranchAddress("o_pdg_Z1"         , &o_pdg_Z1     );
+  tree->SetBranchAddress("o_pdg_Z2"         , &o_pdg_Z2     );
+  tree->SetBranchAddress("o_pdg_H1"         , &o_pdg_H1     );
+  tree->SetBranchAddress("o_pdg_H2"         , &o_pdg_H2     );
+  tree->SetBranchAddress("o_MET_x"         , &o_MET_x        );
+  tree->SetBranchAddress("o_MET_y"         , &o_MET_y        );
+  tree->SetBranchAddress("o_covMET_00"        , &o_covMET_00       );
+  tree->SetBranchAddress("o_covMET_01"        , &o_covMET_01       );
+  tree->SetBranchAddress("o_covMET_10"        , &o_covMET_10       );
+  tree->SetBranchAddress("o_covMET_11"        , &o_covMET_11       );  
   // adding branch with results
   TBranch *svBranch = tree->Branch("o_svMass" , &o_svMass);
+  TBranch *svBranch_unc = tree->Branch("o_svMass_unc" , &o_svMass_unc);
   int nevent = tree->GetEntries();
   for(int i=0; i<nevent; ++i){
-    o_svMass->clear();
     tree->GetEvent(i);
-    if(o_pass) std::cout << "event " << i+1 << " : " << o_pass << std::endl;
-    if(!o_pass){ svBranch->Fill(); continue;}
+    if(o_pass||o_FR) std::cout << "event " << i+1 << " : " << o_pass << std::endl;
+    else{ 
+      continue;
+    }
     // setup MET input vector
-    std::cout << "The MET is " << o_MET->at(0) << " " << o_MET->at(1) << std::endl;
-    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
-    NSVfitStandalone::Vector measuredMET(o_MET->at(0), o_MET->at(1), 0); 
+    // std::cout << "The MET is " << o_MET_x << " " << o_MET_y << std::endl;
+    //    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
+    NSVfitStandalone::Vector measuredMET(o_MET_x, o_MET_y, 0); 
     // setup the MET significance
      TMatrixD covMET(2,2);
-     std::cout << "The cov MET is " << o_covMET->at(0) << " " << o_covMET->at(1) << " : " << o_covMET->at(2) << " : " << o_covMET->at(3) << std::endl;
-     if(o_covMET->size()!=4){ svBranch->Fill(); continue;}
-       covMET[0][0] = o_covMET->at(0);
-       covMET[0][1] = o_covMET->at(1);
-       covMET[1][0] = o_covMET->at(2);
-       covMET[1][1] = o_covMET->at(3);
+     //     std::cout << "The cov MET is " << o_covMET_00 << " " << o_covMET_01 << " : " << o_covMET_10 << " : " << o_covMET_11 << std::endl;
+     //     if(o_covMET->size()!=4){ svBranch->Fill(); continue;}
+       covMET[0][0] = o_covMET_00;
+       covMET[0][1] = o_covMET_01;
+       covMET[1][0] = o_covMET_10;
+       covMET[1][1] = o_covMET_11;
 //     // setup measure tau lepton vectors 
-       if(o_px->size()!=4 || o_py->size()!=4 || o_pz->size()!=4 || o_E->size()!=4) continue;
-       std::cout << "the first vector is " << o_px->at(2)<< " : " << o_py->at(2)<< " : " << o_pz->at(2)<< " : " << o_E->at(2) << " : " << o_pdg->at(2) << std::endl;
-       std::cout << "the second vector is " << o_px->at(3)<< " : " << o_py->at(3)<< " : " << o_pz->at(3)<< " : " << o_E->at(3) << " : " << o_pdg->at(3) <<std::endl;
-       NSVfitStandalone::LorentzVector l1(o_px->at(2), o_py->at(2), o_pz->at(2), o_E->at(2));
-       NSVfitStandalone::LorentzVector l2(o_px->at(3), o_py->at(3), o_pz->at(3), o_E->at(3));
+       // std::cout << "the first vector is " << o_px_H1<< " : " << o_py_H1<< " : " << o_pz_H1<< " : " << o_E_H1 << " : " << o_pdg_H1 << std::endl;
+       // std::cout << "the second vector is " << o_px_H2<< " : " << o_py_H2<< " : " << o_pz_H2<< " : " << o_E_H2 << " : " << o_pdg_H2 <<std::endl;
+       NSVfitStandalone::LorentzVector l1(o_px_H1, o_py_H1, o_pz_H1, o_E_H1);
+       NSVfitStandalone::LorentzVector l2(o_px_H2, o_py_H2, o_pz_H2, o_E_H2);
        std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
-       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg->at(2))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
-       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg->at(3))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
+       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H1)==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
+       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H2)==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
 //     // construct the class object from the minimal necesarry information
       NSVfitStandaloneAlgorithm algo(measuredTauLeptons, measuredMET, covMET, 1);
       algo.addLogM(false);
@@ -159,16 +203,20 @@ void eventsFromTree(int argc, char* argv[])
 //     // retrieve the results upon success
 //     std::cout << "... m truth : " << mTrue  << std::endl;
     if(algo.isValidSolution()){
-      std::cout << "... m svfit : " << mass << "+/-" << diTauMassErr << " " << o_svMass->size() << std::endl;
-      o_svMass->push_back(mass);
-      o_svMass->push_back(diTauMassErr);
+      std::cout << "... m svfit : " << mass << "+/-" << diTauMassErr << " " << std::endl;
+      o_svMass=mass;
+      o_svMass_unc=diTauMassErr;
     }
     else{
       std::cout << "... m svfit : ---" << std::endl;
     }
     svBranch->Fill();
+    svBranch_unc->Fill();
+    o_svMass=-100.;
+    o_svMass_unc=-100.;
   }
-  o_svMass->clear();
+  o_svMass=-100.;
+  o_svMass_unc=-100.;
   tree->Write("", TObject::kOverwrite);
   file->Close();
   return;
