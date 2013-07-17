@@ -25,6 +25,7 @@ config/CONDOR/resubmit
 *.slo
 *.lo
 *.o
+*.pyc
 
 # Compiled Dynamic libraries
 *.so
@@ -54,3 +55,17 @@ ZHtautauAnalysis/src/ZHtautauAnalysis_Dict.h
 TauAnalysis/CVS
 TauAnalysis/*/CVS
 TauAnalysis/*/*/CVS
+
+RecoLuminosity/
+
+#CONDOR
+*.cmd
+ZHtautauAnalysis/CONDOR/*/
+*.out
+*.err
+*_ShowStatus.sh
+Resubmit_now.sh
+resubmit
+*_PrepareJobs.sh
+*_RunAll.sh
+ZHtautauAnalysis/CONDOR/*.list

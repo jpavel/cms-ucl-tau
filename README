@@ -21,20 +21,73 @@ scram b -j 9
 cd ../../
 cmsenv # important to do after every recompillation
 
-# 4) RUN! (change input file defined in Analysis_config.xml appropriatelly)
+# 4) checkout lumi calc code
+cvs co  -r V04-02-08 RecoLuminosity/LumiDB
+cd RecoLuminosity/LumiDB/
+scram b -j 9
+cd ../../
+cmsenv
+
+########################## Running at CONDOR
+#All scripts are located in ZHtautauAnalysis/CONDOR dir
+
+# 1) Preparing submission commands
+# A) Single sample
+# Use Prepare_condor_InputDir_OutputName_FilesPerJob_configFile.sh
+# script that takes 5 parameters: input directory, output name number
+# of input files per job, job configuration XML file, name of folder
+# where results would be stored. EG:
+source Prepare_condor_InputDir_OutputName_FilesPerJob_configFile.sh \
+/storage/data/cms/store/user/jez/DoubleElectron_Run2012C/ \
+DoubleElectron2012C 50 Analysis_config_T2.xml results 
+
+# B1) Multiple samples in the same directory
+# Use Prepare_listdir.sh script that takes 6 parameters:
+# directory in which directories with input are, name of output,
+# list of names of directories with input in a text file, number of
+# files per job, job configuration XML file, name of folder where
+# results would be stored eg: 
+source Prepare_listdir.sh \
+ /storage/data/cms/store/user/jez/ZHttNtuples_v2/53X/Data/ 2012 \
+ 2012.list 50 Analysis_config_T2.xml results
+
+# B2) Script above creates a .sh file finishing with _PrepareJobs.sh
+#  that can be used to change some parameters (config, files per job)
+# for some of the jobs in case one does not want all jobs to run with
+# the same configuration. Afterwards, execute the *_PrepareJobs.sh script
+
+
+# 2) Submit with condor_submit and the cmd file created by script
+#     above or execute *_RunAll.sh script created during preparation
+# of submission of multiple samples to submit on all samples at once 
+
+# 3) Control the output by executing *_ShowStatus.sh script created in
+#     submission process and having the chosen output name. It also
+#     checks failed jobs and prepares resubmission. Follow instructions
+#     on the screen
+
+# 4) Enjoy results stored in the directory you specified in submission
+
+
+
+############################### Running locally
+#  Local running is also possible, but not all features are
+#  available on computers without CMSSW, e.g. full mass reconstruction
+#  or lumi calculation. To run locally do  RUN! (change input file defined in Analysis_config.xml appropriatelly)
+
 cd ZHtautauAnalysis/config
 sframe-main  Analysis_config.xml 
+
+# The code executed by this command is stored in src/Analysis.cxx file
+#  and steered via the xml file that is the first parameter of
+#  sframe-main program
 
 
 
 ########### misc (see http://git-scm.com/book for more help)
 ## adress of a git repository
-https://git.cern.ch/web/?p=cms-ucl-tau.git;a=summary #for browsing via web
-#for downloading the code
-https://<USER>@git.cern.ch/kerberos/cms-ucl-tau #With valid kerberos credentials
-https://git.cern.ch/reps/cms-ucl-tau #LDAP authentication
-
-## 
+https://github.com/jpavel/cms-ucl-tau
+##
 
 ## Obtaining Kerberos ticket from CERN for 24h password-less access to CERN
 # use setup described e.g. here: http://david.decotigny.free.fr/wiki/wakka.php?wiki=AfsOnUbuntu
