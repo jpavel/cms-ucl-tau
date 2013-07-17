@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <!-- This config file will run over input defined in input.xml file -->
-<JobConfiguration JobName="AnalysisJob" OutputLevel="DEBUG">
+<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />
@@ -58,19 +58,19 @@
       
                 <Item Name="AllowTauBOverlap" Value="true" />
                 <Item Name="UseSumPtCut" Value="true" />
-                <Item Name="Cut_tautau_sumPt" Value="75" />
-                <Item Name="Cut_etau_sumPt" Value="35" />
-                <Item Name="Cut_mutau_sumPt" Value="45" />
-                <Item Name="Cut_leplep_sumPt" Value="25" /> 
+                <Item Name="Cut_tautau_sumPt" Value="70" />
+                <Item Name="Cut_etau_sumPt" Value="25" />
+                <Item Name="Cut_mutau_sumPt" Value="35" />
+                <Item Name="Cut_leplep_sumPt" Value="35" /> 
 
                 <Item Name="printoutEvents" Value="true" />
                 <Item Name="maxDeltaR" Value="0.1" />
                 <Item Name="maxDeltaR2" Value="0.1" />
-                <Item Name="examineEvent" Value="" />
+                <Item Name="examineEvent" Value="44487" />
                 <Item Name="IgnoreAdditionalTaus" Value="True" />
                 
-                <Item Name="IgnorePUW" Value="False" />
-                <Item Name="IgnoreSF" Value="False" />
+                <Item Name="IgnorePUW" Value="True" />
+                <Item Name="IgnoreSF" Value="True" />
                 
                
 		<!-- Systematics -->

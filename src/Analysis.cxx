@@ -501,15 +501,23 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 
 	std::cout << "Event type summary: " << std::endl;
-	std::cout << "Z(mumu)H(mutau)   : " << h_event_type->GetBinContent(1) << std::endl;
-	std::cout << "Z(mumu)H(muE)     : " << h_event_type->GetBinContent(2) << std::endl;
-	std::cout << "Z(mumu)H(Etau)    : " << h_event_type->GetBinContent(3) << std::endl;
-	std::cout << "Z(mumu)H(tautau)  : " << h_event_type->GetBinContent(4) << std::endl;
-	std::cout << "Z(EE)H(mutau)     : " << h_event_type->GetBinContent(5) << std::endl;
-	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << std::endl;
-	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << std::endl;
-	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << std::endl;
-
+	std::cout << "Z(mumu)H(mutau)   : " << h_event_type->GetBinContent(1) << 
+	" (" << h_event_type_raw->GetBinContent(1) << ")"<< std::endl;
+	std::cout << "Z(mumu)H(muE)     : " << h_event_type->GetBinContent(2) << 
+	" (" << h_event_type_raw->GetBinContent(2) << ")"<< std::endl;
+	std::cout << "Z(mumu)H(Etau)    : " << h_event_type->GetBinContent(3) << 
+	" (" << h_event_type_raw->GetBinContent(3) << ")"<< std::endl;
+	std::cout << "Z(mumu)H(tautau)  : " << h_event_type->GetBinContent(4) << 
+	" (" << h_event_type_raw->GetBinContent(4) << ")"<< std::endl;
+	std::cout << "Z(EE)H(mutau)     : " << h_event_type->GetBinContent(5) << 
+	" (" << h_event_type_raw->GetBinContent(5) << ")"<< std::endl;
+	std::cout << "Z(EE)H(muE)       : " << h_event_type->GetBinContent(6) << 
+	" (" << h_event_type_raw->GetBinContent(6) << ")"<< std::endl;
+	std::cout << "Z(EE)H(Etau)      : " << h_event_type->GetBinContent(7) << 
+	" (" << h_event_type_raw->GetBinContent(7) << ")"<< std::endl;
+	std::cout << "Z(EE)H(tautau)    : " << h_event_type->GetBinContent(8) << 
+	" (" << h_event_type_raw->GetBinContent(8) << ")"<< std::endl;
+	
 	if(printoutEvents){ log1.close(); plus.close();}
 	lumi.close();
 	ofstream log2;       
@@ -842,7 +850,7 @@ entries++;
 	goodElectron.clear();
 	std::vector<myobject> electron = m->PreSelectedElectrons;
 	m_logger << VERBOSE << " There are " << electron.size() << " preselected electrons " << SLogger::endmsg;
-
+	if(examineThisEvent) std::cout << "There are " << electron.size() << " pre-electrons" << std::endl;
 	for (uint i = 0; i < electron.size(); i++) {
 
 		double elPt = electron[i].pt;
@@ -850,7 +858,8 @@ entries++;
 		int missingHits = electron[i].numLostHitEleInner;
 		bool elID =  LooseEleId(elPt,electron[i].eta_SC,electron[i].Id_mvaNonTrg);
 		double relIso = RelIsoEl(electron[i]);
-
+		if(examineThisEvent) std::cout << " pre-electron no. " << i << " " <<
+		elPt << " " << elEta << " " << missingHits << " " << elID << std::endl;
 		if (elPt > 10. && fabs(elEta) < 2.5 && missingHits <= 1 && elID)
 		{
 			goodElectron.push_back(electron[i]);
@@ -876,36 +885,36 @@ entries++;
 	
 	//overlap cleaning
 	
-	for(int i = 0; i < goodMuon.size(); i++)
-	{
-		if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << goodMuon.size() << std::endl;
-		
-		bool removed = false;
-		for(uint j = i+1; j < goodMuon.size() && !removed ; j++)
-		{
-			if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << goodMuon.size() 
-			<<":" << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
-		
-			if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR2) 
-			{	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
-			if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
-		}
-	}
+	//~ for(int i = 0; i < goodMuon.size(); i++)
+	//~ {
+		//~ if(examineThisEvent) std::cout << "Looping over muon no. " << i << " out of " << goodMuon.size() << std::endl;
+		//~ 
+		//~ bool removed = false;
+		//~ for(uint j = i+1; j < goodMuon.size() && !removed ; j++)
+		//~ {
+			//~ if(examineThisEvent) std::cout << "Looping over muon no. " << j << " out of " << goodMuon.size() 
+			//~ <<":" << deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi) << std::endl;
+		//~ 
+			//~ if(deltaR(goodMuon[i].eta,goodMuon[i].phi,goodMuon[j].eta,goodMuon[j].phi)< maxDeltaR2) 
+			//~ {	goodMuon.erase(goodMuon.begin()+i); i--;removed = true;}
+			//~ if(examineThisEvent) std::cout << "Preremoved? " << removed << std::endl;
+		//~ }
+	//~ }
 	Hist("h_n_goodMu_Hcand")->Fill(goodMuon.size());
 	
 	for(int i = 0; i < goodElectron.size(); i++)
 	{
 		if(examineThisEvent) std::cout << "Looping over electron no. " << i << " out of " << goodElectron.size() << std::endl;
 		bool removed = false;
-		for(uint j = i+1; j < goodElectron.size() && !removed ; j++)
-		{
-			if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
-			<< " " << deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi) << std::endl;
-		
-			if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR2) 
-			{	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
-			if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
-		}
+		//~ for(uint j = i+1; j < goodElectron.size() && !removed ; j++)
+		//~ {
+			//~ if(examineThisEvent) std::cout << "Looping over ele no. " << j << " out of " << Zcand.size() 
+			//~ << " " << deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi) << std::endl;
+		//~ 
+			//~ if(deltaR(goodElectron[i].eta,goodElectron[i].phi,goodElectron[j].eta,goodElectron[j].phi)< maxDeltaR2) 
+			//~ {	goodElectron.erase(goodElectron.begin()+i); i--; removed = true;}
+			//~ if(examineThisEvent) std::cout << "Zremoved? " << removed << std::endl;
+		//~ }
 
 		for(uint j = 0; j < goodMuon.size() && !removed; j++)
 		{
@@ -1379,45 +1388,63 @@ double Z_weight = PUWeight;
 	for(uint i = 0; i < goodMuon.size() && !signal; i++)
 	{
 
+		if(examineThisEvent) std::cout << "  Checking for muE  " << std::endl;
+	
 		double relIso = RelIsoMu(goodMuon[i]);
 		bool iso1_muE = (relIso < 0.3);
 		bool iso1_muTau = (relIso < 0.3);
 		bool isTightMuon = isGoodMu(goodMuon[i]);
 		if(!checkCategories && !iso1_muE) continue;
+		if(examineThisEvent) std::cout << "mu1 no. " << i << " passes preselection with iso1 " << relIso << std::endl;
 		m_logger << DEBUG << " Checking for muE with very isolated muon" << SLogger::endmsg;   
 		for(uint j=0; j< goodElectron.size() && !signal; j++)
 		{
-
+			if(examineThisEvent) std::cout << "el2 no. " << j << "out of " << goodElectron.size() << std::endl;
+			
 			if(UseSumPtCut && goodMuon[i].pt+goodElectron[j].pt < Cut_leplep_sumPt) continue;
+			if(examineThisEvent) std::cout << "sum pt" << std::endl;		
+			
 			bool iso2 = (RelIsoEl(goodElectron[j]) < 0.3);
 			if(goodMuon[i].charge*goodElectron[j].charge >=0) continue;
+			if(examineThisEvent) std::cout << "charge" << std::endl;		
+			
 			if(deltaR(goodElectron[j].eta,goodElectron[j].phi,goodMuon[i].eta,goodMuon[i].phi)< maxDeltaR) continue;
+			if(examineThisEvent) std::cout << "distance" << std::endl;		
+			
 			if (iso1_muE && iso2){ signal = true; muE=true; muTau = false;}
 			else if (!iso1_muE && iso2  && category < 1){ category = 2; muE=true; muTau = false;}
 			else if ( iso1_muE && !iso2 && category < 1){ category = 1; muE=true; muTau = false;} 
 			else if (!iso1_muE && !iso2 && category < 0){ category = 0; muE=true; muTau = false;}
 			else continue;
+			if(examineThisEvent) std::cout << "signal!" << std::endl;
 			Hindex[0]=i;
 			Hindex[1]=j;
 		}
-
+		if(examineThisEvent) std::cout << "  Checking for muTau  " << std::endl;
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
 		if(!checkCategories && !iso1_muTau) continue;
 		if(!isTightMuon) continue;
+		if(examineThisEvent) std::cout << "mu1 no. " << i << " passes ID " << std::endl;
 		for(uint j=0; j< goodTau.size() && !signal; j++)
 		{
+			if(examineThisEvent) std::cout << "tau2 no. " << j << "out of " << goodTau.size() << std::endl;
 			//if(Tmass(m,goodMuon[i]) > 30) continue;
                         Hist("h_LT_muTau")->Fill(goodMuon[i].pt+goodTau[j].pt);
-			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_mutau_sumPt) continue;			
+			if(UseSumPtCut && goodMuon[i].pt+goodTau[j].pt < Cut_mutau_sumPt) continue;	
+			if(examineThisEvent) std::cout << "sum pt" << std::endl;		
 			bool iso2 = Cut_tautau_MVA_iso ? goodTau[j].byLooseIsolationMVA > 0.5 : goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			if(goodMuon[i].charge*goodTau[j].charge >=0) continue;
+			if(examineThisEvent) std::cout << "charge" << std::endl;
 			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
+			if(examineThisEvent) std::cout << "tau ID" << std::endl;
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodMuon[i].eta,goodMuon[i].phi)< maxDeltaR) continue;                                    
+			if(examineThisEvent) std::cout << "distance" << std::endl;
 			if (iso1_muTau && iso2){ signal = true; muE=false; muTau=true;}
 			else if (!iso1_muTau && iso2  && category < 1){ category = 2; muE=false; muTau=true;}
 			else if ( iso1_muTau && !iso2 && category < 1){ category = 1; muE=false; muTau=true;} 
 			else if (!iso1_muTau && !iso2 && category < 0){ category = 0; muE=false; muTau=true;}
 			else continue;
+			if(examineThisEvent) std::cout << "signal!" << std::endl;
 			Hindex[0]=i;
 			Hindex[1]=j;
 		}             
@@ -1432,18 +1459,18 @@ double Z_weight = PUWeight;
 	{
 		for(uint i = 0; i < goodElectron.size() && !signal ; i++)
 		{
-			if(examineThisEvent) std::cout << "ele1 no. " << i << "out of " << goodElectron.size() << std::endl;
+			if(examineThisEvent) std::cout << "ele1 no. " << i << "out of " << goodElectron.size() << " pt = " << goodElectron[i].pt <<  std::endl;
 			//if(Tmass(m,goodElectron[i]) > 30) continue;
-			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.2);
+			bool iso1 = (RelIsoEl(goodElectron[i]) < 0.3);
 			if (!iso1 && !checkCategories) continue;
-			if( goodElectron[i].numLostHitEleInner > 0) continue;
+			//if( goodElectron[i].numLostHitEleInner > 0) continue;
 			m_logger << DEBUG << " Checking for eTau " << SLogger::endmsg;	
 			if(examineThisEvent) std::cout << "ele1 no. " << i << " passes preselection with iso1 " << iso1 << std::endl;
 			if(!TightEleId(goodElectron[i])) continue;
 			for(uint j=0; j< goodTau.size() && !signal; j++)
 			{
-				if(examineThisEvent) std::cout << "tau2 no. " << j << "out of " << goodTau.size() << std::endl;
-		
+			if(examineThisEvent) std::cout << "tau2 no. " << j << "out of " << goodTau.size() << " pt = " << goodTau[j].pt << " M= " << InvMass(goodElectron[i],goodTau[j]) << std::endl;
+			
 				Hist("h_LT_eTau")->Fill(goodElectron[i].pt+goodTau[j].pt);
 				if(UseSumPtCut && goodElectron[i].pt+goodTau[j].pt < Cut_etau_sumPt) continue;
 				if(examineThisEvent) std::cout << "sum pt" << std::endl;
@@ -1634,9 +1661,11 @@ double Z_weight = PUWeight;
 			if(is2012_53 && !onlyTrigger && !onlyIDIso && !NoSFShift_Ele && !NoSFShift_Mu){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+				
 			}else if(is2012_53 && (onlyTrigger || (onlyIDIso && NoSFShift_Ele && NoSFShift_Mu))){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
 				corrHlep2=Cor_ID_Iso_Ele_Loose_2012_53X(Hcand[1]);
+				
 			}else if(is2012_53 && SFShiftUp_Mu && SFShiftUp_Ele){
                                 if(onlyIDIso && !onlyTrigger){
 				corrHlep1=Cor_ID_Iso_Mu_Loose_2012_53X(Hcand[0])+Unc_ID_Iso_Mu_Loose_2012_53X(Hcand[0]);
@@ -1676,6 +1705,7 @@ double Z_weight = PUWeight;
 
 	}
 
+	//corrHlep1=corrHlep2=1.0;
 	double weight = PUWeight*corrZlep1*corrZlep2*corrHlep1*corrHlep2;
 
 	TLorentzVector eH_eTau,tauH_eTau,H_eTau;
