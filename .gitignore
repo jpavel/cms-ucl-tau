@@ -49,3 +49,8 @@ SFrame/user/src/SFrameUser_Dict.cxx
 SFrame/user/src/SFrameUser_Dict.h
 ZHtautauAnalysis/src/ZHtautauAnalysis_Dict.cxx
 ZHtautauAnalysis/src/ZHtautauAnalysis_Dict.h
+
+#CVS
+TauAnalysis/CVS
+TauAnalysis/*/CVS
+TauAnalysis/*/*/CVS
