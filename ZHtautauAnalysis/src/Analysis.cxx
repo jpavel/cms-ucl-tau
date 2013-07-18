@@ -2954,7 +2954,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
 		 myobject ClosestJet2 = ClosestInCollection(Hcand_FR[i+1],jet);
 		 bool barrel1= fabs(ClosestJet.eta) < 1.4 ? true : false;
-		 bool barrel2= fabs(ClosestJet.eta) < 1.4 ? true : false;
+		 bool barrel2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 		 
 		 int exp_event_type=Hcand_type_FR[i/2];
 		 double mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
@@ -3038,7 +3038,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
 			myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
 			bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
-			bool B2= fabs(ClosestJet.eta) < 1.4 ? true : false;
+			bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 			switch(exp_event_type)
 			{
 				case 1:
