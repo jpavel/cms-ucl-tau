@@ -122,7 +122,7 @@ int estimateBG(TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMori
 	  
   } 
   
-  h_hist2[0][0][0]->Draw();
+ h_hist2[0][0][0]->Draw();
  std::cout << h_hist[0][0][0]->GetSumOfWeights() << std::endl;
    
    //~ const double FR_ele_loose=0.0278039;
