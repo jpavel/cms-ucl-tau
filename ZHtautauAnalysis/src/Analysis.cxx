@@ -668,7 +668,7 @@ bool Analysis::TightEleId(float pt, float eta, double value){
 }
 
 bool Analysis::TightEleId(myobject o){
-	if( o.numLostHitEleInner > 1) return false;
+	if( o.numLostHitEleInner > 0) return false;
 	return TightEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
 }
 
