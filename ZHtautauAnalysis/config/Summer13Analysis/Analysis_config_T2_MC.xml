@@ -108,6 +108,12 @@
 
 	       	<Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
+		
+		
+		<!-- Switch off LT cut for various channels in reducible backround estimation -->
+		<Item Name="IgnoreLTforFR_TT" Value="False" />
+		<Item Name="IgnoreLTforFR_LT" Value="True" />
+		<Item Name="IgnoreLTforFR_LL" Value="True" />
                 
                       
 		</UserConfig>

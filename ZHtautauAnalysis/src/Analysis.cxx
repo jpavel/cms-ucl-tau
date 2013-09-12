@@ -82,6 +82,12 @@ Analysis::Analysis()
 		
 		DeclareProperty("FillPDFInfo",FillPDFInfo);
 		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
+		
+		// for FR calculation
+		
+		DeclareProperty("IgnoreLTforFR_TT",IgnoreLTforFR_TT);
+		DeclareProperty("IgnoreLTforFR_LT",IgnoreLTforFR_LT);;
+		DeclareProperty("IgnoreLTforFR_LL",IgnoreLTforFR_LL);
 
 	}
 
@@ -1893,7 +1899,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double sumPt = pt1+pt2;
 			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
-			if(!LTcut) continue;
+			
+			if(!LTcut && !IgnoreLTforFR_TT) continue;
 			signal = pass1 && pass2 && signalPtCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2048,7 +2055,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool tightFR=isGoodMu(Hcand[index]);
 			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_mutau_sumPt);
-			if(!LTcut) continue;
+			if(!LTcut && !IgnoreLTforFR_LT) continue;
 			
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
@@ -2211,6 +2218,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool tightFR=TightEleId(Hcand[index]);
 			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_etau_sumPt);
+			if(!LTcut && !IgnoreLTforFR_LT) continue;
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2348,7 +2356,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
 			bool LTcut = UseSumPtCut && (sumPt > Cut_leplep_sumPt);
-			if(!LTcut) continue;
+			if(!LTcut && !IgnoreLTforFR_LL) continue;
 			signal = pass1 && pass2 && LTcut && !isFakeRate;
 			bool Ad_lepton=false;
 			if(signal){

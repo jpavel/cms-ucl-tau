@@ -378,6 +378,11 @@ private:
     
     double tau_shape_iso_cut;
     double lep_shape_iso_cut;
+    
+    bool IgnoreLTforFR_TT;
+    bool IgnoreLTforFR_LT;
+    bool IgnoreLTforFR_LL;
+    
             
     
     
