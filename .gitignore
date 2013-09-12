@@ -5,6 +5,7 @@
 src/*_Dict.cxx
 src/*_Dict.h
 ZHtautauAnalysis/config/Analysis*.root
+ZHtautauAnalysis/config/*/Analysis*.root
 ZHtautauAnalysis/config/2012.root
 ZHtautauAnalysis/config/*.txt
 ZHtautauAnalysis/config/*.csv
