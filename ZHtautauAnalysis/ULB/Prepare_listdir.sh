@@ -38,7 +38,7 @@ more ${input_list} | while read line
 do
  file=`echo ${line%/}`
  echo "source PrepareJobs_removeDuplicates.sh ${input_data}/${line} ${time}_${NAME}_${file} ${num_files} ${config} ${results}" >> ${time}_${NAME}_PrepareJobs.sh
- echo "echo \"condor_submit ${time}_${NAME}_${file}.cmd\" >> ${time}_${NAME}_RunAll.sh"  >> ${time}_${NAME}_PrepareJobs.sh
+ echo "echo \"./${time}_${NAME}_${file}_SubmitAll.sh\" >> ${time}_${NAME}_RunAll.sh"  >> ${time}_${NAME}_PrepareJobs.sh
 done
 
 chmod +x ${time}_${NAME}_PrepareJobs.sh

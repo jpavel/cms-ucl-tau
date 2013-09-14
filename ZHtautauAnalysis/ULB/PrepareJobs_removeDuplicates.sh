@@ -122,6 +122,8 @@ touch script2.sh
 
 echo "cd "$CMSSW_BASE"/src" >> script2.sh
 echo "eval \`scram runtime -sh\`" >> script2.sh
+echo "cd SFrame" >> script2.sh
+echo "source setup.sh" >> script2.sh
 echo "cd \$pwd" >> script2.sh
 echo "" >> script2.sh
 echo "# staging-in input" >> script2.sh
@@ -148,7 +150,7 @@ do
   rm -f temp_input.1.2
   mv temp_input_2_${counter}.1.2 temp_input.1.2
   mkdir -p ${output_name}/job${counter}
-  cp script.sh ${output_name}/job${counter}/${output_name}_${counter}.sh
+  cp script_temp.sh ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "mkdir -p /scratch/${output_name}_input" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   cat  input_${counter}.1 >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   rm -f input_${counter}.1
@@ -163,6 +165,7 @@ do
   echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "sframe_main ${config_name}" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "nsvfitStandalone Analysis.Data1.Reco.root redtree" >> ${output_name}/job${counter}/${output_name}_${counter}.sh # svfit mass calculation
   echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "touch events.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "tar czvf events.tgz events.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
@@ -182,6 +185,8 @@ do
 done 
 rm -f temp_input*
 rm -f full_path
+rm -f script2.sh
+rm -f script_temp.sh
 
 chmod +x ${output_name}_SubmitAll.sh
 echo "To submit jobs, do ./${output_name}_SubmitAll.sh"
