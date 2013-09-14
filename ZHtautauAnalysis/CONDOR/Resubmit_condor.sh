@@ -8,8 +8,8 @@ do
   file=`echo $line`
   echo "Submitting job ${file} ... "
   echo "Initialdir     = ${2}/job${file}" >>  ${2}_resubmit.cmd
-  cat argu >> ${2}_resubmit.cm
-  echo " queue 1" >> ${2}_resubmit.cm
+  cat argu >> ${2}_resubmit.cmd
+  echo " queue 1" >> ${2}_resubmit.cmd
   rm -f ${2}/job${file}/condor.*
 #  sed -i 's/glidein/ZHttNtuples\/53X\/Data/g' ${file}.sh
 #  cp *.sh ${file}.sh
@@ -18,4 +18,4 @@ do
 #  cd ../..
 done
 rm argu
-#condor_submit ${2}_resubmit.cmd
+condor_submit ${2}_resubmit.cmd
