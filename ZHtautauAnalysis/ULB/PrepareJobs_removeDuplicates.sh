@@ -165,13 +165,22 @@ do
   echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "sframe_main ${config_name}" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "ls -ltrh" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
-  echo "nsvfitStandalone Analysis.Data1.Reco.root redtree" >> ${output_name}/job${counter}/${output_name}_${counter}.sh # svfit mass calculation
-  echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "touch events.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
-  echo "tar czvf events.tgz events.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "touch filelist.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "tar czvf events.tgz events*.txt filelist.txt" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "cp events.tgz ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "cp total.txt ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "cp *.csv ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "scramv1 project CMSSW CMSSW_5_3_3"  >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cd CMSSW_5_3_3/src"  >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "eval \`scram runtime -sh\`"  >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cp -r "$CMSSW_BASE"/src/TauAnalysis ."  >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  sed -i 's/localgrid_mnt\///g' ${output_name}/job${counter}/${output_name}_${counter}.sh # remove problematic line
+  echo "scram b" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "eval \`scram runtime -sh\`"  >> ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "cp /scratch/${output_name}_${counter}_runDir/Analysis.Data1.Reco.root ." >>  ${output_name}/job${counter}/${output_name}_${counter}.sh
+  echo "nsvfitStandalone Analysis.Data1.Reco.root redtree" >> ${output_name}/job${counter}/${output_name}_${counter}.sh # svfit mass calculation
+  echo "cp Analysis.Data1.Reco.root ${sframe_dir}/${output_name}/job${counter}/" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo -n "rm -rf " >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   more temp_input.2 >> ${output_name}/job${counter}/${output_name}_${counter}.sh
   echo "" >> ${output_name}/job${counter}/${output_name}_${counter}.sh
