@@ -23,7 +23,7 @@ echo "${finished} jobs produced output"
 source ShowResults_condor.sh ${name}
 
 echo "Calculating lumi..."
-lumiCalc2.py overview -i ${outputDir}/${output}/lumi.json 1>lumi.out 2>lumi.err
+pixelLumiCalc.py overview -i ${outputDir}/${output}/lumi.json 1>lumi.out 2>lumi.err
 tail lumi.out -n 4
 
 touch Resubmit_now.sh

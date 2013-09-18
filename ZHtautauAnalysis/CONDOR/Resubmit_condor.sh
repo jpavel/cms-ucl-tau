@@ -14,7 +14,7 @@ do
   rm -f ${2}/job${file}/Analysis.Data1.Reco.root 
   rm -f ${2}/job${file}/*.txt
   rm -f ${2}/job${file}/*.csv
-#  sed -i 's/glidein/ZHttNtuples\/53X\/Data/g' ${file}.sh
+#  sed -i 's/glidein/ZHttNtuples\/52X\/Data/g' ${file}.sh
 #  cp *.sh ${file}.sh
 #  srmrm srm://maite.iihe.ac.be${3}/output_Ntuples_${file}_0_abc.root
 #  qsub -q localgrid@cream02 -o script.stdout -e script.stderr ${2}_${file}.sh
