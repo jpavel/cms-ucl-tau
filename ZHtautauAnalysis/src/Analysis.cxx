@@ -250,12 +250,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	
 
-        h_nPU_Info                      		 = Book(TH1D("h_nPU_Info","PU info distribution",50,0,50));
-        h_nPU_InfoTrue                  		 = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",50,0,50));
-        h_nPU_Bunch0                    		 = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",50,0,50));
-        h_nPU_Info_W                    		 = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",50,0,50));
-        h_nPU_InfoTrue_W               			 = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",50,0,50));
-        h_nPU_Bunch0_W                 			 = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",50,0,50));
+        h_nPU_Info                      		 = Book(TH1D("h_nPU_Info","PU info distribution",100,0,100));
+        h_nPU_InfoTrue                  		 = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",100,0,100));
+        h_nPU_Bunch0                    		 = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",100,0,100));
+        h_nPU_Info_W                    		 = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",100,0,100));
+        h_nPU_InfoTrue_W               			 = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",100,0,100));
+        h_nPU_Bunch0_W                 			 = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",100,0,100));
         
         
         // FR plots
