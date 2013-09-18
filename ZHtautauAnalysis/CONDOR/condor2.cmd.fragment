@@ -12,6 +12,7 @@ log            = condor.log.$(Cluster).$(Process)
 # to the submit machine from the remote machine where the job executes
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
+notify_user = pavel.jez@uclouvain.be
 
 
 

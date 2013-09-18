@@ -11,6 +11,9 @@ do
   cat argu >> ${2}_resubmit.cmd
   echo " queue 1" >> ${2}_resubmit.cmd
   rm -f ${2}/job${file}/condor.*
+  rm -f ${2}/job${file}/Analysis.Data1.Reco.root 
+  rm -f ${2}/job${file}/*.txt
+  rm -f ${2}/job${file}/*.csv
 #  sed -i 's/glidein/ZHttNtuples\/53X\/Data/g' ${file}.sh
 #  cp *.sh ${file}.sh
 #  srmrm srm://maite.iihe.ac.be${3}/output_Ntuples_${file}_0_abc.root
