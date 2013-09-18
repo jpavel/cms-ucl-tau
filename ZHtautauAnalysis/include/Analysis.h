@@ -348,6 +348,14 @@ private:
     double Cut_etau_sumPt;
     double Cut_leplep_sumPt;
     
+    double Cut_tautau_sumPt_FR;
+    double Cut_mutau_sumPt_FR;
+    double Cut_etau_sumPt_FR;
+    double Cut_leplep_sumPt_FR;
+    
+    double relIso_MT;
+    double relIso_ET;
+    double relIso_EM;
    
     bool IgnoreSF;
     bool IgnorePUW;
