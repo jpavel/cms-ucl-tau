@@ -65,14 +65,24 @@
         
                 <Item Name="UseSumPtCut" Value="true" />
      
-		<Item Name="Cut_tautau_sumPt" Value="70" />
+		        <Item Name="Cut_tautau_sumPt" Value="70" />
                 <Item Name="Cut_etau_sumPt" Value="30" />
                 <Item Name="Cut_mutau_sumPt" Value="45" />
-                <Item Name="Cut_leplep_sumPt" Value="25" />  
+                <Item Name="Cut_leplep_sumPt" Value="25" /> 
+                
+                <Item Name="Cut_tautau_sumPt_FR" Value="50" />
+                <Item Name="Cut_etau_sumPt_FR" Value="0" />
+                <Item Name="Cut_mutau_sumPt_FR" Value="0" />
+                <Item Name="Cut_leplep_sumPt_FR" Value="0" />  
+                
+                <Item Name="relIso_MT" Value="0.3" />
+                <Item Name="relIso_ET" Value="0.2" />
+                <Item Name="relIso_EM" Value="0.3" />
+                
         
         <!-- Shape -->
         
-	       <Item Name="tau_shape_iso_cut" Value = "0.3" /> <!-- Lower MVA2 cut -->
+	       <Item Name="tau_shape_iso_cut" Value = "0.0" /> <!-- Lower MVA2 cut -->
                <Item Name="lep_shape_iso_cut" Value = "2.0" /> <!-- Upper RelPFIso -->
         
 		
@@ -88,7 +98,7 @@
 		<Item Name="removeTauOverlap" Value="true" />
 		
 		<Item Name="DoubleM" Value="false" />
-		<Item Name="DoubleE" Value="true" />
+		<Item Name="DoubleE" Value="True" />
 	 
 		<Item Name="IgnorePUW" Value="True" />
 		<Item Name="IgnoreSF" Value="True" />

@@ -47,7 +47,16 @@ Analysis::Analysis()
 		DeclareProperty("Cut_mutau_sumPt",Cut_mutau_sumPt);
 		DeclareProperty("Cut_etau_sumPt",Cut_etau_sumPt);
 		DeclareProperty("Cut_leplep_sumPt",Cut_leplep_sumPt);
+		DeclareProperty("Cut_tautau_sumPt_FR",Cut_tautau_sumPt_FR);
+		DeclareProperty("Cut_mutau_sumPt_FR",Cut_mutau_sumPt_FR);
+		DeclareProperty("Cut_etau_sumPt_FR",Cut_etau_sumPt_FR);
+		DeclareProperty("Cut_leplep_sumPt_FR",Cut_leplep_sumPt_FR);
 		DeclareProperty("UseSumPtCut",UseSumPtCut);
+		
+		DeclareProperty("relIso_MT",relIso_MT);
+		DeclareProperty("relIso_ET",relIso_ET);;
+		DeclareProperty("relIso_EM",relIso_EM);
+	
 	
 		DeclareProperty("IgnoreSF",IgnoreSF);
 		DeclareProperty("IgnorePUW",IgnorePUW);
@@ -241,12 +250,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	
 
-        h_nPU_Info                      		 = Book(TH1D("h_nPU_Info","PU info distribution",50,0,50));
-        h_nPU_InfoTrue                  		 = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",50,0,50));
-        h_nPU_Bunch0                    		 = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",50,0,50));
-        h_nPU_Info_W                    		 = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",50,0,50));
-        h_nPU_InfoTrue_W               			 = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",50,0,50));
-        h_nPU_Bunch0_W                 			 = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",50,0,50));
+        h_nPU_Info                      		 = Book(TH1D("h_nPU_Info","PU info distribution",100,0,100));
+        h_nPU_InfoTrue                  		 = Book(TH1D("h_nPU_InfoTrue","PU info True distribution",100,0,100));
+        h_nPU_Bunch0                    		 = Book(TH1D("h_nPU_Bunch0","PU info Bunch0 distribution",100,0,100));
+        h_nPU_Info_W                    		 = Book(TH1D("h_nPU_Info_W","PU info distribution reweighted",100,0,100));
+        h_nPU_InfoTrue_W               			 = Book(TH1D("h_nPU_InfoTrue_W","PU info True distribution reweighted",100,0,100));
+        h_nPU_Bunch0_W                 			 = Book(TH1D("h_nPU_Bunch0_W","PU info Bunch0 distribution reweighted",100,0,100));
         
         
         // FR plots
@@ -1890,8 +1899,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << goodTau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits << goodTau[j].byLooseCombinedIsolationDeltaBetaCorr3Hits << std::endl;
 			int index = Hcand.size() -2;
-			bool pass1 = Hcand[index].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
-			bool pass2 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5;
+			bool pass1 = Hcand[index].byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5;
+			bool pass2 = Hcand[index+1].byMediumCombinedIsolationDeltaBetaCorr3Hits > 0.5;
 			bool shapePass1 = Hcand[index].byIsolationMVA2raw > tau_shape_iso_cut;
 			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;			
 			double pt1=Hcand[index].pt;
@@ -1899,8 +1908,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double sumPt = pt1+pt2;
 			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
+			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_tautau_sumPt_FR);
 			
-			if(!LTcut && !IgnoreLTforFR_TT) continue;
+			if(!LTcut && !LTcut_FR) continue;
 			signal = pass1 && pass2 && signalPtCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2044,7 +2054,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hcand.push_back(genericMuon[i]);
 			Hcand.push_back(goodTau[j]);
 			int index = Hcand.size() -2;
-			bool pass2 = (RelIso(Hcand[index])<0.3 && isLooseMu(Hcand[index]));
+			bool pass2 = (RelIso(Hcand[index])<relIso_MT && isLooseMu(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
 			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && isLooseMu(Hcand[index]));
 			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
@@ -2055,7 +2065,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool tightFR=isGoodMu(Hcand[index]);
 			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_mutau_sumPt);
-			if(!LTcut && !IgnoreLTforFR_LT) continue;
+			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_mutau_sumPt_FR);
+			if(!LTcut && !LTcut_FR) continue;
 			
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
@@ -2206,7 +2217,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			
 					
-			bool pass2 = (RelIso(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
+			bool pass2 = (RelIso(Hcand[index])<relIso_ET && LooseEleId(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
 			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
 			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
@@ -2218,7 +2229,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool tightFR=TightEleId(Hcand[index]);
 			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_etau_sumPt);
-			if(!LTcut && !IgnoreLTforFR_LT) continue;
+			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_etau_sumPt_FR);
+			
+			if(!LTcut && !LTcut_FR) continue;
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2343,8 +2356,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hcand.push_back(genericMuon[j]);
 			int index = Hcand.size() -2;
 			
-			bool pass1 = (RelIso(Hcand[index])<0.3 && LooseEleId(Hcand[index]));
-			bool pass2 = (RelIso(Hcand[index+1])<0.3 && isLooseMu(Hcand[index+1]));
+			bool pass1 = (RelIso(Hcand[index])<relIso_EM && LooseEleId(Hcand[index]));
+			bool pass2 = (RelIso(Hcand[index+1])<relIso_EM && isLooseMu(Hcand[index+1]));
 			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
 			bool shapePass2 = (RelIso(Hcand[index+1])< lep_shape_iso_cut && isLooseMu(Hcand[index+1]));
 			
@@ -2356,7 +2369,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
 			bool LTcut = UseSumPtCut && (sumPt > Cut_leplep_sumPt);
-			if(!LTcut && !IgnoreLTforFR_LL) continue;
+			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_leplep_sumPt_FR);
+			if(!LTcut && !LTcut_FR) continue;
 			signal = pass1 && pass2 && LTcut && !isFakeRate;
 			bool Ad_lepton=false;
 			if(signal){
