@@ -91,6 +91,7 @@ Analysis::Analysis()
 		
 		DeclareProperty("FillPDFInfo",FillPDFInfo);
 		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
+		DeclareProperty("FillZZgenInfo",FillZZgenInfo);
 		
 		// for FR calculation
 		
@@ -188,6 +189,16 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_pdf_hasBinningValues,"o_hasBinningValues"); 
 	DeclareVariable(o_pdf_signalProcessID,"o_signalProcessID"); 
 	DeclareVariable(o_pdf_binningValueSize,"o_binningValueSize"); 
+	
+	DeclareVariable(o_gen_pt_Z1,"o_gen_pt_Z1");
+	DeclareVariable(o_gen_pt_Z2,"o_gen_pt_Z2");
+	DeclareVariable(o_gen_eta_Z1,"o_gen_eta_Z1");
+	DeclareVariable(o_gen_eta_Z2,"o_gen_eta_Z2");
+	DeclareVariable(o_gen_phi_Z1,"o_gen_phi_Z1");
+	DeclareVariable(o_gen_phi_Z2,"o_gen_phi_Z2");
+	DeclareVariable(o_gen_mass_Z1,"o_gen_mass_Z1");
+	DeclareVariable(o_gen_mass_Z2,"o_gen_mass_Z2");
+
 
 	
 
@@ -1293,6 +1304,23 @@ double _massLow = 60., double _massHi = 120., double _relIso = 0.3){
 	return Zll;	
 }
 
+std::vector<myGenobject> FindTrueZZ(std::vector<myGenobject>* _allGen){
+	std::vector<myGenobject> outZZ_;
+	outZZ_.clear();
+	std::cout << "-----------> NEW SEARCH <-------------------" << std::endl;
+	for(uint i = 0; i < _allGen->size(); i++)
+		{
+			if((_allGen->at(i)).pdgId==23 && (_allGen->at(i)).status==2){
+				std::cout << "checking particle no. " << i << " pdg id: " << (_allGen->at(i)).pdgId << 
+				" status: " << (_allGen->at(i)).status << " mother pdgID: " << (_allGen->at(i)).mod_pdgId 
+				<< " Gmod pdgID: " << (_allGen->at(i)).mod_pdgId <<  std::endl;
+				outZZ_.push_back(_allGen->at(i));
+			}
+		}
+	
+	return outZZ_;
+}
+
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
@@ -1348,6 +1376,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_pdf_hasBinningValues=0; 
 	o_pdf_signalProcessID=0; 
 	o_pdf_binningValueSize=0; 
+	
+	o_gen_pt_Z1=0;
+	o_gen_pt_Z2=0;
+	o_gen_eta_Z1=0;
+	o_gen_eta_Z2=0;
+	o_gen_phi_Z1=0;
+	o_gen_phi_Z2=0;
+	o_gen_mass_Z1=0;
+	o_gen_mass_Z2=0;
 
 	// bookkepping part
 	++m_allEvents;
@@ -2715,6 +2752,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				o_pdf_signalProcessID=m->signalProcessID; 
 				o_pdf_binningValueSize=m->binningValueSize; 
 			}
+			
+			if(FillZZgenInfo)
+			{
+				//finding Z's
+				// looseElectrons
+				std::vector<myGenobject> allMC = m->RecGenParticle;
+				std::vector<myGenobject> ZZpair = FindTrueZZ(&allMC);
+				std::cout << "We found " << ZZpair.size() << "Z's" << std::endl;
+				o_gen_pt_Z1=ZZpair[0].pt;o_gen_pt_Z2=ZZpair[1].pt;
+				o_gen_eta_Z1=ZZpair[0].eta;o_gen_eta_Z2=ZZpair[1].eta;
+				o_gen_phi_Z1=ZZpair[0].phi;o_gen_phi_Z2=ZZpair[1].phi;
+				o_gen_mass_Z1=ZZpair[0].mass;o_gen_mass_Z2=ZZpair[1].mass;
+				
+			
+			}
 			 
 		 }
     // save mass info in SS events to get background shape
@@ -2829,6 +2881,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				o_pdf_signalProcessID=m->signalProcessID; 
 				o_pdf_binningValueSize=m->binningValueSize; 
 			}
+			
+			
 			 
 		 }
 			

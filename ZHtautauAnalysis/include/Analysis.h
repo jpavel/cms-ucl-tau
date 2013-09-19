@@ -383,6 +383,7 @@ private:
     
     bool FillPDFInfo;
     bool FillSVmassInfo;
+    bool FillZZgenInfo;
     
     double tau_shape_iso_cut;
     double lep_shape_iso_cut;
@@ -460,6 +461,21 @@ Bool_t o_pdf_hasPDF;
 Bool_t o_pdf_hasBinningValues; 
 UInt_t o_pdf_signalProcessID; 
 Int_t o_pdf_binningValueSize; 
+
+// ZZgen info
+
+Float_t o_gen_pt_Z1;
+Float_t o_gen_pt_Z2;
+Float_t o_gen_eta_Z1;
+Float_t o_gen_eta_Z2;
+Float_t o_gen_phi_Z1;
+Float_t o_gen_phi_Z2;
+Float_t o_gen_mass_Z1;
+Float_t o_gen_mass_Z2;
+
+
+
+
 
    // Macro adding the functions for dictionary generation
    ClassDef( Analysis, 0 );

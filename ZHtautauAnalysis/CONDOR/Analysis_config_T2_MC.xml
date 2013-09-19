@@ -116,9 +116,10 @@
                 
                <!-- Output options -->
 
-	       	<Item Name="FillPDFInfo" Value="False" />
+	       	
+	    <Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
-		
+		<Item Name="FillZZgenInfo" Value="False" />
 		
 		<!-- Switch off LT cut for various channels in reducible backround estimation -->
 		<Item Name="IgnoreLTforFR_TT" Value="False" />
