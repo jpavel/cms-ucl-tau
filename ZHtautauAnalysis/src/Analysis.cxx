@@ -1307,16 +1307,99 @@ double _massLow = 60., double _massHi = 120., double _relIso = 0.3){
 std::vector<myGenobject> FindTrueZZ(std::vector<myGenobject>* _allGen){
 	std::vector<myGenobject> outZZ_;
 	outZZ_.clear();
-	std::cout << "-----------> NEW SEARCH <-------------------" << std::endl;
+	//std::cout << "-----------> NEW SEARCH <-------------------" << std::endl;
 	for(uint i = 0; i < _allGen->size(); i++)
 		{
 			if((_allGen->at(i)).pdgId==23 && (_allGen->at(i)).status==2){
-				std::cout << "checking particle no. " << i << " pdg id: " << (_allGen->at(i)).pdgId << 
-				" status: " << (_allGen->at(i)).status << " mother pdgID: " << (_allGen->at(i)).mod_pdgId 
-				<< " Gmod pdgID: " << (_allGen->at(i)).mod_pdgId <<  std::endl;
+				//~ std::cout << "checking particle no. " << i << " pdg id: " << (_allGen->at(i)).pdgId << 
+				//~ " status: " << (_allGen->at(i)).status << " mother pdgID: " << (_allGen->at(i)).mod_pdgId 
+				//~ << " Gmod pdgID: " << (_allGen->at(i)).mod_pdgId <<  std::endl;
 				outZZ_.push_back(_allGen->at(i));
 			}
 		}
+	if(outZZ_.size()!=2){
+		outZZ_.clear();
+		TLorentzVector lep1,lep2,lepA,lepB;
+		uint lep2_index=0;
+		uint lep1_index=0;
+		bool Z1=false;
+		bool Z2=false;
+		myGenobject gen_z1,gen_z2;
+		for(uint i = 0; i < _allGen->size(); i++)
+		{
+			int pdgId=(_allGen->at(i)).pdgId;
+			int status = (_allGen->at(i)).status;
+			
+			//~ std::cout << "checking particle no. " << i << " pdg id: " << (_allGen->at(i)).pdgId << 
+				//~ " status: " << (_allGen->at(i)).status << " mother pdgID: " << (_allGen->at(i)).mod_pdgId 
+				//~ << " Gmod pdgID: " << (_allGen->at(i)).mod_pdgId <<  std::endl;
+			if(status==1 &&(!Z1||!Z2))// decay products after ISR/FSR
+			{
+				if(abs(pdgId)==11||abs(pdgId)==13||abs(pdgId)==15) //lepton
+				{
+					//std::cout << i << ":lepton1 candidate" << pdgId  << std::endl;
+					// looking for the second
+					if(!Z1) lep1.SetPtEtaPhiM((_allGen->at(i)).pt,(_allGen->at(i)).eta,(_allGen->at(i)).phi,(_allGen->at(i)).mass);
+					for(uint j = i+1; j < _allGen->size() && !Z1; j++)
+					{
+						int pdgId2=(_allGen->at(j)).pdgId;
+						int status2 = (_allGen->at(j)).status;
+						
+			
+						if(pdgId2==-pdgId&&status2==1)
+						{
+						//	std::cout << "lep2 cand" << pdgId2 << std::endl;
+							lep2.SetPtEtaPhiM((_allGen->at(j)).pt,(_allGen->at(j)).eta,(_allGen->at(j)).phi,(_allGen->at(j)).mass);
+							lep2+=lep1;
+							//std::cout << "Cand mass is " << lep2.M() << std::endl;
+							 
+								Z1=true; 
+								lep2_index=j;
+								lep1_index=i;
+								gen_z1.pt=lep2.Pt();
+								gen_z1.eta=lep2.Eta();
+								gen_z1.phi=lep2.Phi();
+								gen_z1.mass=lep2.M();
+								outZZ_.push_back(gen_z1);
+								
+								
+					
+						}
+					
+					}
+					if(Z1&&!Z2&& (i!=lep1_index&&i!=lep2_index))
+					{
+						lepA.SetPtEtaPhiM((_allGen->at(i)).pt,(_allGen->at(i)).eta,(_allGen->at(i)).phi,(_allGen->at(i)).mass);
+					//	std::cout << i <<":lepA candidate" << pdgId << std::endl;
+					}
+					
+					for(uint j = i+1; j < _allGen->size() && Z1 && !Z2 && (i!=lep1_index && i!=lep2_index) ; j++)
+					{
+						if(j==lep2_index|| j==lep1_index) continue;
+						int pdgId2=(_allGen->at(j)).pdgId;
+						int status2 = (_allGen->at(j)).status;
+				//		std::cout << j <<":looking for match with " << pdgId2 << " " << status2 << std::endl;
+						if(pdgId2==-pdgId&&status2==1)
+						{
+							
+						//	std::cout << "lepB cand" << std::endl;
+							lepB.SetPtEtaPhiM((_allGen->at(j)).pt,(_allGen->at(j)).eta,(_allGen->at(j)).phi,(_allGen->at(j)).mass);
+							lepB+=lepA;
+							//std::cout << "Cand mass is " << lepB.M() << std::endl;
+							Z2=true; 
+							gen_z2.pt=lepB.Pt();
+							gen_z2.eta=lepB.Eta();
+							gen_z2.phi=lepB.Phi();
+							gen_z2.mass=lepB.M();
+							outZZ_.push_back(gen_z2);
+					
+						}
+					
+					}
+				} 
+			}
+		}
+	}
 	
 	return outZZ_;
 }
@@ -2759,12 +2842,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				// looseElectrons
 				std::vector<myGenobject> allMC = m->RecGenParticle;
 				std::vector<myGenobject> ZZpair = FindTrueZZ(&allMC);
-				std::cout << "We found " << ZZpair.size() << "Z's" << std::endl;
-				o_gen_pt_Z1=ZZpair[0].pt;o_gen_pt_Z2=ZZpair[1].pt;
-				o_gen_eta_Z1=ZZpair[0].eta;o_gen_eta_Z2=ZZpair[1].eta;
-				o_gen_phi_Z1=ZZpair[0].phi;o_gen_phi_Z2=ZZpair[1].phi;
-				o_gen_mass_Z1=ZZpair[0].mass;o_gen_mass_Z2=ZZpair[1].mass;
-				
+				//~ std::cout << "We found " << ZZpair.size() << "Z's" << std::endl;
+				if(ZZpair.size()==2){
+					o_gen_pt_Z1=ZZpair[0].pt;o_gen_pt_Z2=ZZpair[1].pt;
+					o_gen_eta_Z1=ZZpair[0].eta;o_gen_eta_Z2=ZZpair[1].eta;
+					o_gen_phi_Z1=ZZpair[0].phi;o_gen_phi_Z2=ZZpair[1].phi;
+					o_gen_mass_Z1=ZZpair[0].mass;o_gen_mass_Z2=ZZpair[1].mass;
+				}else{
+					o_gen_pt_Z1=-999.;o_gen_pt_Z2=-999.;
+					o_gen_eta_Z1=-999.;o_gen_eta_Z2=-999.;
+					o_gen_phi_Z1=-999.;o_gen_phi_Z2=-999.;
+					o_gen_mass_Z1=-999.;o_gen_mass_Z2=-999.;
+				}
 			
 			}
 			 
