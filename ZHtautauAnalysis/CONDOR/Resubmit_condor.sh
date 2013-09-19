@@ -1,8 +1,8 @@
-head -n 20 ${2}.cmd > ${2}_resubmit.cmd
+head -n 21 ${2}.cmd > ${2}_resubmit.cmd
 touch argu
 rm -f argu
 touch argu
-head -n 22 ${2}.cmd | tail -n 1 > argu 
+head -n 23 ${2}.cmd | tail -n 1 > argu 
 more ${1} |while read line
 do
   file=`echo $line`
