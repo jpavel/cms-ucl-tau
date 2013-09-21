@@ -229,24 +229,28 @@ private:
         //FR plots
         
         TH1* h_FR_tau_denom;
+        TH1* h_FR_tauLT_denom;
         TH1* h_FR_mu_denom;
         TH1* h_FR_el_denom;
         TH1* h_FR_muT_denom;
         TH1* h_FR_elT_denom;
         
         TH1* h_FR_tau_num;
+        TH1* h_FR_tauLT_num;
         TH1* h_FR_mu_num;
         TH1* h_FR_el_num;
         TH1* h_FR_muT_num;
         TH1* h_FR_elT_num;
         
         TH1* h_FR_tau_denom_EC;
+        TH1* h_FR_tauLT_denom_EC;
         TH1* h_FR_mu_denom_EC;
         TH1* h_FR_el_denom_EC;
         TH1* h_FR_muT_denom_EC;
         TH1* h_FR_elT_denom_EC;
         
         TH1* h_FR_tau_num_EC;
+        TH1* h_FR_tauLT_num_EC;
         TH1* h_FR_mu_num_EC;
         TH1* h_FR_el_num_EC;
         TH1* h_FR_muT_num_EC;

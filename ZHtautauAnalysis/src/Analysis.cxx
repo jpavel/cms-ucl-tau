@@ -272,18 +272,22 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
         // FR plots
         
         h_FR_tau_denom 	= Book(TH1D("h_FR_tau_denom","Tau FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_tauLT_denom 	= Book(TH1D("h_FR_tauLT_denom","Tau LT FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_mu_denom 	= Book(TH1D("h_FR_mu_denom","Mu FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_el_denom 	= Book(TH1D("h_FR_el_denom","El FR denominator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
         
         h_FR_tau_num 	= Book(TH1D("h_FR_tau_num","Tau FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_tauLT_num 	= Book(TH1D("h_FR_tauLT_num","Tau LT FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_mu_num		= Book(TH1D("h_FR_mu_num","Mu FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_el_num		= Book(TH1D("h_FR_el_num","El FR numerator in |#eta| < 1.4; jet p_{T}[GeV]",300,0,300));
 
 		h_FR_tau_denom_EC 	= Book(TH1D("h_FR_tau_denom_EC","Tau FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_tauLT_denom_EC 	= Book(TH1D("h_FR_tauLT_denom_EC","Tau LT FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_mu_denom_EC 	= Book(TH1D("h_FR_mu_denom_EC","Mu FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_el_denom_EC 	= Book(TH1D("h_FR_el_denom_EC","El FR denominator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         
         h_FR_tau_num_EC 	= Book(TH1D("h_FR_tau_num_EC","Tau FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
+        h_FR_tauLT_num_EC 	= Book(TH1D("h_FR_tauLT_num_EC","Tau LT FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_mu_num_EC		= Book(TH1D("h_FR_mu_num_EC","Mu FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
         h_FR_el_num_EC		= Book(TH1D("h_FR_el_num_EC","El FR numerator in |#eta| > 1.4; jet p_{T}[GeV]",300,0,300));
       
@@ -2176,8 +2180,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			bool pass2 = (RelIso(Hcand[index])<relIso_MT && isLooseMu(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
-			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && isLooseMu(Hcand[index]));
-			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
+			bool shapePass2 = (RelIso(Hcand[index])< lep_shape_iso_cut && isLooseMu(Hcand[index]));
+			bool shapePass1 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
@@ -2246,11 +2250,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
-				int result = pass1? 1:0;
+				int result = pass2? 1:0;
 				int tight = tightFR? 1:0;
-				if(pass1) result+=tightFR;
+				if(pass2) result+=tightFR;
 				Hcand_pass.push_back(result);
-				Hcand_pass.push_back(pass2);
+				Hcand_pass.push_back(pass1);
 				if(shapePass1 && shapePass2){
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
@@ -2339,8 +2343,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					
 			bool pass2 = (RelIso(Hcand[index])<relIso_ET && LooseEleId(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
-			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
-			bool shapePass2 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
+			bool shapePass2 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
+			bool shapePass1 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			
 			double pt1=Hcand[index].pt;
@@ -2409,11 +2413,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
-				int result = pass1? 1:0;
+				int result = pass2? 1:0;
 				int tight = tightFR? 1:0;
-				if(pass1) result+=tightFR;
+				if(pass2) result+=tightFR;
 				Hcand_pass.push_back(result);
-				Hcand_pass.push_back(pass2);
+				Hcand_pass.push_back(pass1);
 				if(shapePass1 && shapePass2){
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
@@ -3117,7 +3121,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint i=0; i < Hcand_FR.size(); i+=2)
 	{
 		 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
-		 myobject ClosestJet2 = ClosestInCollection(Hcand_FR[i+1],jet);
+		 myobject ClosestJet2 = ClosestInCollection(Hcand_FR[i+1],jet); //tau in LT
 		 bool barrel1= fabs(ClosestJet.eta) < 1.4 ? true : false;
 		 bool barrel2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 		 
@@ -3139,10 +3143,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 1:
 				case 5:
 					barrel1 ? Hist("h_FR_mu_denom")->Fill(ClosestJet.pt) : Hist("h_FR_mu_denom_EC")->Fill(ClosestJet.pt);
+					barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);
 					break;
 				case 3:
 				case 7:
 					barrel1 ? Hist("h_FR_el_denom")->Fill(ClosestJet.pt) : Hist("h_FR_el_denom_EC")->Fill(ClosestJet.pt);
+					barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);
 					break;
 				default:
 					break;
@@ -3188,6 +3194,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 4:
 				case 8:
 					barrel2 ? Hist("h_FR_tau_num")->Fill(ClosestJet2.pt) : Hist("h_FR_tau_num_EC")->Fill(ClosestJet2.pt);
+					break;
+				case 1:
+				case 5:
+					barrel2 ? Hist("h_FR_tauLT_num")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_num_EC")->Fill(ClosestJet2.pt);
+					break;
+				case 3:
+				case 7:
+					barrel2 ? Hist("h_FR_tauLT_num")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_num_EC")->Fill(ClosestJet2.pt);
 					break;
 				default:
 					break;
