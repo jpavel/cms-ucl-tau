@@ -2051,7 +2051,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Ad_lepton) continue;
 			if(isFakeRate) tauTau=true;
 			if(signal) tauTau=true;
-			if(!isFakeRate&&!signal&&LTcut){
+			if(!isFakeRate&&!signal&&LTcut&&signalPtCuts){
 				if(!pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
@@ -2212,7 +2212,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << std::endl;
 			
-			if(!isFakeRate && !signal && LTcut){
+			if(!isFakeRate && !signal && LTcut && pt2>Cut_tau_base_Pt){
 				if( !pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
@@ -2376,7 +2376,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
 			
-			if(!isFakeRate && !signal &&LTcut){
+			if(!isFakeRate && !signal &&LTcut && pt2>Cut_tau_base_Pt){
 				if( !pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
