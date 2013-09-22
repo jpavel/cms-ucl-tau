@@ -15,6 +15,7 @@
 #include "THStack.h"
 #include "TH2D.h"
 #include "TF1.h"
+#include "TCanvas.h"
 
 #include <string>
 #include <sstream>
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+
 
 //~ #include "../plotStyles/AtlasStyle.C"
 //~ #include "../plotStyles/AtlasUtils.h"
@@ -38,8 +40,8 @@ TF1* TauFakeRate(TFile* f, TString outputDir, int type, bool log = true, double 
   //~ setTDRStyle();
   //~ gStyle->SetPalette(1);
    
-  const uint rebinLeptonFR=5;	
-  const uint rebinTauFR=5;	
+ // const uint rebinLeptonFR=5;	
+  const uint rebinTauFR=10;	
 	
 
   const uint nFiles = 1;
@@ -89,16 +91,35 @@ TF1* TauFakeRate(TFile* f, TString outputDir, int type, bool log = true, double 
 		histName=histName2="tau";
 		suffix="_EC";
 		break;
-	case 2:
+	case 2: //tau B
+		histName=histName2="tauLT";
+		suffix="";
+		break;
+	case 3: // tau EC
+		histName=histName2="tauLT";
+		suffix="_EC";
+		break;
+	case 4:
+		histName="el";
+		histName2="el";
+		suffix="";
+		break;
+	case 5:
+		histName="mu";
+		histName2="mu";
+		suffix="";
+		break;
+	case 6:
 		histName="el";
 		histName2="elT";
 		suffix="";
 		break;
-	case 3:
+	case 7:
 		histName="mu";
 		histName2="muT";
 		suffix="";
 		break;
+	
   }
   
   std::stringstream denom, num;
@@ -115,7 +136,7 @@ TF1* TauFakeRate(TFile* f, TString outputDir, int type, bool log = true, double 
   
   // TH1D* h_d_EC,h_n_EC;
   
-  if(type>1)
+  if(type>3)
   {
 	TH1D* h_d_EC = (TH1D*)f->Get(TString(Denom_name+"_EC"));
 	TH1D* h_n_EC = (TH1D*)f->Get(TString(Num_name+"_EC"));
@@ -123,11 +144,15 @@ TF1* TauFakeRate(TFile* f, TString outputDir, int type, bool log = true, double 
 	h_num->Add(h_n_EC);
   }
   
-  h_denom->Rebin(rebinTauFR);
-  h_num->Rebin(rebinTauFR);
+ // h_denom->Rebin(rebinTauFR);
+ // h_num->Rebin(rebinTauFR);
 	
   TH1D*  h_FR = (TH1D*)h_num->Clone(); 
   h_FR->Divide(h_denom);
+  h_FR->Rebin(rebinTauFR);
+  h_FR->Scale(1./rebinTauFR);
+  
+ 
   
   TCanvas* c1 = new TCanvas("c1","c1", 1024,1024);
   h_FR->Draw();
@@ -135,16 +160,16 @@ TF1* TauFakeRate(TFile* f, TString outputDir, int type, bool log = true, double 
   TF1 *fit1 = new TF1("fit1","[0]+[1]*TMath::Exp([2]*x)",fitMin,fitMax);
   fit1->SetParameters(0.015,0.2,-0.07);
   h_FR->Fit("fit1","R");
-  
+  //~ 
   if(log) c1->SetLogy();
-  
+  //~ 
   h_FR->GetXaxis()->SetRangeUser(0.,150.);
-  h_FR->GetYaxis()->SetTitle(histName+" fake rate "+suffix );
-  
-  c1->Print(outputDir+"/png/"+histName+suffix+"FR.png");
-  c1->Print(outputDir+"/pdf/"+histName+suffix+"FR.pdf");
-  
-  c1->SetLogy(0);
+  h_FR->GetYaxis()->SetTitle(histName2+" fake rate "+suffix );
+  //~ 
+  c1->Print(outputDir+"/png/"+histName2+suffix+"FR.png");
+  c1->Print(outputDir+"/pdf/"+histName2+suffix+"FR.pdf");
+  //~ 
+   c1->SetLogy(0);
   
   return fit1;
 }

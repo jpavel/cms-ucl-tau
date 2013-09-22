@@ -33,7 +33,7 @@
 
 using namespace std;
 
-int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/PostSync/results/results/2012.root") {
+int EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root") {
 
   gROOT->Reset();  
   //SetAtlasStyle();
@@ -50,7 +50,7 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 		};
    
 
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/FakeRate/Summer13_AfterSync";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/20130918";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/pdf");
   
@@ -79,9 +79,14 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
   
   TF1 *tauFit = TauFakeRate(f[0],outputDir,0);
   TF1 *tauFit_EC = TauFakeRate(f[0],outputDir,1);
+  TF1 *tauFitLT = TauFakeRate(f[0],outputDir,2);
+  TF1 *tauFitLT_EC = TauFakeRate(f[0],outputDir,3);
+  
   //~ 
-  TF1 *muFit = TauFakeRate(f[0],outputDir,3,true, 10.,200.);
-  TF1 *elFit = TauFakeRate(f[0],outputDir,2,true, 10.,200.);
+  TF1 *muFit = TauFakeRate(f[0],outputDir,5);
+  TF1 *elFit = TauFakeRate(f[0],outputDir,4);
+  TF1 *muFitT = TauFakeRate(f[0],outputDir,7);
+  TF1 *elFitT = TauFakeRate(f[0],outputDir,6);
   //~ 
   
   
@@ -133,24 +138,24 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 	   {
 		   for(int jBin=1; jBin <= h_hist2D[0][iType]->GetNbinsY()+1;jBin++)
 		   {
-			double pt1 = h_hist2D[0][iType]->GetXaxis()->GetBinCenter(iBin);
+			double pt1 = h_hist2D[0][iType]->GetXaxis()->GetBinCenter(iBin); // tau or electron
 			double pt2 = h_hist2D[0][iType]->GetYaxis()->GetBinCenter(jBin);
 			
 			//std::cout << setiosflags(ios::fixed) << std::setprecision(2) << iBin << " " << jBin << " " << iType << ":" << pt1 << " " << pt2 << std::endl;
 			double fr1,fr2;
 			switch(iType%4)
 			{
-				case 0:
-					fr1=tauFit->Eval(pt1);
-					fr2=muFit->Eval(pt2);
+				case 0: // MUTAU
+					fr1=tauFitLT->Eval(pt1);
+					fr2=muFitT->Eval(pt2);
 					break;
-				case 1:
+				case 1: //EM
 					fr1=elFit->Eval(pt1);
 					fr2=muFit->Eval(pt2);
 					break;
 				case 2:
-					fr1=tauFit->Eval(pt1);
-					fr2=elFit->Eval(pt2);
+					fr1=tauFitLT->Eval(pt1);
+					fr2=elFitT->Eval(pt2);
 					break;
 				case 3:
 					fr1 = tauFit->Eval(pt1);
@@ -184,16 +189,16 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 			switch(iType%4)
 			{
 				case 0:
-					fr1=tauFit_EC->Eval(pt1);
-					fr2=muFit->Eval(pt2);
+					fr1=tauFitLT_EC->Eval(pt1);
+					fr2=muFitT->Eval(pt2);
 					break;
 				case 1:
 					fr1=elFit->Eval(pt1);
 					fr2=muFit->Eval(pt2);
 					break;
 				case 2:
-					fr1=tauFit_EC->Eval(pt1);
-					fr2=elFit->Eval(pt2);
+					fr1=tauFitLT_EC->Eval(pt1);
+					fr2=elFitT->Eval(pt2);
 					break;
 				case 3:
 					fr1 = tauFit_EC->Eval(pt1);
@@ -201,7 +206,7 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 					break;
 			}
 			//std::cout << fr1 << " " << fr2 << " " << h_hist2D[0][0][iType]->GetBinContent(iBin,jBin) << std::endl;
-			double estim = (fr1*fr2*h_hist2D[0][iType]->GetBinContent(iBin,jBin))/((1-fr1)*(1-fr2));
+			double estim = (fr1*fr2*h_hist2D[1][iType]->GetBinContent(iBin,jBin))/((1-fr1)*(1-fr2));
 			bg_estimate+=estim;
 		   }
 	   }
@@ -227,16 +232,16 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 			switch(iType%4)
 			{
 				case 0:
-					fr1=tauFit->Eval(pt1);
-					fr2=muFit->Eval(pt2);
+					fr1=tauFitLT->Eval(pt1);
+					fr2=muFitT->Eval(pt2);
 					break;
 				case 1:
 					fr1=elFit->Eval(pt1);
 					fr2=muFit->Eval(pt2);
 					break;
 				case 2:
-					fr1=tauFit->Eval(pt1);
-					fr2=elFit->Eval(pt2);
+					fr1=tauFitLT->Eval(pt1);
+					fr2=elFitT->Eval(pt2);
 					break;
 				case 3:
 					fr1 = tauFit->Eval(pt1);
@@ -244,7 +249,7 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 					break;
 			}
 			//std::cout << fr1 << " " << fr2 << " " << h_hist2D[0][0][iType]->GetBinContent(iBin,jBin) << std::endl;
-			double estim = (fr1*fr2*h_hist2D[0][iType]->GetBinContent(iBin,jBin))/((1-fr1)*(1-fr2));
+			double estim = (fr1*fr2*h_hist2D[2][iType]->GetBinContent(iBin,jBin))/((1-fr1)*(1-fr2));
 			bg_estimate+=estim;
 		   }
 	   }
@@ -269,16 +274,16 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 			switch(iType%4)
 			{
 				case 0:
-					fr1=tauFit_EC->Eval(pt1);
-					fr2=muFit->Eval(pt2);
+					fr1=tauFitLT_EC->Eval(pt1);
+					fr2=muFitT->Eval(pt2);
 					break;
 				case 1:
 					fr1=elFit->Eval(pt1);
 					fr2=muFit->Eval(pt2);
 					break;
 				case 2:
-					fr1=tauFit_EC->Eval(pt1);
-					fr2=elFit->Eval(pt2);
+					fr1=tauFitLT_EC->Eval(pt1);
+					fr2=elFitT->Eval(pt2);
 					break;
 				case 3:
 					fr1 = tauFit_EC->Eval(pt1);
@@ -286,7 +291,7 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 					break;
 			}
 			//std::cout << fr1 << " " << fr2 << " " << h_hist2D[0][0][iType]->GetBinContent(iBin,jBin) << std::endl;
-			double estim = (fr1*fr2*h_hist2D[0][iType]->GetBinContent(iBin,jBin))/((1-fr1)*(1-fr2));
+			double estim = (fr1*fr2*h_hist2D[3][iType]->GetBinContent(iBin,jBin))/((1-fr1)*(1-fr2));
 			bg_estimate+=estim;
 		   }
 	   }
@@ -312,13 +317,13 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 		   switch(iType%4)
 			{
 				case 0:
-					fr1=tauFit->Eval(pt1);
+					fr1=tauFitLT->Eval(pt1);
 					break;
 				case 1:
 					fr1=elFit->Eval(pt1);
 					break;
 				case 2:
-					fr1=tauFit->Eval(pt1);
+					fr1=tauFitLT->Eval(pt1);
 					break;
 				case 3:
 					fr1 = tauFit->Eval(pt1);
@@ -345,13 +350,13 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 		   switch(iType%4)
 			{
 				case 0:
-					fr1=tauFit_EC->Eval(pt1);
+					fr1=tauFitLT_EC->Eval(pt1);
 					break;
 				case 1:
 					fr1=elFit->Eval(pt1);
 					break;
 				case 2:
-					fr1=tauFit_EC->Eval(pt1);
+					fr1=tauFitLT_EC->Eval(pt1);
 					break;
 				case 3:
 					fr1 = tauFit_EC->Eval(pt1);
@@ -368,7 +373,7 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 	   std::cout << setiosflags(ios::fixed) << std::setprecision(2) << bg_estimate << std::endl;
    }
    
-   sum_estimate[2]=cat_estimate;
+   sum_estimate[1]=cat_estimate;
    cat_estimate=0;
    
    // cat 2 barrel
@@ -383,13 +388,13 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 		   switch(iType%4)
 			{
 				case 0:
-					fr1=muFit->Eval(pt1);
+					fr1=muFitT->Eval(pt1);
 					break;
 				case 1:
 					fr1=muFit->Eval(pt1);
 					break;
 				case 2:
-					fr1=elFit->Eval(pt1);
+					fr1=elFitT->Eval(pt1);
 					break;
 				case 3:
 					fr1 = tauFit->Eval(pt1);
@@ -415,13 +420,13 @@ int EstimateBackground(TString inputFile = "/home/jpavel/ntuples/CMS/analysis/ZH
 		   switch(iType%4)
 			{
 				case 0:
-					fr1=muFit->Eval(pt1);
+					fr1=muFitT->Eval(pt1);
 					break;
 				case 1:
 					fr1=muFit->Eval(pt1);
 					break;
 				case 2:
-					fr1=elFit->Eval(pt1);
+					fr1=elFitT->Eval(pt1);
 					break;
 				case 3:
 					fr1 = tauFit_EC->Eval(pt1);

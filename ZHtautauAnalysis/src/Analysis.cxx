@@ -2051,7 +2051,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Ad_lepton) continue;
 			if(isFakeRate) tauTau=true;
 			if(signal) tauTau=true;
-			if(!isFakeRate&&!signal){
+			if(!isFakeRate&&!signal&&LTcut){
 				if(!pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
@@ -2212,7 +2212,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << std::endl;
 			
-			if(!isFakeRate && !signal){
+			if(!isFakeRate && !signal && LTcut){
 				if( !pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
@@ -2376,7 +2376,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
 			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
 			
-			if(!isFakeRate && !signal){
+			if(!isFakeRate && !signal &&LTcut){
 				if( !pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
@@ -2506,7 +2506,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Ad_lepton) continue;
 			if(signal && !saved_signal ) eMu=true;
 			
-			if(!signal && !isFakeRate){
+			if(!signal && !isFakeRate &&LTcut){
 				if( !pass1 && !pass2 && !category0)
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
@@ -3220,14 +3220,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 			switch(exp_event_type)
 			{
-				case 1:
+				case 1: //MT, ET
 				case 3:
 				case 5:
 				case 7: 
-					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].pt, Hcand_cat0[i].pt); 
+					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].pt, Hcand_cat0[i].pt); // Tau goes first
 					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt); 
 					if(B1&&B2) h_category0_jet_BB_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);  
-					else if(!B1&&B2) h_category0_jet_BE_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);
+					else if(!B1&&B2) h_category0_jet_BE_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt); // Tau is in the barrel
 					else if(B1&&!B2) h_category0_jet_EB_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);
 					else if(!B1&&!B2) h_category0_jet_EE_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt, ClosestJet.pt);
 					h_category0_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i+1].jetPt,Hcand_cat0[i].jetPt); 
@@ -3236,7 +3236,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 4: 
 				case 6: 
 				case 8: 
-					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].pt, Hcand_cat0[i+1].pt);
+					h_category0_pt_types[exp_event_type-1]->Fill(Hcand_cat0[i].pt, Hcand_cat0[i+1].pt); // tau/electron goes first
 					h_category0_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);
 					if(B1&&B2) h_category0_jet_BB_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);  
 					else if(!B1&&B2) h_category0_jet_EB_pt_types[exp_event_type-1]->Fill(ClosestJet.pt, ClosestJet2.pt);
