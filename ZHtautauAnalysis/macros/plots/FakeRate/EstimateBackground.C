@@ -33,7 +33,7 @@
 
 using namespace std;
 
-int EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root") {
+std::vector<double>* EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root") {
 
   gROOT->Reset();  
   //SetAtlasStyle();
@@ -71,22 +71,24 @@ int EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms
 	f[iFile] = TFile::Open(input_file.c_str());
 	if(!f[iFile]) {
 		std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
-    return 1;
+    return NULL;
 	}
 	else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
   
   }
   
-  TF1 *tauFit = TauFakeRate(f[0],outputDir,0);
-  TF1 *tauFit_EC = TauFakeRate(f[0],outputDir,1);
-  TF1 *tauFitLT = TauFakeRate(f[0],outputDir,2);
-  TF1 *tauFitLT_EC = TauFakeRate(f[0],outputDir,3);
+  TFile* g = TFile::Open("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root");
+  
+  TF1 *tauFit = TauFakeRate(g,outputDir,0);
+  TF1 *tauFit_EC = TauFakeRate(g,outputDir,1);
+  TF1 *tauFitLT = TauFakeRate(g,outputDir,2);
+  TF1 *tauFitLT_EC = TauFakeRate(g,outputDir,3);
   
   //~ 
-  TF1 *muFit = TauFakeRate(f[0],outputDir,5);
-  TF1 *elFit = TauFakeRate(f[0],outputDir,4);
-  TF1 *muFitT = TauFakeRate(f[0],outputDir,7);
-  TF1 *elFitT = TauFakeRate(f[0],outputDir,6);
+  TF1 *muFit = TauFakeRate(g,outputDir,5);
+  TF1 *elFit = TauFakeRate(g,outputDir,4);
+  TF1 *muFitT = TauFakeRate(g,outputDir,7);
+  TF1 *elFitT = TauFakeRate(g,outputDir,6);
   //~ 
   
   
@@ -118,7 +120,9 @@ int EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms
    double estimate_cat0[nTypes];
    double estimate_cat1[nTypes];
    double estimate_cat2[nTypes];
-   
+   std::vector<double>* estimate_BG;
+   estimate_BG = new std::vector<double>;
+   estimate_BG->clear();
    double total_cat0[nTypes];
    double total_cat1[nTypes];
    double total_cat2[nTypes];
@@ -466,6 +470,7 @@ int EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms
 			//}
 			std::cout <<  " & " << setiosflags(ios::fixed) << std::setprecision(2)  << estimate_cat1[i-1]+estimate_cat2[i-1]-estimate_cat0[i-1] ;
 		std::cout << " \\\\" << std::endl;
+		estimate_BG->push_back(estimate_cat1[i-1]+estimate_cat2[i-1]-estimate_cat0[i-1]);
 	}
 	std::cout << "\\hline" << std::endl;
 	std::cout << " Sum: & " << sum_estimate[0] << setiosflags(ios::fixed) << std::setprecision(2)  << " & " << sum_estimate[1] << " & " << sum_estimate[2] << "\\\\" << std::endl;
@@ -499,5 +504,5 @@ int EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms
   //~ c1->Print(outputDir+"/pdf/tauFR.pdf");
   //~ 
   //~ 
-  return 0;
+  return estimate_BG;
 }

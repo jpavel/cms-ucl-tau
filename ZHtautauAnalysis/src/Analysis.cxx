@@ -2163,7 +2163,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
 			if(examineThisEvent) std::cout << "Passed pt cut" << std::endl;
-			if(isFakeRate && !WZ_Rej(m,genericMuon[i])) continue;	
 			if(examineThisEvent) std::cout << "Passed WZ rejection" << std::endl;
 			if(isFakeRate && muTau) continue; // save only one pair
 			if(examineThisEvent) std::cout << "Passed uniqueness cut" << std::endl;
@@ -2256,6 +2255,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				int result = pass2? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
+				if(!WZ_Rej(m,Hcand[index])) result = -1;	
 				Hcand_pass.push_back(result);
 				Hcand_pass.push_back(pass1);
 				if(shapePass1 && shapePass2){
@@ -2319,7 +2319,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
-			if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;
+		//	if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "Passed Pt cuts and WZ rej" << std::endl;	
 			if(isFakeRate && eTau) continue; // save only one pair	
 			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
@@ -2420,6 +2420,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				int result = pass2? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
+				if(!WZ_Rej(m,Hcand[index])) result = -1;
 				Hcand_pass.push_back(result);
 				Hcand_pass.push_back(pass1);
 				if(shapePass1 && shapePass2){
