@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
+<!-- This config file will run over input defined in input.xml file -->
+<JobConfiguration JobName="AnalysisJob" OutputLevel="INFO">
+	<Library Name="libGenVector" />
+    <Library Name="libGraf" />
+    <Library Name="libPhysics" />
+    <Library Name="libSFramePlugIns" />
+	<Library Name="libZHtautauAnalysis"/>
+	
+	<Package Name="SFrameCore.par"/>
+    <Package Name="SFramePlugIns.par"/>
+    <Package Name="SFrameUser.par"/>
+    <Package Name="ZHtautauAnalysis.par"/>
+	
+	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+                       &grid;
+            <InputTree Name="t"/>
+             <OutputTree Name="redtree"/>
+		</InputData>
+		<UserConfig>
+		<Item Name="InTreeName" Value="t"/>
+       
+			<!-- using lepton pair with the closest mass instead of highest Pt. To switch off use any negative value-->
+        <Item Name="BestMassForZ" Value="91.2" /> 
+        	<!-- Distance in z-direction between the lead lepton from Z candidate and other leptons-->
+        <Item Name="dZvertex" Value="0.1" /> 
+			<!-- Value of b-tag weight for veto -->
+        <Item Name="bTagValue" Value="0.679" />
+        	<!-- Names of triggers to use. The full name is not necessary, the algorithm checks whether the full name contains the strings defined below. -->
+        <Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
+		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
+<!-- 2011 triggers -->		
+<!--
+		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	
+		<Item Name="MuonTriggerName2" Value="HLT_Mu13_Mu8_v"/>
+-->
+		<Item Name="MuonTriggerName3" Value="HLT_DoubleMu7_v"/>
+
+<!-- 2012 triggers -->
+		<Item Name="MuonTriggerName1" Value="HLT_Mu17_Mu8_v" />	
+		<Item Name="MuonTriggerName2" Value="HLT_Mu17_TkMu8_v"/>
+
+
+		
+		
+		<Item Name="isSimulation" Value="False"/>
+		<Item Name="is2011" Value="false"/>
+		
+		<Item Name="is2012_53" Value="true"/>
+<!--
+		Careful - following options veto one of the trigger paths! To be used only with data and caution
+-->
+
+		<Item Name="vetoMuonTrigger" Value="false" />
+                <Item Name="vetoElectronTrigger" Value="false" />
+        
+ <!-- Selection cuts -->       
+                <Item Name="Cut_tau_base_Pt" Value="15" /> <!-- Event selection cuts -->       
+		<Item Name="Cut_tautau_Pt_1" Value="10" /> <!-- FR measurement and application -->       
+		<Item Name="Cut_tautau_Pt_2" Value="10" />
+		<Item Name="Cut_leptau_Pt" Value="5" />
+		
+        
+                <Item Name="UseSumPtCut" Value="true" />
+     
+		        <Item Name="Cut_tautau_sumPt" Value="70" />
+                <Item Name="Cut_etau_sumPt" Value="30" />
+                <Item Name="Cut_mutau_sumPt" Value="45" />
+                <Item Name="Cut_leplep_sumPt" Value="25" /> 
+                
+                <Item Name="Cut_tautau_sumPt_FR" Value="50" />
+                <Item Name="Cut_etau_sumPt_FR" Value="0" />
+                <Item Name="Cut_mutau_sumPt_FR" Value="0" />
+                <Item Name="Cut_leplep_sumPt_FR" Value="0" />  
+                
+                <Item Name="relIso_MT" Value="0.3" />
+                <Item Name="relIso_ET" Value="0.2" />
+                <Item Name="relIso_EM" Value="0.3" />
+                
+        
+        <!-- Shape -->
+        
+	       <Item Name="tau_shape_iso_cut" Value = "0.0" /> <!-- Lower MVA2 cut -->
+               <Item Name="lep_shape_iso_cut" Value = "2.0" /> <!-- Upper RelPFIso -->
+        
+		
+		<Item Name="printoutEvents" Value="true" />
+		<Item Name="maxDeltaR" Value="0.1" />            
+       
+				
+		<Item Name="UseLongEvent" Value="false" />
+		<Item Name="examineEvent" Value="" />
+		<Item Name="OverM" Value="" />
+		
+		<Item Name="BelowM" Value="" />
+		<Item Name="removeTauOverlap" Value="true" />
+		
+		<Item Name="DoubleM" Value="false" />
+		<Item Name="DoubleE" Value="True" />
+	 
+		<Item Name="IgnorePUW" Value="True" />
+		<Item Name="IgnoreSF" Value="True" />
+				
+<!--   Systematics -->
+		<Item Name="ShiftTauES_up" Value="False" />
+                <Item Name="ShiftTauES_down" Value="False" />
+                <Item Name="SystUncert_ES" Value="0.03" />
+		<Item Name="onlyTrigger" Value="False" />
+                <Item Name="onlyIDIso" Value="True" />
+                <Item Name="SFShiftUp_Mu" Value="False" />
+                <Item Name="SFShiftUp_Ele" Value="False" />
+                <Item Name="SFShiftDown_Mu" Value="False" />
+                <Item Name="SFShiftDown_Ele" Value="False" />
+                
+               <!-- Output options -->
+
+	       	
+        	<Item Name="FillPDFInfo" Value="False" />
+		<Item Name="FillSVmassInfo" Value="True" />
+		<Item Name="FillZZgenInfo" Value="False" />
+		
+		<!-- Switch off LT cut for various channels in reducible backround estimation -->
+		<Item Name="IgnoreLTforFR_TT" Value="False" />
+		<Item Name="IgnoreLTforFR_LT" Value="True" />
+		<Item Name="IgnoreLTforFR_LL" Value="True" />
+		<!-- Selects SS pair and estimates backround in OS region for the method validation -->
+		<Item Name="reverseFR" Value="True" /> 
+                
+                      
+		</UserConfig>
+	</Cycle>
+</JobConfiguration>

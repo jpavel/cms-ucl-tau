@@ -96,8 +96,9 @@ Analysis::Analysis()
 		// for FR calculation
 		
 		DeclareProperty("IgnoreLTforFR_TT",IgnoreLTforFR_TT);
-		DeclareProperty("IgnoreLTforFR_LT",IgnoreLTforFR_LT);;
+		DeclareProperty("IgnoreLTforFR_LT",IgnoreLTforFR_LT);
 		DeclareProperty("IgnoreLTforFR_LL",IgnoreLTforFR_LL);
+		DeclareProperty("reverseFR",reverseFR);
 
 	}
 
@@ -1992,6 +1993,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
 			isFakeRate = (goodTau[i].charge*goodTau[j].charge  > 0);
+			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
@@ -2147,6 +2149,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericMuon[i]) << std::endl;
 			bool isFakeRate = (genericMuon[i].charge*goodTau[j].charge  > 0);
+			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
@@ -2303,6 +2306,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericElectron[i]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*goodTau[j].charge  > 0);
+			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
@@ -2464,6 +2468,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*genericMuon[j].charge > 0);
+			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			
 			if(deltaR(genericMuon[j],genericElectron[i])< maxDeltaR) continue;

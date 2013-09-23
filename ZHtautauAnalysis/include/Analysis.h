@@ -396,6 +396,8 @@ private:
     bool IgnoreLTforFR_LT;
     bool IgnoreLTforFR_LL;
     
+    bool reverseFR;
+    
             
     
     
