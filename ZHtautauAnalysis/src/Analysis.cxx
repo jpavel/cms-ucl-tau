@@ -2253,13 +2253,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				int result = pass2? 1:0;
+				int result2 = pass1? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
 				if(!WZ_Rej(m,Hcand[index])) result = -1;	
 				Hcand_pass.push_back(result);
 				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
-				if(!LTptcut) pass1=-1;
-				Hcand_pass.push_back(pass1);
+				if(!LTptcut) result2=-1;
+				Hcand_pass.push_back(result2);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
@@ -2420,13 +2421,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				int result = pass2? 1:0;
+				int result2 = pass1? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
 				if(!WZ_Rej(m,Hcand[index])) result = -1;
 				Hcand_pass.push_back(result);
 				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
-				if(!LTptcut) pass1=-1;
-				Hcand_pass.push_back(pass1);
+				if(!LTptcut) result2=-1;
+				Hcand_pass.push_back(result2);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
