@@ -2215,7 +2215,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << std::endl;
 			
 			if(!isFakeRate && !signal && LTcut && pt2>Cut_tau_base_Pt){
-				if( !pass1 && !pass2 && !category0)
+				if( !pass1 && !pass2 && !category0 && !tightFR)
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
 					category0=true;
@@ -2383,7 +2383,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
 			
 			if(!isFakeRate && !signal &&LTcut && pt2>Cut_tau_base_Pt){
-				if( !pass1 && !pass2 && !category0)
+				if( !pass1 && !pass2 && !category0 && !tightFR)
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
 					category0=true;
@@ -2401,7 +2401,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat1.push_back(3);
 					else if(Zee) Hcand_type_cat1.push_back(7);
 				}
-				if(pass1 && !pass2 && !category2)
+				if(pass1 && !pass2 && !category2 && !tightFR)
 				{
 					if(examineThisEvent) std::cout << "in category2" << std::endl;
 					category2=true;
