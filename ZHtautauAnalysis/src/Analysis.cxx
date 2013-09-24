@@ -2096,7 +2096,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				
 				Hcand_pass.push_back(pass1);
 				Hcand_pass.push_back(pass2);
-				if(shapePass1 && shapePass2) Hcand_shape_pass.push_back(1);
+				if(shapePass1 && shapePass2 && LTcut && signalPtCuts) Hcand_shape_pass.push_back(1);
 				else Hcand_shape_pass.push_back(0);
 				usedTauIdx.push_back(index);
 				if(Zmumu) Hcand_type_FR.push_back(4);
@@ -2234,7 +2234,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat1.push_back(1);
 					else if(Zee) Hcand_type_cat1.push_back(5);
 				}
-				if(pass1 && !pass2 && !category2)
+				if(pass1 && !pass2 && !category2 && !tightFR)
 				{
 					if(examineThisEvent) std::cout << " in category 2!" << std::endl;
 					category2=true;
@@ -2257,8 +2257,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(pass2) result+=tightFR;
 				if(!WZ_Rej(m,Hcand[index])) result = -1;	
 				Hcand_pass.push_back(result);
+				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
+				if(!LTptcut) pass1=-1;
 				Hcand_pass.push_back(pass1);
-				if(shapePass1 && shapePass2){
+				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
 				}else Hcand_shape_pass.push_back(0);
@@ -2422,8 +2424,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(pass2) result+=tightFR;
 				if(!WZ_Rej(m,Hcand[index])) result = -1;
 				Hcand_pass.push_back(result);
+				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
+				if(!LTptcut) pass1=-1;
 				Hcand_pass.push_back(pass1);
-				if(shapePass1 && shapePass2){
+				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
 				}else Hcand_shape_pass.push_back(0);	
@@ -2550,7 +2554,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_signal.push_back(2);
 				else if(Zee) Hcand_type_signal.push_back(6);
 				saved_signal=true;
-			}else if(isFakeRate && shapePass1 && shapePass2){
+			}else if(isFakeRate){
 				if(examineThisEvent){
 					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
 					std::cout << "Saving shape fake candidates with pass = " << shapePass1 << " " << shapePass2 << 
@@ -2561,7 +2565,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_FR.push_back(Hcand[index+1]);
 				Hcand_pass.push_back(0);
 				Hcand_pass.push_back(0);
-				if(shapePass1 && shapePass2){
+				if(shapePass1 && shapePass2 && LTcut){
 					Hcand_shape_pass.push_back(1);
 				}else Hcand_shape_pass.push_back(0);	
 				if(Zmumu) Hcand_type_FR.push_back(2);
@@ -3149,12 +3153,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 1:
 				case 5:
 					if(Hcand_pass[i] > -1){ barrel1 ? Hist("h_FR_mu_denom")->Fill(ClosestJet.pt) : Hist("h_FR_mu_denom_EC")->Fill(ClosestJet.pt);} // fill only those passing WZrejection
-					barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);
+					if(Hcand_pass[i+1] > -1){ barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt); } // PT cut on taus
 					break;
 				case 3:
 				case 7:
 					if(Hcand_pass[i] > -1){ barrel1 ? Hist("h_FR_el_denom")->Fill(ClosestJet.pt) : Hist("h_FR_el_denom_EC")->Fill(ClosestJet.pt);} // fill only those passing WZrejection
-					barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);
+					if(Hcand_pass[i+1] > -1){ barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);} // Pt cut on taus
 					break;
 				default:
 					break;

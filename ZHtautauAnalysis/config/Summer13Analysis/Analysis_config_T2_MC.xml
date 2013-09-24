@@ -60,7 +60,7 @@
                 <Item Name="Cut_tau_base_Pt" Value="15" /> <!-- Event selection cuts -->       
 				<Item Name="Cut_tautau_Pt_1" Value="15" /> <!-- FR measurement and application -->       
 				<Item Name="Cut_tautau_Pt_2" Value="15" />
-				<Item Name="Cut_leptau_Pt" Value="15" />
+				<Item Name="Cut_leptau_Pt" Value="5" />
 		
         
                 <Item Name="UseSumPtCut" Value="true" />
