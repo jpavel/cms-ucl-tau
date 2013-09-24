@@ -2224,7 +2224,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat0.push_back(1);
 					else if(Zee) Hcand_type_cat0.push_back(5);
 				}
-				if(!pass1 && pass2 && !category1)
+				if(!pass1 && pass2 && !category1 && tightFR)
 				{	
 				
 					if(examineThisEvent) std::cout << " in category 1!" << std::endl;
@@ -2300,7 +2300,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Checking for eTau " << std::endl;
 	
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
-		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2)  ; j++)
+		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2 &&signal)  ; j++)
 		{
 			
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
@@ -2390,7 +2390,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat0.push_back(3);
 					else if(Zee) Hcand_type_cat0.push_back(7);
 				}
-				if(!pass1 && pass2 && !category1)
+				if(!pass1 && pass2 && !category1 && tightFR)
 				{
 					if(examineThisEvent) std::cout << "In category1" << std::endl;
 					category1=true;
@@ -3148,12 +3148,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					break;
 				case 1:
 				case 5:
-					barrel1 ? Hist("h_FR_mu_denom")->Fill(ClosestJet.pt) : Hist("h_FR_mu_denom_EC")->Fill(ClosestJet.pt);
+					if(Hcand_pass[i] > -1){ barrel1 ? Hist("h_FR_mu_denom")->Fill(ClosestJet.pt) : Hist("h_FR_mu_denom_EC")->Fill(ClosestJet.pt);} // fill only those passing WZrejection
 					barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);
 					break;
 				case 3:
 				case 7:
-					barrel1 ? Hist("h_FR_el_denom")->Fill(ClosestJet.pt) : Hist("h_FR_el_denom_EC")->Fill(ClosestJet.pt);
+					if(Hcand_pass[i] > -1){ barrel1 ? Hist("h_FR_el_denom")->Fill(ClosestJet.pt) : Hist("h_FR_el_denom_EC")->Fill(ClosestJet.pt);} // fill only those passing WZrejection
 					barrel2 ? Hist("h_FR_tauLT_denom")->Fill(ClosestJet2.pt) : Hist("h_FR_tauLT_denom_EC")->Fill(ClosestJet2.pt);
 					break;
 				default:
