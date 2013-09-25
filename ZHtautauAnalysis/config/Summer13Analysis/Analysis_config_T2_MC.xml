@@ -17,7 +17,7 @@
 		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
-             <OutputTree Name="redtree"/>
+            <OutputTree Name="redtree"/>
 		</InputData>
 		<UserConfig>
 		<Item Name="InTreeName" Value="t"/>

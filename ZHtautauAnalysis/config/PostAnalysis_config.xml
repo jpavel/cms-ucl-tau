@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobConfiguration JobName="PostAnalysisJob" OutputLevel="INFO">
+	<Library Name="YourLibraryNameComesHere"/>
+	<Cycle Name="PostAnalysis" OutputDirectory="./" PostFix="" TargetLumi="1.0">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+			<In FileName="YourInputFileComesHere"/>
+		</InputData>
+		<UserConfig>
+			<Item Name="NameOfUserProperty" Value="ValueOfUserProperty"/>
+		</UserConfig>
+	</Cycle>
+</JobConfiguration>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" >
+
+<JobConfiguration JobName="PostAnalysisJob" OutputLevel="INFO">
+	<Library Name="libGenVector" />
+    <Library Name="libGraf" />
+    <Library Name="libPhysics" />
+    <Library Name="libSFramePlugIns" />
+	<Library Name="libZHtautauAnalysis"/>
+	
+	<Package Name="SFrameCore.par"/>
+    <Package Name="SFramePlugIns.par"/>
+    <Package Name="SFrameUser.par"/>
+    <Package Name="ZHtautauAnalysis.par"/>
+    
+	<Cycle Name="PostAnalysis" OutputDirectory="./" PostFix="" TargetLumi="1.0">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+			<In FileName="Analysis.Data1.Reco.root" Lumi="1.0"/>
+			<InputTree Name="redtree"/>
+		</InputData>
+		<UserConfig>
+			<Item Name="InTreeName" Value="redtree"/>
+       
+		</UserConfig>
+	</Cycle>
+</JobConfiguration>
