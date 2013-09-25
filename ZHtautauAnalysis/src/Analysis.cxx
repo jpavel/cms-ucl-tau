@@ -147,6 +147,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_FR, "o_FR");
 	DeclareVariable(o_FRt, "o_FRt");
 	DeclareVariable(o_event_weight,"o_event_weight");
+	DeclareVariable(o_type,"o_type");
 	DeclareVariable(o_px_Z1,"o_px_Z1");
 	DeclareVariable(o_px_Z2,"o_px_Z2");
 	DeclareVariable(o_px_H1,"o_px_H1");
@@ -1421,6 +1422,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_FR=false;
 	o_FRt=false;
 	o_event_weight=0.;
+	o_type=0;
 	o_px_Z1=0.;
 	o_px_Z2=0.;
 	o_px_H1=0.;
@@ -2753,6 +2755,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			o_pass=true;
 			o_event_weight=weight;
+			o_type=event_type;
 			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
 			o_px_H1=Hcand[0].px;o_px_H2=Hcand[1].px;
 			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
@@ -2888,6 +2891,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			o_FR=true; 
 			if(Hcand_shape_pass[i/2] >1) o_FRt=true; // passed tight ID cuts
 			o_event_weight=weight;
+			o_type=event_type;
 			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
 			o_px_H1=Hcand[0].px;o_px_H2=Hcand[1].px;
 			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;

@@ -416,6 +416,7 @@ Int_t o_event;
 Bool_t o_pass;
 Bool_t o_FR;
 Bool_t o_FRt;
+Int_t o_type;
 Float_t o_event_weight;
 Float_t o_px_Z1;
 Float_t o_px_Z2;

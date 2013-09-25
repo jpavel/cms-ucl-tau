@@ -48,12 +48,12 @@ void PostAnalysis::EndInputData( const SInputData& ) throw( SError ) {
 }
 
 void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
-	ConnectVariable(InTreeName.c_str(),"o_run",in_run);
-	ConnectVariable(InTreeName.c_str(),"o_lumi",in_lumi);
-	ConnectVariable(InTreeName.c_str(),"o_event",in_event);
-	ConnectVariable(InTreeName.c_str(),"o_pass",in_pass);
+	//~ ConnectVariable(InTreeName.c_str(),"o_run",in_run);
+	//~ ConnectVariable(InTreeName.c_str(),"o_lumi",in_lumi);
+	//~ ConnectVariable(InTreeName.c_str(),"o_event",in_event);
+	//~ ConnectVariable(InTreeName.c_str(),"o_pass",in_pass);
 	ConnectVariable(InTreeName.c_str(),"o_svMass",in_svMass);
-	ConnectVariable(InTreeName.c_str(),"o_event_weight",in_event_weight);
+	//~ ConnectVariable(InTreeName.c_str(),"o_event_weight",in_event_weight);
 	
 	
 	
@@ -65,10 +65,11 @@ void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
 void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	++m_allEvents;
 	
-    m_logger << DEBUG << "(" << in_pass << ") Now executing event " << in_event << " in a run " << in_run << SLogger::endmsg;
+    //m_logger << DEBUG << "(" << in_pass << ") Now executing event " << in_event << " in a run " << in_run << SLogger::endmsg;
 	//if(in_pass) m_logger << DEBUG << " Now executing event " << in_event << " in a run " << in_run << SLogger::endmsg;
-	if(!in_pass) return;
-	m_logger << INFO << " Now executing event " << in_event << " in a run " << in_run << SLogger::endmsg;
+	//if(!in_pass) return;
+	m_logger << INFO << m_allEvents << ": Now executing event "<< SLogger::endmsg;
+//	" << in_event << " in a run " << in_run << SLogger::endmsg;
 	m_logger << INFO << "The mass is " << in_svMass << SLogger::endmsg;
 	Hist("h_svMass")->Fill(in_svMass);
 		

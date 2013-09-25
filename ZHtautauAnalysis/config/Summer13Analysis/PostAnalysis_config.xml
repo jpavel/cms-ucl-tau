@@ -16,10 +16,10 @@
 	<Cycle Name="PostAnalysis" OutputDirectory="./" PostFix="" TargetLumi="1.0">
 		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
 			<In FileName="Analysis.Data1.Reco.root" Lumi="1.0"/>
-			<InputTree Name="redtree"/>
+			<InputTree Name="svTree"/>
 		</InputData>
 		<UserConfig>
-			<Item Name="InTreeName" Value="redtree"/>
+			<Item Name="InTreeName" Value="svTree"/>
        
 		</UserConfig>
 	</Cycle>
