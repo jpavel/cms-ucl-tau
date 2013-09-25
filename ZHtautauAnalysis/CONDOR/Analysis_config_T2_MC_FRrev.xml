@@ -45,7 +45,7 @@
 
 		
 		
-		<Item Name="isSimulation" Value="true"/>
+		<Item Name="isSimulation" Value="True"/>
 		<Item Name="is2011" Value="false"/>
 		
 		<Item Name="is2012_53" Value="true"/>
@@ -54,18 +54,18 @@
 -->
 
 		<Item Name="vetoMuonTrigger" Value="false" />
-                <Item Name="vetoElectronTrigger" Value="false" />
+                <Item Name="vetoElectronTrigger" Value="False" />
         
  <!-- Selection cuts -->       
                 <Item Name="Cut_tau_base_Pt" Value="15" /> <!-- Event selection cuts -->       
-		<Item Name="Cut_tautau_Pt_1" Value="10" /> <!-- FR measurement and application -->       
-		<Item Name="Cut_tautau_Pt_2" Value="10" />
+		<Item Name="Cut_tautau_Pt_1" Value="15" /> <!-- FR measurement and application -->       
+		<Item Name="Cut_tautau_Pt_2" Value="15" />
 		<Item Name="Cut_leptau_Pt" Value="5" />
 		
         
                 <Item Name="UseSumPtCut" Value="true" />
      
-		        <Item Name="Cut_tautau_sumPt" Value="70" />
+	        <Item Name="Cut_tautau_sumPt" Value="70" />
                 <Item Name="Cut_etau_sumPt" Value="30" />
                 <Item Name="Cut_mutau_sumPt" Value="45" />
                 <Item Name="Cut_leplep_sumPt" Value="25" /> 
@@ -97,8 +97,8 @@
 		<Item Name="BelowM" Value="" />
 		<Item Name="removeTauOverlap" Value="true" />
 		
-		<Item Name="DoubleM" Value="false" />
-		<Item Name="DoubleE" Value="false" />
+		<Item Name="DoubleM" Value="False" />
+		<Item Name="DoubleE" Value="False" />
 	 
 		<Item Name="IgnorePUW" Value="False" />
 		<Item Name="IgnoreSF" Value="False" />
@@ -116,18 +116,16 @@
                 
                <!-- Output options -->
 
-	       	
-	    <Item Name="FillPDFInfo" Value="False" />
+	       	<Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
-		<Item Name="FillZZgenInfo" Value="True" />
+                <Item Name="FillZZgenInfo" Value="False" />
 		
 		<!-- Switch off LT cut for various channels in reducible backround estimation -->
 		<Item Name="IgnoreLTforFR_TT" Value="False" />
 		<Item Name="IgnoreLTforFR_LT" Value="True" />
 		<Item Name="IgnoreLTforFR_LL" Value="True" />
-		<!-- Selects SS pair and estimates backround in OS region for the method validation -->
-		<Item Name="reverseFR" Value="True" /> 
                 
+                <Item Name="reverseFR" Value="True" /> 
                       
 		</UserConfig>
 	</Cycle>

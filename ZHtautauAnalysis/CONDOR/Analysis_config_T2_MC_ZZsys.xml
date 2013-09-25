@@ -117,7 +117,7 @@
                <!-- Output options -->
 
 	       	
-	    <Item Name="FillPDFInfo" Value="False" />
+	        <Item Name="FillPDFInfo" Value="True" />
 		<Item Name="FillSVmassInfo" Value="True" />
 		<Item Name="FillZZgenInfo" Value="True" />
 		

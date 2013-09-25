@@ -58,8 +58,8 @@
         
  <!-- Selection cuts -->       
                 <Item Name="Cut_tau_base_Pt" Value="15" /> <!-- Event selection cuts -->       
-		<Item Name="Cut_tautau_Pt_1" Value="10" /> <!-- FR measurement and application -->       
-		<Item Name="Cut_tautau_Pt_2" Value="10" />
+		<Item Name="Cut_tautau_Pt_1" Value="15" /> <!-- FR measurement and application -->       
+		<Item Name="Cut_tautau_Pt_2" Value="15" />
 		<Item Name="Cut_leptau_Pt" Value="5" />
 		
         
@@ -116,18 +116,16 @@
                 
                <!-- Output options -->
 
-	       	
-        	<Item Name="FillPDFInfo" Value="False" />
+	       	<Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
-		<Item Name="FillZZgenInfo" Value="False" />
+                <Item Name="FillZZgenInfo" Value="False" />
 		
 		<!-- Switch off LT cut for various channels in reducible backround estimation -->
 		<Item Name="IgnoreLTforFR_TT" Value="False" />
 		<Item Name="IgnoreLTforFR_LT" Value="True" />
 		<Item Name="IgnoreLTforFR_LL" Value="True" />
-		<!-- Selects SS pair and estimates backround in OS region for the method validation -->
-		<Item Name="reverseFR" Value="True" /> 
                 
+                <Item Name="reverseFR" Value="True" /> 
                       
 		</UserConfig>
 	</Cycle>

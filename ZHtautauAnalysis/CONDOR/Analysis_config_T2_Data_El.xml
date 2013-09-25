@@ -45,7 +45,7 @@
 
 		
 		
-		<Item Name="isSimulation" Value="false"/>
+		<Item Name="isSimulation" Value="False"/>
 		<Item Name="is2011" Value="false"/>
 		
 		<Item Name="is2012_53" Value="true"/>
@@ -118,13 +118,14 @@
 
 	       	<Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
-		
+                <Item Name="FillZZgenInfo" Value="False" />
 		
 		<!-- Switch off LT cut for various channels in reducible backround estimation -->
 		<Item Name="IgnoreLTforFR_TT" Value="False" />
 		<Item Name="IgnoreLTforFR_LT" Value="True" />
 		<Item Name="IgnoreLTforFR_LL" Value="True" />
                 
+                <Item Name="reverseFR" Value="False" /> 
                       
 		</UserConfig>
 	</Cycle>
