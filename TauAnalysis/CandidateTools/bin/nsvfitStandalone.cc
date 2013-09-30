@@ -90,7 +90,7 @@ void eventsFromTree(int argc, char* argv[])
   // input variables
   Bool_t  o_pass;
   Bool_t o_FR;
-  Bool_t o_FRt;
+  //  Bool_t o_FRt;
   Float_t o_event_weight;
   Int_t o_type;
   Int_t o_run;
@@ -314,27 +314,27 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
     }
    }
    if(o_FR){ // protections
-	   if(o_FR_type->size()!=o_FR_n) continue;
-	   if(o_FR_px_H1->size()!=o_FR_n) continue;
-	   if(o_FR_py_H1->size()!=o_FR_n) continue;
-	   if(o_FR_pz_H1->size()!=o_FR_n) continue;
-	   if(o_FR_E_H1->size()!=o_FR_n) continue;
-	   if(o_FR_px_H2->size()!=o_FR_n) continue;
-	   if(o_FR_py_H2->size()!=o_FR_n) continue;
-	   if(o_FR_pz_H2->size()!=o_FR_n) continue;
-	   if(o_FR_E_H2->size()!=o_FR_n) continue;
-	   if(o_FR_pdg_H1->size()!=o_FR_n) continue;
-	   if(o_FR_pdg_H2->size()!=o_FR_n) continue;
+	   if(int(o_FR_type->size())!=o_FR_n) continue;
+	   if(int(o_FR_px_H1->size())!=o_FR_n) continue;
+	   if(int(o_FR_py_H1->size())!=o_FR_n) continue;
+	   if(int(o_FR_pz_H1->size())!=o_FR_n) continue;
+	   if(int(o_FR_E_H1->size())!=o_FR_n) continue;
+	   if(int(o_FR_px_H2->size())!=o_FR_n) continue;
+	   if(int(o_FR_py_H2->size())!=o_FR_n) continue;
+	   if(int(o_FR_pz_H2->size())!=o_FR_n) continue;
+	   if(int(o_FR_E_H2->size())!=o_FR_n) continue;
+	   if(int(o_FR_pdg_H1->size())!=o_FR_n) continue;
+	   if(int(o_FR_pdg_H2->size())!=o_FR_n) continue;
 	  
 	   o_FR2=0;
 	   for(int iFR=0; iFR < o_FR_n; iFR++)
 	   {
 	       o_FR_n2++;
-	       NSVfitStandalone::LorentzVector l1(o_px_H1->at(iFR), o_py_H1->at(iFR), o_pz_H1->at(iFR), o_E_H1->at(iFR));
-	       NSVfitStandalone::LorentzVector l2(o_px_H2->at(iFR), o_py_H2->at(iFR), o_pz_H2->at(iFR), o_E_H2->at(iFR));
+	       NSVfitStandalone::LorentzVector l1(o_FR_px_H1->at(iFR), o_FR_py_H1->at(iFR), o_FR_pz_H1->at(iFR), o_FR_E_H1->at(iFR));
+	       NSVfitStandalone::LorentzVector l2(o_FR_px_H2->at(iFR), o_FR_py_H2->at(iFR), o_FR_pz_H2->at(iFR), o_FR_E_H2->at(iFR));
 	       std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
-	       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H1->at(iFR))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
-	       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H2->at(iFR))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
+	       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_FR_pdg_H1->at(iFR))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
+	       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_FR_pdg_H2->at(iFR))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
 	//     // construct the class object from the minimal necesarry information
 	      NSVfitStandaloneAlgorithm algo(measuredTauLeptons, measuredMET, covMET, 1);
 	      algo.addLogM(false);
@@ -345,10 +345,10 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
 	    if(algo.isValidSolution()){
 	      std::cout << "... m svfit : " << mass << "+/-" << diTauMassErr << " " << std::endl;
 	      o_FR_svMass->push_back(mass);
-	      o_FR_svMass_unc->pusk_back(diTauMassErr);
+	      o_FR_svMass_unc->push_back(diTauMassErr);
 	      o_FR2=o_FR;
 	      o_FRt2->push_back(o_FRt->at(iFR));
-	      o_FR_type2->push_back(o_FR_type);
+	      o_FR_type2->push_back(o_FR_type->at(iFR));
 	      
 	      //svTree->Fill();
 	    }
