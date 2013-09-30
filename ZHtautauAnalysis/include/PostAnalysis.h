@@ -79,8 +79,8 @@ private:
 	Int_t in_run2;
 	Int_t in_lumi2;
 	Int_t in_event2;
-	Char_t in_pass2;
-	Char_t in_FR2;
+	Bool_t in_pass2;
+	Bool_t in_FR2;
 	
 	
 	

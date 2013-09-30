@@ -182,9 +182,9 @@ void eventsFromTree(int argc, char* argv[])
   TTree *svTree = new TTree("svTree","Tree with SVmass");
   svTree->Branch("o_svMass" , &o_svMass, "o_svMass/F");
   svTree->Branch("o_svMass_unc" , &o_svMass_unc, "o_svMass_unc/F");
-  svTree->Branch("o_pass", &o_pass2, "o_pass2/B");
-  svTree->Branch("o_FR", &o_FR2, "o_FR2/B");
-  svTree->Branch("o_FRt", &o_FRt2, "o_FRt2/B");
+  svTree->Branch("o_pass", &o_pass2, "o_pass2/O");
+  svTree->Branch("o_FR", &o_FR2, "o_FR2/O");
+  svTree->Branch("o_FRt", &o_FRt2, "o_FRt2/O");
   svTree->Branch("o_event_weight", &o_event_weight2, "o_event_weight2/F");
   svTree->Branch("o_type", &o_type2, "o_type2/I");
   svTree->Branch("o_run", &o_run2, "o_run2/I");
