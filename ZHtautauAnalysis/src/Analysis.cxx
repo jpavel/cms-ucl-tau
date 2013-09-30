@@ -168,6 +168,24 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_pdg_Z2,"o_pdg_Z2");
 	DeclareVariable(o_pdg_H1,"o_pdg_H1");
 	DeclareVariable(o_pdg_H2,"o_pdg_H2");
+	
+	//FR
+	DeclareVariable( o_FR_n, "o_FR_n");
+	DeclareVariable(o_FR_type,"o_FR_type");
+	DeclareVariable(o_FR_px_H1,"o_FR_px_H1");
+	DeclareVariable(o_FR_px_H2,"o_FR_px_H2");
+	DeclareVariable(o_FR_py_H1,"o_FR_py_H1");
+	DeclareVariable(o_FR_py_H2,"o_FR_py_H2");
+	DeclareVariable(o_FR_pz_H1,"o_FR_pz_H1");
+	DeclareVariable(o_FR_pz_H2,"o_FR_pz_H2");
+	DeclareVariable(o_FR_E_H1,"o_FR_E_H1");
+	DeclareVariable(o_FR_E_H2,"o_FR_E_H2");
+	DeclareVariable(o_FR_pdg_H1,"o_FR_pdg_H1");
+	DeclareVariable(o_FR_pdg_H2,"o_FR_pdg_H2");
+	
+	
+	
+	
 	DeclareVariable(o_MET_x,"o_MET_x");
 	DeclareVariable(o_MET_y,"o_MET_y");
 	DeclareVariable(o_covMET_00,"o_covMET_00");
@@ -1420,7 +1438,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	//clearing output vectors
 	o_pass=false;
 	o_FR=false;
-	o_FRt=false;
+	o_FRt.clear();
 	o_event_weight=0.;
 	o_type=0;
 	o_px_Z1=0.;
@@ -1443,6 +1461,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_pdg_Z2=0.;
 	o_pdg_H1=0.;
 	o_pdg_H2=0.;
+
+	
+	o_FR_n=0;
+	o_FR_type.clear();
+	o_FR_px_H1.clear();
+	o_FR_px_H2.clear();
+	o_FR_py_H1.clear();
+	o_FR_py_H2.clear();
+	o_FR_pz_H1.clear();
+	o_FR_pz_H2.clear();
+	o_FR_E_H1.clear();
+	o_FR_E_H2.clear();
+	o_FR_pdg_H1.clear();
+	o_FR_pdg_H2.clear();
+
+	
 	o_MET_x=0;
 	o_MET_y=0;
 	o_covMET_00=0;
@@ -2757,73 +2791,63 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			o_event_weight=weight;
 			o_type=event_type;
 			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
-			o_px_H1=Hcand[0].px;o_px_H2=Hcand[1].px;
+			o_px_H1=Hcand_signal[0].px;o_px_H2=Hcand_signal[1].px;
 			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
-			o_py_H1=Hcand[0].py;o_py_H2=Hcand[1].py;
+			o_py_H1=Hcand_signal[0].py;o_py_H2=Hcand_signal[1].py;
 			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
-			o_pz_H1=Hcand[0].pz;o_pz_H2=Hcand[1].pz;
+			o_pz_H1=Hcand_signal[0].pz;o_pz_H2=Hcand_signal[1].pz;
 			o_E_Z1=Zcand[0].E;o_E_Z2=Zcand[1].E;
-			o_E_H1=Hcand[0].E;o_E_H2=Hcand[1].E;
-			//~ o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
-			//~ o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
-			//~ 
-			//~ o_py.push_back(Zcand[0].py);o_py.push_back(Zcand[1].py);
-			//~ o_py.push_back(Hcand[0].py);o_py.push_back(Hcand[1].py);
-			//~ 
-			//~ o_pz.push_back(Zcand[0].pz);o_pz.push_back(Zcand[1].pz);
-			//~ o_pz.push_back(Hcand[0].pz);o_pz.push_back(Hcand[1].pz);
-			//~ 
-			//~ o_E.push_back(Zcand[0].E);o_E.push_back(Zcand[1].E);
-			//~ o_E.push_back(Hcand[0].E);o_E.push_back(Hcand[1].E);
+			o_E_H1=Hcand_signal[0].E;o_E_H2=Hcand_signal[1].E;
+			
 			//~ 
 			switch(event_type){
 				case 1://MMMT
 					o_pdg_Z1=13*Zcand[0].charge;
 					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_pdg_H1=13*Hcand_signal[0].charge;
+					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
 				case 2://MMME
 					o_pdg_Z1=13*Zcand[0].charge;
 					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=11*Hcand[1].charge;
+					o_pdg_H1=13*Hcand_signal[0].charge;
+					o_pdg_H2=11*Hcand_signal[1].charge;
 					break;
 				case 3://MMET
 					o_pdg_Z1=13*Zcand[0].charge;
 					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=11*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_pdg_H1=11*Hcand_signal[0].charge;
+					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
 				case 4://MMTT
 					o_pdg_Z1=13*Zcand[0].charge;
 					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=15*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_pdg_H1=15*Hcand_signal[0].charge;
+					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
 				case 5://EEMT
 					o_pdg_Z1=11*Zcand[0].charge;
 					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_pdg_H1=13*Hcand_signal[0].charge;
+					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
 				case 6://EEME
 					o_pdg_Z1=11*Zcand[0].charge;
 					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=11*Hcand[1].charge;
+					o_pdg_H1=13*Hcand_signal[0].charge;
+					o_pdg_H2=11*Hcand_signal[1].charge;
 					break;
 				case 7://EEET
 					o_pdg_Z1=11*Zcand[0].charge;
 					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=11*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_pdg_H1=11*Hcand_signal[0].charge;
+					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
 				case 8://EETT
 					o_pdg_Z1=11*Zcand[0].charge;
 					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=15*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_pdg_H1=15*Hcand_signal[0].charge;
+					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
 			}
 			
@@ -2889,17 +2913,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			o_event=m->eventNumber;
 			
 			o_FR=true; 
-			if(Hcand_shape_pass[i/2] >1) o_FRt=true; // passed tight ID cuts
+			o_FRt.push_back(Hcand_shape_pass[i/2] >1); // passed tight ID cuts
 			o_event_weight=weight;
-			o_type=event_type;
-			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
-			o_px_H1=Hcand[0].px;o_px_H2=Hcand[1].px;
-			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
-			o_py_H1=Hcand[0].py;o_py_H2=Hcand[1].py;
-			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
-			o_pz_H1=Hcand[0].pz;o_pz_H2=Hcand[1].pz;
-			o_E_Z1=Zcand[0].E;o_E_Z2=Zcand[1].E;
-			o_E_H1=Hcand[0].E;o_E_H2=Hcand[1].E;
+			o_FR_n++;
+			
+		// make to vectors
+			o_FR_type.push_back(event_type);
+			o_FR_px_H1.push_back(Hcand_FR[i].px);o_FR_px_H2.push_back(Hcand_FR[i+1].px);
+			o_FR_py_H1.push_back(Hcand_FR[i].py);o_FR_py_H2.push_back(Hcand_FR[i+1].py);
+			o_FR_pz_H1.push_back(Hcand_FR[i].pz);o_FR_pz_H2.push_back(Hcand_FR[i+1].pz);
+			o_FR_E_H1.push_back(Hcand_FR[i].E);o_FR_E_H2.push_back(Hcand_FR[i+1].E);
+		//~ 
+		
 			//~ o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);
 			//~ o_px.push_back(Hcand[0].px);o_px.push_back(Hcand[1].px);
 			//~ 
@@ -2914,52 +2939,36 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			//~ 
 			switch(event_type){
 				case 1://MMMT
-					o_pdg_Z1=13*Zcand[0].charge;
-					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
 				case 2://MMME
-					o_pdg_Z1=13*Zcand[0].charge;
-					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=11*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(11*Hcand_FR[i+1].charge);
 					break;
 				case 3://MMET
-					o_pdg_Z1=13*Zcand[0].charge;
-					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=11*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(11*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
 				case 4://MMTT
-					o_pdg_Z1=13*Zcand[0].charge;
-					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=15*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(15*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
 				case 5://EEMT
-					o_pdg_Z1=11*Zcand[0].charge;
-					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
 				case 6://EEME
-					o_pdg_Z1=11*Zcand[0].charge;
-					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=13*Hcand[0].charge;
-					o_pdg_H2=11*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(11*Hcand_FR[i+1].charge);
 					break;
 				case 7://EEET
-					o_pdg_Z1=11*Zcand[0].charge;
-					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=11*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(11*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
 				case 8://EETT
-					o_pdg_Z1=11*Zcand[0].charge;
-					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=15*Hcand[0].charge;
-					o_pdg_H2=15*Hcand[1].charge;
+					o_FR_pdg_H1.push_back(15*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
 			}
 			

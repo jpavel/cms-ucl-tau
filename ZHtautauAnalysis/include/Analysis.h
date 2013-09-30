@@ -415,7 +415,7 @@ Int_t o_lumi;
 Int_t o_event;
 Bool_t o_pass;
 Bool_t o_FR;
-Bool_t o_FRt;
+//Bool_t o_FRt;
 Int_t o_type;
 Float_t o_event_weight;
 Float_t o_px_Z1;
@@ -442,6 +442,29 @@ Float_t o_pdg_Z1;
 Float_t o_pdg_Z2;
 Float_t o_pdg_H1;
 Float_t o_pdg_H2;
+
+Int_t o_FR_n;
+std::vector<Int_t> o_FR_type;
+std::vector<Bool_t> o_FRt;
+
+
+std::vector<Float_t> o_FR_px_H1;
+std::vector<Float_t> o_FR_px_H2;
+
+std::vector<Float_t> o_FR_py_H1;
+std::vector<Float_t> o_FR_py_H2;
+
+std::vector<Float_t> o_FR_pz_H1;
+std::vector<Float_t> o_FR_pz_H2;
+
+std::vector<Float_t> o_FR_E_H1;
+std::vector<Float_t> o_FR_E_H2;
+
+std::vector<Float_t> o_FR_pdg_H1;
+std::vector<Float_t> o_FR_pdg_H2;
+
+   
+
 
 Float_t o_MET_x;
 Float_t o_MET_y;

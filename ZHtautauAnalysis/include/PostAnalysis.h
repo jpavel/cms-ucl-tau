@@ -21,6 +21,8 @@
 #include <iomanip>
 
 #include <TTree.h>
+#include <TLorentzVector.h>
+
 
 /**
  *   @short Put short description of class here
@@ -50,6 +52,9 @@ public:
 
    /// Function called after opening each new input file
    virtual void BeginInputFile( const SInputData& ) throw( SError );
+   double PairMass(double px1, double py1, double pz1, double E1,
+double px2, double py2, double pz2, double E2);
+
 
    /// Function called for every event
    virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
@@ -71,16 +76,37 @@ private:
 	Int_t in_event;
 	Bool_t in_pass;
 	Bool_t in_FR;
+	Bool_t in_FRt;
+	
+	Int_t in_type;
+	Float_t in_event_weight;
+	
+	Float_t in_px_H1;
+	Float_t in_px_H2;
+	
+	Float_t in_py_H1;
+	Float_t in_py_H2;
+	
+	Float_t in_pz_H1;
+	Float_t in_pz_H2;
+	
+	Float_t in_E_H1;
+	Float_t in_E_H2;
+
+
 	
 	Float_t in_svMass;
-	Float_t in_event_weight;
-
+	Float_t in_svMass_unc;
+	
 
 	Int_t in_run2;
 	Int_t in_lumi2;
 	Int_t in_event2;
 	Bool_t in_pass2;
 	Bool_t in_FR2;
+	Bool_t in_FRt2;
+	Int_t in_type2;
+	Float_t in_event_weight2;
 	
 	
 	
@@ -90,6 +116,10 @@ private:
 	// histograms
 	
 	TH1* h_svMass;
+	
+	std::vector<TH1*>  h_H_svMass_types;
+    std::vector<TH1*>  h_H_visMass_types;
+     
 
 	//bookeeping
 	SSummedVar< Int_t > m_allEvents;

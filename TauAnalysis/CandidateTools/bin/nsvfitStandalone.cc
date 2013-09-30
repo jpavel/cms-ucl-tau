@@ -121,6 +121,29 @@ void eventsFromTree(int argc, char* argv[])
   Float_t o_pdg_Z2;
   Float_t o_pdg_H1;
   Float_t o_pdg_H2;
+  
+  // FR
+  
+  Int_t o_FR_n;
+std::vector<Int_t>* o_FR_type=0;
+std::vector<Bool_t>* o_FRt=0;
+
+
+std::vector<Float_t>* o_FR_px_H1=0;
+std::vector<Float_t>* o_FR_px_H2=0;
+
+std::vector<Float_t>* o_FR_py_H1=0;
+std::vector<Float_t>* o_FR_py_H2=0;
+
+std::vector<Float_t>* o_FR_pz_H1=0;
+std::vector<Float_t>* o_FR_pz_H2=0;
+
+std::vector<Float_t>* o_FR_E_H1=0;
+std::vector<Float_t>* o_FR_E_H2=0;
+
+std::vector<Float_t>* o_FR_pdg_H1=0;
+std::vector<Float_t>* o_FR_pdg_H2=0;
+
 
   Float_t o_MET_x;
   Float_t o_MET_y;
@@ -132,16 +155,30 @@ void eventsFromTree(int argc, char* argv[])
   // new branch
   Float_t o_svMass=-100.;
   Float_t o_svMass_unc=-100.;
+  
 
   Bool_t  o_pass2;
   Bool_t o_FR2;
-  Bool_t o_FRt2;
   Float_t o_event_weight2;
   Int_t o_type2;
   Int_t o_run2;
   Int_t o_lumi2;
   Int_t o_event2;
-
+  	
+  Int_t o_FR_n2;	
+  std::vector<Bool_t>* o_FRt2;
+   	
+  std::vector<Float_t>* o_FR_svMass;
+  std::vector<Float_t>* o_FR_svMass_unc;
+  std::vector<Int_t>* o_FR_type2;
+  
+  o_FRt2 = new std::vector<Bool_t>;
+   	
+  o_FR_svMass = new std::vector<Float_t>;
+  o_FR_svMass_unc = new std::vector<Float_t>;
+  o_FR_type2 = new std::vector<Int_t>;
+  
+  	
 
 //   // branch adresses
   tree->SetBranchAddress("o_pass", &o_pass);
@@ -172,6 +209,24 @@ void eventsFromTree(int argc, char* argv[])
   tree->SetBranchAddress("o_pdg_Z2"         , &o_pdg_Z2     );
   tree->SetBranchAddress("o_pdg_H1"         , &o_pdg_H1     );
   tree->SetBranchAddress("o_pdg_H2"         , &o_pdg_H2     );
+  
+  //FR
+  
+  tree->SetBranchAddress("o_FR_n", &o_FR_n);
+  
+  tree->SetBranchAddress("o_FR_type", &o_FR_type);
+  tree->SetBranchAddress("o_FR_px_H1"         , &o_FR_px_H1     );
+  tree->SetBranchAddress("o_FR_px_H2"         , &o_FR_px_H2     );
+  tree->SetBranchAddress("o_FR_py_H1"         , &o_FR_py_H1     );
+  tree->SetBranchAddress("o_FR_py_H2"         , &o_FR_py_H2     );
+  tree->SetBranchAddress("o_FR_pz_H1"         , &o_FR_pz_H1     );
+  tree->SetBranchAddress("o_FR_pz_H2"         , &o_FR_pz_H2     );
+  tree->SetBranchAddress("o_FR_E_H1"         , &o_FR_E_H1     );
+  tree->SetBranchAddress("o_FR_E_H2"         , &o_FR_E_H2     );
+  tree->SetBranchAddress("o_FR_pdg_H1"         , &o_FR_pdg_H1     );
+  tree->SetBranchAddress("o_FR_pdg_H2"         , &o_FR_pdg_H2     );
+  
+  
   tree->SetBranchAddress("o_MET_x"         , &o_MET_x        );
   tree->SetBranchAddress("o_MET_y"         , &o_MET_y        );
   tree->SetBranchAddress("o_covMET_00"        , &o_covMET_00       );
@@ -184,13 +239,19 @@ void eventsFromTree(int argc, char* argv[])
   svTree->Branch("o_svMass_unc" , &o_svMass_unc, "o_svMass_unc/F");
   svTree->Branch("o_pass", &o_pass2, "o_pass2/O");
   svTree->Branch("o_FR", &o_FR2, "o_FR2/O");
-  svTree->Branch("o_FRt", &o_FRt2, "o_FRt2/O");
+  
   svTree->Branch("o_event_weight", &o_event_weight2, "o_event_weight2/F");
   svTree->Branch("o_type", &o_type2, "o_type2/I");
   svTree->Branch("o_run", &o_run2, "o_run2/I");
   svTree->Branch("o_lumi", &o_lumi2, "o_lumi2/I");
   svTree->Branch("o_event", &o_event2, "o_event2/I");
-
+  
+  svTree->Branch("o_FR_n", &o_FR_n2, "o_FR_n2/I");
+  svTree->Branch("o_FR_svMass" , &o_FR_svMass);
+  svTree->Branch("o_FR_svMass_unc" , &o_FR_svMass_unc);
+  svTree->Branch("o_FR_type", &o_FR_type2);
+  svTree->Branch("o_FRt", &o_FRt2);
+  
 
   int nevent = tree->GetEntries();
   for(int i=0; i<nevent; ++i){
@@ -202,6 +263,11 @@ void eventsFromTree(int argc, char* argv[])
     // setup MET input vector
     // std::cout << "The MET is " << o_MET_x << " " << o_MET_y << std::endl;
     //    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
+    o_event_weight2=o_event_weight;
+    o_type2=o_type;
+    o_run2=o_run;
+    o_lumi2=o_lumi;
+    o_event2=o_event;
     NSVfitStandalone::Vector measuredMET(o_MET_x, o_MET_y, 0); 
     // setup the MET significance
      TMatrixD covMET(2,2);
@@ -214,6 +280,7 @@ void eventsFromTree(int argc, char* argv[])
 //     // setup measure tau lepton vectors 
        // std::cout << "the first vector is " << o_px_H1<< " : " << o_py_H1<< " : " << o_pz_H1<< " : " << o_E_H1 << " : " << o_pdg_H1 << std::endl;
        // std::cout << "the second vector is " << o_px_H2<< " : " << o_py_H2<< " : " << o_pz_H2<< " : " << o_E_H2 << " : " << o_pdg_H2 <<std::endl;
+	if(o_pass){
        NSVfitStandalone::LorentzVector l1(o_px_H1, o_py_H1, o_pz_H1, o_E_H1);
        NSVfitStandalone::LorentzVector l2(o_px_H2, o_py_H2, o_pz_H2, o_E_H2);
        std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
@@ -226,29 +293,15 @@ void eventsFromTree(int argc, char* argv[])
 
       double mass = algo.mass(); 
       double diTauMassErr = algo.massUncert();
-//     // apply customized configurations if wanted (examples are given below)
-//     algo.maxObjFunctionCalls(5000);
-//     //algo.addLogM(false);
-//     //algo.metPower(0.5)
-//     // run the fit
-//     algo.fit();
-//     // retrieve the results upon success
-//     std::cout << "... m truth : " << mTrue  << std::endl;
     if(algo.isValidSolution()){
       std::cout << "... m svfit : " << mass << "+/-" << diTauMassErr << " " << std::endl;
       o_svMass=mass;
       o_svMass_unc=diTauMassErr;
       o_pass2= o_pass;
       o_FR2=o_FR;
-      o_FRt2=o_FRt;
-      o_event_weight2=o_event_weight;
-      o_type2=o_type;
-      o_run2=o_run;
-      o_lumi2=o_lumi;
-      o_event2=o_event;
-
-
-      svTree->Fill();
+      //o_FRt2=o_FRt;
+      
+      //svTree->Fill();
     }
     else{
       std::cout << "... m svfit : ---" << std::endl;
@@ -256,17 +309,64 @@ void eventsFromTree(int argc, char* argv[])
       o_svMass_unc=-999.;
       o_pass2= 0;
       o_FR2=0;
-      o_FRt2=0;
-      o_event_weight2=o_event_weight;
-      o_type2=o_type;
-      o_run2=o_run;
-      o_lumi2=o_lumi;
-      o_event2=o_event;
-      svTree->Fill();
-
+      //o_FRt2=0;
+      //svTree->Fill();
     }
+   }
+   if(o_FR){ // protections
+	   if(o_FR_type->size()!=o_FR_n) continue;
+	   if(o_FR_px_H1->size()!=o_FR_n) continue;
+	   if(o_FR_py_H1->size()!=o_FR_n) continue;
+	   if(o_FR_pz_H1->size()!=o_FR_n) continue;
+	   if(o_FR_E_H1->size()!=o_FR_n) continue;
+	   if(o_FR_px_H2->size()!=o_FR_n) continue;
+	   if(o_FR_py_H2->size()!=o_FR_n) continue;
+	   if(o_FR_pz_H2->size()!=o_FR_n) continue;
+	   if(o_FR_E_H2->size()!=o_FR_n) continue;
+	   if(o_FR_pdg_H1->size()!=o_FR_n) continue;
+	   if(o_FR_pdg_H2->size()!=o_FR_n) continue;
+	  
+	   o_FR2=0;
+	   for(int iFR=0; iFR < o_FR_n; iFR++)
+	   {
+	       o_FR_n2++;
+	       NSVfitStandalone::LorentzVector l1(o_px_H1->at(iFR), o_py_H1->at(iFR), o_pz_H1->at(iFR), o_E_H1->at(iFR));
+	       NSVfitStandalone::LorentzVector l2(o_px_H2->at(iFR), o_py_H2->at(iFR), o_pz_H2->at(iFR), o_E_H2->at(iFR));
+	       std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+	       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H1->at(iFR))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
+	       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H2->at(iFR))==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
+	//     // construct the class object from the minimal necesarry information
+	      NSVfitStandaloneAlgorithm algo(measuredTauLeptons, measuredMET, covMET, 1);
+	      algo.addLogM(false);
+	      algo.integrateMarkovChain();
+	
+	      double mass = algo.mass(); 
+	      double diTauMassErr = algo.massUncert();
+	    if(algo.isValidSolution()){
+	      std::cout << "... m svfit : " << mass << "+/-" << diTauMassErr << " " << std::endl;
+	      o_FR_svMass->push_back(mass);
+	      o_FR_svMass_unc->pusk_back(diTauMassErr);
+	      o_FR2=o_FR;
+	      o_FRt2->push_back(o_FRt->at(iFR));
+	      o_FR_type2->push_back(o_FR_type);
+	      
+	      //svTree->Fill();
+	    }
+	    else{
+	      std::cout << "... m svfit : ---" << std::endl;
+	      o_FR_svMass->push_back(-999.);
+	      o_FR_svMass_unc->push_back(-999.);
+	      o_FRt2->push_back(0);
+	      o_FR_type2->push_back(0);
+	      
+	     
+	      //svTree->Fill();
+	    }
+	}
+   }
     //    o_svMass=-100.;
     // o_svMass_unc=-100.;
+    svTree->Fill();
   }  
   //  o_svMass=-100.;
   //  o_svMass_unc=-100.;
