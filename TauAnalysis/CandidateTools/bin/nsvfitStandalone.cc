@@ -252,6 +252,18 @@ void eventsFromTree(int argc, char* argv[])
     }
     else{
       std::cout << "... m svfit : ---" << std::endl;
+      o_svMass=-999.;
+      o_svMass_unc=-999.;
+      o_pass2= 0;
+      o_FR2=0;
+      o_FRt2=0;
+      o_event_weight2=o_event_weight;
+      o_type2=o_type;
+      o_run2=o_run;
+      o_lumi2=o_lumi;
+      o_event2=o_event;
+      svTree->Fill();
+
     }
     //    o_svMass=-100.;
     // o_svMass_unc=-100.;
