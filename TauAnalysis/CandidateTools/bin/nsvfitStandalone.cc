@@ -263,11 +263,20 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
     // setup MET input vector
     // std::cout << "The MET is " << o_MET_x << " " << o_MET_y << std::endl;
     //    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
+    o_pass2=0;
+    o_FR2=0;
+    o_svMass=-999.;
+    o_svMass_unc=-999.;
     o_event_weight2=o_event_weight;
     o_type2=o_type;
     o_run2=o_run;
     o_lumi2=o_lumi;
     o_event2=o_event;
+    o_FR_svMass->clear();
+    o_FR_svMass_unc->clear();
+    o_FRt2->clear();
+    o_FR_type2->clear();
+    o_FR_n2=0;
     NSVfitStandalone::Vector measuredMET(o_MET_x, o_MET_y, 0); 
     // setup the MET significance
      TMatrixD covMET(2,2);
@@ -349,7 +358,6 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
 	      o_FR2=o_FR;
 	      o_FRt2->push_back(o_FRt->at(iFR));
 	      o_FR_type2->push_back(o_FR_type->at(iFR));
-	      
 	      //svTree->Fill();
 	    }
 	    else{
@@ -358,8 +366,6 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
 	      o_FR_svMass_unc->push_back(-999.);
 	      o_FRt2->push_back(0);
 	      o_FR_type2->push_back(0);
-	      
-	     
 	      //svTree->Fill();
 	    }
 	}
