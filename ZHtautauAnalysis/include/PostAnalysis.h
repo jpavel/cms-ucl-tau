@@ -20,6 +20,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <TTree.h>
+
 /**
  *   @short Put short description of class here
  *
@@ -68,9 +70,22 @@ private:
 	Int_t in_lumi;
 	Int_t in_event;
 	Bool_t in_pass;
+	Bool_t in_FR;
+	
 	Float_t in_svMass;
 	Float_t in_event_weight;
 
+
+	Int_t in_run2;
+	Int_t in_lumi2;
+	Int_t in_event2;
+	Char_t in_pass2;
+	Char_t in_FR2;
+	
+	
+	
+	TTree* SVTree;
+	TTree* MainTree;
 	
 	// histograms
 	
