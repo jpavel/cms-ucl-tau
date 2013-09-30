@@ -81,6 +81,7 @@ void eventsFromTree(int argc, char* argv[])
     std::cout << "Usage : " << argv[0] << " [inputfile.root] [tree_name]" << std::endl;
     return;
   }
+
   // get intput directory up to one before mass points
   TFile* file = new TFile(argv[1],"update"); 
   // access tree in file
@@ -91,6 +92,11 @@ void eventsFromTree(int argc, char* argv[])
   Bool_t o_FR;
   Bool_t o_FRt;
   Float_t o_event_weight;
+  Int_t o_type;
+  Int_t o_run;
+  Int_t o_lumi;
+  Int_t o_event;
+
   Float_t o_px_Z1;
   Float_t o_px_Z2;
   Float_t o_px_H1;
@@ -126,11 +132,26 @@ void eventsFromTree(int argc, char* argv[])
   // new branch
   Float_t o_svMass=-100.;
   Float_t o_svMass_unc=-100.;
+
+  Bool_t  o_pass2;
+  Bool_t o_FR2;
+  Bool_t o_FRt2;
+  Float_t o_event_weight2;
+  Int_t o_type2;
+  Int_t o_run2;
+  Int_t o_lumi2;
+  Int_t o_event2;
+
+
 //   // branch adresses
   tree->SetBranchAddress("o_pass", &o_pass);
   tree->SetBranchAddress("o_FR", &o_FR);
   tree->SetBranchAddress("o_FRt", &o_FRt);
   tree->SetBranchAddress("o_event_weight"          , &o_event_weight       );
+  tree->SetBranchAddress("o_type", &o_type);
+  tree->SetBranchAddress("o_run", &o_run);
+  tree->SetBranchAddress("o_lumi", &o_lumi);
+  tree->SetBranchAddress("o_event", &o_event);
   tree->SetBranchAddress("o_px_Z1"         , &o_px_Z1     );
   tree->SetBranchAddress("o_px_Z2"         , &o_px_Z2     );
   tree->SetBranchAddress("o_px_H1"         , &o_px_H1     );
@@ -158,8 +179,19 @@ void eventsFromTree(int argc, char* argv[])
   tree->SetBranchAddress("o_covMET_10"        , &o_covMET_10       );
   tree->SetBranchAddress("o_covMET_11"        , &o_covMET_11       );  
   // adding branch with results
-  TBranch *svBranch = tree->Branch("o_svMass" , &o_svMass);
-  TBranch *svBranch_unc = tree->Branch("o_svMass_unc" , &o_svMass_unc);
+  TTree *svTree = new TTree("svTree","Tree with SVmass");
+  svTree->Branch("o_svMass" , &o_svMass, "o_svMass/F");
+  svTree->Branch("o_svMass_unc" , &o_svMass_unc, "o_svMass_unc/F");
+  svTree->Branch("o_pass", &o_pass2, "o_pass2/B");
+  svTree->Branch("o_FR", &o_FR2, "o_FR2/B");
+  svTree->Branch("o_FRt", &o_FRt2, "o_FRt2/B");
+  svTree->Branch("o_event_weight", &o_event_weight2, "o_event_weight2/F");
+  svTree->Branch("o_type", &o_type2, "o_type2/I");
+  svTree->Branch("o_run", &o_run2, "o_run2/I");
+  svTree->Branch("o_lumi", &o_lumi2, "o_lumi2/I");
+  svTree->Branch("o_event", &o_event2, "o_event2/I");
+
+
   int nevent = tree->GetEntries();
   for(int i=0; i<nevent; ++i){
     tree->GetEvent(i);
@@ -206,19 +238,29 @@ void eventsFromTree(int argc, char* argv[])
       std::cout << "... m svfit : " << mass << "+/-" << diTauMassErr << " " << std::endl;
       o_svMass=mass;
       o_svMass_unc=diTauMassErr;
+      o_pass2= o_pass;
+      o_FR2=o_FR;
+      o_FRt2=o_FRt;
+      o_event_weight2=o_event_weight;
+      o_type2=o_type;
+      o_run2=o_run;
+      o_lumi2=o_lumi;
+      o_event2=o_event;
+
+
+      svTree->Fill();
     }
     else{
       std::cout << "... m svfit : ---" << std::endl;
     }
-    svBranch->Fill();
-    svBranch_unc->Fill();
-    o_svMass=-100.;
-    o_svMass_unc=-100.;
-  }
-  o_svMass=-100.;
-  o_svMass_unc=-100.;
-  tree->Write("", TObject::kOverwrite);
-  file->Close();
+    //    o_svMass=-100.;
+    // o_svMass_unc=-100.;
+  }  
+  //  o_svMass=-100.;
+  //  o_svMass_unc=-100.;
+  svTree->Write(); //"", TObject::kOverwrite);
+  
+ file->Close();
   return;
 }
 
