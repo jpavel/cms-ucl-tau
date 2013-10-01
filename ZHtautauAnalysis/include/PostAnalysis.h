@@ -76,7 +76,9 @@ private:
 	Int_t in_event;
 	Bool_t in_pass;
 	Bool_t in_FR;
+	Int_t in_FR_n;
 	std::vector<Bool_t>* in_FRt;
+	std::vector<Int_t>* in_FR_type;
 	
 	Int_t in_type;
 	Float_t in_event_weight;
@@ -103,11 +105,29 @@ private:
 	Int_t in_lumi2;
 	Int_t in_event2;
 	Bool_t in_pass2;
-	Bool_t in_FR2;
-	std::vector<Bool_t>* in_FRt2;
+	
 	Int_t in_type2;
 	Float_t in_event_weight2;
 	
+	Bool_t in_FR2;
+	Int_t in_FR_n2;
+	std::vector<Bool_t>* in_FRt2;
+	std::vector<Int_t>* in_FR_type2;
+	std::vector<Float_t>* in_FR_svMass;
+	std::vector<Float_t>* in_FR_svMass_unc;
+	
+	std::vector<Float_t>* in_FR_px_H1;
+	std::vector<Float_t>* in_FR_px_H2;
+
+	std::vector<Float_t>* in_FR_py_H1;
+	std::vector<Float_t>* in_FR_py_H2;
+
+	std::vector<Float_t>* in_FR_pz_H1;
+	std::vector<Float_t>* in_FR_pz_H2;
+
+	std::vector<Float_t>* in_FR_E_H1;
+	std::vector<Float_t>* in_FR_E_H2;
+
 	
 	
 	TTree* SVTree;
@@ -116,9 +136,16 @@ private:
 	// histograms
 	
 	TH1* h_svMass;
+	TH1* h_FR_svMass;
+	TH1* h_FRt_svMass;
+	
 	
 	std::vector<TH1*>  h_H_svMass_types;
     std::vector<TH1*>  h_H_visMass_types;
+    std::vector<TH1*>  h_H_FR_svMass_types;
+    std::vector<TH1*>  h_H_FR_visMass_types;
+    std::vector<TH1*>  h_H_FRt_svMass_types;
+    std::vector<TH1*>  h_H_FRt_visMass_types;
      
 
 	//bookeeping
