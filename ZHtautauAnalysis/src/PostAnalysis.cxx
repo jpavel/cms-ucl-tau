@@ -40,6 +40,10 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	SVTree = new TTree();
 	MainTree = new TTree();
 	
+	in_FRt2 = new std::vector<Bool_t>;
+	in_FRt = new std::vector<Bool_t>;
+	
+	
 	h_H_svMass_types.clear();
 	
 	TString type_name[8]={"Z(#mu#mu)H(#mu#tau)" ,"Z(#mu#mu)H(#mu e)" ,"Z(#mu#mu)H(e#tau)" ,"Z(#mu#mu)H(#tau#tau)" ,

@@ -76,7 +76,7 @@ private:
 	Int_t in_event;
 	Bool_t in_pass;
 	Bool_t in_FR;
-	Bool_t in_FRt;
+	std::vector<Bool_t>* in_FRt;
 	
 	Int_t in_type;
 	Float_t in_event_weight;
@@ -104,7 +104,7 @@ private:
 	Int_t in_event2;
 	Bool_t in_pass2;
 	Bool_t in_FR2;
-	Bool_t in_FRt2;
+	std::vector<Bool_t>* in_FRt2;
 	Int_t in_type2;
 	Float_t in_event_weight2;
 	
