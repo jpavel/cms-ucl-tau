@@ -9,9 +9,11 @@
 #include "TPaveText.h"
 #include "THStack.h"
 #include "TCanvas.h"
+#include <fstream>
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include "TColor.h"
 
 //~ #include "../plotStyles/AtlasStyle.C"
@@ -42,6 +44,47 @@ int stack_upgrade() {
   gStyle->SetTitleFillColor(0);
   gStyle->SetPalette(1);
 
+  
+  std::vector<TString> bg_names;
+  std::vector<Double_t> bg_xsec;
+  std::vector<Long_t> bg_nevents;
+  std::vector<Bool_t> bg_plot;
+  std::vector<Bool_t> bg_save;
+  
+  
+  
+
+  std::ifstream myfile;
+  myfile.open ("BGinput.txt");	
+  if (myfile.is_open()){
+	while ( myfile.good() ){
+		TString name;
+		myfile >> name;
+		if(name.Length()==0) continue;
+		bg_names.push_back(name);
+		Double_t xsec;
+		myfile >> xsec;
+		bg_xsec.push_back(xsec);
+		Long_t n_events;
+		myfile >> n_events;
+		bg_nevents.push_back(n_events);
+		Bool_t plot;
+		myfile >> plot;
+		bg_plot.push_back(plot);
+		Bool_t save;
+		myfile >> save;
+		bg_save.push_back(save);
+		std::cout << name << " " << xsec << " " << n_events 
+		<< " " << plot << save << std::endl;  
+	}
+	myfile.close();
+  }
+  
+  for (uint iVec=0; iVec < bg_names.size(); iVec++)
+  {
+		std::cout << iVec << ": " << bg_names[iVec] << " " << bg_xsec[iVec] << " " << bg_nevents[iVec] 
+		<< " " << bg_plot[iVec] << bg_save[iVec] << std::endl;
+  }
 
   const int nFiles = 7;
 

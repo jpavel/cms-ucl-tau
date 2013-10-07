@@ -1,0 +1,6 @@
+GluGluToZZTo2L2L_TuneZ2star_8TeV-gg2zz-pythia6	0.01203	400973	1	1
+GluGluToZZTo4L_8TeV-gg2zz-pythia6	0.0048	548760	1	1
+TTTo2L2Nu2B_8TeV-powheg-pythia6	23.64	10783509	1	1
+TTZJets_8TeV-madgraph_v2	0.208	210160	1	1
+WZTo3LNu_TuneZ2star_8TeV_pythia6_tauola	1.057	2979624	1	1
+ZZTo4L_TuneZ2star_8TeV_pythia6_tauola	0.13	4989540	1	1
