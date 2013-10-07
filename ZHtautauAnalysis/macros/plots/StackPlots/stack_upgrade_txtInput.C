@@ -100,33 +100,43 @@ int stack_upgrade() {
   "GG2L2L",
   "GG4L"};
   
-  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/";
+  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary/";
   
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/pdf");
  
   
-  TFile * f[nFiles];  	
+  std::vector<TFile*> f_bg;  	
+  std::vector<TFile*> f_data;  	
+  
+  f_data.push_back(TFile::Open("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root"));
+  
+  if(!f_data[0]) {
+		  std::cerr << "Error: file " << "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root" << " could not be opened." << std::endl; 
+		  return 1;
+	  }
+	  else std::cout << "File " << "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root" << " succesfully opened!" << std::endl;
+  
   std::stringstream indexes;  
 
-  for(int iFile = 0; iFile < nFiles; iFile++)
+  for(int iFile = 0; iFile < bg_names.size(); iFile++)
 
   {
 	  indexes.str("");
-	  indexes << inputDir << fileNames[iFile];
-	  std::string input_file=indexes.str()+".root";
+	  indexes << inputDir << bg_names[iFile] << "/Summary.root";
+	  std::string input_file=indexes.str();
 
-	  f[iFile] = TFile::Open(input_file.c_str());
+	  f_bg.push_back(TFile::Open(input_file.c_str()));
 
-	  if(!f[iFile]) {
+	  if(!f_bg[iFile]) {
 		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
 		  return 1;
 	  }
 	  else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
   }
 
-
+  
 
   const int nHist1 = 9;
   //const int nHist1 = 44;
@@ -138,38 +148,60 @@ int stack_upgrade() {
   TString histTitles[nHist1] = {"M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]"};
   TString PaveText[nHist1]	= {"CMS preliminary 2012","MMMT","MMME","MMET","EETT","EEMT","EEME","EEET","EETT"};
  
-  TH1F * 		h_1d[nHist1][nFiles];
+  std::vector<std::vector<TH1F*>* > 	h_1d_bg;
+  std::vector<std::vector<TH1F*>* > 	h_1d_data;
   TH1F * 		h_1BG[nHist1];
  
  // TH1F *                signal[nHist1];
   
-  Double_t weights[nFiles];
-  Double_t xsection[nFiles]={1.0, 0.130, 1.057, 23.64, 0.208, 0.01203, 0.0048}; // pb
-  Double_t events[nFiles]={1.0, 4989540, 2979624, 10783509, 210160, 400973, 548760}; // pb
+  std::vector<Double_t> weights;
+  //Double_t xsection[nFiles]={1.0, 0.130, 1.057, 23.64, 0.208, 0.01203, 0.0048}; // pb
+  //Double_t events[nFiles]={1.0, 4989540, 2979624, 10783509, 210160, 400973, 548760}; // pb
   
-  Color_t colors[nFiles]={kBlack,kRed,kYellow,kMagenta,kGreen,kBlack,kBlue};
+  Color_t colors[6]={kRed,kYellow,kMagenta,kGreen,kBlack,kBlue};
   
 
   const double total_lumi = 19711.2250; //// pb-1
   
-  for(int iFile = 0; iFile < nFiles; iFile++)
+  for(int iFile = 0; iFile < bg_names.size(); iFile++)
 	{
-		double lumi = events[iFile]/xsection[iFile];
-		if(iFile > 0) weights[iFile]=total_lumi/lumi;
-		else weights[iFile] = 1.0;
+		double lumi = bg_nevents[iFile]/bg_xsec[iFile];
+		weights.push_back(total_lumi/lumi);
 		std::cout << weights[iFile] << std::endl;
 	}
 
-  for(int iFile = 0; iFile < nFiles; iFile++)
+  for(int iFile = 0; iFile < bg_names.size(); iFile++)
   {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
 	  for(int iHist = 0; iHist < nHist1; iHist++)
 	  {
-		  h_1d[iHist][iFile] = (TH1F*)f[iFile]->Get(histNames1[iHist]);
-		  h_1d[iHist][iFile]->Scale(weights[iFile]); 
-		  h_1d[iHist][iFile]->Rebin(20);
+		  
+		  //temp_vec->push_back();
+		  TH1F* test = (TH1F*)f_bg[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		  (*temp_vec)[iHist]->Draw();	
+		  //(*(h_1d_bg[iHist]))[iFile] = ;
+		  (*temp_vec)[iHist]->Scale(weights[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
 	  }
+	  h_1d_bg.push_back(temp_vec);
   }
   
+  (*(h_1d_bg[0]))[0]->Draw();
+  
+  for(int iFile = 0; iFile < 1; iFile++)
+  {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	
+	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  {
+		  TH1F* test = (TH1F*)f_data[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		//  (*temp_vec)[iHist]->Scale(weights[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
+	  }
+	  h_1d_data.push_back(temp_vec);
+  }
   
   std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root",
 		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root");
@@ -181,16 +213,16 @@ int stack_upgrade() {
 	
   } 
   
+  
   for(int iHist=0; iHist < nHist1; iHist++)
   {
-	 h_1BG[iHist]=(TH1F*)f[0]->Get(histBGNames1[iHist]);
+	 h_1BG[iHist]=(TH1F*)f_data[0]->Get(histBGNames1[iHist]);
 	 if(iHist>0) h_1BG[iHist]->Scale(BGcounts->at(iHist-1)/h_1BG[iHist]->Integral());
 	 h_1BG[iHist]->Rebin(20);
 	 if(iHist==1) h_1BG[0]=(TH1F*)h_1BG[iHist]->Clone();
 	 if(iHist>1) h_1BG[0]->Add(h_1BG[iHist]);			
 	 
   }
-  h_1d[0][0]->Draw();
   
   
   //~ 
@@ -206,62 +238,70 @@ int stack_upgrade() {
   c1->SetFillColor(10);
   c1->SetTicky();
   c1->SetObjectStat(0);
-
+(*(h_1d_data[0]))[0]->Draw();
+ 
   //~ for(int iHist = 0; iHist < nHist1; iHist++){
 	  //~ signal[iHist] = (TH1F*)h_1d[iHist][5]->Clone();}
 
+  
   for(int iHist = 0; iHist < nHist1; iHist++) 
   {
 	  THStack *hs = new THStack("hs","Stacked MC histograms");
 
-
-	  for(int iFile=1; iFile < nFiles; iFile++)
+	  std::cout << "bla" << std::endl;
+	  for(int iFile=0; iFile < bg_names.size(); iFile++)
 	  {
+			std::cout << "bla2" << std::endl;
+	  
+		  (*(h_1d_bg[iFile]))[iHist]->SetLineWidth(0);
+		  //h_1d[iFile][iHist]->SetFillStyle(3244);
 
-		  h_1d[iHist][iFile]->SetLineWidth(0);
-		  //h_1d[iHist][iFile]->SetFillStyle(3244);
-
-		  h_1d[iHist][iFile]->SetFillColor(colors[iFile]);
+		  (*(h_1d_bg[iFile]))[iHist]->SetFillColor(colors[iFile]);
 		  //~ if(iFile == 1){   }
-		  //~ else if(iFile == 2){  h_1d[iHist][iFile]->SetFillColor(WZ_Color); }
-		  //~ else if(iFile == 3){  h_1d[iHist][iFile]->SetFillColor(TTbar_Color); }
-		  //~ else if(iFile == 4){  h_1d[iHist][iFile]->SetFillColor(Zjet_Color); }
+		  //~ else if(iFile == 2){  h_1d[iFile][iHist]->SetFillColor(WZ_Color); }
+		  //~ else if(iFile == 3){  h_1d[iFile][iHist]->SetFillColor(TTbar_Color); }
+		  //~ else if(iFile == 4){  h_1d[iFile][iHist]->SetFillColor(Zjet_Color); }
 		  //~ else if(iFile == 5){
-			  //~ signal[iHist]->Add(h_1d[iHist][iFile+1]);
-                          //~ signal[iHist]->SetLineColor(kRed); 
-                          //~ signal[iHist]->SetLineWidth(2.0); 
+			  //~ signal[iFile]->Add(h_1d[iFile][iFile+1]);
+                          //~ signal[iFile]->SetLineColor(kRed); 
+                          //~ signal[iFile]->SetLineWidth(2.0); 
                           //~ 
                    //~ }
 
 		  //if(iFile < 5) 
 		 //if(iFile!=2 && iFile!=3)
-		  hs->Add(h_1d[iHist][iFile],"hist");		
+		  hs->Add((*(h_1d_bg[iFile]))[iHist],"hist");		
 
 	  }
+	  std::cout << "bla3" << std::endl;
+	  
 	  hs->Add(h_1BG[iHist],"hist");
+	 
 //~ 
-		  //~ //hs->Add(signal[iHist],"hist");		
+		  //~ //hs->Add(signal[iFile],"hist");		
 	  //~ 
-	  h_1d[iHist][0]->SetMarkerStyle(21);
-	  h_1d[iHist][0]->SetMarkerSize(0.7);
+	  (*(h_1d_data[0]))[iHist]->SetMarkerStyle(21);
+	  (*(h_1d_data[0]))[iHist]->SetMarkerSize(0.7);
+	  std::cout << "bla4" << std::endl;
 //~ 
  TLegend* leg = new TLegend(0.65,0.60,0.88,0.88,NULL,"brNDC");
  leg->SetFillColor(0);
  leg->SetTextSize(0.035);
  leg->SetBorderSize(0);
 			//~ 
-	  leg->AddEntry(h_1d[iHist][0],"data 2012","p");
-	  leg->AddEntry(h_1d[iHist][1],"ppZZ","f");
-	  leg->AddEntry(h_1d[iHist][2],"WZ","f");
-	  leg->AddEntry(h_1d[iHist][3],"t#bar{t}","f");
-	  leg->AddEntry(h_1d[iHist][4],"t#bar{t}Z","f");
-	  leg->AddEntry(h_1d[iHist][5],"ggZZ2L2L","f");
-	  leg->AddEntry(h_1d[iHist][6],"ggZZ4L","f");
+			
+	  leg->AddEntry((*(h_1d_data[0]))[iHist],"data 2012","p");   
+	  leg->AddEntry((*(h_1d_bg[0]))[iHist],bg_names[0],"f");
+	  leg->AddEntry((*(h_1d_bg[1]))[iHist],bg_names[1],"f");
+	  leg->AddEntry((*(h_1d_bg[2]))[iHist],bg_names[2],"f");
+	  leg->AddEntry((*(h_1d_bg[3]))[iHist],bg_names[3],"f");
+	  leg->AddEntry((*(h_1d_bg[4]))[iHist],bg_names[4],"f");
+	  leg->AddEntry((*(h_1d_bg[5]))[iHist],bg_names[5],"f");
 	  leg->AddEntry(h_1BG[iHist],"reducible","f");
-	  
+	   
 	  //~ 
-	  //~ leg->AddEntry(h_1d[iHist][4],"Z+jets","f");
-	  //~ leg->AddEntry(signal[iHist],"ZH(125)","f");
+	  //~ leg->AddEntry(h_1d[iFile][4],"Z+jets","f");
+	  //~ leg->AddEntry(signal[iFile],"ZH(125)","f");
 //~ 
 TString lumist="19.7 fb^{-1}";
   TPaveText *ll = new TPaveText(0.25, 0.95, 0.95, 0.99, "NDC");
@@ -278,30 +318,18 @@ TString lumist="19.7 fb^{-1}";
   //  ll->SetTextAlign(32); // align right
   ll->AddText(0.5, 0.5, text);
    
-	  //~ /*double max_dy = h_1d[iHist][4]->GetMaximum();
-	  //~ double max_data = h_1d[iHist][0]->GetMaximum();
-	  //~ double max = 0;
+	
 //~ 
-	  //~ if (max_dy > max_data){
-		  //~ max = max_dy;}
-	  //~ else {
-		  //~ max = max_data;}
-	  //~ if (max != 0) hs->SetMaximum(max);
-//~ 
-          //~ cout << "max data: " << max_data << endl;
-          //~ cout << "max dy: " << max_dy << endl;
-	  //~ */
-//~ 
-	  h_1d[iHist][0]->Draw("PE01");
-	  //~ double max = h_1d[iHist][0]->GetMaximum();
-	  //~ h_1d[iHist][0]->GetYaxis()->SetRangeUser(1e-2,200*max);
-	//~ // if(iHist > 0 && iHist < 4)  h_1d[iHist][0]->GetXaxis()->SetRangeUser(0,150);
+	  (*(h_1d_data[0]))[iHist]->Draw("PE01");
+	  //~ double max = h_1d[iFile][0]->GetMaximum();
+	  //~ h_1d[iFile][0]->GetYaxis()->SetRangeUser(1e-2,200*max);
+	//~ // if(iHist > 0 && iHist < 4)  h_1d[iFile][0]->GetXaxis()->SetRangeUser(0,150);
 	 //~ 
-	   h_1d[iHist][0]->GetXaxis()->SetTitle(histTitles[iHist]);
+	   (*(h_1d_data[0]))[iHist]->GetXaxis()->SetTitle(histTitles[iHist]);
 	   hs->Draw("same");
-	 //~ // signal[iHist]->Scale(10.);
-	  //~ signal[iHist]->Draw("histsame");
-      h_1d[iHist][0]->Draw("samePE01");
+	 //~ // signal[iFile]->Scale(10.);
+	  //~ signal[iFile]->Draw("histsame");
+      (*(h_1d_data[0]))[iHist]->Draw("samePE01");
       //~ 
 	  //~ 
 	  leg->Draw("same");
@@ -312,17 +340,17 @@ TString lumist="19.7 fb^{-1}";
 	   c1->Print(outputDir+"/png/"+histNames1[iHist]+".png");
        c1->Print(outputDir+"/pdf/"+histNames1[iHist]+".pdf");
 
-	  //~ c1->Print("Moriond/Mu_"+histNames1[iHist]+"_all.eps");
+	  //~ c1->Print("Moriond/Mu_"+histNames1[iFile]+"_all.eps");
 	  //~ c1->SetLogy(0);
-	  //~ h_1d[iHist][0]->GetYaxis()->SetRangeUser(0,1.5*max);
+	  //~ h_1d[iFile][0]->GetYaxis()->SetRangeUser(0,1.5*max);
 	//~ 
-	  //~ c1->Print("Moriond/Mu_"+histNames1[iHist]+"_all_normal.png");
-	  //~ c1->Print("Moriond/Mu_"+histNames1[iHist]+"_all_normal.eps");
+	  //~ c1->Print("Moriond/Mu_"+histNames1[iFile]+"_all_normal.png");
+	  //~ c1->Print("Moriond/Mu_"+histNames1[iFile]+"_all_normal.eps");
 	  	//~ 
 	  //~ 
 //~ 
-	  //~ leg->Clear();
-	  //~ hs->Clear();    
+//	   leg->Clear();
+//	   hs->Clear();    
 
   }
 
