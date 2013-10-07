@@ -25,7 +25,7 @@
 using namespace std;
 
 
-int stack_upgrade_42X() {
+int stack_upgrade() {
 
 	//gROOT->ProcessLine(".L ./tdrstyle.C");
 	//setTDRStyle();
@@ -128,7 +128,8 @@ int stack_upgrade_42X() {
   }
   
   
-  std::vector<double>* BGcounts = EstimateBackground();
+  std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root",
+		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root");
   //getting histograms for the background
   
   for(int iBG=0; iBG < BGcounts->size(); iBG++)
@@ -190,7 +191,8 @@ int stack_upgrade_42X() {
                    //~ }
 
 		  //if(iFile < 5) 
-		 if(iFile!=2 && iFile!=3) hs->Add(h_1d[iHist][iFile],"hist");		
+		 //if(iFile!=2 && iFile!=3)
+		  hs->Add(h_1d[iHist][iFile],"hist");		
 
 	  }
 	  hs->Add(h_1BG[iHist],"hist");
@@ -207,8 +209,8 @@ int stack_upgrade_42X() {
 			//~ 
 	  leg->AddEntry(h_1d[iHist][0],"data 2012","p");
 	  leg->AddEntry(h_1d[iHist][1],"ppZZ","f");
-	 // leg->AddEntry(h_1d[iHist][2],"WZ","f");
-	 // leg->AddEntry(h_1d[iHist][3],"t#bar{t}","f");
+	  leg->AddEntry(h_1d[iHist][2],"WZ","f");
+	  leg->AddEntry(h_1d[iHist][3],"t#bar{t}","f");
 	  leg->AddEntry(h_1d[iHist][4],"t#bar{t}Z","f");
 	  leg->AddEntry(h_1d[iHist][5],"ggZZ2L2L","f");
 	  leg->AddEntry(h_1d[iHist][6],"ggZZ4L","f");
