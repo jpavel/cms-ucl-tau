@@ -139,6 +139,10 @@ private:
 	TH1* h_FR_svMass;
 	TH1* h_FRt_svMass;
 	
+	TH1D* h_nPU_raw;
+    TH1D* h_nPU_raw_old;
+                
+	
 	
 	std::vector<TH1*>  h_H_svMass_types;
     std::vector<TH1*>  h_H_visMass_types;

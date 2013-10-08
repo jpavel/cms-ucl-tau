@@ -50,6 +50,7 @@ int stack_upgrade() {
   std::vector<Long_t> bg_nevents;
   std::vector<Bool_t> bg_plot;
   std::vector<Bool_t> bg_save;
+  std::vector<TString> bg_titles;
   
   
   
@@ -74,6 +75,9 @@ int stack_upgrade() {
 		Bool_t save;
 		myfile >> save;
 		bg_save.push_back(save);
+		TString title;
+		myfile >> title;
+		bg_titles.push_back(title);
 		std::cout << name << " " << xsec << " " << n_events 
 		<< " " << plot << save << std::endl;  
 	}
@@ -121,34 +125,63 @@ int stack_upgrade() {
   std::stringstream indexes;  
 
   for(int iFile = 0; iFile < bg_names.size(); iFile++)
-
   {
 	  indexes.str("");
 	  indexes << inputDir << bg_names[iFile] << "/Summary.root";
 	  std::string input_file=indexes.str();
-
 	  f_bg.push_back(TFile::Open(input_file.c_str()));
-
 	  if(!f_bg[iFile]) {
 		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
 		  return 1;
-	  }
-	  else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
   }
+  
+  // tau ES
+  
+  TString tauESplusSuffix=	"TauESplus";
+  TString tauESminusSuffix=	"TauESminus";
 
+  std::vector<TFile*> f_bg_ESplus;
+  std::vector<TFile*> f_bg_ESminus;
+  
+  for(int iFile = 0; iFile < bg_names.size(); iFile++)
+  {
+	  indexes.str("");
+	  indexes << inputDir << bg_names[iFile] << "_" << tauESplusSuffix << "/Summary.root";
+	  std::string input_file=indexes.str();
+	  f_bg_ESplus.push_back(TFile::Open(input_file.c_str()));
+	  if(!f_bg_ESplus[iFile]) {
+		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
+		  return 1;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+  }
+  
+  for(int iFile = 0; iFile < bg_names.size(); iFile++)
+  {
+	  indexes.str("");
+	  indexes << inputDir << bg_names[iFile] << "_" << tauESminusSuffix << "/Summary.root";
+	  std::string input_file=indexes.str();
+	  f_bg_ESminus.push_back(TFile::Open(input_file.c_str()));
+	  if(!f_bg_ESminus[iFile]) {
+		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
+		  return 1;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+  }
   
 
   const int nHist1 = 9;
   //const int nHist1 = 44;
 
 
-  TString histNames1[nHist1] = {"h_svMass","h_H_svMass_type_1","h_H_svMass_type_2","h_H_svMass_type_3","h_H_svMass_type_4","h_H_svMass_type_5","h_H_svMass_type_6","h_H_svMass_type_7","h_H_svMass_type_8"};
-  TString histBGNames1[nHist1] = {"h_FR_svMass","h_H_FR_svMass_type_1","h_H_FR_svMass_type_2","h_H_FR_svMass_type_3","h_H_FR_svMass_type_4","h_H_FR_svMass_type_5","h_H_FR_svMass_type_6","h_H_FR_svMass_type_7","h_H_FR_svMass_type_8"};
+  TString histNames1[nHist1] = {"h_svMass","h_H_svMass_type_4","h_H_svMass_type_3","h_H_svMass_type_1","h_H_svMass_type_2","h_H_svMass_type_8","h_H_svMass_type_5","h_H_svMass_type_7","h_H_svMass_type_6"};
+  TString histBGNames1[nHist1] = {"h_FR_svMass","h_H_FR_svMass_type_4","h_H_FR_svMass_type_3","h_H_FR_svMass_type_1","h_H_FR_svMass_type_2","h_H_FR_svMass_type_8","h_H_FR_svMass_type_5","h_H_FR_svMass_type_7","h_H_FR_svMass_type_6"};
   
   TString histTitles[nHist1] = {"M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]"};
   TString PaveText[nHist1]	= {"CMS preliminary 2012","MMMT","MMME","MMET","EETT","EEMT","EEME","EEET","EETT"};
  
   std::vector<std::vector<TH1F*>* > 	h_1d_bg;
+  std::vector<std::vector<TH1F*>* > 	h_1d_bg_ESplus;
+  std::vector<std::vector<TH1F*>* > 	h_1d_bg_ESminus; 
   std::vector<std::vector<TH1F*>* > 	h_1d_data;
   TH1F * 		h_1BG[nHist1];
  
@@ -175,19 +208,47 @@ int stack_upgrade() {
 	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
 	  for(int iHist = 0; iHist < nHist1; iHist++)
 	  {
-		  
-		  //temp_vec->push_back();
 		  TH1F* test = (TH1F*)f_bg[iFile]->Get(histNames1[iHist]);
 		  temp_vec->push_back(test);
 		  (*temp_vec)[iHist]->Draw();	
-		  //(*(h_1d_bg[iHist]))[iFile] = ;
+		 
 		  (*temp_vec)[iHist]->Scale(weights[iFile]); 
 		  (*temp_vec)[iHist]->Rebin(20);
 	  }
 	  h_1d_bg.push_back(temp_vec);
   }
   
-  (*(h_1d_bg[0]))[0]->Draw();
+   for(int iFile = 0; iFile < bg_names.size(); iFile++)
+  {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  {
+		  TH1F* test = (TH1F*)f_bg_ESplus[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		  (*temp_vec)[iHist]->Draw();	
+		 
+		  (*temp_vec)[iHist]->Scale(weights[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
+	  }
+	  h_1d_bg_ESplus.push_back(temp_vec);
+  }
+  
+  for(int iFile = 0; iFile < bg_names.size(); iFile++)
+  {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  {
+		  TH1F* test = (TH1F*)f_bg_ESminus[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		  (*temp_vec)[iHist]->Draw();	
+		 
+		  (*temp_vec)[iHist]->Scale(weights[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
+	  }
+	  h_1d_bg_ESminus.push_back(temp_vec);
+  }
+  
+  //(*(h_1d_bg[0]))[0]->Draw();
   
   for(int iFile = 0; iFile < 1; iFile++)
   {
@@ -248,10 +309,10 @@ int stack_upgrade() {
   {
 	  THStack *hs = new THStack("hs","Stacked MC histograms");
 
-	  std::cout << "bla" << std::endl;
+	
 	  for(int iFile=0; iFile < bg_names.size(); iFile++)
 	  {
-			std::cout << "bla2" << std::endl;
+			
 	  
 		  (*(h_1d_bg[iFile]))[iHist]->SetLineWidth(0);
 		  //h_1d[iFile][iHist]->SetFillStyle(3244);
@@ -270,10 +331,10 @@ int stack_upgrade() {
 
 		  //if(iFile < 5) 
 		 //if(iFile!=2 && iFile!=3)
-		  hs->Add((*(h_1d_bg[iFile]))[iHist],"hist");		
+		 if(bg_plot[iFile])	hs->Add((*(h_1d_bg[iFile]))[iHist],"hist");		
 
 	  }
-	  std::cout << "bla3" << std::endl;
+	 
 	  
 	  hs->Add(h_1BG[iHist],"hist");
 	 
@@ -282,7 +343,7 @@ int stack_upgrade() {
 	  //~ 
 	  (*(h_1d_data[0]))[iHist]->SetMarkerStyle(21);
 	  (*(h_1d_data[0]))[iHist]->SetMarkerSize(0.7);
-	  std::cout << "bla4" << std::endl;
+	  
 //~ 
  TLegend* leg = new TLegend(0.65,0.60,0.88,0.88,NULL,"brNDC");
  leg->SetFillColor(0);
@@ -291,12 +352,12 @@ int stack_upgrade() {
 			//~ 
 			
 	  leg->AddEntry((*(h_1d_data[0]))[iHist],"data 2012","p");   
-	  leg->AddEntry((*(h_1d_bg[0]))[iHist],bg_names[0],"f");
-	  leg->AddEntry((*(h_1d_bg[1]))[iHist],bg_names[1],"f");
-	  leg->AddEntry((*(h_1d_bg[2]))[iHist],bg_names[2],"f");
-	  leg->AddEntry((*(h_1d_bg[3]))[iHist],bg_names[3],"f");
-	  leg->AddEntry((*(h_1d_bg[4]))[iHist],bg_names[4],"f");
-	  leg->AddEntry((*(h_1d_bg[5]))[iHist],bg_names[5],"f");
+	  for(uint iFile=0; iFile < bg_names.size(); iFile++)
+	  {
+		  if(bg_plot[iFile]) leg->AddEntry((*(h_1d_bg[iFile]))[iHist],bg_titles[iFile],"f");
+	  }
+	  
+	  
 	  leg->AddEntry(h_1BG[iHist],"reducible","f");
 	   
 	  //~ 
@@ -353,6 +414,55 @@ TString lumist="19.7 fb^{-1}";
 //	   hs->Clear();    
 
   }
+  // saving stuff
+  
+  TFile out("outFile.root","RECREATE");
+  TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
+  TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
+  TString nameES="_CMS_scale_t_";
+  TString nameUp="Up";
+  TString nameDown="Down";
+  
+  for(uint iDir = 0; iDir < 8; iDir++)
+  {
+	out.mkdir(dirNames[iDir]);
+	out.cd(dirNames[iDir]);
+	for(uint iFile=0; iFile < bg_titles.size(); iFile++)
+	{
+		if(!bg_save[iFile]) continue;
+		TH1D* hist = new TH1D(bg_titles[iFile],"",15,0,300);
+		for(uint iBin = 1; iBin <= (*(h_1d_bg[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist->SetBinContent(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinContent(iBin));
+			hist->SetBinError(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinError(iBin));
+		}
+		hist->Write();
+		
+		TH1D* hist_Up = new TH1D(bg_titles[iFile]+nameES+upNames[iDir]+nameUp,"",15,0,300);
+		for(uint iBin = 1; iBin <= (*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist_Up->SetBinContent(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinContent(iBin));
+			hist_Up->SetBinError(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinError(iBin));
+		}
+		hist_Up->Write();
+		
+		TH1D* hist_Down = new TH1D(bg_titles[iFile]+nameES+upNames[iDir]+nameDown,"",15,0,300);
+		for(uint iBin = 1; iBin <= (*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist_Down->SetBinContent(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinContent(iBin));
+			hist_Down->SetBinError(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinError(iBin));
+		}
+		hist_Down->Write();
+		
+	}
+	out.cd();
+	
+  }
+  
+  out.Close();
 
   return 0;
 

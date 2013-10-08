@@ -15,10 +15,10 @@
     
 	<Cycle Name="PostAnalysis" OutputDirectory="./" PostFix="" TargetLumi="1.0">
 		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
-			<In FileName="/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root" Lumi="1.0"/>
 <!--
-			<In FileName="Analysis.Data1.Reco.root" Lumi="1.0"/>
+			<In FileName="/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root" Lumi="1.0"/>
 -->
+			<In FileName="Analysis.Data1.Reco.root" Lumi="1.0"/>
 			<InputTree Name="redtree"/>
 		</InputData>
 		<UserConfig>

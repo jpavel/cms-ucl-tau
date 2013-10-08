@@ -27,6 +27,7 @@ void PostAnalysis::BeginCycle() throw( SError ) {
 void PostAnalysis::EndCycle() throw( SError ) {
 
    std::cout << "Post Analysis finished." << std::endl;
+   
    return;
 
 }
@@ -39,6 +40,10 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_FR_svMass                      	 = Book(TH1D("h_FR_svMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
 	h_FRt_svMass                      	 = Book(TH1D("h_FRt_svMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
 	
+	
+	// old histograms
+	
+	h_nPU_raw					 = 		  Book(TH1D("h_nPU_raw","raw PU distribution",50,0,50),"AnalysisHistos");
 	
 	SVTree = new TTree();
 	MainTree = new TTree();
@@ -162,7 +167,7 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 }
 
 void PostAnalysis::EndInputData( const SInputData& ) throw( SError ) {
-
+	
    return;
 
 }
@@ -172,7 +177,19 @@ void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
 	SVTree = Retrieve<TTree>("svTree");
 	MainTree = Retrieve<TTree>(InTreeName.c_str());
 	std::cout << SVTree->GetEntries() << std::endl;
-
+	
+	h_nPU_raw_old = Retrieve<TH1D>("h_nPU_raw");
+	std::cout << h_nPU_raw_old->Integral() << std::endl;
+	for (int iBin =0; iBin <= (h_nPU_raw_old->GetNbinsX() +1); iBin++)
+	{
+		h_nPU_raw->SetBinContent(iBin,h_nPU_raw_old->GetBinContent(iBin));
+		h_nPU_raw->SetBinError(iBin,h_nPU_raw_old->GetBinError(iBin));
+		
+	}
+	
+	//h_nPU_raw = (TH1D*)h_nPU_raw_old->Clone();
+	std::cout << h_nPU_raw->Integral() << std::endl;
+	
 	ConnectVariable(InTreeName.c_str(),"o_run",in_run);
 	ConnectVariable(InTreeName.c_str(),"o_lumi",in_lumi);
 	ConnectVariable(InTreeName.c_str(),"o_event",in_event);
