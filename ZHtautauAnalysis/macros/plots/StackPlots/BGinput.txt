@@ -1,7 +1,7 @@
-ZZTo4L_TuneZ2star_8TeV_pythia6_tauola	0.13	4989540	1	1	ZZ
-GluGluToZZTo2L2L_TuneZ2star_8TeV-gg2zz-pythia6	0.01203	400973	1	1	GGToZZ2L2L
-GluGluToZZTo4L_8TeV-gg2zz-pythia6	0.0048	548760	0	0	GGToZZ4L
-WZTo3LNu_TuneZ2star_8TeV_pythia6_tauola	1.057	2979624	0	0	WZ
-TTTo2L2Nu2B_8TeV-powheg-pythia6	23.64	10783509	0	0	TT
-TTZJets_8TeV-madgraph_v2	0.208	210160	1	1	TTZ
+ZZTo4L_TuneZ2star_8TeV_pythia6_tauola	0.13	1	1	ZZ
+GluGluToZZTo2L2L_TuneZ2star_8TeV-gg2zz-pythia6	0.01203	1	1	GGToZZ2L2L
+GluGluToZZTo4L_8TeV-gg2zz-pythia6	0.0048	0	0	GGToZZ4L
+WZTo3LNu_TuneZ2star_8TeV_pythia6_tauola	1.057	0	0	WZ
+TTTo2L2Nu2B_8TeV-powheg-pythia6	23.64	0	0	TT
+TTZJets_8TeV-madgraph_v2	0.208	1	1	TTZ
 

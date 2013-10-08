@@ -47,14 +47,11 @@ int stack_upgrade() {
   
   std::vector<TString> bg_names;
   std::vector<Double_t> bg_xsec;
-  std::vector<Long_t> bg_nevents;
+ 
   std::vector<Bool_t> bg_plot;
   std::vector<Bool_t> bg_save;
   std::vector<TString> bg_titles;
   
-  
-  
-
   std::ifstream myfile;
   myfile.open ("BGinput.txt");	
   if (myfile.is_open()){
@@ -66,9 +63,6 @@ int stack_upgrade() {
 		Double_t xsec;
 		myfile >> xsec;
 		bg_xsec.push_back(xsec);
-		Long_t n_events;
-		myfile >> n_events;
-		bg_nevents.push_back(n_events);
 		Bool_t plot;
 		myfile >> plot;
 		bg_plot.push_back(plot);
@@ -78,7 +72,7 @@ int stack_upgrade() {
 		TString title;
 		myfile >> title;
 		bg_titles.push_back(title);
-		std::cout << name << " " << xsec << " " << n_events 
+		std::cout << name << " " << xsec << " " 
 		<< " " << plot << save << std::endl;  
 	}
 	myfile.close();
@@ -86,8 +80,28 @@ int stack_upgrade() {
   
   for (uint iVec=0; iVec < bg_names.size(); iVec++)
   {
-		std::cout << iVec << ": " << bg_names[iVec] << " " << bg_xsec[iVec] << " " << bg_nevents[iVec] 
+		std::cout << iVec << ": " << bg_names[iVec] << " " << bg_xsec[iVec] << " " 
 		<< " " << bg_plot[iVec] << bg_save[iVec] << std::endl;
+  }
+  
+  std::vector<TString> data_names;
+  std::vector<Double_t> data_lumi;
+ 
+  
+  std::ifstream datafile;
+  datafile.open ("Datainput.txt");	
+  if (datafile.is_open()){
+	while ( datafile.good() ){
+		TString name;
+		datafile >> name;
+		if(name.Length()==0) continue;
+		data_names.push_back(name);
+		Double_t xsec;
+		datafile >> xsec;
+		data_lumi.push_back(xsec);
+		std::cout << name << " " << xsec << std::endl;  
+	}
+	datafile.close();
   }
 
   const int nFiles = 7;
@@ -104,7 +118,7 @@ int stack_upgrade() {
   "GG2L2L",
   "GG4L"};
   
-  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary/";
+  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary2/";
   
   TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
@@ -114,15 +128,28 @@ int stack_upgrade() {
   std::vector<TFile*> f_bg;  	
   std::vector<TFile*> f_data;  	
   
-  f_data.push_back(TFile::Open("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root"));
-  
-  if(!f_data[0]) {
-		  std::cerr << "Error: file " << "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root" << " could not be opened." << std::endl; 
+    std::stringstream indexes;  
+  for(int iFile = 0; iFile < data_names.size(); iFile++)
+  {
+	  indexes.str("");
+	  indexes << inputDir << data_names[iFile] << "/Summary.root";
+	  std::string input_file=indexes.str();
+	  f_data.push_back(TFile::Open(input_file.c_str()));
+	  if(!f_data[iFile]) {
+		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
 		  return 1;
-	  }
-	  else std::cout << "File " << "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root" << " succesfully opened!" << std::endl;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+  }
   
-  std::stringstream indexes;  
+  //f_data.push_back(TFile::Open("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root"));
+  
+  //~ if(!f_data[0]) {
+		  //~ std::cerr << "Error: file " << "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root" << " could not be opened." << std::endl; 
+		  //~ return 1;
+	  //~ }
+	  //~ else std::cout << "File " << "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/PostAnalysisSummary/2012.root" << " succesfully opened!" << std::endl;
+  //~ 
+
 
   for(int iFile = 0; iFile < bg_names.size(); iFile++)
   {
@@ -177,12 +204,14 @@ int stack_upgrade() {
   TString histBGNames1[nHist1] = {"h_FR_svMass","h_H_FR_svMass_type_4","h_H_FR_svMass_type_3","h_H_FR_svMass_type_1","h_H_FR_svMass_type_2","h_H_FR_svMass_type_8","h_H_FR_svMass_type_5","h_H_FR_svMass_type_7","h_H_FR_svMass_type_6"};
   
   TString histTitles[nHist1] = {"M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]"};
-  TString PaveText[nHist1]	= {"CMS preliminary 2012","MMMT","MMME","MMET","EETT","EEMT","EEME","EEET","EETT"};
+  TString PaveText[nHist1]	= {"CMS preliminary 2012","MMTT","MMET","MMMT","MMME","EETT","EEMT","EEET","EEEM"};
  
   std::vector<std::vector<TH1F*>* > 	h_1d_bg;
   std::vector<std::vector<TH1F*>* > 	h_1d_bg_ESplus;
   std::vector<std::vector<TH1F*>* > 	h_1d_bg_ESminus; 
-  std::vector<std::vector<TH1F*>* > 	h_1d_data;
+  //std::vector<std::vector<TH1F*>* > 	h_1d_data;
+  TH1F * 		h_1d_data[nHist1];
+ 
   TH1F * 		h_1BG[nHist1];
  
  // TH1F *                signal[nHist1];
@@ -194,11 +223,19 @@ int stack_upgrade() {
   Color_t colors[6]={kRed,kYellow,kMagenta,kGreen,kBlack,kBlue};
   
 
-  const double total_lumi = 19711.2250; //// pb-1
+  double total_lumi = 0;// 19711.2250; //// pb-1
   
+  for(int iFile = 0; iFile < (data_names.size()/2); iFile++)
+  {
+	total_lumi+=data_lumi[iFile];
+  }
+  
+  std::cout << "Total lumi is " << total_lumi << std::endl;
   for(int iFile = 0; iFile < bg_names.size(); iFile++)
 	{
-		double lumi = bg_nevents[iFile]/bg_xsec[iFile];
+		TH1D * h_pu = (TH1D*)f_bg[iFile]->Get("AnalysisHistos/h_nPU_raw");
+		std::cout << h_pu->Integral() << std::endl;
+		double lumi =  h_pu->Integral()/bg_xsec[iFile];
 		weights.push_back(total_lumi/lumi);
 		std::cout << weights[iFile] << std::endl;
 	}
@@ -250,18 +287,31 @@ int stack_upgrade() {
   
   //(*(h_1d_bg[0]))[0]->Draw();
   
-  for(int iFile = 0; iFile < 1; iFile++)
+  //~ for(int iFile = 0; iFile < data_names.size(); iFile++)
+  //~ {
+	  //~ std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	//~ 
+	  //~ for(int iHist = 0; iHist < nHist1; iHist++)
+	  //~ {
+		  //~ TH1F* test = (TH1F*)f_data[iFile]->Get(histNames1[iHist]);
+		  //~ temp_vec->push_back(test);
+		//~ 
+		  //~ (*temp_vec)[iHist]->Rebin(20);
+	  //~ }
+	  //~ h_1d_data.push_back(temp_vec);
+  //~ }
+  
+  for(int iHist=0; iHist < nHist1; iHist++)
   {
-	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
-	
-	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  for(int iFile=0; iFile < data_names.size(); iFile++)
 	  {
-		  TH1F* test = (TH1F*)f_data[iFile]->Get(histNames1[iHist]);
-		  temp_vec->push_back(test);
-		//  (*temp_vec)[iHist]->Scale(weights[iFile]); 
-		  (*temp_vec)[iHist]->Rebin(20);
+		TH1F* test =(TH1F*)f_data[iFile]->Get(histNames1[iHist]);
+		if(iFile==0) h_1d_data[iHist]=(TH1F*)test->Clone();
+		else h_1d_data[iHist]->Add(test);
 	  }
-	  h_1d_data.push_back(temp_vec);
+	 h_1d_data[iHist]->Rebin(20);
+	 if(iHist==1) h_1d_data[0]=(TH1F*)h_1d_data[iHist]->Clone();
+	 if(iHist>1) h_1d_data[0]->Add(h_1d_data[iHist]);				 
   }
   
   std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root",
@@ -274,17 +324,26 @@ int stack_upgrade() {
 	
   } 
   
-  
+  uint MeToULBconv[8] = { 4,3,1,2,8,5,7,6};
+
+ 
   for(int iHist=0; iHist < nHist1; iHist++)
   {
-	 h_1BG[iHist]=(TH1F*)f_data[0]->Get(histBGNames1[iHist]);
-	 if(iHist>0) h_1BG[iHist]->Scale(BGcounts->at(iHist-1)/h_1BG[iHist]->Integral());
+  
+	  for(int iFile=0; iFile < data_names.size(); iFile++)
+	  {
+		TH1F* test =(TH1F*)f_data[iFile]->Get(histBGNames1[iHist]);
+		if(iFile==0) h_1BG[iHist]=(TH1F*)test->Clone();
+		else h_1BG[iHist]->Add(test);
+	  }
+	
+	 if(iHist>0) h_1BG[iHist]->Scale(BGcounts->at(MeToULBconv[iHist-1]-1)/h_1BG[iHist]->Integral());
 	 h_1BG[iHist]->Rebin(20);
 	 if(iHist==1) h_1BG[0]=(TH1F*)h_1BG[iHist]->Clone();
 	 if(iHist>1) h_1BG[0]->Add(h_1BG[iHist]);			
-	 
+	
   }
-  
+
   
   //~ 
     //~ int ZZ_Color = TColor::GetColor("#99ff99");
@@ -299,7 +358,7 @@ int stack_upgrade() {
   c1->SetFillColor(10);
   c1->SetTicky();
   c1->SetObjectStat(0);
-(*(h_1d_data[0]))[0]->Draw();
+h_1d_data[0]->Draw();
  
   //~ for(int iHist = 0; iHist < nHist1; iHist++){
 	  //~ signal[iHist] = (TH1F*)h_1d[iHist][5]->Clone();}
@@ -341,8 +400,8 @@ int stack_upgrade() {
 //~ 
 		  //~ //hs->Add(signal[iFile],"hist");		
 	  //~ 
-	  (*(h_1d_data[0]))[iHist]->SetMarkerStyle(21);
-	  (*(h_1d_data[0]))[iHist]->SetMarkerSize(0.7);
+	  h_1d_data[iHist]->SetMarkerStyle(21);
+	  h_1d_data[iHist]->SetMarkerSize(0.7);
 	  
 //~ 
  TLegend* leg = new TLegend(0.65,0.60,0.88,0.88,NULL,"brNDC");
@@ -351,7 +410,7 @@ int stack_upgrade() {
  leg->SetBorderSize(0);
 			//~ 
 			
-	  leg->AddEntry((*(h_1d_data[0]))[iHist],"data 2012","p");   
+	  leg->AddEntry(h_1d_data[iHist],"data 2012","p");   
 	  for(uint iFile=0; iFile < bg_names.size(); iFile++)
 	  {
 		  if(bg_plot[iFile]) leg->AddEntry((*(h_1d_bg[iFile]))[iHist],bg_titles[iFile],"f");
@@ -381,16 +440,16 @@ TString lumist="19.7 fb^{-1}";
    
 	
 //~ 
-	  (*(h_1d_data[0]))[iHist]->Draw("PE01");
+	h_1d_data[iHist]->Draw("PE01");
 	  //~ double max = h_1d[iFile][0]->GetMaximum();
 	  //~ h_1d[iFile][0]->GetYaxis()->SetRangeUser(1e-2,200*max);
 	//~ // if(iHist > 0 && iHist < 4)  h_1d[iFile][0]->GetXaxis()->SetRangeUser(0,150);
 	 //~ 
-	   (*(h_1d_data[0]))[iHist]->GetXaxis()->SetTitle(histTitles[iHist]);
+	h_1d_data[iHist]->GetXaxis()->SetTitle(histTitles[iHist]);
 	   hs->Draw("same");
 	 //~ // signal[iFile]->Scale(10.);
 	  //~ signal[iFile]->Draw("histsame");
-      (*(h_1d_data[0]))[iHist]->Draw("samePE01");
+	h_1d_data[iHist]->Draw("samePE01");
       //~ 
 	  //~ 
 	  leg->Draw("same");
@@ -416,22 +475,36 @@ TString lumist="19.7 fb^{-1}";
   }
   // saving stuff
   
-  TFile out("outFile.root","RECREATE");
+  TFile out("outFile10.root","RECREATE");
   TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
   TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
   TString nameES="_CMS_scale_t_";
   TString nameUp="Up";
   TString nameDown="Down";
+  TString ZjetsName="Zjets";
+  TString DataName="data_obs";
   
   for(uint iDir = 0; iDir < 8; iDir++)
   {
 	out.mkdir(dirNames[iDir]);
 	out.cd(dirNames[iDir]);
-	for(uint iFile=0; iFile < bg_titles.size(); iFile++)
+	
+	// reducible
+	TH1D* hist_Zjets = new TH1D(ZjetsName,"",15,0,300);
+	for(int iBin = 1; iBin <= h_1BG[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist_Zjets->SetBinContent(iBin,h_1BG[iDir+1]->GetBinContent(iBin));
+			hist_Zjets->SetBinError(iBin,h_1BG[iDir+1]->GetBinError(iBin));
+		}
+		hist_Zjets->Write();
+	
+	// MC backgrounds
+	for(int iFile=0; iFile < bg_titles.size(); iFile++)
 	{
 		if(!bg_save[iFile]) continue;
 		TH1D* hist = new TH1D(bg_titles[iFile],"",15,0,300);
-		for(uint iBin = 1; iBin <= (*(h_1d_bg[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		for(int iBin = 1; iBin <= (*(h_1d_bg[iFile]))[iDir+1]->GetNbinsX(); iBin++)
 		{
 			
 			hist->SetBinContent(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinContent(iBin));
@@ -440,7 +513,7 @@ TString lumist="19.7 fb^{-1}";
 		hist->Write();
 		
 		TH1D* hist_Up = new TH1D(bg_titles[iFile]+nameES+upNames[iDir]+nameUp,"",15,0,300);
-		for(uint iBin = 1; iBin <= (*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		for(int iBin = 1; iBin <= (*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
 		{
 			
 			hist_Up->SetBinContent(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinContent(iBin));
@@ -449,7 +522,7 @@ TString lumist="19.7 fb^{-1}";
 		hist_Up->Write();
 		
 		TH1D* hist_Down = new TH1D(bg_titles[iFile]+nameES+upNames[iDir]+nameDown,"",15,0,300);
-		for(uint iBin = 1; iBin <= (*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		for(int iBin = 1; iBin <= (*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
 		{
 			
 			hist_Down->SetBinContent(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinContent(iBin));
@@ -458,6 +531,17 @@ TString lumist="19.7 fb^{-1}";
 		hist_Down->Write();
 		
 	}
+	
+	//data
+	TH1D* hist_data = new TH1D(DataName,"",15,0,300);
+	for(int iBin = 1; iBin <= h_1d_data[iDir+1]->GetNbinsX(); iBin++)
+	{
+		
+		hist_data->SetBinContent(iBin,h_1d_data[iDir+1]->GetBinContent(iBin));
+		hist_data->SetBinError(iBin,h_1d_data[iDir+1]->GetBinError(iBin));
+	}
+	hist_data->Write();
+	
 	out.cd();
 	
   }
