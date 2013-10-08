@@ -103,6 +103,31 @@ int stack_upgrade() {
 	}
 	datafile.close();
   }
+  
+  std::vector<TString> signal_names;
+  std::vector<TString> signal_titles;
+  
+  std::vector<Double_t> signal_xsec;
+ 
+  
+  std::ifstream signalfile;
+  signalfile.open ("Signalinput.txt");	
+  if (signalfile.is_open()){
+	while ( signalfile.good() ){
+		TString title;
+		signalfile >> title;
+		if(title.Length()==0) continue;
+		signal_titles.push_back(title);
+		TString name;
+		signalfile >> name;
+		signal_names.push_back(name);
+		Double_t xsec;
+		signalfile >> xsec;
+		signal_xsec.push_back(xsec);
+		std::cout << title << " " << name << " " << xsec << std::endl;  
+	}
+	signalfile.close();
+  }
 
   const int nFiles = 7;
 
@@ -195,6 +220,52 @@ int stack_upgrade() {
 	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
   }
   
+  // signal
+  
+  std::vector<TFile*> f_signal;  	
+  
+  for(int iFile = 0; iFile < signal_names.size(); iFile++)
+  {
+	  indexes.str("");
+	  indexes << inputDir << signal_names[iFile] << "/Summary.root";
+	  std::string input_file=indexes.str();
+	  f_signal.push_back(TFile::Open(input_file.c_str()));
+	  if(!f_signal[iFile]) {
+		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
+		  return 1;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+  }
+  
+  // tau ES
+  
+  
+
+  std::vector<TFile*> f_signal_ESplus;
+  std::vector<TFile*> f_signal_ESminus;
+  
+  for(int iFile = 0; iFile < signal_names.size(); iFile++)
+  {
+	  indexes.str("");
+	  indexes << inputDir << signal_names[iFile] << "_" << tauESplusSuffix << "/Summary.root";
+	  std::string input_file=indexes.str();
+	  f_signal_ESplus.push_back(TFile::Open(input_file.c_str()));
+	  if(!f_signal_ESplus[iFile]) {
+		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
+		  return 1;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+  }
+  
+  for(int iFile = 0; iFile < signal_names.size(); iFile++)
+  {
+	  indexes.str("");
+	  indexes << inputDir << signal_names[iFile] << "_" << tauESminusSuffix << "/Summary.root";
+	  std::string input_file=indexes.str();
+	  f_signal_ESminus.push_back(TFile::Open(input_file.c_str()));
+	  if(!f_signal_ESminus[iFile]) {
+		  std::cerr << "Error: file " << input_file << " could not be opened." << std::endl; 
+		  return 1;
+	  } else std::cout << "File " << input_file << " succesfully opened!" << std::endl;
+  }
 
   const int nHist1 = 9;
   //const int nHist1 = 44;

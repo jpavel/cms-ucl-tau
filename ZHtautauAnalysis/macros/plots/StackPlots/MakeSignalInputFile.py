@@ -26,11 +26,11 @@ per_rowW = []
 for line in infileW:
     per_rowW.append(line.split('\t'))
 WW_prefix='signal_WH_ZH_TTH_HToWW_M-'
-WW_suffix='_lepdecay_8TeV-pythia6-tauola'
+WW_suffix='_lepdecay_8TeV-pythia6'
 WW_short='ZH_hww'
 for rowW in per_rowW:
 	massW=float(rowW[0])
-	if (massW%10==0 or massW==125):
+	if ((massW%10==0 and massW!=150) or massW==125 or massW==145 ):
 		line=WW_short+rowW[0]+" "+WW_prefix+rowW[0]+WW_suffix+" "+rowW[1]
 		print line
 		outF.write(line)
