@@ -596,7 +596,10 @@ TString lumist="19.7 fb^{-1}";
   }
   // saving stuff
   
-  TFile out("outFile10.root","RECREATE");
+  TString outputROOTDir = "/home/jpavel/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/LimitInput/";
+ 
+  
+  TFile out(outputROOTDir+"vhtt_llLL.inputs-sm-8TeV.root","RECREATE");
   TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
   TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
   TString nameES="_CMS_scale_t_";
