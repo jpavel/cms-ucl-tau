@@ -280,6 +280,10 @@ int stack_upgrade() {
   std::vector<std::vector<TH1F*>* > 	h_1d_bg;
   std::vector<std::vector<TH1F*>* > 	h_1d_bg_ESplus;
   std::vector<std::vector<TH1F*>* > 	h_1d_bg_ESminus; 
+  
+  std::vector<std::vector<TH1F*>* > 	h_1d_signal;
+  std::vector<std::vector<TH1F*>* > 	h_1d_signal_ESplus;
+  std::vector<std::vector<TH1F*>* > 	h_1d_signal_ESminus; 
   //std::vector<std::vector<TH1F*>* > 	h_1d_data;
   TH1F * 		h_1d_data[nHist1];
  
@@ -288,6 +292,8 @@ int stack_upgrade() {
  // TH1F *                signal[nHist1];
   
   std::vector<Double_t> weights;
+  std::vector<Double_t> weight_signal;
+  
   //Double_t xsection[nFiles]={1.0, 0.130, 1.057, 23.64, 0.208, 0.01203, 0.0048}; // pb
   //Double_t events[nFiles]={1.0, 4989540, 2979624, 10783509, 210160, 400973, 548760}; // pb
   
@@ -309,6 +315,15 @@ int stack_upgrade() {
 		double lumi =  h_pu->Integral()/bg_xsec[iFile];
 		weights.push_back(total_lumi/lumi);
 		std::cout << weights[iFile] << std::endl;
+	}
+	
+	for(int iFile = 0; iFile < signal_names.size(); iFile++)
+	{
+		TH1D * h_pu = (TH1D*)f_signal[iFile]->Get("AnalysisHistos/h_nPU_raw");
+		std::cout << h_pu->Integral() << std::endl;
+		double lumi =  h_pu->Integral()/signal_xsec[iFile];
+		weight_signal.push_back(total_lumi/lumi);
+		std::cout << weight_signal[iFile] << std::endl;
 	}
 
   for(int iFile = 0; iFile < bg_names.size(); iFile++)
@@ -356,22 +371,57 @@ int stack_upgrade() {
 	  h_1d_bg_ESminus.push_back(temp_vec);
   }
   
-  //(*(h_1d_bg[0]))[0]->Draw();
   
-  //~ for(int iFile = 0; iFile < data_names.size(); iFile++)
-  //~ {
-	  //~ std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
-	//~ 
-	  //~ for(int iHist = 0; iHist < nHist1; iHist++)
-	  //~ {
-		  //~ TH1F* test = (TH1F*)f_data[iFile]->Get(histNames1[iHist]);
-		  //~ temp_vec->push_back(test);
-		//~ 
-		  //~ (*temp_vec)[iHist]->Rebin(20);
-	  //~ }
-	  //~ h_1d_data.push_back(temp_vec);
-  //~ }
+
+// signal
+
+for(int iFile = 0; iFile < signal_names.size(); iFile++)
+  {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  {
+		  TH1F* test = (TH1F*)f_signal[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		  (*temp_vec)[iHist]->Draw();	
+		 
+		  (*temp_vec)[iHist]->Scale(weight_signal[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
+	  }
+	  h_1d_signal.push_back(temp_vec);
+  }
   
+   for(int iFile = 0; iFile < signal_names.size(); iFile++)
+  {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  {
+		  TH1F* test = (TH1F*)f_signal_ESplus[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		  (*temp_vec)[iHist]->Draw();	
+		 
+		  (*temp_vec)[iHist]->Scale(weight_signal[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
+	  }
+	  h_1d_signal_ESplus.push_back(temp_vec);
+  }
+  
+  for(int iFile = 0; iFile < signal_names.size(); iFile++)
+  {
+	  std::vector<TH1F*>* temp_vec = new std::vector<TH1F*>;
+	  for(int iHist = 0; iHist < nHist1; iHist++)
+	  {
+		  TH1F* test = (TH1F*)f_signal_ESminus[iFile]->Get(histNames1[iHist]);
+		  temp_vec->push_back(test);
+		  (*temp_vec)[iHist]->Draw();	
+		 
+		  (*temp_vec)[iHist]->Scale(weight_signal[iFile]); 
+		  (*temp_vec)[iHist]->Rebin(20);
+	  }
+	  h_1d_signal_ESminus.push_back(temp_vec);
+  }
+
+//data
+
   for(int iHist=0; iHist < nHist1; iHist++)
   {
 	  for(int iFile=0; iFile < data_names.size(); iFile++)
@@ -396,7 +446,7 @@ int stack_upgrade() {
   } 
   
   uint MeToULBconv[8] = { 4,3,1,2,8,5,7,6};
-
+// reducible
  
   for(int iHist=0; iHist < nHist1; iHist++)
   {
@@ -559,6 +609,40 @@ TString lumist="19.7 fb^{-1}";
   {
 	out.mkdir(dirNames[iDir]);
 	out.cd(dirNames[iDir]);
+	
+	//signal
+	for(int iFile=0; iFile < signal_titles.size(); iFile++)
+	{
+		
+		TH1D* hist = new TH1D(signal_titles[iFile],"",15,0,300);
+		for(int iBin = 1; iBin <= (*(h_1d_signal[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist->SetBinContent(iBin,(*(h_1d_signal[iFile]))[iDir+1]->GetBinContent(iBin));
+			hist->SetBinError(iBin,(*(h_1d_signal[iFile]))[iDir+1]->GetBinError(iBin));
+		}
+		hist->Write();
+		
+		TH1D* hist_Up = new TH1D(signal_titles[iFile]+nameES+upNames[iDir]+nameUp,"",15,0,300);
+		for(int iBin = 1; iBin <= (*(h_1d_signal_ESplus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist_Up->SetBinContent(iBin,(*(h_1d_signal_ESplus[iFile]))[iDir+1]->GetBinContent(iBin));
+			hist_Up->SetBinError(iBin,(*(h_1d_signal_ESplus[iFile]))[iDir+1]->GetBinError(iBin));
+		}
+		hist_Up->Write();
+		
+		TH1D* hist_Down = new TH1D(signal_titles[iFile]+nameES+upNames[iDir]+nameDown,"",15,0,300);
+		for(int iBin = 1; iBin <= (*(h_1d_signal_ESminus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
+		{
+			
+			hist_Down->SetBinContent(iBin,(*(h_1d_signal_ESminus[iFile]))[iDir+1]->GetBinContent(iBin));
+			hist_Down->SetBinError(iBin,(*(h_1d_signal_ESminus[iFile]))[iDir+1]->GetBinError(iBin));
+		}
+		hist_Down->Write();
+		
+	}
+	
 	
 	// reducible
 	TH1D* hist_Zjets = new TH1D(ZjetsName,"",15,0,300);

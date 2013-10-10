@@ -30,7 +30,7 @@ WW_suffix='_lepdecay_8TeV-pythia6'
 WW_short='ZH_hww'
 for rowW in per_rowW:
 	massW=float(rowW[0])
-	if ((massW%10==0 and massW!=150) or massW==125 or massW==145 ):
+	if massW%5==0:
 		line=WW_short+rowW[0]+" "+WW_prefix+rowW[0]+WW_suffix+" "+rowW[1]
 		print line
 		outF.write(line)
