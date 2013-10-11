@@ -388,6 +388,7 @@ private:
     bool FillPDFInfo;
     bool FillSVmassInfo;
     bool FillZZgenInfo;
+    bool FillGenMET;
     
     double tau_shape_iso_cut;
     double lep_shape_iso_cut;
@@ -502,6 +503,13 @@ Float_t o_gen_phi_Z1;
 Float_t o_gen_phi_Z2;
 Float_t o_gen_mass_Z1;
 Float_t o_gen_mass_Z2;
+
+// True MET info
+
+Float_t o_gen_MET_x;
+Float_t o_gen_MET_y;
+Float_t o_gen_MET;
+
 
 
 

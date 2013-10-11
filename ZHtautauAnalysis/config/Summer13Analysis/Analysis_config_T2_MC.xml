@@ -120,6 +120,7 @@
 	    <Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
 		<Item Name="FillZZgenInfo" Value="False" />
+		<Item Name="FillGenMET" Value="True" />
 		
 		<!-- Switch off LT cut for various channels in reducible backround estimation -->
 		<Item Name="IgnoreLTforFR_TT" Value="False" />

@@ -33,7 +33,7 @@
 
 using namespace std;
 
-std::vector<double>* EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root") {
+std::vector<double>* EstimateBackground(TString inputFile = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root", TString FRfile = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root") {
 
   gROOT->Reset();  
   //SetAtlasStyle();
@@ -77,7 +77,7 @@ std::vector<double>* EstimateBackground(TString inputFile = "/home/jpavel/analys
   
   }
   
-  TFile* g = TFile::Open("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/2012.root");
+  TFile* g = TFile::Open(FRfile);
   
   TF1 *tauFit = TauFakeRate(g,outputDir,0);
   TF1 *tauFit_EC = TauFakeRate(g,outputDir,1);

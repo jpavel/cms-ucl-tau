@@ -27,6 +27,7 @@ void PostAnalysis::BeginCycle() throw( SError ) {
 void PostAnalysis::EndCycle() throw( SError ) {
 
    std::cout << "Post Analysis finished." << std::endl;
+   
    return;
 
 }
@@ -39,6 +40,14 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_FR_svMass                      	 = Book(TH1D("h_FR_svMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
 	h_FRt_svMass                      	 = Book(TH1D("h_FRt_svMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
 	
+	h_visMass                      		 = Book(TH1D("h_visMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
+	h_FR_visMass                      	 = Book(TH1D("h_FR_visMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
+	h_FRt_visMass                      	 = Book(TH1D("h_FRt_visMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
+	
+	
+	// old histograms
+	
+	h_nPU_raw					 = 		  Book(TH1D("h_nPU_raw","raw PU distribution",50,0,50),"AnalysisHistos");
 	
 	SVTree = new TTree();
 	MainTree = new TTree();
@@ -162,7 +171,7 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 }
 
 void PostAnalysis::EndInputData( const SInputData& ) throw( SError ) {
-
+	
    return;
 
 }
@@ -172,7 +181,19 @@ void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
 	SVTree = Retrieve<TTree>("svTree");
 	MainTree = Retrieve<TTree>(InTreeName.c_str());
 	std::cout << SVTree->GetEntries() << std::endl;
-
+	
+	h_nPU_raw_old = Retrieve<TH1D>("h_nPU_raw");
+	std::cout << h_nPU_raw_old->Integral() << std::endl;
+	for (int iBin =0; iBin <= (h_nPU_raw_old->GetNbinsX() +1); iBin++)
+	{
+		h_nPU_raw->SetBinContent(iBin,h_nPU_raw_old->GetBinContent(iBin));
+		h_nPU_raw->SetBinError(iBin,h_nPU_raw_old->GetBinError(iBin));
+		
+	}
+	
+	//h_nPU_raw = (TH1D*)h_nPU_raw_old->Clone();
+	std::cout << h_nPU_raw->Integral() << std::endl;
+	
 	ConnectVariable(InTreeName.c_str(),"o_run",in_run);
 	ConnectVariable(InTreeName.c_str(),"o_lumi",in_lumi);
 	ConnectVariable(InTreeName.c_str(),"o_event",in_event);
@@ -252,7 +273,10 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(in_pass || in_FR){
 		 SVTree->GetEntry(m_allEvents);
 		 double visMass = PairMass(in_px_H1,in_py_H1,in_pz_H1,in_E_H1,in_px_H2,in_py_H2,in_pz_H2,in_E_H2);
-		if(in_pass) h_H_visMass_types[in_type-1]->Fill(visMass,in_event_weight);
+		if(in_pass){
+			 h_H_visMass_types[in_type-1]->Fill(visMass,in_event_weight);
+			 Hist("h_visMass")->Fill(visMass,in_event_weight);
+		 }
 		if(in_FR){
 			for(int iFR=0; iFR< in_FR_n; iFR++)
 			{
@@ -261,8 +285,13 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 											  in_FR_pz_H1->at(iFR),in_FR_E_H1->at(iFR),
 											  in_FR_px_H2->at(iFR),in_FR_py_H2->at(iFR),
 											  in_FR_pz_H2->at(iFR),in_FR_E_H2->at(iFR));
-				h_H_FR_visMass_types[in_FR_type->at(iFR)-1]->Fill(in_FR_visMass,in_event_weight2);
-				if(in_FRt->at(iFR)) h_H_FRt_visMass_types[in_FR_type->at(iFR)-1]->Fill(in_FR_visMass,in_event_weight2);
+				h_H_FR_visMass_types[in_FR_type->at(iFR)-1]->Fill(in_FR_visMass,in_event_weight);
+				Hist("h_FR_visMass")->Fill(in_FR_visMass,in_event_weight);
+					
+				if(in_FRt->at(iFR)){
+					h_H_FRt_visMass_types[in_FR_type->at(iFR)-1]->Fill(in_FR_visMass,in_event_weight);
+					Hist("h_FRt_visMass")->Fill(in_FR_visMass,in_event_weight);
+				}
 			}
 		}
 		
@@ -274,17 +303,17 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			if(in_pass2){
 				 h_H_svMass_types[in_type2-1]->Fill(in_svMass,in_event_weight2);
-				 Hist("h_svMass")->Fill(in_svMass);
+				 Hist("h_svMass")->Fill(in_svMass,in_event_weight2);
 			}
 			if(in_FR2){
 				for(int iFR=0; iFR< in_FR_n2; iFR++)
 				{
 					if(in_FR_type2->at(iFR) == 0) continue;
 					h_H_FR_svMass_types[in_FR_type2->at(iFR)-1]->Fill(in_FR_svMass->at(iFR),in_event_weight2);
-					Hist("h_FR_svMass")->Fill(in_FR_svMass->at(iFR));
+					Hist("h_FR_svMass")->Fill(in_FR_svMass->at(iFR),in_event_weight2);
 					if(in_FRt2->at(iFR)){
 						 h_H_FRt_svMass_types[in_FR_type2->at(iFR)-1]->Fill(in_FR_svMass->at(iFR),in_event_weight2);
-						 Hist("h_FRt_svMass")->Fill(in_FR_svMass->at(iFR));
+						 Hist("h_FRt_svMass")->Fill(in_FR_svMass->at(iFR),in_event_weight2);
 					 }
 				}
 			}
