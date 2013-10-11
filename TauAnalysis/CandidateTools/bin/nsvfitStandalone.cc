@@ -256,12 +256,13 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
   int nevent = tree->GetEntries();
   for(int i=0; i<nevent; ++i){
     tree->GetEvent(i);
-    if(o_pass||o_FR) std::cout << "event " << i+1 << " : " << o_pass << std::endl;
+    if(o_pass||o_FR) std::cout << "event #" << i+1 << " eventN/lumi/run:" <<
+o_event <<"/" << o_lumi << "/" << o_run << " : " << o_pass << std::endl;
     else{ 
       continue;
     }
     // setup MET input vector
-    // std::cout << "The MET is " << o_MET_x << " " << o_MET_y << std::endl;
+    std::cout << "MET_x= " << o_MET_x << "MET_y= " << o_MET_y << std::endl;
     //    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
     o_pass2=0;
     o_FR2=0;
@@ -280,21 +281,45 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
     NSVfitStandalone::Vector measuredMET(o_MET_x, o_MET_y, 0); 
     // setup the MET significance
      TMatrixD covMET(2,2);
-     //     std::cout << "The cov MET is " << o_covMET_00 << " " << o_covMET_01 << " : " << o_covMET_10 << " : " << o_covMET_11 << std::endl;
+     std::cout << "The cov MET is (00,01,10,11) " << o_covMET_00 << " " << o_covMET_01 << " : " << o_covMET_10 << " : " << o_covMET_11 << std::endl;
      //     if(o_covMET->size()!=4){ svBranch->Fill(); continue;}
        covMET[0][0] = o_covMET_00;
        covMET[0][1] = o_covMET_01;
        covMET[1][0] = o_covMET_10;
        covMET[1][1] = o_covMET_11;
 //     // setup measure tau lepton vectors 
-       // std::cout << "the first vector is " << o_px_H1<< " : " << o_py_H1<< " : " << o_pz_H1<< " : " << o_E_H1 << " : " << o_pdg_H1 << std::endl;
-       // std::cout << "the second vector is " << o_px_H2<< " : " << o_py_H2<< " : " << o_pz_H2<< " : " << o_E_H2 << " : " << o_pdg_H2 <<std::endl;
-	if(o_pass){
-       NSVfitStandalone::LorentzVector l1(o_px_H1, o_py_H1, o_pz_H1, o_E_H1);
-       NSVfitStandalone::LorentzVector l2(o_px_H2, o_py_H2, o_pz_H2, o_E_H2);
+       std::cout << "the first input 4-vector(px,py,pz,E) is " << o_px_H1<< " : " << o_py_H1<< " : " << o_pz_H1<< " : " << o_E_H1 << " pdgId= " << o_pdg_H1 << std::endl;
+       std::cout << "the second input 4-vector (px,py,pz,E) is " << o_px_H2<< " : " << o_py_H2<< " : " << o_pz_H2<< " : " << o_E_H2 << " pdgId= " << o_pdg_H2 <<std::endl;
+       NSVfitStandalone::LorentzVector l1,l2;
+       int lep_type1,lep_type2;
+      if(o_pass){
+	if(abs(o_pdg_H1)!=15)
+	  {
+	    l1.SetPxPyPzE(o_px_H1,o_py_H1,o_pz_H1,o_E_H1);
+	    l2.SetPxPyPzE(o_px_H2,o_py_H2,o_pz_H2,o_E_H2);
+	    lep_type1=o_pdg_H1;
+	    lep_type2=o_pdg_H2;
+	  }
+	else if(abs(o_pdg_H2)!=15)
+	  {
+	    l2.SetPxPyPzE(o_px_H1,o_py_H1,o_pz_H1,o_E_H1);
+            l1.SetPxPyPzE(o_px_H2,o_py_H2,o_pz_H2,o_E_H2);
+	    lep_type1=o_pdg_H2;
+            lep_type2=o_pdg_H1;
+	  }else{
+	    l1.SetPxPyPzE(o_px_H1,o_py_H1,o_pz_H1,o_E_H1);
+	    l2.SetPxPyPzE(o_px_H2,o_py_H2,o_pz_H2,o_E_H2);
+	    lep_type1=o_pdg_H1;
+            lep_type2=o_pdg_H2;
+	}
+	// NSVfitStandalone::LorentzVector l1(o_px_H1, o_py_H1, o_pz_H1, o_E_H1);
+	//  NSVfitStandalone::LorentzVector l2(o_px_H2, o_py_H2, o_pz_H2, o_E_H2);
        std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
-       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H1)==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
-       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(o_pdg_H2)==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
+       // debug
+       std::cout << "measuredTauLepton 1 : E=" << l1.E() << " Px=" << l1.Px() << " Py=" << l1.Py() << " Pz= " << l1.Pz() << " type=" << lep_type1 << std::endl;
+       std::cout << "measuredTauLepton 2 : E=" << l2.E() << " Px=" << l2.Px() << " Py=" << l2.Py() << " Pz= " << l2.Pz() << " type=" << lep_type2 << std::endl;
+       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(lep_type1)==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l1));
+       measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(abs(lep_type2)==15 ? NSVfitStandalone::kHadDecay : NSVfitStandalone::kLepDecay, l2));
 //     // construct the class object from the minimal necesarry information
       NSVfitStandaloneAlgorithm algo(measuredTauLeptons, measuredMET, covMET, 1);
       algo.addLogM(false);
