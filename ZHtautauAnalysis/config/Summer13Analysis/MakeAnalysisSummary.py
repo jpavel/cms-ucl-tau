@@ -35,8 +35,9 @@ print 'The output will be saved in '+outFullDir
 
 
 for subdir in os.listdir(inputDir):
+	print subdir
 	if os.path.isdir(inputDir+subdir):
-	#	print subdir
+		print subdir
 		sep2='_'
 		if len(subdir.split('_'))>2:
 			sample=sep2.join(subdir.split('_')[2:])
@@ -59,4 +60,6 @@ for subdir in os.listdir(inputDir):
 		#call(['more','inputPA.xml'])
 		call(['sframe_main','PostAnalysis_customInput_config.xml'])
 		call(['cp', 'PostAnalysis.Data1.Reco.root',outSampleDir+'/Summary.root']) 
+
+
 

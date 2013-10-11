@@ -92,6 +92,7 @@ Analysis::Analysis()
 		DeclareProperty("FillPDFInfo",FillPDFInfo);
 		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
 		DeclareProperty("FillZZgenInfo",FillZZgenInfo);
+		DeclareProperty("FillGenMET",FillGenMET);
 		
 		// for FR calculation
 		
@@ -218,6 +219,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_gen_phi_Z2,"o_gen_phi_Z2");
 	DeclareVariable(o_gen_mass_Z1,"o_gen_mass_Z1");
 	DeclareVariable(o_gen_mass_Z2,"o_gen_mass_Z2");
+	
+	DeclareVariable(o_gen_MET_x,"o_gen_MET_x");
+	DeclareVariable(o_gen_MET_y,"o_gen_MET_y");
+	DeclareVariable(o_gen_MET,"o_gen_MET");
+	
+	
 
 
 	
@@ -1509,6 +1516,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_gen_phi_Z2=0;
 	o_gen_mass_Z1=0;
 	o_gen_mass_Z2=0;
+	
+	o_gen_MET_x=0;
+	o_gen_MET_y=0;
+	o_gen_MET=0;
+	
 
 	// bookkepping part
 	++m_allEvents;
@@ -2897,6 +2909,24 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					o_gen_phi_Z1=-999.;o_gen_phi_Z2=-999.;
 					o_gen_mass_Z1=-999.;o_gen_mass_Z2=-999.;
 				}
+			
+			}
+			
+			if(FillGenMET)
+			{
+				std::vector<myGenobject> truMET=m->RecGenMet;
+				//~ for(uint iVec=0; iVec < truMET.size(); iVec++)
+				//~ {
+					//~ std::cout << "member no. " << iVec << " pt=" << truMET[iVec].pt << 
+					//~ " phi=" << truMET[iVec].phi << " et=" << truMET[iVec].et << std::endl;
+				//~ }
+				double genMET=truMET[0].pt;
+				double genPhi=truMET[0].phi;
+				double genMETx=genMET*cos(genPhi);
+				double genMETy=genMET*sin(genPhi);
+				o_gen_MET_x=genMETx;
+				o_gen_MET_y=genMETy;
+				o_gen_MET=genMET;
 			
 			}
 			 

@@ -139,6 +139,10 @@ private:
 	TH1* h_FR_svMass;
 	TH1* h_FRt_svMass;
 	
+	TH1* h_visMass;
+	TH1* h_FR_visMass;
+	TH1* h_FRt_visMass;
+	
 	TH1D* h_nPU_raw;
     TH1D* h_nPU_raw_old;
                 
