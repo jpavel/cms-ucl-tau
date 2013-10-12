@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "inputPA.xml" >]>
 
-<JobConfiguration JobName="PostAnalysisJob" OutputLevel="INFO">
+<JobConfiguration JobName="PostAnalysisJob" OutputLevel="DEBUG">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
     <Library Name="libPhysics" />

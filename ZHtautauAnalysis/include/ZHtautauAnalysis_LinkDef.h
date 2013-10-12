@@ -48,6 +48,8 @@
 #pragma link C++ function operator+(const vector<myGenobject>::iterator::difference_type,const vector<myGenobject>::iterator&);
 
 #pragma link C++ class PostAnalysis+;
-#pragma link C++ class std::vector<bool>+;
+//#pragma link C++ class std::vector<bool>+;
+
+#pragma link C++ class WHanalysis+;
 
 #endif // __CINT__
