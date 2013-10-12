@@ -152,6 +152,10 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
   Float_t o_covMET_10;
   Float_t o_covMET_11;
 
+  Float_t o_gen_MET_x;
+  Float_t o_gen_MET_y;
+  Float_t o_gen_MET;
+
   // new branch
   Float_t o_svMass=-100.;
   Float_t o_svMass_unc=-100.;
@@ -233,6 +237,10 @@ std::vector<Float_t>* o_FR_pdg_H2=0;
   tree->SetBranchAddress("o_covMET_01"        , &o_covMET_01       );
   tree->SetBranchAddress("o_covMET_10"        , &o_covMET_10       );
   tree->SetBranchAddress("o_covMET_11"        , &o_covMET_11       );  
+  tree->SetBranchAddress("o_gen_MET_x"         , &o_gen_MET_x        );
+  tree->SetBranchAddress("o_gen_MET_y"         , &o_gen_MET_y        );
+  tree->SetBranchAddress("o_gen_MET"         , &o_gen_MET        );
+
   // adding branch with results
   TTree *svTree = new TTree("svTree","Tree with SVmass");
   svTree->Branch("o_svMass" , &o_svMass, "o_svMass/F");
@@ -262,8 +270,9 @@ o_event <<"/" << o_lumi << "/" << o_run << " : " << o_pass << std::endl;
       continue;
     }
     // setup MET input vector
-    std::cout << "MET_x= " << o_MET_x << "MET_y= " << o_MET_y << std::endl;
-    //    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
+    std::cout << "MET_x= " << o_MET_x << " MET_y= " << o_MET_y << std::endl;
+    std::cout << "TRUE Gen met is gMET_x= " << o_gen_MET_x << " gMET_y= " << o_gen_MET_y << std::endl;  
+  //    if(o_MET->size()!=2){ svBranch->Fill(); continue;}
     o_pass2=0;
     o_FR2=0;
     o_svMass=-999.;
@@ -323,7 +332,8 @@ o_event <<"/" << o_lumi << "/" << o_run << " : " << o_pass << std::endl;
 //     // construct the class object from the minimal necesarry information
       NSVfitStandaloneAlgorithm algo(measuredTauLeptons, measuredMET, covMET, 1);
       algo.addLogM(false);
-      algo.integrateMarkovChain();
+      algo.integrateVEGAS();
+// integrateMarkovChain();
 
       double mass = algo.mass(); 
       double diTauMassErr = algo.massUncert();
