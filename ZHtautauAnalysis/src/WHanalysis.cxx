@@ -69,20 +69,19 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_nPU_raw					 = Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
 	h_nPU_reweight					 = Book(TH1D("h_nPU_reweight","reweighted PU distribution",100,0,100));
         
-        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",12,-0.5,12.5));	
+        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,11.5));	
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
 	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
 	h_cut_flow->GetXaxis()->SetBinLabel(3, "good vx");
-	h_cut_flow->GetXaxis()->SetBinLabel(4, "mu W cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(5, "mu H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(4, "1muW and 1muH");
+	h_cut_flow->GetXaxis()->SetBinLabel(5, "charge");
 	h_cut_flow->GetXaxis()->SetBinLabel(6, "tau H cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(7, "light lep SS");
-	h_cut_flow->GetXaxis()->SetBinLabel(8, "muon veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(9, "ele veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(10, "tau veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(11, "bjet veto");	
-	h_cut_flow->GetXaxis()->SetBinLabel(12, "LT");	
+	h_cut_flow->GetXaxis()->SetBinLabel(7, "muon veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(8, "ele veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(9, "tau veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(10, "bjet veto");	
+	h_cut_flow->GetXaxis()->SetBinLabel(11, "LT");	
 
         //mu W plot
 	h_muW_beforeVetoes_pt                                    = Book(TH1D("h_muW_beforeVetoes_pt","muonW_Pt",300,0,300));
@@ -314,7 +313,7 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 	return outMu_;
 }
 
-std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =5., double elEta_ = 2.4){
+std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =5., double elEta_ = 2.5){
 
 	std::vector<myobject> outEl_;
 	outEl_.clear();
@@ -488,8 +487,6 @@ bool WHanalysis::AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, 
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
 		if(RelIso(genericMuon[i]) < 0.15 && (dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4))
 			Ad_muon=true;
-                else if(RelIso(genericMuon[i]) > 0.15)
-			Ad_muon=false;
 	}
 	return Ad_muon;
 }
@@ -511,8 +508,6 @@ bool WHanalysis::AdElectron_sig(std::vector<myobject> genericElectron, myobject 
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
 		if(RelIso(genericElectron[i]) < 0.30 && (dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4))
 			Ad_electron=true;
-                else if(RelIso(genericElectron[i]) > 0.30)
-			Ad_electron=false;
 	}
 	return Ad_electron;
 }
@@ -534,8 +529,6 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
 		if(dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4)
 			Ad_tau=true;
-                else 
-			Ad_tau=false;
 	}
 	return Ad_tau;
 }
@@ -649,7 +642,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	for(uint i=0; i<goodMuon.size(); i++){
                 // pt cut > 20
-		if( !((goodMuon.at(i)).pt > 20.) ) continue;
+		if( (goodMuon.at(i)).pt < 20.)  continue;
                 //
                 if(examineThisEvent) cout << "rel iso is: " << RelIso(goodMuon.at(i)) << endl;
                 if( fabs((goodMuon.at(i)).eta) < 1.479 ){
@@ -659,7 +652,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				i = i-1;
 			}  
 		}
-		else if( fabs((goodMuon.at(i)).eta) > 1.479 ){
+		else{
 			if( RelIso(goodMuon.at(i)) < 0.10 ){
 				muon_W.push_back(goodMuon.at(i));
 				goodMuon.erase(goodMuon.begin()+i);
@@ -668,8 +661,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}        
         
-        h_cut_flow->Fill(3,1);
-
 	if(examineThisEvent) std::cout << " There are " << muon_W.size() << " muon for W " << endl;
 	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon for mu_H selection " << endl;
 
@@ -679,7 +670,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	for(uint i=0; i<goodMuon.size(); i++){
                 // pt cut > 10
-		if( !((goodMuon.at(i)).pt > 10.) ) continue;
+		if( (goodMuon.at(i)).pt < 10. ) continue;
                 //
                 if(examineThisEvent) cout << "rel iso is: " << RelIso(goodMuon.at(i)) << endl;
 		if( fabs((goodMuon.at(i)).eta) < 1.479 ){
@@ -689,7 +680,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				i = i-1;
 			}  
 		}
-		else if( fabs((goodMuon.at(i)).eta) > 1.479 ){
+		else{
 			if( RelIso(goodMuon.at(i)) < 0.15 ){
 				muon_H.push_back(goodMuon.at(i));
 				goodMuon.erase(goodMuon.begin()+i);
@@ -698,13 +689,14 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}        
         
-        h_cut_flow->Fill(4,1);
 	
         if(examineThisEvent) std::cout << " There are " << muon_H.size() << " muon for H " << endl;
 	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon " << endl;
 
         if( !(muon_H.size() == 1 && muon_W.size() == 1) )
         return;
+        
+        h_cut_flow->Fill(3,1);
    
 	
 	//select good taus 
@@ -747,11 +739,11 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         if( !(tau_H.size() == 1) )
         return;
         
-        h_cut_flow->Fill(5,1);
+        h_cut_flow->Fill(4,1);
         
         if( ((muon_W.at(0)).charge + (muon_H.at(0)).charge) == 0 ) return;
         
-        h_cut_flow->Fill(6,1);
+        h_cut_flow->Fill(5,1);
         
         //filling histograms
         h_muW_beforeVetoes_pt->Fill((muon_W.at(0)).pt);
@@ -775,7 +767,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         if(Ad_muon) 
            return;
 	if(examineThisEvent) std::cout << " After additional isolated muon veto" << std::endl;
-        h_cut_flow->Fill(7,1);
+        h_cut_flow->Fill(6,1);
         
         //check the presence of additional isolated electrons
         //if any, reject the event
@@ -787,7 +779,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         if(Ad_electron) 
            return;
 	if(examineThisEvent) std::cout << " After additional isolated electron veto" << std::endl;
-        h_cut_flow->Fill(8,1);
+        h_cut_flow->Fill(7,1);
         
         //check the presence of additional isolated taus
         //if any, reject the event
@@ -799,7 +791,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         if(Ad_tau) 
            return;
 	if(examineThisEvent) std::cout << " After additional isolated tau veto" << std::endl;
-        h_cut_flow->Fill(9,1);
+        h_cut_flow->Fill(8,1);
 
         //b-Tag Veto
 	bool bTagVeto = false;
@@ -818,9 +810,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			count_bJets++;
 			if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
 			double dR1,dR2,dR3;
-			dR1=deltaR(jetEta,jetPhi,(muon_W.at(0)).eta,(muon_W.at(0)).phi);
-			dR2=deltaR(jetEta,jetPhi,(muon_H.at(0)).eta,(muon_H.at(0)).phi);
-			dR3=deltaR(jetEta,jetPhi,(tau_H.at(0)).eta,(tau_H.at(0)).phi);
+			//dR1=deltaR(jetEta,jetPhi,(muon_W.at(0)).eta,(muon_W.at(0)).phi);
+			//dR2=deltaR(jetEta,jetPhi,(muon_H.at(0)).eta,(muon_H.at(0)).phi);
+			//dR3=deltaR(jetEta,jetPhi,(tau_H.at(0)).eta,(tau_H.at(0)).phi);
+			dR1=deltaR(jet.at(i),muon_W.at(0));
+			dR2=deltaR(jet.at(i),muon_H.at(0));
+			dR3=deltaR(jet.at(i),tau_H.at(0));
 			if(examineThisEvent) std::cout << " distances are " << dR1 << " " << dR2 << " " << dR3 << std::endl;
 			bool overlap = false;
 			if(dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4) overlap = true;
@@ -834,7 +829,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(bTagVeto)
 		return;
 	if(examineThisEvent) std::cout << " After b-tag veto" << std::endl;
-        h_cut_flow->Fill(10,1);
+        h_cut_flow->Fill(9,1);
         
         //filling histograms
         h_muW_afterVetoes_pt->Fill((muon_W.at(0)).pt);
@@ -855,29 +850,25 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         bool aboveEvent = false;
         bool belowEvent = false;
         
-        TLorentzVector muW_b130, muH_b130, tauH_b130;
-        TLorentzVector H_b130;
-        TLorentzVector muW_a130, muH_a130, tauH_a130;
-        TLorentzVector H_a130;
+        //TLorentzVector muW_b130, muH_b130, tauH_b130;
+        //TLorentzVector muW_a130, muH_a130, tauH_a130;
         
         LT = (muon_W.at(0)).pt + (muon_H.at(0)).pt + (tau_H.at(0)).pt;
         if(LT < LTValue){
-		muW_b130.SetPxPyPzE( (muon_W.at(0)).px, (muon_W.at(0)).py, (muon_W.at(0)).pz, (muon_W.at(0)).E );
-		muH_b130.SetPxPyPzE( (muon_H.at(0)).px, (muon_H.at(0)).py, (muon_H.at(0)).pz, (muon_H.at(0)).E );
-		tauH_b130.SetPxPyPzE( (tau_H.at(0)).px, (tau_H.at(0)).py, (tau_H.at(0)).pz, (tau_H.at(0)).E );
-		H_b130 = muH_b130 + tauH_b130;
+		//muW_b130.SetPxPyPzE( (muon_W.at(0)).px, (muon_W.at(0)).py, (muon_W.at(0)).pz, (muon_W.at(0)).E );
+		//muH_b130.SetPxPyPzE( (muon_H.at(0)).px, (muon_H.at(0)).py, (muon_H.at(0)).pz, (muon_H.at(0)).E );
+		//tauH_b130.SetPxPyPzE( (tau_H.at(0)).px, (tau_H.at(0)).py, (tau_H.at(0)).pz, (tau_H.at(0)).E );
+                h_finalVisMass_below130->Fill(PairMass(muon_H.at(0),tau_H.at(0)));
                 belowEvent = true;
         }
         if(LT > LTValue){
-		muW_a130.SetPxPyPzE( (muon_W.at(0)).px, (muon_W.at(0)).py, (muon_W.at(0)).pz, (muon_W.at(0)).E );
-		muH_a130.SetPxPyPzE( (muon_H.at(0)).px, (muon_H.at(0)).py, (muon_H.at(0)).pz, (muon_H.at(0)).E );
-		tauH_a130.SetPxPyPzE( (tau_H.at(0)).px, (tau_H.at(0)).py, (tau_H.at(0)).pz, (tau_H.at(0)).E );
-		H_a130 = muH_a130 + tauH_a130;
+		//muW_a130.SetPxPyPzE( (muon_W.at(0)).px, (muon_W.at(0)).py, (muon_W.at(0)).pz, (muon_W.at(0)).E );
+		//muH_a130.SetPxPyPzE( (muon_H.at(0)).px, (muon_H.at(0)).py, (muon_H.at(0)).pz, (muon_H.at(0)).E );
+		//tauH_a130.SetPxPyPzE( (tau_H.at(0)).px, (tau_H.at(0)).py, (tau_H.at(0)).pz, (tau_H.at(0)).E );
+                h_finalVisMass_above130->Fill(PairMass(muon_H.at(0),tau_H.at(0)));
 		aboveEvent = true;
         }
 
-        h_finalVisMass_below130->Fill(H_b130.M());
-        h_finalVisMass_above130->Fill(H_a130.M());
 
 
 	if(examineThisEvent) {
@@ -886,7 +877,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
            else if(aboveEvent)
            std::cout << " LT > 130 GeV ! scalar pt sum: " << LT << std::endl;
         }
-        h_cut_flow->Fill(11,1);
+        h_cut_flow->Fill(10,1);
 
 }
 
