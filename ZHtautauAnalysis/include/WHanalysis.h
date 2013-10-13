@@ -79,6 +79,9 @@ public:
    bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
    std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_, double muEta_);
    std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
+   bool AdLepton_sig(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
+   bool LooseEleId(float pt, float eta, double value);
+   bool LooseEleId(myobject o);
    void CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso, bool _looseMuId);
    bool isGoodMu(myobject mu);
    bool isLooseMu(myobject mu);
@@ -110,9 +113,9 @@ private:
 	std::string doubEle;
 	std::string doubEle2;
 	
-    std::string doubMu;
-    std::string doubMu2;
-    std::string doubMu3;
+	std::string doubMu;
+	std::string doubMu2;
+	std::string doubMu3;
     
    
    
@@ -133,14 +136,16 @@ private:
     bool UseLongEvent;
     double OverM;
     double BelowM;
+    double bTagValue;
+    double LTValue;
     
 	
 	 // bookkeeping variables
     
     ofstream lumi;
-	long current_run;
-	long current_lumi;
-	SSummedVar< Int_t > m_allEvents;
+    long current_run;
+    long current_lumi;
+    SSummedVar< Int_t > m_allEvents;
 	
 	// output variables in ntuple
 	
