@@ -68,8 +68,48 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_PU_weight					 = Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
 	h_nPU_raw					 = Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
 	h_nPU_reweight					 = Book(TH1D("h_nPU_reweight","reweighted PU distribution",100,0,100));
-	
-	
+        
+        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",12,-0.5,12.5));	
+	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
+	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
+	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
+	h_cut_flow->GetXaxis()->SetBinLabel(3, "good vx");
+	h_cut_flow->GetXaxis()->SetBinLabel(4, "mu W cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(5, "mu H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(6, "tau H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(7, "light lep SS");
+	h_cut_flow->GetXaxis()->SetBinLabel(8, "muon veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(9, "ele veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(10, "tau veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(11, "bjet veto");	
+	h_cut_flow->GetXaxis()->SetBinLabel(12, "LT");	
+
+        //mu W plot
+	h_muW_beforeVetoes_pt                                    = Book(TH1D("h_muW_beforeVetoes_pt","muonW_Pt",300,0,300));
+	h_muW_beforeVetoes_eta	                                 = Book(TH1D("h_muW_beforeVetoes_eta","muonW #eta; #eta",100,-3.0,3.0));
+	h_muW_beforeVetoes_phi	                                 = Book(TH1D("h_muW_beforeVetoes_phi","muonW #phi; #phi",64,-3.2,3.2));	
+	h_muW_afterVetoes_pt                                     = Book(TH1D("h_muW_afterVetoes_pt","muonW_Pt",300,0,300));
+	h_muW_afterVetoes_eta	                                 = Book(TH1D("h_muW_afterVetoes_eta","muonW #eta; #eta",100,-3.0,3.0));
+	h_muW_afterVetoes_phi	                                 = Book(TH1D("h_muW_afterVetoes_phi","muonW #phi; #phi",64,-3.2,3.2));	
+        //mu H plot
+	h_muH_beforeVetoes_pt                                    = Book(TH1D("h_muH_beforeVetoes_pt","muonH_Pt",300,0,300));
+	h_muH_beforeVetoes_eta	                                 = Book(TH1D("h_muH_beforeVetoes_eta","muonH #eta; #eta",100,-3.0,3.0));
+	h_muH_beforeVetoes_phi	                                 = Book(TH1D("h_muH_beforeVetoes_phi","muonH #phi; #phi",64,-3.2,3.2));	
+	h_muH_afterVetoes_pt                                     = Book(TH1D("h_muH_afterVetoes_pt","muonH_Pt",300,0,300));
+	h_muH_afterVetoes_eta	                                 = Book(TH1D("h_muH_afterVetoes_eta","muonH #eta; #eta",100,-3.0,3.0));
+	h_muH_afterVetoes_phi	                                 = Book(TH1D("h_muH_afterVetoes_phi","muonH #phi; #phi",64,-3.2,3.2));	
+        //tau H plot
+	h_tauH_beforeVetoes_pt                                   = Book(TH1D("h_tauH_beforeVetoes_pt","tauH_Pt",300,0,300));
+	h_tauH_beforeVetoes_eta	                                 = Book(TH1D("h_tauH_beforeVetoes_eta","tauH #eta; #eta",100,-3.0,3.0));
+	h_tauH_beforeVetoes_phi	                                 = Book(TH1D("h_tauH_beforeVetoes_phi","tauH #phi; #phi",64,-3.2,3.2));	
+	h_tauH_afterVetoes_pt                                    = Book(TH1D("h_tauH_afterVetoes_pt","tauH_Pt",300,0,300));
+	h_tauH_afterVetoes_eta	                                 = Book(TH1D("h_tauH_afterVetoes_eta","tauH #eta; #eta",100,-3.0,3.0));
+	h_tauH_afterVetoes_phi	                                 = Book(TH1D("h_tauH_afterVetoes_phi","tauH #phi; #phi",64,-3.2,3.2));	
+        //final vis mass plot
+        h_finalVisMass_below130                                  = Book(TH1D("h_HvisMass_below130LT","H vis mass",300,0,300));
+        h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_after130LT","H vis mass",300,0,300));
+
+
 	if(is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
 
@@ -249,7 +289,7 @@ double WHanalysis::PairPt(myobject Hcand1, myobject Hcand2){
 	return H_sum.Pt();
 }
 
-std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_ = 10., double muEta_ = 2.4){
+std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_ = 5., double muEta_ = 2.4){
 
 	std::vector<myobject> outMu_;
 	outMu_.clear();
@@ -274,7 +314,7 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 	return outMu_;
 }
 
-std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =10., double elEta_ = 2.4){
+std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =5., double elEta_ = 2.4){
 
 	std::vector<myobject> outEl_;
 	outEl_.clear();
@@ -406,47 +446,98 @@ bool WHanalysis::LooseEleId(myobject o){
 	return LooseEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
 }
 
+bool WHanalysis::TightEleId(float pt, float eta, double value){
+	bool passingId=false;
 
-bool WHanalysis::AdLepton_sig(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose){
-	bool Ad_lepton=false;
-	if(verbose) std::cout << "Checking additional sig leptons!" << std::endl;
+	if( pt<20. && fabs(eta)<0.8 && value>0.925)
+		passingId=true;
+	if( pt<20. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.915)
+		passingId=true;
+	if( pt<20. && fabs(eta)>=1.479 && value>0.965)
+		passingId=true;
+
+	if(pt>20. && fabs(eta)<0.8 && value>0.905)
+		passingId=true;
+	if(pt>20. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.955)
+		passingId=true;
+	if(pt>20. && fabs(eta)>=1.479 && value>0.975)
+		passingId=true;
+	// if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
+	return passingId;
+}
+
+bool WHanalysis::TightEleId(myobject o){
+	if( o.numLostHitEleInner > 0) return false;
+	return TightEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
+}
+
+bool WHanalysis::AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose){
+	
+        bool Ad_muon=false;
+	if(verbose) std::cout << "Checking additional sig muons!" << std::endl;
 	if(verbose) std::cout << "There are " << genericMuon.size() << " additional muons." << std::endl;
 	for(uint i = 0; i < genericMuon.size(); i++)
 	{
+		double dR1= deltaR(genericMuon[i].eta,genericMuon[i].phi,Wcand.eta,Wcand.phi); 
+		double dR2= deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi); 
+		double dR3= deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi); 
+
 		if(verbose) std::cout << " Mu cand no. " << i << std::endl;
-		if(verbose) std::cout << " Distance to 1st is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
-		if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-		if(verbose) std::cout << " Is good? " << isLooseMu(genericMuon[i]) << std::endl;
-		if(verbose) std::cout << " iso is " << RelIso(genericMuon[i]) << std::endl;
-		if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand1.eta,Hcand1.phi) < 0.001) continue; // identical object
-		if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Hcand2.eta,Hcand2.phi) < 0.001) continue; // identical object
-		if(deltaR(genericMuon[i].eta,genericMuon[i].phi,Wcand.eta,Wcand.phi) < 0.001) continue; // identical object
-		if(isLooseMu(genericMuon[i]) && RelIso(genericMuon[i]) < 0.3)
-			Ad_lepton=true;
-		if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
-
+		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
+		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
+		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
+		if(RelIso(genericMuon[i]) < 0.15 && (dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4))
+			Ad_muon=true;
+                else if(RelIso(genericMuon[i]) > 0.15)
+			Ad_muon=false;
 	}
-	if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
+	return Ad_muon;
+}
 
+bool WHanalysis::AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose){
+	
+        bool Ad_electron=false;
+	if(verbose) std::cout << "Checking additional sig electrons!" << std::endl;
+	if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
 	for(uint i = 0; i < genericElectron.size(); i++)
 	{
+		double dR1= deltaR(genericElectron[i].eta,genericElectron[i].phi,Wcand.eta,Wcand.phi); 
+		double dR2= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi); 
+		double dR3= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi); 
+
 		if(verbose) std::cout << " Ele cand no. " << i << std::endl;
-		if(verbose) std::cout << " Distance to 1st is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) << std::endl;
-		if(verbose) std::cout << " Distance to 2nd is " << deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) << std::endl;
-		if(verbose) std::cout << " Is good? " << LooseEleId(genericElectron[i]) << std::endl;
-		if(verbose) std::cout << " iso is " << RelIso(genericElectron[i]) << std::endl;
-		if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi) < 0.001) continue; // identical object
-		if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi) < 0.001) continue; // identical object
-		if(deltaR(genericElectron[i].eta,genericElectron[i].phi,Wcand.eta,Wcand.phi) < 0.001) continue; // identical object
-
-		if(LooseEleId(genericElectron[i]) && genericElectron[i].numLostHitEleInner < 2 && RelIso(genericElectron[i]) < 0.3)
-			Ad_lepton=true;
-		if(Ad_lepton && verbose) std::cout << "AD LEPTON FAIL!" << std::endl;
-
+		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
+		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
+		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
+		if(RelIso(genericElectron[i]) < 0.30 && (dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4))
+			Ad_electron=true;
+                else if(RelIso(genericElectron[i]) > 0.30)
+			Ad_electron=false;
 	}
+	return Ad_electron;
+}
 
-	if(verbose) std::cout << "Returning " << Ad_lepton << std::endl;
-	return Ad_lepton;
+bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose){
+	
+        bool Ad_tau=false;
+	if(verbose) std::cout << "Checking additional sig taus!" << std::endl;
+	if(verbose) std::cout << "There are " << genericTau.size() << " additional taus." << std::endl;
+	for(uint i = 0; i < genericTau.size(); i++)
+	{
+		double dR1= deltaR(genericTau[i].eta,genericTau[i].phi,Wcand.eta,Wcand.phi); 
+		double dR2= deltaR(genericTau[i].eta,genericTau[i].phi,Hcand1.eta,Hcand1.phi); 
+		double dR3= deltaR(genericTau[i].eta,genericTau[i].phi,Hcand2.eta,Hcand2.phi); 
+
+		if(verbose) std::cout << " Tau cand no. " << i << std::endl;
+		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
+		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
+		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
+		if(dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4)
+			Ad_tau=true;
+                else 
+			Ad_tau=false;
+	}
+	return Ad_tau;
 }
 
 
@@ -489,6 +580,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	Hist("h_nPU_raw")->Fill(m->PUInfo_true);
 	Hist("h_nPU_reweight")->Fill(m->PUInfo_true,PUWeight);
 	
+        h_cut_flow->Fill(0.0,1);
 
 	bool trigPass;
 	trigPass = Trg_MC_12(m,examineThisEvent);
@@ -498,6 +590,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << "Trigger fail! " << examineEvent << std::endl;
 		return;
 	}
+
+        h_cut_flow->Fill(1,1);
 	
 	//vertex selection
 	std::vector<myobject> vertex = m->Vertex;
@@ -506,15 +600,17 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	// at least one good vertex
 	if(nGoodVx < 1) return;
+        
+        h_cut_flow->Fill(2,1);
 	
-	// looseMuons
+	//select generic muon with pt > 5 GeV and |eta| < 2.4
 	std::vector<myobject> muon = m->PreSelectedMuons;
 	if(examineThisEvent) std::cout << " There are " << muon.size() << " preselected muons " << std::endl;
 	m_logger << DEBUG << " There are " << muon.size() << " preselected muons " << SLogger::endmsg;
 	std::vector<myobject> genericMuon = SelectGoodMuVector(muon,examineThisEvent);
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " selected muons " << std::endl;
 
-	// looseElectrons
+	//select generic electron with pt > 5 GeV and |eta| < 2.5
 	std::vector<myobject> electron = m->PreSelectedElectrons;
 	if(examineThisEvent) std::cout << " There are " << electron.size() << " preselected electrons " << std::endl;
 	std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent);
@@ -523,131 +619,189 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	CrossCleanWithMu(&genericElectron,genericMuon,examineThisEvent,maxDeltaR);
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " selected electrons" << std::endl;
 
-        std::vector<myobject> muonForW;
-        std::vector<myobject> muonForH;
- 
-         for(uint i=0; i<genericMuon.size(); i++){
+	//select good electron 
+        std::vector<myobject> goodElectron;
+        for(uint i=0; i<genericElectron.size(); i++){
 
-            bool pfID = PFMuonID(genericMuon.at(i));
+            bool tightID = TightEleId(genericElectron.at(i));
 
-            if((genericMuon.at(i)).pt > 20. && pfID){
-	       muonForW.push_back(genericMuon.at(i));
-               genericMuon.erase(genericMuon.begin()+i);
-               i = i-1;
+            if(tightID && (genericElectron.at(i)).dz_PV < 0.2){
+	       goodElectron.push_back(genericElectron.at(i));
 	    } 
-         }
-         
+        }
+	
+        //select good muon 
+        std::vector<myobject> goodMuon;
         for(uint i=0; i<genericMuon.size(); i++){
 
             bool pfID = PFMuonID(genericMuon.at(i));
 
-            if(pfID){
-	       muonForH.push_back(genericMuon.at(i));
-               genericMuon.erase(genericMuon.begin()+i);
-               i = i-1;
+            if(pfID && (genericMuon.at(i)).dz_PV < 0.2){
+	       goodMuon.push_back(genericMuon.at(i));
 	    } 
-         }
+        }
+         
+	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " good muon before mu_W selection " << endl;
 
+	//select leading muon for W
+        std::vector<myobject> muon_W;
+        muon_W.clear();
+
+	for(uint i=0; i<goodMuon.size(); i++){
+                // pt cut > 20
+		if( !((goodMuon.at(i)).pt > 20.) ) continue;
+                //
+                if(examineThisEvent) cout << "rel iso is: " << RelIso(goodMuon.at(i)) << endl;
+                if( fabs((goodMuon.at(i)).eta) < 1.479 ){
+			if( RelIso(goodMuon.at(i)) < 0.15 ){
+				muon_W.push_back(goodMuon.at(i));
+				goodMuon.erase(goodMuon.begin()+i);
+				i = i-1;
+			}  
+		}
+		else if( fabs((goodMuon.at(i)).eta) > 1.479 ){
+			if( RelIso(goodMuon.at(i)) < 0.10 ){
+				muon_W.push_back(goodMuon.at(i));
+				goodMuon.erase(goodMuon.begin()+i);
+				i = i-1;
+			}  
+		}
+	}        
+        
+        h_cut_flow->Fill(3,1);
+
+	if(examineThisEvent) std::cout << " There are " << muon_W.size() << " muon for W " << endl;
+	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon for mu_H selection " << endl;
+
+        //select sub-leading muon for H
+        std::vector<myobject> muon_H;
+        muon_H.clear();
+
+	for(uint i=0; i<goodMuon.size(); i++){
+                // pt cut > 10
+		if( !((goodMuon.at(i)).pt > 10.) ) continue;
+                //
+                if(examineThisEvent) cout << "rel iso is: " << RelIso(goodMuon.at(i)) << endl;
+		if( fabs((goodMuon.at(i)).eta) < 1.479 ){
+			if( RelIso(goodMuon.at(i)) < 0.20 ){
+				muon_H.push_back(goodMuon.at(i));
+				goodMuon.erase(goodMuon.begin()+i);
+				i = i-1;
+			}  
+		}
+		else if( fabs((goodMuon.at(i)).eta) > 1.479 ){
+			if( RelIso(goodMuon.at(i)) < 0.15 ){
+				muon_H.push_back(goodMuon.at(i));
+				goodMuon.erase(goodMuon.begin()+i);
+				i = i-1;
+			}  
+		}
+	}        
+        
+        h_cut_flow->Fill(4,1);
 	
-if(examineThisEvent) std::cout << " There are " << muonForW.size() << " muon for W and " << muonForH.size() << " muon for H " << endl;
-        cout << eNumber << endl;
+        if(examineThisEvent) std::cout << " There are " << muon_H.size() << " muon for H " << endl;
+	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon " << endl;
 
-        if( !(muonForH.size() == 1 && muonForW.size() == 1) )
+        if( !(muon_H.size() == 1 && muon_W.size() == 1) )
         return;
+   
 	
-	// list of good taus 
+	//select good taus 
 	std::vector<myobject> goodTau;
 	goodTau.clear();
-	//int muCand=denomMuon.size();
-	//int elCand=denomElectron.size();
 	std::vector<myobject> tau = m->PreSelectedHPSTaus;
 	
 	for (uint i = 0; i < tau.size(); i++) {
 
-		double tauPt = tau[i].pt;
-		double tauEta = tau[i].eta;
-		bool Loose3Hit = (tau[i].byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
-		bool DecayMode = (tau[i].discriminationByDecayModeFinding > 0.5);
+		double tauPt = (tau.at(i)).pt;
+		double tauEta = (tau.at(i)).eta;
+		double tauDZ = (tau.at(i)).dz_PV;
+		bool Loose3Hit = ((tau.at(i)).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
+		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
 		
-		if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode){
-			goodTau.push_back(tau[i]);
+		if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && tauDZ < 0.2){
+			goodTau.push_back(tau.at(i));
 		}
 	}
 	
         if(examineThisEvent) std::cout << " There are " << goodTau.size() << " selected taus" << std::endl;
         
-        if( !(goodTau.size() == 1) )
+        if( goodTau.size() == 0 )
         return;
         
-
-        // mumutau final state selection
-
-        //leading muon (for W)
-	for(uint i=0; i<muonForW.size(); i++){
-                if(examineThisEvent) cout << "rel iso is: " << RelIso(muonForW.at(i)) << endl;
-		if( fabs(muonForW.at(i).eta) < 1.479 ){
-			if( RelIso(muonForW.at(i)) > 0.15 ){
-				muonForW.erase(muonForW.begin()+i);
-				i = i-1;
-			}  
-		}
-		else if( fabs(muonForW.at(i).eta) > 1.479 ){
-			if( RelIso(muonForW.at(i)) > 0.10 ){
-				muonForW.erase(muonForW.begin()+i);
-				i = i-1;
-			}  
-		}
-	}        
-
-	if(examineThisEvent) std::cout << " There are " << muonForW.size() << " selected muons possibly good for W candidate after RelIso requirement" << std::endl;
-
-        //sub-leading muon (for H)
-	for(uint i=0; i<muonForH.size(); i++){
-                if(examineThisEvent) cout << "rel iso is: " << RelIso(muonForH.at(i)) << endl;
-		if( fabs(muonForH.at(i).eta) < 1.479 ){
-			if( RelIso(muonForH.at(i)) > 0.20 ){
-				muonForH.erase(muonForH.begin()+i);
-				i = i-1;
-			}  
-		}
-		else if( fabs(muonForH.at(i).eta) > 1.479 ){
-			if( RelIso(muonForH.at(i)) > 0.15 ){
-				muonForH.erase(muonForH.begin()+i);
-				i = i-1;
-			}  
-		}
-	}        
-	if(examineThisEvent) std::cout << " There are " << muonForH.size() << " selected muons possibly good for H candidate after RelIso requirement" << std::endl;
-        
-        if( !(muonForH.size() == 1 && muonForW.size() == 1) )
-        return;
-	
-
-        std::vector<myobject> tauForH;
+        std::vector<myobject> tau_H;
+        tau_H.clear();
  
         for(uint i=0; i<goodTau.size(); i++){
-		bool LooseEleMVA3 = (tau[i].discriminationByElectronMVA3Loose > 0.5);
-		bool TightMuon    = (tau[i].discriminationByMuonTight > 0.5);
+		bool LooseEleMVA3 = ((tau.at(i)).discriminationByElectronMVA3Loose > 0.5);
+		bool TightMuon    = ((tau.at(i)).discriminationByMuonTight > 0.5);
 		if ( LooseEleMVA3 && TightMuon){
-			tauForH.push_back(goodTau.at(i));
+			tau_H.push_back(goodTau.at(i));
                 }
         }
         
-        if(examineThisEvent) std::cout << " There are " << tauForH.size() << " selected tau possibly good for H candidate" << std::endl;
+        if(examineThisEvent) std::cout << " There are " << tau_H.size() << " selected tau possibly good for H candidate" << std::endl;
         if(examineThisEvent) std::cout << " light lepton charges " << std::endl;
-        if( !(tauForH.size() == 1) )
+        
+        if( !(tau_H.size() == 1) )
         return;
         
-        if( (muonForW.at(0)).charge + (muonForH.at(0)).charge == 0 ) return;
+        h_cut_flow->Fill(5,1);
+        
+        if( ((muon_W.at(0)).charge + (muon_H.at(0)).charge) == 0 ) return;
+        
+        h_cut_flow->Fill(6,1);
+        
+        //filling histograms
+        h_muW_beforeVetoes_pt->Fill((muon_W.at(0)).pt);
+        h_muW_beforeVetoes_eta->Fill((muon_W.at(0)).eta);
+        h_muW_beforeVetoes_phi->Fill((muon_W.at(0)).phi);
+        h_muH_beforeVetoes_pt->Fill((muon_H.at(0)).pt);
+        h_muH_beforeVetoes_eta->Fill((muon_H.at(0)).eta);
+        h_muH_beforeVetoes_phi->Fill((muon_H.at(0)).phi);
+        h_tauH_beforeVetoes_pt->Fill((tau_H.at(0)).pt);
+        h_tauH_beforeVetoes_eta->Fill((tau_H.at(0)).eta);
+        h_tauH_beforeVetoes_phi->Fill((tau_H.at(0)).phi);
 
-        std::vector<myobject> Hcand;
-        Hcand.clear();
-        Hcand.push_back(muonForH.at(0));
-        Hcand.push_back(tauForH.at(0));
-        if(examineThisEvent) std::cout << " higgs candidate size " << Hcand.size() << std::endl;
+
+        //check the presence of additional isolated muons
+        //if any, reject the event
+	if(examineThisEvent) std::cout << " Before additional isolated muon veto" << std::endl;
+        bool Ad_muon=false;
+	if(AdMuon_sig(goodMuon,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
+		Ad_muon=true;
+         	}
+        if(Ad_muon) 
+           return;
+	if(examineThisEvent) std::cout << " After additional isolated muon veto" << std::endl;
+        h_cut_flow->Fill(7,1);
+        
+        //check the presence of additional isolated electrons
+        //if any, reject the event
+	if(examineThisEvent) std::cout << " Before additional isolated electron veto" << std::endl;
+        bool Ad_electron=false;
+	if(AdElectron_sig(goodElectron,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
+		Ad_electron=true;
+         	}
+        if(Ad_electron) 
+           return;
+	if(examineThisEvent) std::cout << " After additional isolated electron veto" << std::endl;
+        h_cut_flow->Fill(8,1);
+        
+        //check the presence of additional isolated taus
+        //if any, reject the event
+	if(examineThisEvent) std::cout << " Before additional isolated tau veto" << std::endl;
+        bool Ad_tau=false;
+	if(AdTau_sig(goodElectron,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
+		Ad_tau=true;
+         	}
+        if(Ad_tau) 
+           return;
+	if(examineThisEvent) std::cout << " After additional isolated tau veto" << std::endl;
+        h_cut_flow->Fill(9,1);
 
         //b-Tag Veto
-
 	bool bTagVeto = false;
 	std::vector<myobject> jet = m->RecPFJetsAK5;
 	Int_t count_bJets = 0;
@@ -664,9 +818,9 @@ if(examineThisEvent) std::cout << " There are " << muonForW.size() << " muon for
 			count_bJets++;
 			if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
 			double dR1,dR2,dR3;
-			dR1=deltaR(jetEta,jetPhi,(muonForW.at(0)).eta,(muonForW.at(0)).phi);
-			dR2=deltaR(jetEta,jetPhi,(Hcand.at(0)).eta,(Hcand.at(0)).phi);
-			dR3=deltaR(jetEta,jetPhi,(Hcand.at(1)).eta,(Hcand.at(1)).phi);
+			dR1=deltaR(jetEta,jetPhi,(muon_W.at(0)).eta,(muon_W.at(0)).phi);
+			dR2=deltaR(jetEta,jetPhi,(muon_H.at(0)).eta,(muon_H.at(0)).phi);
+			dR3=deltaR(jetEta,jetPhi,(tau_H.at(0)).eta,(tau_H.at(0)).phi);
 			if(examineThisEvent) std::cout << " distances are " << dR1 << " " << dR2 << " " << dR3 << std::endl;
 			bool overlap = false;
 			if(dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4) overlap = true;
@@ -680,17 +834,19 @@ if(examineThisEvent) std::cout << " There are " << muonForW.size() << " muon for
 	if(bTagVeto)
 		return;
 	if(examineThisEvent) std::cout << " After b-tag veto" << std::endl;
-	if(examineThisEvent) std::cout << " Before additional isolated lepton veto" << std::endl;
+        h_cut_flow->Fill(10,1);
+        
+        //filling histograms
+        h_muW_afterVetoes_pt->Fill((muon_W.at(0)).pt);
+        h_muW_afterVetoes_eta->Fill((muon_W.at(0)).eta);
+        h_muW_afterVetoes_phi->Fill((muon_W.at(0)).phi);
+        h_muH_afterVetoes_pt->Fill((muon_H.at(0)).pt);
+        h_muH_afterVetoes_eta->Fill((muon_H.at(0)).eta);
+        h_muH_afterVetoes_phi->Fill((muon_H.at(0)).phi);
+        h_tauH_afterVetoes_pt->Fill((tau_H.at(0)).pt);
+        h_tauH_afterVetoes_eta->Fill((tau_H.at(0)).eta);
+        h_tauH_afterVetoes_phi->Fill((tau_H.at(0)).phi);
 
-        bool Ad_lepton=false;
-
-	if(AdLepton_sig(genericMuon,genericElectron,Hcand.at(0),Hcand.at(1),muonForW.at(0),examineThisEvent)){
-		if(examineThisEvent) std::cout << " > j failed overlap check." << std::endl;	
-		Ad_lepton=true;
-         	}
-        if(Ad_lepton) 
-           return;
-	if(examineThisEvent) std::cout << " After additional isolated lepton veto" << std::endl;
 
 
         //define LT regions
@@ -699,28 +855,30 @@ if(examineThisEvent) std::cout << " There are " << muonForW.size() << " muon for
         bool aboveEvent = false;
         bool belowEvent = false;
         
-        std::vector<myobject> muonForW_below130;
-        muonForW_below130.clear();
-        std::vector<myobject> Hcand_below130;
-        Hcand_below130.clear();
-        std::vector<myobject> muonForW_above130;
-        muonForW_above130.clear();
-        std::vector<myobject> Hcand_above130;
-        Hcand_above130.clear();
-
-        LT = (muonForW.at(0)).pt + (Hcand.at(0)).pt + (Hcand.at(1)).pt;
+        TLorentzVector muW_b130, muH_b130, tauH_b130;
+        TLorentzVector H_b130;
+        TLorentzVector muW_a130, muH_a130, tauH_a130;
+        TLorentzVector H_a130;
+        
+        LT = (muon_W.at(0)).pt + (muon_H.at(0)).pt + (tau_H.at(0)).pt;
         if(LT < LTValue){
-           muonForW_below130.push_back(muonForW.at(0));
-           Hcand_below130.push_back(Hcand.at(0));
-           Hcand_below130.push_back(Hcand.at(1));
-           belowEvent = true;
+		muW_b130.SetPxPyPzE( (muon_W.at(0)).px, (muon_W.at(0)).py, (muon_W.at(0)).pz, (muon_W.at(0)).E );
+		muH_b130.SetPxPyPzE( (muon_H.at(0)).px, (muon_H.at(0)).py, (muon_H.at(0)).pz, (muon_H.at(0)).E );
+		tauH_b130.SetPxPyPzE( (tau_H.at(0)).px, (tau_H.at(0)).py, (tau_H.at(0)).pz, (tau_H.at(0)).E );
+		H_b130 = muH_b130 + tauH_b130;
+                belowEvent = true;
         }
         if(LT > LTValue){
-           muonForW_above130.push_back(muonForW.at(0));
-           Hcand_above130.push_back(Hcand.at(0));
-           Hcand_above130.push_back(Hcand.at(1));
-           aboveEvent = true;
+		muW_a130.SetPxPyPzE( (muon_W.at(0)).px, (muon_W.at(0)).py, (muon_W.at(0)).pz, (muon_W.at(0)).E );
+		muH_a130.SetPxPyPzE( (muon_H.at(0)).px, (muon_H.at(0)).py, (muon_H.at(0)).pz, (muon_H.at(0)).E );
+		tauH_a130.SetPxPyPzE( (tau_H.at(0)).px, (tau_H.at(0)).py, (tau_H.at(0)).pz, (tau_H.at(0)).E );
+		H_a130 = muH_a130 + tauH_a130;
+		aboveEvent = true;
         }
+
+        h_finalVisMass_below130->Fill(H_b130.M());
+        h_finalVisMass_above130->Fill(H_a130.M());
+
 
 	if(examineThisEvent) {
            if(belowEvent)
@@ -728,7 +886,7 @@ if(examineThisEvent) std::cout << " There are " << muonForW.size() << " muon for
            else if(aboveEvent)
            std::cout << " LT > 130 GeV ! scalar pt sum: " << LT << std::endl;
         }
-        
+        h_cut_flow->Fill(11,1);
 
 }
 

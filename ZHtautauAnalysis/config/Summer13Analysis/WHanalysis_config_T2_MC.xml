@@ -21,7 +21,7 @@
 		<UserConfig>
 		<Item Name="InTreeName" Value="t"/>
 		<Item Name="maxDeltaR" Value="0.1" />   
-	        <Item Name="bTagValue" Value="0.679" />
+	        <Item Name="bTagValue" Value="0.898" />
 	        <Item Name="LTValue" Value="130." />
 	
 		<Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />

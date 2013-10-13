@@ -79,9 +79,13 @@ public:
    bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
    std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_, double muEta_);
    std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
-   bool AdLepton_sig(std::vector<myobject> genericMuon, std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
+   bool AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
+   bool AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
+   bool AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool LooseEleId(float pt, float eta, double value);
    bool LooseEleId(myobject o);
+   bool TightEleId(float pt, float eta, double value);
+   bool TightEleId(myobject o);
    void CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso, bool _looseMuId);
    bool isGoodMu(myobject mu);
    bool isLooseMu(myobject mu);
@@ -102,6 +106,31 @@ private:
 	TH1* h_PU_weight;
 	TH1* h_nPU_raw;
 	TH1* h_nPU_reweight;
+        TH1* h_cut_flow;
+        TH1* h_muW_beforeVetoes_pt;
+        TH1* h_muW_beforeVetoes_eta;
+        TH1* h_muW_beforeVetoes_phi;
+        TH1* h_muW_afterVetoes_pt;
+        TH1* h_muW_afterVetoes_eta;
+        TH1* h_muW_afterVetoes_phi;
+        //mu H plot
+        TH1* h_muH_beforeVetoes_pt;
+        TH1* h_muH_beforeVetoes_eta;
+        TH1* h_muH_beforeVetoes_phi;
+        TH1* h_muH_afterVetoes_pt;
+        TH1* h_muH_afterVetoes_eta;
+        TH1* h_muH_afterVetoes_phi;
+        //tau H plot
+        TH1* h_tauH_beforeVetoes_pt;
+        TH1* h_tauH_beforeVetoes_eta;
+        TH1* h_tauH_beforeVetoes_phi;
+        TH1* h_tauH_afterVetoes_pt;
+        TH1* h_tauH_afterVetoes_eta;
+        TH1* h_tauH_afterVetoes_phi;
+        //final vis mass plot
+        TH1* h_finalVisMass_below130;
+        TH1* h_finalVisMass_above130;
+
 	
 	//helpers
 	reweight::LumiReWeighting* LumiWeights_;
