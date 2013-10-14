@@ -107,6 +107,8 @@ private:
 	TH1* h_nPU_raw;
 	TH1* h_nPU_reweight;
         TH1* h_cut_flow;
+        TH1* h_dZ_PV_muon;
+        TH1* h_dZ_PV_tau;
         TH1* h_muW_beforeVetoes_pt;
         TH1* h_muW_beforeVetoes_eta;
         TH1* h_muW_beforeVetoes_phi;
