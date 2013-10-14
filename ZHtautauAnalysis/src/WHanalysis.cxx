@@ -680,7 +680,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		muon_W.erase(muon_W.begin()+1);
 	}
 // if no W candidate suitable, check the rest
-if(goodMuon.size()==0){
+if(muon_H.size()==0){
 	for(uint i=0; i<goodMuon.size(); i++){
                 // pt cut > 10
 		if( (goodMuon.at(i)).pt < 10. ) continue;
