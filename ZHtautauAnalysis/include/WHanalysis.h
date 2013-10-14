@@ -174,6 +174,7 @@ private:
 	 // bookkeeping variables
     
     ofstream lumi;
+    ofstream eventList;
     long current_run;
     long current_lumi;
     SSummedVar< Int_t > m_allEvents;

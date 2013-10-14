@@ -69,7 +69,7 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_nPU_raw					 = Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
 	h_nPU_reweight					 = Book(TH1D("h_nPU_reweight","reweighted PU distribution",100,0,100));
         
-        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,11.5));	
+        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));	
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
 	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
@@ -119,6 +119,7 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
+        eventList.open("event.list");
 	
 
    return;
@@ -134,9 +135,10 @@ void WHanalysis::EndInputData( const SInputData& ) throw( SError ) {
 	// bookkeeping
 	lumi.close();
 	ofstream log2;       
-     log2.open("total.txt");
-     log2 << *m_allEvents << std::endl;
-     log2.close();
+        log2.open("total.txt");
+        log2 << *m_allEvents << std::endl;
+        log2.close();
+        eventList.close();
 
    return;
 
@@ -885,6 +887,13 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
            std::cout << " LT > 130 GeV ! scalar pt sum: " << LT << std::endl;
         }
         h_cut_flow->Fill(10,1);
+        
+        cout << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl; 
+        //write runNumber:lumiNumber:eventNumber
+        eventList << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ; 
+ 
+   
+
 
 }
 
