@@ -674,7 +674,13 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         //select sub-leading muon for H
         std::vector<myobject> muon_H;
         muon_H.clear();
-
+  // every W candidate is good H candidate      
+    if(muon_W.size() > 1){
+		muon_H.push_back(muon_W.at(1));
+		muon_W.erase(muon_W.begin()+1);
+	}
+// if no W candidate suitable, check the rest
+if(goodMuon.size()==0){
 	for(uint i=0; i<goodMuon.size(); i++){
                 // pt cut > 10
 		if( (goodMuon.at(i)).pt < 10. ) continue;
@@ -694,7 +700,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				i = i-1;
 			}  
 		}
-	}        
+	}
+}        
         
 	
         if(examineThisEvent) std::cout << " There are " << muon_H.size() << " muon for H " << endl;
