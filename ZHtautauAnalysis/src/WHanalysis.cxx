@@ -490,7 +490,7 @@ bool WHanalysis::AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, 
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
-		if(RelIso(genericMuon[i]) < 0.15 && (dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4))
+		if(RelIso(genericMuon[i]) < 0.15 && (dR1 > 0.4 || dR2 > 0.4 || dR3 > 0.4))
 			Ad_muon=true;
 	}
 	return Ad_muon;
@@ -511,7 +511,7 @@ bool WHanalysis::AdElectron_sig(std::vector<myobject> genericElectron, myobject 
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
-		if(RelIso(genericElectron[i]) < 0.30 && (dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4))
+		if(RelIso(genericElectron[i]) < 0.30 && (dR1 > 0.4 || dR2 > 0.4 || dR3 > 0.4))
 			Ad_electron=true;
 	}
 	return Ad_electron;
@@ -532,7 +532,7 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
-		if(dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4)
+		if(dR1 > 0.4 || dR2 > 0.4 || dR3 > 0.4)
 			Ad_tau=true;
 	}
 	return Ad_tau;
