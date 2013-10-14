@@ -83,6 +83,9 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_cut_flow->GetXaxis()->SetBinLabel(10, "bjet veto");	
 	h_cut_flow->GetXaxis()->SetBinLabel(11, "LT");	
 
+	h_dZ_PV_muon                                             = Book(TH1D("h_dZ_PV_muon","muon dz PV",100,0.,1.));
+	h_dZ_PV_tau                                              = Book(TH1D("h_dZ_PV_tau","tau dz PV",100,0.,1.));
+        
         //mu W plot
 	h_muW_beforeVetoes_pt                                    = Book(TH1D("h_muW_beforeVetoes_pt","muonW_Pt",300,0,300));
 	h_muW_beforeVetoes_eta	                                 = Book(TH1D("h_muW_beforeVetoes_eta","muonW #eta; #eta",100,-3.0,3.0));
@@ -627,6 +630,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         std::vector<myobject> goodMuon;
         for(uint i=0; i<genericMuon.size(); i++){
 
+            h_dZ_PV_muon->Fill((genericMuon.at(i)).dz_PV);
+
             bool pfID = PFMuonID(genericMuon.at(i));
 
             if(pfID && (genericMuon.at(i)).dz_PV < 0.2){
@@ -708,11 +713,13 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 		double tauPt = (tau.at(i)).pt;
 		double tauEta = (tau.at(i)).eta;
-		double tauDZ = (tau.at(i)).dz_PV;
+		double tauDZ = (tau.at(i)).dz_Ver_match;
 		bool Loose3Hit = ((tau.at(i)).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
 		
-		if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && tauDZ < 0.2){
+		h_dZ_PV_tau->Fill(tauDZ);
+		
+                if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && tauDZ < 0.2){
 			goodTau.push_back(tau.at(i));
 		}
 	}
