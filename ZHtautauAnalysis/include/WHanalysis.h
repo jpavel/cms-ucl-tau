@@ -170,11 +170,18 @@ private:
     double bTagValue;
     double LTValue;
     
+    std::string syncFileName;
+    bool doSync;
+    
 	
 	 // bookkeeping variables
     
     ofstream lumi;
     ofstream eventList;
+    
+    ifstream sync_eventList;
+    std::vector<int> runs,lumis,events;
+    
     long current_run;
     long current_lumi;
     SSummedVar< Int_t > m_allEvents;

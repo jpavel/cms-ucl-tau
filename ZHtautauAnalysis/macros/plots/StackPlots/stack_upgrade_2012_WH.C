@@ -121,7 +121,7 @@ int stack_upgrade_WH() {
 	  {
 		  h_1d[iHist][iFile] = (TH1F*)f[iFile]->Get(histNames1[iHist]);
 		  h_1d[iHist][iFile]->Scale(weights[iFile]); 
-		  if(iHist < 2) h_1d[iHist][iFile]->Rebin(20);
+		  if(iHist < 2) h_1d[iHist][iFile]->Rebin(10);
 	  }
   }
   
@@ -205,8 +205,8 @@ int stack_upgrade_WH() {
  leg->SetBorderSize(0);
 			//~ 
 	  leg->AddEntry(h_1d[iHist][0],"data 2012","p");
-	 // leg->AddEntry(h_1d[iHist][1],"WZ","f");
-	  leg->AddEntry(h_1d[iHist][2],"WZ","f");
+	  leg->AddEntry(h_1d[iHist][1],"WZ","f");
+	 // leg->AddEntry(h_1d[iHist][2],"WZ","f");
 	  leg->AddEntry(h_1d[iHist][3],"ZZTo4L","f");
 	  //~ leg->AddEntry(h_1d[iHist][4],"t#bar{t}Z","f");
 	  //~ leg->AddEntry(h_1d[iHist][5],"ggZZ2L2L","f");

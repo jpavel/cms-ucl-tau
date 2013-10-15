@@ -40,6 +40,9 @@ WHanalysis::WHanalysis()
 	DeclareProperty("BelowM",BelowM);
         DeclareProperty("bTagValue",bTagValue);
         DeclareProperty("LTValue",LTValue);
+        
+    DeclareProperty("syncFileName",syncFileName);
+    DeclareProperty("doSync",doSync);
 }
 
 WHanalysis::~WHanalysis() {
@@ -119,7 +122,35 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
-        eventList.open("event.list");
+    eventList.open("event.list");
+    
+    //sync
+    
+      //std::ifstream myfile;
+	if(doSync){
+	sync_eventList.open (syncFileName.c_str());	
+  if (sync_eventList.is_open()){
+	while ( sync_eventList.good() ){
+		int num;
+		sync_eventList >> num;
+		std::cout << num << std::endl;
+		if(num!=1) continue; //HACK!
+		runs.push_back(num);
+		sync_eventList >> num;
+		lumis.push_back(num);
+		sync_eventList >> num;
+		events.push_back(num);
+	}
+	sync_eventList.close();
+	}
+	}
+std::cout << runs.size() << " " << lumis.size() << " " << events.size() << std::endl;
+for(uint iVal = 0; iVal < runs.size(); iVal++)
+{
+	std::cout << runs[iVal] << " " << lumis[iVal] << " " << events[iVal] << std::endl;
+}
+
+		
 	
 
    return;
@@ -549,6 +580,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		current_lumi=m->lumiNumber;
 	}
 	
+	
+	
+	
 	m_logger << DEBUG << " Now executing event " << m->eventNumber << " in a run " << m->runNumber << SLogger::endmsg;
 
 	// for debug printout for a given event
@@ -561,6 +595,14 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}else examineNumber=examineEvent;
 	if( examineNumber==eNumber) examineThisEvent=true;
 	else examineThisEvent=false;
+	
+	//syncing
+	
+	if(doSync){
+		uint pos_helper=0;
+        pos_helper = std::find(events.begin(), events.end(), m->eventNumber) - events.begin();
+		if(pos_helper < events.size()) examineThisEvent=true;
+	}
 	
 	if(examineThisEvent) std::cout << "Examining! Event number " << eNumber << " ENTRY: " << m_allEvents << std::endl;
 
@@ -597,7 +639,11 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	short nGoodVx=goodVertex.size();
 	
 	// at least one good vertex
-	if(nGoodVx < 1) return;
+	if(nGoodVx < 1){
+		if(examineThisEvent) std::cout << "Good vertex fail!" << std::endl;
+		 return;
+	 
+	 }
         
         h_cut_flow->Fill(2,1);
 	
@@ -707,8 +753,10 @@ if(muon_H.size()==0){
         if(examineThisEvent) std::cout << " There are " << muon_H.size() << " muon for H " << endl;
 	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon " << endl;
 
-        if( !(muon_H.size() == 1 && muon_W.size() == 1) )
-        return;
+        if( !(muon_H.size() == 1 && muon_W.size() == 1) ){
+			if(examineThisEvent) std::cout << "Too many mu cand fail!" << std::endl;
+			return;
+		}
         
         h_cut_flow->Fill(3,1);
    
@@ -735,8 +783,10 @@ if(muon_H.size()==0){
 	
         if(examineThisEvent) std::cout << " There are " << goodTau.size() << " selected taus" << std::endl;
         
-        if( goodTau.size() == 0 )
-        return;
+        if( goodTau.size() == 0 ){
+			if(examineThisEvent) std::cout << "No good tau cand fail!" << std::endl;
+			return;
+		}
         
         std::vector<myobject> tau_H;
         tau_H.clear();
@@ -752,12 +802,17 @@ if(muon_H.size()==0){
         if(examineThisEvent) std::cout << " There are " << tau_H.size() << " selected tau possibly good for H candidate" << std::endl;
         if(examineThisEvent) std::cout << " light lepton charges " << std::endl;
         
-        if( !(tau_H.size() == 1) )
-        return;
+        if( !(tau_H.size() == 1) ){
+			if(examineThisEvent) std::cout << "Too many signal tau cands fail!" << std::endl;
+			return;
+		}
         
         h_cut_flow->Fill(4,1);
         
-        if( ((muon_W.at(0)).charge + (muon_H.at(0)).charge) == 0 ) return;
+        if( ((muon_W.at(0)).charge + (muon_H.at(0)).charge) == 0 ){
+			if(examineThisEvent) std::cout << "SS charge fail!" << std::endl;
+			 return;
+		 }
         
         h_cut_flow->Fill(5,1);
         
@@ -780,8 +835,10 @@ if(muon_H.size()==0){
 	if(AdMuon_sig(goodMuon,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
 		Ad_muon=true;
          	}
-        if(Ad_muon) 
+        if(Ad_muon){
+			if(examineThisEvent) std::cout << "Muon veto fail!" << std::endl; 
            return;
+	   }
 	if(examineThisEvent) std::cout << " After additional isolated muon veto" << std::endl;
         h_cut_flow->Fill(6,1);
         
@@ -792,8 +849,10 @@ if(muon_H.size()==0){
 	if(AdElectron_sig(goodElectron,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
 		Ad_electron=true;
          	}
-        if(Ad_electron) 
+        if(Ad_electron){
+			if(examineThisEvent) std::cout << "Electron veto fail!" << std::endl; 
            return;
+	   }
 	if(examineThisEvent) std::cout << " After additional isolated electron veto" << std::endl;
         h_cut_flow->Fill(7,1);
         
@@ -804,8 +863,10 @@ if(muon_H.size()==0){
 	if(AdTau_sig(goodElectron,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
 		Ad_tau=true;
          	}
-        if(Ad_tau) 
+        if(Ad_tau){
+			if(examineThisEvent) std::cout << "tau veto fail!" << std::endl; 
            return;
+	   }
 	if(examineThisEvent) std::cout << " After additional isolated tau veto" << std::endl;
         h_cut_flow->Fill(8,1);
 
@@ -842,8 +903,10 @@ if(muon_H.size()==0){
 
 	if(examineThisEvent) std::cout << " Before b-tag veto" << std::endl;
 
-	if(bTagVeto)
+	if(bTagVeto){
+		if(examineThisEvent) std::cout << "Btag veto fail!" << std::endl;
 		return;
+	}
 	if(examineThisEvent) std::cout << " After b-tag veto" << std::endl;
         h_cut_flow->Fill(9,1);
         
@@ -895,7 +958,7 @@ if(muon_H.size()==0){
         }
         h_cut_flow->Fill(10,1);
         
-        cout << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl; 
+        //cout << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl; 
         //write runNumber:lumiNumber:eventNumber
         eventList << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ; 
  

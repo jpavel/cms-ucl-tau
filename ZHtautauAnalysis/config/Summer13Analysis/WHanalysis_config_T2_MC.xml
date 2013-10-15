@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input_ingrid.xml" >]>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd" [<!ENTITY grid SYSTEM "input.xml" >]>
 <JobConfiguration JobName="WHanalysisJob" OutputLevel="INFO">
 	<Library Name="libGenVector" />
     <Library Name="libGraf" />
@@ -66,6 +66,11 @@
 		<Item Name="OverM" Value="" />  <!-- Event# * 10^6 -->
 		
 		<Item Name="BelowM" Value="" /> <!-- Event# mod 10^6 -->
+		
+		<!--syncing -->
+		
+		<Item Name="syncFileName" Value="Mauro.txt" />
+		<Item Name="doSync" Value="True" />
 		
 		</UserConfig>
 	</Cycle>
