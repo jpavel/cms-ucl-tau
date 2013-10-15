@@ -792,8 +792,10 @@ if(muon_H.size()==0){
         tau_H.clear();
  
         for(uint i=0; i<goodTau.size(); i++){
-		bool LooseEleMVA3 = ((tau.at(i)).discriminationByElectronMVA3Loose > 0.5);
-		bool TightMuon    = ((tau.at(i)).discriminationByMuonTight > 0.5);
+		bool LooseEleMVA3 = ((goodTau.at(i)).discriminationByElectronMVA3Loose > 0.5);
+		bool TightMuon    = ((goodTau.at(i)).discriminationByMuonTight > 0.5);
+		if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
+		LooseEleMVA3 << TightMuon << std::endl;
 		if ( LooseEleMVA3 && TightMuon){
 			tau_H.push_back(goodTau.at(i));
                 }
