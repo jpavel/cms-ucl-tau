@@ -763,6 +763,10 @@ if(muon_H.size()==0){
         
         h_cut_flow->Fill(3,1);
    
+   if( (muon_W.at(0)).charge!=(muon_H.at(0)).charge ){
+			if(examineThisEvent) std::cout << "SS charge fail!" << std::endl;
+			 return;
+	}
 	
 	//select good taus 
 	std::vector<myobject> goodTau;
@@ -776,7 +780,7 @@ if(muon_H.size()==0){
 		double tauDZ = (tau.at(i)).dz_Ver_match;
 		bool Loose3Hit = ((tau.at(i)).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
-		
+	
 		h_dZ_PV_tau->Fill(tauDZ);
 		
                 if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && tauDZ < 0.2){
@@ -795,13 +799,14 @@ if(muon_H.size()==0){
         tau_H.clear();
  
         for(uint i=0; i<goodTau.size(); i++){
-		bool LooseEleMVA3 = ((goodTau.at(i)).discriminationByElectronMVA3Loose > 0.5);
-		bool TightMuon    = ((goodTau.at(i)).discriminationByMuonTight > 0.5);
-		if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
-		LooseEleMVA3 << TightMuon << std::endl;
-		if ( LooseEleMVA3 && TightMuon){
-			tau_H.push_back(goodTau.at(i));
-                }
+			bool LooseEleMVA3 = ((goodTau.at(i)).discriminationByElectronMVA3Loose > 0.5);
+			bool TightMuon    = ((goodTau.at(i)).discriminationByMuonTight > 0.5);
+			bool charge = goodTau[i].charge*muon_H[0].charge < 0; // tau OS sign cut
+			if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
+			LooseEleMVA3 << TightMuon << " charge: " << charge << std::endl;
+			if ( LooseEleMVA3 && TightMuon && charge){
+				tau_H.push_back(goodTau.at(i));
+	                }
         }
         
         if(examineThisEvent) std::cout << " There are " << tau_H.size() << " selected tau possibly good for H candidate" << std::endl;
@@ -814,10 +819,7 @@ if(muon_H.size()==0){
         
         h_cut_flow->Fill(4,1);
         
-        if( ((muon_W.at(0)).charge + (muon_H.at(0)).charge) == 0 ){
-			if(examineThisEvent) std::cout << "SS charge fail!" << std::endl;
-			 return;
-		 }
+        
         
         h_cut_flow->Fill(5,1);
         
