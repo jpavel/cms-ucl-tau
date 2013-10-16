@@ -683,7 +683,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
             h_dZ_PV_muon->Fill((genericMuon.at(i)).dz_PV);
 
             bool pfID = PFMuonID(genericMuon.at(i));
-            if(examineThisEvent) std::cout << "The muon no. " << i << " has id " << pfID << " and dz " << dz_PV << std::endl;
+            if(examineThisEvent) std::cout << "The muon no. " << i << " has id " << pfID << " and dz " << genericMuon[i].dz_PV << std::endl;
 
             if(pfID && (genericMuon.at(i)).dz_PV < 0.2){
 	       goodMuon.push_back(genericMuon.at(i));
