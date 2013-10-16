@@ -768,6 +768,16 @@ if(muon_H.size()==0){
 			 return;
 	}
 	
+	if(!muon_W[0].hasTrgObject_loose){
+		return;
+		if(examineThisEvent) std::cout << "Muon from W not matched to trigger!" << std::endl;
+	}
+	
+	if(!muon_H[0].hasTrgObject_loose){
+		return;
+		if(examineThisEvent) std::cout << "Muon from H not matched to trigger!" << std::endl;
+	}
+	
 	//select good taus 
 	std::vector<myobject> goodTau;
 	goodTau.clear();
