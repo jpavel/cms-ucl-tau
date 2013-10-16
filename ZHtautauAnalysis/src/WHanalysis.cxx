@@ -769,13 +769,13 @@ if(muon_H.size()==0){
 	}
 	
 	if(!muon_W[0].hasTrgObject_loose){
-		return;
 		if(examineThisEvent) std::cout << "Muon from W not matched to trigger!" << std::endl;
+		return;
 	}
 	
 	if(!muon_H[0].hasTrgObject_loose){
-		return;
 		if(examineThisEvent) std::cout << "Muon from H not matched to trigger!" << std::endl;
+		return;
 	}
 	
 	//select good taus 
@@ -844,6 +844,19 @@ if(muon_H.size()==0){
         h_tauH_beforeVetoes_eta->Fill((tau_H.at(0)).eta);
         h_tauH_beforeVetoes_phi->Fill((tau_H.at(0)).phi);
 
+
+	// check the masses of the pair(s)
+	
+	if(PairMass(muon_W[0],muon_H[0]) < 20.){
+		if(examineThisEvent) std::cout << " mu pair failed inv mass cut" << std::endl;
+		return;
+	}
+	
+	if(PairMass(muon_H[0],tau_H[0]) < 20.){
+		if(examineThisEvent) std::cout << " mutau pair failed inv mass cut" << std::endl;
+		return;
+	}
+	
 
         //check the presence of additional isolated muons
         //if any, reject the event
