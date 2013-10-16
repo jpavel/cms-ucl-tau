@@ -3,6 +3,7 @@
 mkdir -p ${2}
 pwd=$PWD
 $ROOTSYS/bin/hadd ${2}/${1}_histo.root ${1}/job*/WHanalysis.Data1.Reco.root
+tar czvf ${2}/${1}_condor.out ${1}/job*/condor.out.*
 touch ${2}/${1}_total.txt
 touch ${2}/${1}_lumi.csv
 touch ${2}/${1}_event.list
