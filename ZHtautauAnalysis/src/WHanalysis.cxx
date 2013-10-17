@@ -72,19 +72,23 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_nPU_raw					 = Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
 	h_nPU_reweight					 = Book(TH1D("h_nPU_reweight","reweighted PU distribution",100,0,100));
         
-        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",11,-0.5,10.5));	
+        h_cut_flow                                       = Book(TH1D("h_cut_flow","Cut Flow",15,-0.5,14.5));	
 	h_cut_flow = Retrieve<TH1D>("h_cut_flow");
 	h_cut_flow->GetXaxis()->SetBinLabel(1, "Initial Events");
 	h_cut_flow->GetXaxis()->SetBinLabel(2, "trigger");
 	h_cut_flow->GetXaxis()->SetBinLabel(3, "good vx");
 	h_cut_flow->GetXaxis()->SetBinLabel(4, "1muW and 1muH");
 	h_cut_flow->GetXaxis()->SetBinLabel(5, "charge");
-	h_cut_flow->GetXaxis()->SetBinLabel(6, "tau H cand");
-	h_cut_flow->GetXaxis()->SetBinLabel(7, "muon veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(8, "ele veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(9, "tau veto");
-	h_cut_flow->GetXaxis()->SetBinLabel(10, "bjet veto");	
-	h_cut_flow->GetXaxis()->SetBinLabel(11, "LT");	
+	h_cut_flow->GetXaxis()->SetBinLabel(6, "muW trigger match");
+	h_cut_flow->GetXaxis()->SetBinLabel(7, "muH trigger match");
+	h_cut_flow->GetXaxis()->SetBinLabel(8, "tau H cand");
+	h_cut_flow->GetXaxis()->SetBinLabel(9, "muW-muH inv mass");
+	h_cut_flow->GetXaxis()->SetBinLabel(10, "muH-tauH inv mass");
+	h_cut_flow->GetXaxis()->SetBinLabel(11, "muon veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(12, "ele veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(13, "tau veto");
+	h_cut_flow->GetXaxis()->SetBinLabel(14, "bjet veto");	
+	h_cut_flow->GetXaxis()->SetBinLabel(15, "LT");	
 
 	h_dZ_PV_muon                                             = Book(TH1D("h_dZ_PV_muon","muon dz PV",100,0.,1.));
 	h_dZ_PV_tau                                              = Book(TH1D("h_dZ_PV_tau","tau dz PV",100,0.,1.));
@@ -112,7 +116,7 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_tauH_afterVetoes_phi	                                 = Book(TH1D("h_tauH_afterVetoes_phi","tauH #phi; #phi",64,-3.2,3.2));	
         //final vis mass plot
         h_finalVisMass_below130                                  = Book(TH1D("h_HvisMass_below130LT","H vis mass",300,0,300));
-        h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_after130LT","H vis mass",300,0,300));
+        h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_above130LT","H vis mass",300,0,300));
 
 
 	if(is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
@@ -767,16 +771,19 @@ if(muon_H.size()==0){
 			if(examineThisEvent) std::cout << "SS charge fail!" << std::endl;
 			 return;
 	}
+        h_cut_flow->Fill(4,1);
 	
 	if(!muon_W[0].hasTrgObject_loose){
 		if(examineThisEvent) std::cout << "Muon from W not matched to trigger!" << std::endl;
 		return;
 	}
+        h_cut_flow->Fill(5,1);
 	
 	if(!muon_H[0].hasTrgObject_loose){
 		if(examineThisEvent) std::cout << "Muon from H not matched to trigger!" << std::endl;
 		return;
 	}
+        h_cut_flow->Fill(6,1);
 	
 	//select good taus 
 	std::vector<myobject> goodTau;
@@ -831,11 +838,8 @@ if(muon_H.size()==0){
 			return;
 		}
         
-        h_cut_flow->Fill(4,1);
+        h_cut_flow->Fill(7,1);
         
-        
-        
-        h_cut_flow->Fill(5,1);
         
         //filling histograms
         h_muW_beforeVetoes_pt->Fill((muon_W.at(0)).pt);
@@ -855,13 +859,16 @@ if(muon_H.size()==0){
 		if(examineThisEvent) std::cout << " mu pair failed inv mass cut" << std::endl;
 		return;
 	}
+        
+        h_cut_flow->Fill(8,1);
 	
 	if(PairMass(muon_H[0],tau_H[0]) < 20.){
 		if(examineThisEvent) std::cout << " mutau pair failed inv mass cut" << std::endl;
 		return;
 	}
+        
+        h_cut_flow->Fill(9,1);
 	
-
         //check the presence of additional isolated muons
         //if any, reject the event
 	if(examineThisEvent) std::cout << " Before additional isolated muon veto" << std::endl;
@@ -874,7 +881,7 @@ if(muon_H.size()==0){
            return;
 	   }
 	if(examineThisEvent) std::cout << " After additional isolated muon veto" << std::endl;
-        h_cut_flow->Fill(6,1);
+        h_cut_flow->Fill(10,1);
         
         //check the presence of additional isolated electrons
         //if any, reject the event
@@ -888,7 +895,7 @@ if(muon_H.size()==0){
            return;
 	   }
 	if(examineThisEvent) std::cout << " After additional isolated electron veto" << std::endl;
-        h_cut_flow->Fill(7,1);
+        h_cut_flow->Fill(11,1);
         
         //check the presence of additional isolated taus
         //if any, reject the event
@@ -902,7 +909,7 @@ if(muon_H.size()==0){
            return;
 	   }
 	if(examineThisEvent) std::cout << " After additional isolated tau veto" << std::endl;
-        h_cut_flow->Fill(8,1);
+        h_cut_flow->Fill(12,1);
 
         //b-Tag Veto
 	bool bTagVeto = false;
@@ -942,7 +949,7 @@ if(muon_H.size()==0){
 		return;
 	}
 	if(examineThisEvent) std::cout << " After b-tag veto" << std::endl;
-        h_cut_flow->Fill(9,1);
+        h_cut_flow->Fill(13,1);
         
         //filling histograms
         h_muW_afterVetoes_pt->Fill((muon_W.at(0)).pt);
@@ -990,7 +997,7 @@ if(muon_H.size()==0){
            else if(aboveEvent)
            std::cout << " LT > 130 GeV ! scalar pt sum: " << LT << std::endl;
         }
-        h_cut_flow->Fill(10,1);
+        h_cut_flow->Fill(14,1);
         
         //cout << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl; 
         //write runNumber:lumiNumber:eventNumber

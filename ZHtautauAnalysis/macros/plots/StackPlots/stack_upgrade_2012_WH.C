@@ -87,7 +87,7 @@ int stack_upgrade_WH() {
   //const int nHist1 = 44;
 
 
-  TString histNames1[nHist1] = {"h_HvisMass_after130LT", "h_HvisMass_below130LT","h_cut_flow"};// ,"h_H_svMass_type_1","h_H_svMass_type_2","h_H_svMass_type_3","h_H_svMass_type_4","h_H_svMass_type_5","h_H_svMass_type_6","h_H_svMass_type_7","h_H_svMass_type_8"};
+  TString histNames1[nHist1] = {"h_HvisMass_above130LT", "h_HvisMass_below130LT","h_cut_flow"};// ,"h_H_svMass_type_1","h_H_svMass_type_2","h_H_svMass_type_3","h_H_svMass_type_4","h_H_svMass_type_5","h_H_svMass_type_6","h_H_svMass_type_7","h_H_svMass_type_8"};
   //TString histBGNames1[nHist1] = {"h_FR_svMass","h_H_FR_svMass_type_1","h_H_FR_svMass_type_2","h_H_FR_svMass_type_3","h_H_FR_svMass_type_4","h_H_FR_svMass_type_5","h_H_FR_svMass_type_6","h_H_FR_svMass_type_7","h_H_FR_svMass_type_8"};
   
   TString histTitles[nHist1] = {"M^{vis}_{#tau_{#mu}#tau}[GeV]", "M^{vis}_{#tau_{#mu}#tau}[GeV]", "Cut name" };//,"M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]","M_{#tau#tau}[GeV]"};
