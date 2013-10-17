@@ -116,7 +116,7 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_tauH_afterVetoes_phi	                                 = Book(TH1D("h_tauH_afterVetoes_phi","tauH #phi; #phi",64,-3.2,3.2));	
         //final vis mass plot
         h_finalVisMass_below130                                  = Book(TH1D("h_HvisMass_below130LT","H vis mass",300,0,300));
-        h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_after130LT","H vis mass",300,0,300));
+        h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_above130LT","H vis mass",300,0,300));
 
 
 	if(is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
