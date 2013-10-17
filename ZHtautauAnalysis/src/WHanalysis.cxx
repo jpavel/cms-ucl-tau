@@ -790,6 +790,10 @@ if(muon_H.size()==0){
 		double tauDZ = (tau.at(i)).dz_Ver_match;
 		bool Loose3Hit = ((tau.at(i)).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
+		// overlap removal
+		if(deltaR(muon_W[0],tau[i]) < 0.1) continue;
+		if(deltaR(muon_H[0],tau[i]) < 0.1) continue;
+		
 	
 		h_dZ_PV_tau->Fill(tauDZ);
 		
