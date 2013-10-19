@@ -77,7 +77,7 @@ public:
    bool PFMuonID(myobject mu);
      bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb);
    bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
-   std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_, double muEta_);
+   std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
    std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
    bool AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
@@ -132,6 +132,8 @@ private:
         //final vis mass plot
         TH1* h_finalVisMass_below130;
         TH1* h_finalVisMass_above130;
+        // syncronisation
+        TH1* h_fail_reason;
 
 	
 	//helpers

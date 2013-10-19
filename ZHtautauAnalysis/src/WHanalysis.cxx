@@ -118,6 +118,23 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
         h_finalVisMass_below130                                  = Book(TH1D("h_HvisMass_below130LT","H vis mass",300,0,300));
         h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_above130LT","H vis mass",300,0,300));
 
+	h_fail_reason = Book(TH1D("h_fail_reason","Fail reason",14, 0.5,14.5));
+	h_fail_reason = Retrieve<TH1D>("h_fail_reason");
+	h_fail_reason->GetXaxis()->SetBinLabel(1, "trigger");
+	h_fail_reason->GetXaxis()->SetBinLabel(2, "good vx");
+	h_fail_reason->GetXaxis()->SetBinLabel(3, "1muW and 1muH");
+	h_fail_reason->GetXaxis()->SetBinLabel(4, "charge");
+	h_fail_reason->GetXaxis()->SetBinLabel(5, "muW trigger match");
+	h_fail_reason->GetXaxis()->SetBinLabel(6, "muH trigger match");
+	h_fail_reason->GetXaxis()->SetBinLabel(7, "tau H cand");
+	h_fail_reason->GetXaxis()->SetBinLabel(8, "1tau cand");
+	h_fail_reason->GetXaxis()->SetBinLabel(9, "muW-muH inv mass");
+	h_fail_reason->GetXaxis()->SetBinLabel(10, "muH-tauH inv mass");
+	h_fail_reason->GetXaxis()->SetBinLabel(11, "muon veto");
+	h_fail_reason->GetXaxis()->SetBinLabel(12, "ele veto");
+	h_fail_reason->GetXaxis()->SetBinLabel(13, "tau veto");
+	h_fail_reason->GetXaxis()->SetBinLabel(14, "bjet veto");	
+
 
 	if(is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
 	else LumiWeights_ = new reweight::LumiReWeighting("Summer12_PU_53X.root", "dataPileUpHistogramABCD_True_2012.root","mcPU","pileup");
@@ -328,7 +345,7 @@ double WHanalysis::PairPt(myobject Hcand1, myobject Hcand2){
 	return H_sum.Pt();
 }
 
-std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_ = 5., double muEta_ = 2.4){
+std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_ = 10., double muEta_ = 2.4){
 
 	std::vector<myobject> outMu_;
 	outMu_.clear();
@@ -340,8 +357,27 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 			bool muGlobal = _muon[i].isGlobalMuon;
 			bool muTracker = _muon[i].isTrackerMuon;
                         bool pfID = PFMuonID(_muon[i]);
+            bool pixelHits = (_muon[i].intrkLayerpixel >=1);
+            
+            double max = 0.5;
+            double minDist = 1.0;
+            int index = -1;
+            for(uint j = 0; j< _jets.size(); j++)
+			{
+				if(_jets[j].pt < 12.) continue;
+				double dR = deltaR(_muon[i],_jets[j]);
+				if(dR< max && dR < minDist)
+				{
+					index=j;
+					minDist=dR;
+				}
+			}
+			bool bTag=true;
+			if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
+			
+            bool dZ = _muon[i].dz_PV < 0.2;
 
-			if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_){
+			if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && bTag && dZ ){
 				if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
 				<< muEta << std::endl;
 	        	outMu_.push_back(_muon[i]);
@@ -633,7 +669,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	m_logger << DEBUG <<" Trigger decision " << trigPass << SLogger::endmsg;
 	if(!trigPass)
 	{
-		if(examineThisEvent) std::cout << "Trigger fail! " << examineEvent << std::endl;
+		if(examineThisEvent){
+			 std::cout << "Trigger fail! " << examineEvent << std::endl;
+			 h_fail_reason->Fill(1);
+		 }
 		return;
 	}
 
@@ -646,7 +685,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	// at least one good vertex
 	if(nGoodVx < 1){
-		if(examineThisEvent) std::cout << "Good vertex fail!" << std::endl;
+		if(examineThisEvent){ std::cout << "Good vertex fail!" << std::endl;
+		h_fail_reason->Fill(2);
+		}
 		 return;
 	 
 	 }
@@ -655,9 +696,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	//select generic muon with pt > 5 GeV and |eta| < 2.4
 	std::vector<myobject> muon = m->PreSelectedMuons;
+	std::vector<myobject> jet = m->RecPFJetsAK5;
 	if(examineThisEvent) std::cout << " There are " << muon.size() << " preselected muons " << std::endl;
 	m_logger << DEBUG << " There are " << muon.size() << " preselected muons " << SLogger::endmsg;
-	std::vector<myobject> genericMuon = SelectGoodMuVector(muon,examineThisEvent);
+	std::vector<myobject> genericMuon = SelectGoodMuVector(muon,jet,examineThisEvent);
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " selected muons " << std::endl;
 
 	//select generic electron with pt > 5 GeV and |eta| < 2.5
@@ -761,26 +803,38 @@ if(muon_H.size()==0){
 	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon " << endl;
 
         if( !(muon_H.size() == 1 && muon_W.size() == 1) ){
-			if(examineThisEvent) std::cout << "Too many mu cand fail!" << std::endl;
+			if(examineThisEvent){
+				 std::cout << "Too many mu cand fail!" << std::endl;
+				 h_fail_reason->Fill(3);
+			 }
 			return;
 		}
         
         h_cut_flow->Fill(3,1);
    
    if( (muon_W.at(0)).charge!=(muon_H.at(0)).charge ){
-			if(examineThisEvent) std::cout << "SS charge fail!" << std::endl;
+			if(examineThisEvent){
+				 std::cout << "SS charge fail!" << std::endl;
+				 h_fail_reason->Fill(4);
+			 }
 			 return;
 	}
         h_cut_flow->Fill(4,1);
 	
 	if(!muon_W[0].hasTrgObject_loose){
-		if(examineThisEvent) std::cout << "Muon from W not matched to trigger!" << std::endl;
+		if(examineThisEvent){
+			 std::cout << "Muon from W not matched to trigger!" << std::endl;
+			 h_fail_reason->Fill(5);
+		 }
 		return;
 	}
         h_cut_flow->Fill(5,1);
 	
 	if(!muon_H[0].hasTrgObject_loose){
-		if(examineThisEvent) std::cout << "Muon from H not matched to trigger!" << std::endl;
+		if(examineThisEvent){
+			 std::cout << "Muon from H not matched to trigger!" << std::endl;
+			 h_fail_reason->Fill(6);
+		 }
 		return;
 	}
         h_cut_flow->Fill(6,1);
@@ -798,8 +852,8 @@ if(muon_H.size()==0){
 		bool Loose3Hit = ((tau.at(i)).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
 		// overlap removal
-		if(deltaR(muon_W[0],tau[i]) < 0.1) continue;
-		if(deltaR(muon_H[0],tau[i]) < 0.1) continue;
+		if(deltaR(muon_W[0],tau[i]) < 0.5) continue;
+		if(deltaR(muon_H[0],tau[i]) < 0.5) continue;
 		
 	
 		h_dZ_PV_tau->Fill(tauDZ);
@@ -812,7 +866,10 @@ if(muon_H.size()==0){
         if(examineThisEvent) std::cout << " There are " << goodTau.size() << " selected taus" << std::endl;
         
         if( goodTau.size() == 0 ){
-			if(examineThisEvent) std::cout << "No good tau cand fail!" << std::endl;
+			if(examineThisEvent){
+				 std::cout << "No good tau cand fail!" << std::endl;
+				 h_fail_reason->Fill(7);
+			 }
 			return;
 		}
         
@@ -834,7 +891,10 @@ if(muon_H.size()==0){
         if(examineThisEvent) std::cout << " light lepton charges " << std::endl;
         
         if( !(tau_H.size() == 1) ){
-			if(examineThisEvent) std::cout << "Too many signal tau cands fail!" << std::endl;
+			if(examineThisEvent){
+				 std::cout << "Too many signal tau cands fail!" << std::endl;
+				h_fail_reason->Fill(8); 
+			}
 			return;
 		}
         
@@ -856,14 +916,20 @@ if(muon_H.size()==0){
 	// check the masses of the pair(s)
 	
 	if(PairMass(muon_W[0],muon_H[0]) < 20.){
-		if(examineThisEvent) std::cout << " mu pair failed inv mass cut" << std::endl;
+		if(examineThisEvent){
+			 std::cout << " mu pair failed inv mass cut" << std::endl;
+			 h_fail_reason->Fill(9);
+		 }
 		return;
 	}
         
         h_cut_flow->Fill(8,1);
 	
 	if(PairMass(muon_H[0],tau_H[0]) < 20.){
-		if(examineThisEvent) std::cout << " mutau pair failed inv mass cut" << std::endl;
+		if(examineThisEvent){
+			 std::cout << " mutau pair failed inv mass cut" << std::endl;
+			 h_fail_reason->Fill(10);
+		 }
 		return;
 	}
         
@@ -877,7 +943,10 @@ if(muon_H.size()==0){
 		Ad_muon=true;
          	}
         if(Ad_muon){
-			if(examineThisEvent) std::cout << "Muon veto fail!" << std::endl; 
+			if(examineThisEvent) {
+				std::cout << "Muon veto fail!" << std::endl; 
+				h_fail_reason->Fill(11);
+			}
            return;
 	   }
 	if(examineThisEvent) std::cout << " After additional isolated muon veto" << std::endl;
@@ -891,7 +960,11 @@ if(muon_H.size()==0){
 		Ad_electron=true;
          	}
         if(Ad_electron){
-			if(examineThisEvent) std::cout << "Electron veto fail!" << std::endl; 
+			if(examineThisEvent){
+				 std::cout << "Electron veto fail!" << std::endl; 
+				 h_fail_reason->Fill(12);
+			 }
+	
            return;
 	   }
 	if(examineThisEvent) std::cout << " After additional isolated electron veto" << std::endl;
@@ -905,7 +978,10 @@ if(muon_H.size()==0){
 		Ad_tau=true;
          	}
         if(Ad_tau){
-			if(examineThisEvent) std::cout << "tau veto fail!" << std::endl; 
+			if(examineThisEvent){
+				 std::cout << "tau veto fail!" << std::endl; 
+				 h_fail_reason->Fill(13);
+			}
            return;
 	   }
 	if(examineThisEvent) std::cout << " After additional isolated tau veto" << std::endl;
@@ -913,7 +989,7 @@ if(muon_H.size()==0){
 
         //b-Tag Veto
 	bool bTagVeto = false;
-	std::vector<myobject> jet = m->RecPFJetsAK5;
+	
 	Int_t count_bJets = 0;
 	Int_t count_bJetsVetoed = 0;
 	Int_t count_bJets_afterVeto = 0;
@@ -945,7 +1021,10 @@ if(muon_H.size()==0){
 	if(examineThisEvent) std::cout << " Before b-tag veto" << std::endl;
 
 	if(bTagVeto){
-		if(examineThisEvent) std::cout << "Btag veto fail!" << std::endl;
+		if(examineThisEvent){
+			 std::cout << "Btag veto fail!" << std::endl;
+			 h_fail_reason->Fill(14);
+		 }	 
 		return;
 	}
 	if(examineThisEvent) std::cout << " After b-tag veto" << std::endl;
