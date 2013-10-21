@@ -182,7 +182,7 @@ private:
     ofstream eventList;
     
     ifstream sync_eventList;
-    std::vector<int> runs,lumis,events;
+    std::vector<long> runs,lumis,events;
     
     long current_run;
     long current_lumi;

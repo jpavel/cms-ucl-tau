@@ -152,7 +152,7 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	sync_eventList.open (syncFileName.c_str());	
   if (sync_eventList.is_open()){
 	while ( sync_eventList.good() ){
-		int num;
+		long num;
 		sync_eventList >> num;
 		std::cout << num << std::endl;
 		if(num!=1) continue; //HACK!
