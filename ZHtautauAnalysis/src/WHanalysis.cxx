@@ -760,7 +760,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 if(examineThisEvent) 
                 cout << "muon pt: " << goodMuon[i].pt << " eta " << goodMuon[i].eta << " phi " << goodMuon[i].phi <<
                 "rel iso is: " << RelIso(goodMuon.at(i),examineThisEvent) << endl;
-                if( fabs((goodMuon.at(i)).eta) < 1.479 ){
+            if( fabs((goodMuon.at(i)).eta) < 1.479 ){
 			if( RelIso(goodMuon.at(i)) < 0.15 ){
 				muon_W.push_back(goodMuon.at(i));
 				goodMuon.erase(goodMuon.begin()+i);
@@ -787,6 +787,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool found = false;
 		for(uint iMu=1; iMu < muon_W.size() && !found; iMu++)
 		{
+			if(muon_W[iMu].pt > muon_W[0].pt) continue;
 			if(deltaR(muon_W[iMu],muon_W[0]) > 0.5){
 				if(examineThisEvent)
 				cout << "muon pt: " << muon_W[iMu].pt << " eta " << muon_W[iMu].eta << " phi " << muon_W[iMu].phi <<
@@ -800,11 +801,13 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 	}
 // if no W candidate suitable, check the rest
-if(muon_H.size()==0){
+if(muon_H.size()==0 && muon_W.size() > 0){
 	if(examineThisEvent) std::cout << "searching for suitable mu2 candidate" << std::endl;
 	for(uint i=0; i<goodMuon.size(); i++){
                 // pt cut > 10
 		if( (goodMuon.at(i)).pt < 10. ) continue;
+		if(goodMuon[i].pt > muon_W[0].pt) continue;
+		if(deltaR(goodMuon[i],muon_W[0]) < 0.5) continue;
                 //
                 if(examineThisEvent) cout << "muon pt: " << goodMuon[i].pt << " eta " << goodMuon[i].eta << " phi " << goodMuon[i].phi <<
                 "rel iso is: " << RelIso(goodMuon.at(i),examineThisEvent) << endl;
