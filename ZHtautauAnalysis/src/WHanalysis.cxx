@@ -611,8 +611,10 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 		bool tauEta = fabs((genericTau[i]).eta) < 2.5;
 		bool tauDZ = (genericTau[i]).dz_Ver_match < 0.2;
 		bool Loose3Hit = ((genericTau[i]).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
-		bool pass = tauPt && tauEta && tauDZ && Loose3Hit;
-		if(verbose) std::cout << " Tau cand no. " << i << std::endl;
+		bool pass = tauPt && tauEta && fabs(tauDZ) && Loose3Hit;
+		if(!pass) continue;
+		if(verbose) std::cout << " Tau cand no. " << i << "pt/eta/phi:" << genericTau[i].pt << "/"
+		<< genericTau[i].eta << "/" << genericTau[i].phi << std::endl;
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
@@ -886,10 +888,13 @@ if(muon_H.size()==0 && muon_W.size() > 0){
 		if(deltaR(muon_W[0],tau[i]) < 0.5) continue;
 		if(deltaR(muon_H[0],tau[i]) < 0.5) continue;
 		
-	
+		if(examineThisEvent) std::cout << " tau #" << i << "pt/eta/phi:"
+		<< tau[i].pt << "/" << tau[i].eta << "/" << tau[i].phi << " dz: " <<
+		tauDZ << " loose iso " << Loose3Hit << " DM " << DecayMode;
 		h_dZ_PV_tau->Fill(tauDZ);
 		
-                if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && tauDZ < 0.2){
+            if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && fabs(tauDZ) < 0.2){
+				if(examineThisEvent) std::cout << " -> Selected!" << std::endl;
 			goodTau.push_back(tau.at(i));
 		}
 	}
@@ -915,7 +920,7 @@ if(muon_H.size()==0 && muon_W.size() > 0){
 			LooseEleMVA3 << TightMuon << " charge: " << charge << std::endl;
 			if ( LooseEleMVA3 && TightMuon && charge){
 				tau_H.push_back(goodTau.at(i));
-	                }
+	        }
         }
         
         if(examineThisEvent) std::cout << " There are " << tau_H.size() << " selected tau possibly good for H candidate" << std::endl;
