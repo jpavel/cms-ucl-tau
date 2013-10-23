@@ -380,9 +380,9 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 			bool bTag=true;
 			if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
 			
-            bool dZ = _muon[i].dz_PV < 0.2;
+            bool dZ = fabs(_muon[i].dz_PV) < 0.2;
 if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
-				<< muEta << " pixelHits " << _muon[i].intrkLayerpixel << " btag " << bTag << " dz " << _muon[i].dz_PV << std::endl;
+				<< muEta << " pixelHits " << _muon[i].intrkLayerpixel << " btag " << bTag << " dz " << fabs(_muon[i].dz_PV) << std::endl;
 				
 			if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && bTag && dZ ){
 				if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
@@ -730,7 +730,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
             bool tightID = TightEleId(genericElectron.at(i));
 
-            if(tightID && (genericElectron.at(i)).dz_PV < 0.2){
+            if(tightID && fabs((genericElectron.at(i)).dz_PV) < 0.2){
 	       goodElectron.push_back(genericElectron.at(i));
 	    } 
         }
@@ -739,12 +739,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         std::vector<myobject> goodMuon;
         for(uint i=0; i<genericMuon.size(); i++){
 
-            h_dZ_PV_muon->Fill((genericMuon.at(i)).dz_PV);
+            h_dZ_PV_muon->Fill(fabs((genericMuon.at(i)).dz_PV));
 
             bool pfID = PFMuonID(genericMuon.at(i));
-            if(examineThisEvent) std::cout << "The muon no. " << i << " has id " << pfID << " and dz " << genericMuon[i].dz_PV << std::endl;
+            if(examineThisEvent) std::cout << "The muon no. " << i << " has id " << pfID << " and dz " << fabs(genericMuon[i].dz_PV) << std::endl;
 
-            if(pfID && (genericMuon.at(i)).dz_PV < 0.2){
+            if(pfID && fabs((genericMuon.at(i)).dz_PV) < 0.2){
 	       goodMuon.push_back(genericMuon.at(i));
 	    } 
         }
@@ -891,7 +891,7 @@ if(muon_H.size()==0 && muon_W.size() > 0){
 		if(examineThisEvent) std::cout << " tau #" << i << "pt/eta/phi:"
 		<< tau[i].pt << "/" << tau[i].eta << "/" << tau[i].phi << " dz: " <<
 		tauDZ << " loose iso " << Loose3Hit << " DM " << DecayMode;
-		h_dZ_PV_tau->Fill(tauDZ);
+		h_dZ_PV_tau->Fill(fabs(tauDZ));
 		
             if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && fabs(tauDZ) < 0.2){
 				if(examineThisEvent) std::cout << " -> Selected!" << std::endl;
