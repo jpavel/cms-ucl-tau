@@ -72,7 +72,7 @@ public:
    double DistanceToClosestInCollection(myobject o1, std::vector<myobject> collection);
    double PairMass(myobject Hcand1, myobject Hcand2);	
    double PairPt(myobject Hcand1, myobject Hcand2);	
-   double RelIso(myobject mu);
+   double RelIso(myobject mu, bool verb);
    double Tmass(myevent *m, myobject mu);
    bool PFMuonID(myobject mu);
      bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb);
