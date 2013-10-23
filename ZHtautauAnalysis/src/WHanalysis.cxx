@@ -43,6 +43,7 @@ WHanalysis::WHanalysis()
         
     DeclareProperty("syncFileName",syncFileName);
     DeclareProperty("doSync",doSync);
+    DeclareProperty("checkF3",checkF3);
 }
 
 WHanalysis::~WHanalysis() {
@@ -600,12 +601,16 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 		double dR1= deltaR(genericTau[i].eta,genericTau[i].phi,Wcand.eta,Wcand.phi); 
 		double dR2= deltaR(genericTau[i].eta,genericTau[i].phi,Hcand1.eta,Hcand1.phi); 
 		double dR3= deltaR(genericTau[i].eta,genericTau[i].phi,Hcand2.eta,Hcand2.phi); 
-
+		bool tauPt = (genericTau[i]).pt > 20.;
+		bool tauEta = fabs((genericTau[i]).eta) < 2.3;
+		bool tauDZ = (genericTau[i]).dz_Ver_match < 0.2;
+		bool Loose3Hit = ((genericTau[i]).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
+		bool pass = tauPt && tauEta && tauDZ && Loose3Hit;
 		if(verbose) std::cout << " Tau cand no. " << i << std::endl;
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
-		if(dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4)
+		if(dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4 && pass)
 			Ad_tau=true;
 	}
 	return Ad_tau;
@@ -850,6 +855,7 @@ if(muon_H.size()==0){
 		double tauEta = (tau.at(i)).eta;
 		double tauDZ = (tau.at(i)).dz_Ver_match;
 		bool Loose3Hit = ((tau.at(i)).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
+		if(checkF3) Loose3Hit=!Loose3Hit;
 		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
 		// overlap removal
 		if(deltaR(muon_W[0],tau[i]) < 0.5) continue;
@@ -974,7 +980,7 @@ if(muon_H.size()==0){
         //if any, reject the event
 	if(examineThisEvent) std::cout << " Before additional isolated tau veto" << std::endl;
         bool Ad_tau=false;
-	if(AdTau_sig(goodElectron,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
+	if(AdTau_sig(tau,muon_H.at(0),tau_H.at(0),muon_W.at(0),examineThisEvent)){
 		Ad_tau=true;
          	}
         if(Ad_tau){

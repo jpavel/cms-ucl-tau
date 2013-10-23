@@ -174,6 +174,7 @@ private:
     
     std::string syncFileName;
     bool doSync;
+    bool checkF3;
     
 	
 	 // bookkeeping variables
