@@ -346,7 +346,7 @@ double WHanalysis::PairPt(myobject Hcand1, myobject Hcand2){
 	return H_sum.Pt();
 }
 
-std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_ = 10., double muEta_ = 2.4){
+std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_ = 5., double muEta_ = 2.4){
 
 	std::vector<myobject> outMu_;
 	outMu_.clear();
@@ -360,7 +360,7 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
                         bool pfID = PFMuonID(_muon[i]);
             bool pixelHits = (_muon[i].intrkLayerpixel >=1);
             
-            double max = 0.5;
+            double max = 0.4;
             double minDist = 1.0;
             int index = -1;
             for(uint j = 0; j< _jets.size(); j++)
@@ -377,7 +377,9 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 			if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
 			
             bool dZ = _muon[i].dz_PV < 0.2;
-
+if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
+				<< muEta << " pixelHits " << _muon[i].intrkLayerpixel << " btag " << bTag << " dz " << _muon[i].dz_PV << std::endl;
+				
 			if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && bTag && dZ ){
 				if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
 				<< muEta << std::endl;
@@ -602,7 +604,7 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 		double dR2= deltaR(genericTau[i].eta,genericTau[i].phi,Hcand1.eta,Hcand1.phi); 
 		double dR3= deltaR(genericTau[i].eta,genericTau[i].phi,Hcand2.eta,Hcand2.phi); 
 		bool tauPt = (genericTau[i]).pt > 20.;
-		bool tauEta = fabs((genericTau[i]).eta) < 2.3;
+		bool tauEta = fabs((genericTau[i]).eta) < 2.5;
 		bool tauDZ = (genericTau[i]).dz_Ver_match < 0.2;
 		bool Loose3Hit = ((genericTau[i]).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
 		bool pass = tauPt && tauEta && tauDZ && Loose3Hit;
@@ -776,8 +778,17 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         muon_H.clear();
   // every W candidate is good H candidate      
     if(muon_W.size() > 1){
-		muon_H.push_back(muon_W.at(1));
-		muon_W.erase(muon_W.begin()+1);
+		bool found = false;
+		for(uint iMu=1; iMu < muon_W.size() && !found; iMu++)
+		{
+			if(deltaR(muon_W[iMu],muon_W[0]) > 0.5){
+				 muon_H.push_back(muon_W[iMu]);
+				 found = true;
+				 muon_W.erase(muon_W.begin()+iMu);
+			 }
+					
+		}
+		
 	}
 // if no W candidate suitable, check the rest
 if(muon_H.size()==0){
@@ -1005,8 +1016,9 @@ if(muon_H.size()==0){
 		double jetEta = jet[i].eta;
 		double jetPhi = jet[i].phi;
 		double bTag = jet[i].bDiscriminatiors_CSV;
-		if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "btag " << bTag << std::endl;
-		if(jetPt > 20. && fabs(jetEta) < 2.4 && bTag > bTagValue){
+		double PUjetID = jet[i].puJetIdLoose;
+		if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "btag " << bTag << "PU jet ID" << std::endl;
+		if(jetPt > 20. && fabs(jetEta) < 2.4 && bTag > bTagValue && PUjetID){
 			count_bJets++;
 			if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
 			double dR1,dR2,dR3;
