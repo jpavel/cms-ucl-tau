@@ -171,10 +171,6 @@ for(uint iVal = 0; iVal < runs.size(); iVal++)
 {
 	std::cout << runs[iVal] << " " << lumis[iVal] << " " << events[iVal] << std::endl;
 }
-
-		
-	
-
    return;
 
 }
@@ -242,12 +238,12 @@ bool WHanalysis::Trg_MC_12(myevent* m, bool found) {
 	return Trigger;    
 }
 
-std::vector<myobject> WHanalysis::SelectGoodVxVector(std::vector<myobject> _vertex, double _normChi2 = 0., int _ndof = 4, double _dZ = 24.){
+std::vector<myobject> WHanalysis::SelectGoodVxVector(std::vector<myobject> _vertex, double _positionRho = 2., int _ndof = 4, double _dZ = 24.){
 	
 	std::vector<myobject> outVx_;
 	outVx_.clear();	
 	for (uint i = 0; i < _vertex.size(); i++) {
-			if (_vertex[i].isValid && _vertex[i].normalizedChi2 > _normChi2 && _vertex[i].ndof > _ndof && fabs(_vertex[i].z) < _dZ)
+			if (_vertex[i].isValid && _vertex[i].position_Rho < _positionRho && _vertex[i].ndof > _ndof && fabs(_vertex[i].z) < _dZ)
 			outVx_.push_back(_vertex[i]);
 	}
 	return outVx_;
