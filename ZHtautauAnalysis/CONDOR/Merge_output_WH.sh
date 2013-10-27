@@ -14,7 +14,11 @@ for block in  `seq -s ' ' 1 ${max}`; do
 #    more total.txt
     tail total.txt -n 1 >> ${pwd}/${2}/${1}_total.txt
     cat lumi.csv >> ${pwd}/${2}/${1}_lumi.csv
-    cat event.list >> ${pwd}/${2}/${1}_event.list
+    cat event_mmt.list >> ${pwd}/${2}/${1}_event_mmt.list
+    cat event_eet.list >> ${pwd}/${2}/${1}_event_eet.list
+    cat overlap_eet.list >> ${pwd}/${2}/${1}_overlap_eet.list
+    cat overlap_mmt.list >> ${pwd}/${2}/${1}_overlap_mmt.list
+
     cd ${pwd}
 done
 gsum=0

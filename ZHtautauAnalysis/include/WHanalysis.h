@@ -78,7 +78,8 @@ public:
      bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb);
    bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
    std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
-   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
+   //std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
+   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, std::vector<myobject> _jets, bool verb, double elPt_, double elEta_ );
    bool AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
@@ -104,9 +105,13 @@ private:
 	// histograms
 	
 	TH1* h_PU_weight;
+	TH1* h_count;
+	TH1* h_count_mmt;
+	TH1* h_count_eet;
 	TH1* h_nPU_raw;
 	TH1* h_nPU_reweight;
-        TH1* h_cut_flow;
+        TH1* h_cut_flow_mmt;
+        TH1* h_cut_flow_eet;
         TH1* h_dZ_PV_muon;
         TH1* h_dZ_PV_tau;
         TH1* h_muW_beforeVetoes_pt;
@@ -170,7 +175,8 @@ private:
     double OverM;
     double BelowM;
     double bTagValue;
-    double LTValue;
+    double LTValue_mmt;
+    double LTValue_eet;
     
     std::string syncFileName;
     bool doSync;
@@ -180,7 +186,11 @@ private:
 	 // bookkeeping variables
     
     ofstream lumi;
-    ofstream eventList;
+    ofstream eventList_mmt;
+    ofstream eventList_eet;
+    ofstream evOverlap;
+    ofstream evOverlap_mmt;
+    ofstream evOverlap_eet;
     
     ifstream sync_eventList;
     std::vector<long> runs,lumis,events;
