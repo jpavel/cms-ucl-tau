@@ -141,22 +141,23 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
         h_finalVisMass_below130                                  = Book(TH1D("h_HvisMass_below130LT","H vis mass",300,0,300));
         h_finalVisMass_above130                                  = Book(TH1D("h_HvisMass_above130LT","H vis mass",300,0,300));
 
-	h_fail_reason = Book(TH1D("h_fail_reason","Fail reason",14, 0.5,14.5));
+	h_fail_reason = Book(TH1D("h_fail_reason","Fail reason",15, 0.5,15.5));
 	h_fail_reason = Retrieve<TH1D>("h_fail_reason");
 	h_fail_reason->GetXaxis()->SetBinLabel(1, "trigger");
 	h_fail_reason->GetXaxis()->SetBinLabel(2, "good vx");
-	h_fail_reason->GetXaxis()->SetBinLabel(3, "1muW and 1muH");
+	h_fail_reason->GetXaxis()->SetBinLabel(3, "1lW and 1lH");
 	h_fail_reason->GetXaxis()->SetBinLabel(4, "charge");
-	h_fail_reason->GetXaxis()->SetBinLabel(5, "muW trigger match");
-	h_fail_reason->GetXaxis()->SetBinLabel(6, "muH trigger match");
-	h_fail_reason->GetXaxis()->SetBinLabel(7, "tau H cand");
-	h_fail_reason->GetXaxis()->SetBinLabel(8, "1tau cand");
-	h_fail_reason->GetXaxis()->SetBinLabel(9, "muW-muH inv mass");
-	h_fail_reason->GetXaxis()->SetBinLabel(10, "muH-tauH inv mass");
-	h_fail_reason->GetXaxis()->SetBinLabel(11, "muon veto");
-	h_fail_reason->GetXaxis()->SetBinLabel(12, "ele veto");
-	h_fail_reason->GetXaxis()->SetBinLabel(13, "tau veto");
-	h_fail_reason->GetXaxis()->SetBinLabel(14, "bjet veto");	
+	h_fail_reason->GetXaxis()->SetBinLabel(5, "lW trigger match");
+	h_fail_reason->GetXaxis()->SetBinLabel(6, "lH trigger match");
+	h_fail_reason->GetXaxis()->SetBinLabel(7, "Z mass");
+	h_fail_reason->GetXaxis()->SetBinLabel(8, "tau H cand");
+	h_fail_reason->GetXaxis()->SetBinLabel(9, "1tau cand");
+	h_fail_reason->GetXaxis()->SetBinLabel(10, "lW-lH inv mass");
+	h_fail_reason->GetXaxis()->SetBinLabel(11, "lH-lH inv mass");
+	h_fail_reason->GetXaxis()->SetBinLabel(12, "muon veto");
+	h_fail_reason->GetXaxis()->SetBinLabel(13, "ele veto");
+	h_fail_reason->GetXaxis()->SetBinLabel(14, "tau veto");
+	h_fail_reason->GetXaxis()->SetBinLabel(15, "bjet veto");	
 
 
 	if(is2011) LumiWeights_ = new reweight::LumiReWeighting("Fall11_PU.root", "dataPileUpHistogram_True_2011.root","mcPU","pileup");
@@ -987,8 +988,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 
         //if !mmt and !eet no problem! reject the event
-	if(!goodCandidate_mmt && !goodCandidate_eet) 
-           return;
+	if(!goodCandidate_mmt && !goodCandidate_eet){ 
+		h_fail_reason->Fill(3);
+                return;
+        }
 	h_cut_flow_mmt->Fill(3,1);
 	h_cut_flow_eet->Fill(3,1);
      
@@ -1066,10 +1069,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 h_count->Fill(1);
 		evOverlap << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ; 
 		if(examineThisEvent){ 
-			cout << deltaR(muon_H.at(0),electron_H.at(0)) << endl;
-			cout << deltaR(muon_H.at(0),electron_W.at(0)) << endl;
-			cout << deltaR(muon_W.at(0),electron_H.at(0)) << endl; 
-			cout << deltaR(muon_W.at(0),electron_W.at(0)) << endl;}
+			std::cout << "iso muH " << RelIso(muon_H.at(0)) << " iso muW " << RelIso(muon_W.at(0)) << std::endl;
+			std::cout << "iso elH " << RelIso(electron_H.at(0)) << " iso elW " << RelIso(electron_W.at(0)) << std::endl;
+			cout << "deltaR muH - eleH " << deltaR(muon_H.at(0),electron_H.at(0)) << endl;
+			cout << "deltaR muH - eleW " << deltaR(muon_H.at(0),electron_W.at(0)) << endl;
+			cout << "deltaR muW - eleH " << deltaR(muon_W.at(0),electron_H.at(0)) << endl; 
+			cout << "deltaR muW - eleW " << deltaR(muon_W.at(0),electron_W.at(0)) << endl;}
 			if((muon_W.at(0)).pt > (electron_W.at(0)).pt){
 				lepton_W.push_back(muon_W.at(0));
 				lepton_H.push_back(muon_H.at(0));
@@ -1158,7 +1163,11 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         //additional cut for eet to reject dy
         double Z_mass = 91.1876;
 	if(!goodCandidate_mmt && goodCandidate_eet) {
-           if( fabs(PairMass(lepton_W[0],lepton_H[0])-Z_mass) < 10. )
+           if( fabs(PairMass(lepton_W[0],lepton_H[0])-Z_mass) < 10. ){
+		if(examineThisEvent){
+			std::cout << "No close enough to Z mass!" << std::endl;
+			h_fail_reason->Fill(7);}
+           }
               return;
         }
 	h_cut_flow_eet->Fill(7,1);
@@ -1196,7 +1205,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if( goodTau.size() == 0 ){
 		if(examineThisEvent){
 			std::cout << "No good tau cand fail!" << std::endl;
-			h_fail_reason->Fill(7);
+			h_fail_reason->Fill(8);
 		}
 		return;
 	}
@@ -1247,7 +1256,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if( !(tau_H.size() == 1) ){
 		if(examineThisEvent){
 			std::cout << "Too many signal tau cands fail!" << std::endl;
-			h_fail_reason->Fill(8); 
+			h_fail_reason->Fill(9); 
 		}
 		return;
 	}
@@ -1272,7 +1281,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(PairMass(lepton_W[0],lepton_H[0]) < 20.){
 		if(examineThisEvent){
 			std::cout << " mu pair failed inv mass cut" << std::endl;
-			h_fail_reason->Fill(9);
+			h_fail_reason->Fill(10);
 		}
 		return;
 	}
@@ -1283,7 +1292,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(PairMass(lepton_H[0],tau_H[0]) < 20.){
 		if(examineThisEvent){
 			std::cout << " mutau pair failed inv mass cut" << std::endl;
-			h_fail_reason->Fill(10);
+			h_fail_reason->Fill(11);
 		}
 		return;
 	}
@@ -1301,7 +1310,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Ad_muon){
 		if(examineThisEvent) {
 			std::cout << "Muon veto fail!" << std::endl; 
-			h_fail_reason->Fill(11);
+			h_fail_reason->Fill(12);
 		}
 		return;
 	}
@@ -1320,7 +1329,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Ad_electron){
 		if(examineThisEvent){
 			std::cout << "Electron veto fail!" << std::endl; 
-			h_fail_reason->Fill(12);
+			h_fail_reason->Fill(13);
 		}
 
 		return;
@@ -1340,7 +1349,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(Ad_tau){
 		if(examineThisEvent){
 			std::cout << "tau veto fail!" << std::endl; 
-			h_fail_reason->Fill(13);
+			h_fail_reason->Fill(14);
 		}
 		return;
 	}
@@ -1383,7 +1392,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(bTagVeto){
 		if(examineThisEvent){
 			std::cout << "Btag veto fail!" << std::endl;
-			h_fail_reason->Fill(14);
+			h_fail_reason->Fill(15);
 		}	 
 		return;
 	}
