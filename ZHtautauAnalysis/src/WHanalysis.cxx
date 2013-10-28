@@ -976,14 +976,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent){
 			std::cout << "Possible good event for mmt final state!" << std::endl;
 		}
-		std::cout << "Possible good event for mmt final state!" << std::endl;
                 goodCandidate_mmt = true;
         }
 	if( electron_H.size() == 1 && electron_W.size() == 1 ){
 		if(examineThisEvent){
 			std::cout << "Possible good event for eet final state!" << std::endl;
 		}
-		std::cout << "Possible good event for eet final state!" << std::endl;
                 goodCandidate_eet = true;
         }
 
@@ -1004,6 +1002,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         if(goodCandidate_mmt && !goodCandidate_eet) {
            lepton_W.push_back(muon_W.at(0));
            lepton_H.push_back(muon_H.at(0));
+		if(examineThisEvent){
+			std::cout << "goodElectron size before re-pushing is: " << goodElectron.size() << std::endl;
+                }
            if(electron_W.size()!=0){
 		for(uint i=0; i<electron_W.size(); i++){
                    goodElectron.push_back(electron_W.at(i));
@@ -1016,7 +1017,15 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 }
                 electron_H.clear();
            }
-           
+		if(examineThisEvent){
+			std::cout << "goodCandidate_mmt bool is: " << goodCandidate_mmt << std::endl;
+			std::cout << "goodCandidate_eet bool is: " << goodCandidate_eet << std::endl;
+			std::cout << "goodElectron size after re-pushing is: " << goodElectron.size() << std::endl;
+			std::cout << "lepton_W size is: " << lepton_W.size() << std::endl;
+			std::cout << "lepton_H size is: " << lepton_H.size() << std::endl;
+			std::cout << "electron_W size after re-pushing is: " << electron_W.size() << std::endl;
+			std::cout << "electron_H size after re-pushing is: " << electron_H.size() << std::endl;
+                }
         }
         
 	//if !mmt and eet no problem! you are examing a possible good event for eet
@@ -1024,6 +1033,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(!goodCandidate_mmt && goodCandidate_eet) {
            lepton_W.push_back(electron_W.at(0));
            lepton_H.push_back(electron_H.at(0));
+		if(examineThisEvent){
+			std::cout << "goodMuon size before re-pushing is: " << goodMuon.size() << std::endl;
+                }
            if(muon_W.size()!=0){
 		for(uint i=0; i<muon_W.size(); i++){
                    goodMuon.push_back(muon_W.at(i));
@@ -1036,6 +1048,15 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 }
                 muon_H.clear();
            }
+		if(examineThisEvent){
+			std::cout << "goodCandidate_mmt bool is: " << goodCandidate_mmt << std::endl;
+			std::cout << "goodCandidate_eet bool is: " << goodCandidate_eet << std::endl;
+			std::cout << "goodMuon size after re-pushing is: " << goodMuon.size() << std::endl;
+			std::cout << "lepton_W size is: " << lepton_W.size() << std::endl;
+			std::cout << "lepton_H size is: " << lepton_H.size() << std::endl;
+			std::cout << "muon_W size after re-pushing is: " << muon_W.size() << std::endl;
+			std::cout << "muon_H size after re-pushing is: " << muon_H.size() << std::endl;
+                }
         }
         
 	//if mmt and eet: what to do? What Mauro does is not clear..
@@ -1087,6 +1108,18 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					muon_H.clear();
 				}
 			}
+		if(examineThisEvent){
+			std::cout << "goodCandidate_mmt bool is: " << goodCandidate_mmt << std::endl;
+			std::cout << "goodCandidate_eet bool is: " << goodCandidate_eet << std::endl;
+			std::cout << "goodMuon size : " << goodMuon.size() << std::endl;
+			std::cout << "goodElectron size : " << goodElectron.size() << std::endl;
+			std::cout << "lepton_W size is: " << lepton_W.size() << std::endl;
+			std::cout << "lepton_H size is: " << lepton_H.size() << std::endl;
+			std::cout << "muon_W size is: " << muon_W.size() << std::endl;
+			std::cout << "muon_H size is: " << muon_H.size() << std::endl;
+			std::cout << "electron_W size is: " << electron_W.size() << std::endl;
+			std::cout << "electron_H size is: " << electron_H.size() << std::endl;
+                }
 	}
 
        
