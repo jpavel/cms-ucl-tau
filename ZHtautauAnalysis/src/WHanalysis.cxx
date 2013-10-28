@@ -68,7 +68,9 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(out_pt,"pt");
 	
 	// histogram booking
-	
+        Double_t bins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 130, 300 };
+        h_visMass                                        = Book(TH1D("h_visMass","H vis mass", 9, bins));
+
 	h_PU_weight					 = Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
 	h_nPU_raw					 = Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
 	h_nPU_reweight					 = Book(TH1D("h_nPU_reweight","reweighted PU distribution",100,0,100));
@@ -700,6 +702,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 return;
 	 
 	 }
+	if(examineThisEvent){ 
+	   std::cout << " There is " << goodVertex.size() << " good vertex " << std::endl;
+	   std::cout << " position rho " << (goodVertex.at(0)).position_Rho << std::endl;
+	   std::cout << " ndof " << (goodVertex.at(0)).ndof << std::endl;
+	   std::cout << " Z " << (goodVertex.at(0)).z << std::endl;
+        }
         
         h_cut_flow->Fill(2,1);
 	
@@ -1075,6 +1083,7 @@ if(muon_H.size()==0 && muon_W.size() > 0){
         h_tauH_afterVetoes_phi->Fill((tau_H.at(0)).phi);
 
 
+        h_visMass->Fill(PairMass(muon_H.at(0),tau_H.at(0)));
 
         //define LT regions
 
