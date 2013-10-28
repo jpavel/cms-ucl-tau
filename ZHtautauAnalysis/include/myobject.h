@@ -66,6 +66,9 @@ public:
     float ecalIso, hcalIso, caloIso, trackIso, hcalOverEcal, SIP;
     bool passConversionVeto;
     float rawE_SC, preshowerE_SC;
+    bool isGsfCtfScPixChargeConsistent;
+    bool isGsfScPixChargeConsistent;
+    bool isGsfCtfChargeConsistent; 
 
     //For jet and taus
     float bDiscriminatiors_CSV,bDiscriminatiors_JP,bDiscriminatiors_TCHPT;
