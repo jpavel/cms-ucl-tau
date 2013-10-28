@@ -103,6 +103,7 @@ private:
 	
 	// histograms
 	
+	TH1* h_visMass;
 	TH1* h_PU_weight;
 	TH1* h_nPU_raw;
 	TH1* h_nPU_reweight;
