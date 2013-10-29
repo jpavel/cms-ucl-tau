@@ -163,7 +163,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		int n_same=0;
 		bool smaller = false;
 		bool equal = false;
-		treemap::iterator it;
+		treemap::iterator it=syncTreeMap.begin();
 		for(uint iEv = 0; iEv < syncTree->GetEntries(); iEv++)
 		{
 			if(equal) n_same++;
@@ -1603,7 +1603,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
 		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
 
-
+	// sync check
+	
+	
 	
 
 	
@@ -1620,6 +1622,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << "Examining! Event number " << eNumber << " ENTRY: " << m_allEvents << std::endl;
 	
+	if(doSync)
+	{
+		RunLumiEvent thisRLE(207279,556,792599216);
+		//(m->runNumber, m->lumiNumber, m->eventNumber);
+		treemap::iterator it=syncTreeMap.find(thisRLE);
+		long index =0;
+		int plusEvents = 0;
+		if(it!=syncTreeMap.end())
+		{
+			index=(it->second).first;
+			plusEvents=(it->second).second;
+			std::cout << " event for sync: " << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber <<
+			" index is " << index << " and plus events are " << plusEvents << std::endl;
+			examineThisEvent=true;
+		}
+	}
 	
 	double PUWeight = 1.0;
 	double nPU = 0.0;
