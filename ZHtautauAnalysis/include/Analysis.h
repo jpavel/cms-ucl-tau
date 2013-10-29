@@ -19,18 +19,23 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <map>
 
 // my classes
 #include "myevent.h"
 #include "TLorentzVector.h"
 #include "TProfile.h"
 #include "TH2.h"
+#include "RunLumiEvent.h"
 
 // PU weight
 
 #include "LumiReweightingStandAlone.h"
 //#include "Corrector2.h"
 
+
+typedef pair<long, int> treeinfo;
+typedef map<RunLumiEvent, treeinfo> treemap;
 
 /**
  *   @short Put short description of class here
@@ -307,6 +312,21 @@ private:
         ofstream log_events;
         ofstream log_files;
         
+        //sync variables
+        TFile* syncFile;
+        TTree* syncTree;
+        
+        std::vector<long> sync_event_vec;
+        std::vector<long> sync_lumi_vec;
+        std::vector<long> sync_run_vec;
+        
+        Int_t sync_event;
+        Int_t sync_lumi;
+        Int_t sync_run;
+        
+        treemap syncTreeMap;
+
+        
 	
         
 
@@ -398,6 +418,9 @@ private:
     bool IgnoreLTforFR_LL;
     
     bool reverseFR;
+    
+    std::string syncFileName;
+    bool doSync;
     
             
     

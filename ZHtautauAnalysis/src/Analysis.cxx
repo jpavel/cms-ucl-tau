@@ -100,6 +100,9 @@ Analysis::Analysis()
 		DeclareProperty("IgnoreLTforFR_LT",IgnoreLTforFR_LT);
 		DeclareProperty("IgnoreLTforFR_LL",IgnoreLTforFR_LL);
 		DeclareProperty("reverseFR",reverseFR);
+		
+		DeclareProperty("syncFileName",syncFileName);
+		DeclareProperty("doSync",doSync);
 
 	}
 
@@ -138,6 +141,69 @@ int Analysis::EventTypeConv(int e_type_in)
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
+	// sync tree
+	if(doSync){
+		syncFile = TFile::Open(syncFileName.c_str());
+		if(!syncFile) {
+			std::cerr << "Error: file " << syncFileName << " could not be opened." << std::endl; 
+			return;
+		}else std::cout << "File " << syncFileName << " succesfully opened!" << std::endl;
+		syncTree = (TTree*)syncFile->Get("BG_Tree");
+		std::cout << " sync tree has " << syncTree->GetEntries() << " entries" << std::endl;
+		
+		syncTree->SetBranchAddress( "Run_",    &sync_run );
+		syncTree->SetBranchAddress( "Event_",    &sync_event );
+		syncTree->SetBranchAddress( "Lumi_",    &sync_lumi );
+		
+		sync_run_vec.clear();
+		sync_lumi_vec.clear();
+		sync_event_vec.clear();
+		
+		syncTreeMap.clear();
+		int n_same=0;
+		bool smaller = false;
+		bool equal = false;
+		treemap::iterator it;
+		for(uint iEv = 0; iEv < syncTree->GetEntries(); iEv++)
+		{
+			if(equal) n_same++;
+			RunLumiEvent prevRLE(sync_run, sync_lumi, sync_event);
+			syncTree->GetEvent(iEv);
+			RunLumiEvent thisRLE(sync_run, sync_lumi, sync_event);
+			if(prevRLE < thisRLE) smaller=true;
+			else smaller=false;
+			if(prevRLE==thisRLE) equal=true;
+			else equal=false;
+			if(!equal){
+				std::cout << "write " << prevRLE.run <<":" << prevRLE.lumi <<":" << prevRLE.event << " " << n_same << " " << iEv - n_same -1 << std::endl;
+				it=syncTreeMap.find(prevRLE);
+				treeinfo myinfo = std::make_pair(iEv-n_same-1,n_same);
+				if(it==syncTreeMap.end())
+				{
+					syncTreeMap.insert(std::make_pair(prevRLE,myinfo));
+				}else{
+					m_logger << ERROR << " WTF ??? !!! " << SLogger::endmsg;
+				}
+				n_same=0;
+			}
+			std::cout << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << " "  << smaller << equal << std::endl;
+			sync_run_vec.push_back(sync_run);
+			sync_lumi_vec.push_back(sync_lumi);
+			sync_event_vec.push_back(sync_event);	
+			thisRLE = RunLumiEvent(sync_run, sync_lumi, sync_event);
+			
+		}
+		
+		//~ for(uint iEv=0; iEv < sync_event_vec.size(); iEv++)
+		//~ {
+			//~ syncTree->GetEvent(iEv);
+			//~ std::cout << iEv << ": " << sync_run_vec[iEv]-sync_run << ":" << sync_lumi_vec[iEv]-sync_lumi << ":" << sync_event_vec[iEv]-sync_event << std::endl;	
+		//~ }
+		
+	}else{
+		syncFile=NULL;
+		syncTree=NULL;
+	}
 	
 	// ntuple definition
 	//DeclareVariable(out_pt,"el_pt");
@@ -809,7 +875,7 @@ bool Analysis::Trg_MC_12(myevent* m, bool found) {
 
 double Analysis::Tmass(myevent *m, myobject mu) {
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
 	return tMass_v;
@@ -1603,7 +1669,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_weight->Fill(2,PUWeight);
 	
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
 	h_PF_MET_nPU->Fill(nGoodVx,Met.front().et,PUWeight);

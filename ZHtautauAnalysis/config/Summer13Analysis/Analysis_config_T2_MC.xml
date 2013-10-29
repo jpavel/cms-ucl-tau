@@ -126,6 +126,10 @@
 		<Item Name="IgnoreLTforFR_TT" Value="False" />
 		<Item Name="IgnoreLTforFR_LT" Value="True" />
 		<Item Name="IgnoreLTforFR_LL" Value="True" />
+		
+		<!-- Sync tree stuff -->
+		<Item Name="syncFileName" Value="Tree_DoubleEle_Run2012D.root" />
+		<Item Name="doSync" Value="True" />
                 
                       
 		</UserConfig>

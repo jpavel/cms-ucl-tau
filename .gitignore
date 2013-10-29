@@ -76,3 +76,6 @@ ZHtautauAnalysis/config/*/*.txt
 ZHtautauAnalysis/macros/plots/*/*.root
 ZHtautauAnalysis/macros/plots/*/*.pdf
 ZHtautauAnalysis/macros/plots/*/*.ps
+
+*jobTempOutput*
+*.list
