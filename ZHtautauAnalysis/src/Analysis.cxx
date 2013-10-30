@@ -676,6 +676,15 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	TString subChName[5] = {"cat0","cat1","cat2","sig","BGshape" };
 	TString syncSummaryName[5] = {"only UCL","type UCL","type ULB","OK","only ULB"};
 	TString failReasons[6] = {"trigger","Vx","Z", "iso leptons", "no H", "b tag" };
+	h_fail_shape_TT = Book(TH1D("h_fail_shape_TT","Reasons failing shape cuts",12,-0.5,11.5));
+	h_fail_shape_TT=Retrieve<TH1D>("h_fail_shape_TT");
+	TString failReasonsTT[12] = {"LeadPt","LeadElID","SubPt", "SS", "one pair", "SubEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau" };
+	
+	
+	for(uint jBin = 1; jBin <= (uint)h_fail_shape_TT->GetNbinsX(); jBin++)
+		{
+			h_fail_shape_TT->GetXaxis()->SetBinLabel(jBin,failReasonsTT[jBin-1]);
+		}
 	
 	for(uint i = 0; i < 5; i++)
 	{
@@ -2253,14 +2262,42 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
 	
 	bool tauTau =false;
+	
+	std::vector<int> s_s_i_TT; //sync_shape_index
+    s_s_i_TT.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==4 && sync_vec_Channel[iSync]%4 == 0) s_s_i_TT.push_back(iSync);
+	}
 
 	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
 	for(uint i = 0; i < goodTau.size(); i++)
 	{
 		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << " " <<  goodTau[i].charge << " " <<
 		goodTau[i].discriminationByElectronLoose << std::endl;
-		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
-		if(goodTau[i].discriminationByElectronLoose <= 0.5) continue;
+		// finding the sync match
+		int s_match_i = -1;
+		for(uint iSync =0; iSync < s_s_i_TT.size(); iSync++)
+		{
+			if(Zmumu && sync_vec_Channel[s_s_i_TT[iSync]]!=4) continue;
+			if(Zee && sync_vec_Channel[s_s_i_TT[iSync]]!=8) continue;
+			if(fabs(goodTau[i].pt - sync_vec_l3Pt[s_s_i_TT[iSync]]) < 0.1 && fabs(goodTau[i].eta - sync_vec_l3Eta[s_s_i_TT[iSync]]) < 0.1) s_match_i=iSync;
+		}
+		
+		if(goodTau[i].pt < Cut_tautau_Pt_1){
+			if(s_match_i > -1){
+				std::cout << "Failed lead tau cut: " << goodTau[i].pt << std::endl;
+				h_fail_shape_TT->Fill(0.0);
+			}
+			 continue;
+		 }
+		if(goodTau[i].discriminationByElectronLoose <= 0.5){
+			if(s_match_i > -1){
+				std::cout << "Failed lead tau ElId cut: " << std::endl;
+				h_fail_shape_TT->Fill(1.0);
+			}
+			 continue;
+		 }
 				
 		//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 		//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
@@ -2268,17 +2305,32 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double dZ1=deltaR(goodTau[i],Zcand[0]);
 		double dZ2=deltaR(goodTau[i],Zcand[1]);
 		
+		bool match2 = false;
 		for(uint j=i+1; j< goodTau.size() && !(category0 && category1 && category2 && signal); j++)
 		{
 			bool isFakeRate=false;
 			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << "ch: " << 
 			goodTau[j].charge << " mass: " << PairMass(goodTau[i],goodTau[j]) <<std::endl;
 			
+			if(s_match_i >-1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_TT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l3Eta[s_s_i_TT[s_match_i]]) < 0.1) match2=true;
+			}
 			
-			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
+			if(goodTau[j].pt < Cut_tautau_Pt_2){
+				 if(match2)
+				 {
+					std::cout << "Failed subleading tau cut" << std::endl;
+					h_fail_shape_TT->Fill(2.0);
+				 }
+				 continue;	
+			 }
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
 			isFakeRate = (goodTau[i].charge*goodTau[j].charge  > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
+			if(match2 && isFakeRate){
+				std::cout << "Failed sync charge cut" << std::endl;
+				h_fail_shape_TT->Fill(3.0);
+			}
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
@@ -2289,17 +2341,41 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
 			
-			if(isFakeRate && tauTau) continue; // save only one pair
-			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
+			if(isFakeRate && tauTau){
+				if(match2) {
+					std::cout << "too many pairs for FR" << std::endl;
+					h_fail_shape_TT->Fill(4.0);
+				}
+				 continue; // save only one pair
+			 }
+			if(goodTau[j].discriminationByElectronLoose <= 0.5){
+				if(match2) {
+					std::cout << "sub tau faild el ID" << std::endl;
+					h_fail_shape_TT->Fill(5.0);
+				}
+				 continue;
+			 }
 		
 			//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 			//if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
 		
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR){
+				if(match2){
+					std::cout << " shape cand failed delta R" << std::endl;
+					h_fail_shape_TT->Fill(6.0);
+				}
+				 continue;
+			 }
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
 			
-			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 			
+			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)){
+				if(match2){
+					std::cout << " shape cand failed dZ cut" << std::endl;
+					h_fail_shape_TT->Fill(7.0);
+				}
+				 continue; 			
+			 }
 			if(goodTau[i].pt > goodTau[j].pt){ 
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
@@ -2321,7 +2397,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_tautau_sumPt_FR);
 			
-			if(!LTcut && !LTcut_FR) continue;
+			if(!LTcut && !LTcut_FR){
+				if(match2){
+					std::cout << " shape cand failed LT cut" << std::endl;
+					h_fail_shape_TT->Fill(8.0);
+				}
+				 continue;
+			 }
 			signal = pass1 && pass2 && signalPtCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2335,7 +2417,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Ad_lepton=true;
 				}
 			}
-			if(Ad_lepton) continue;
+			if(Ad_lepton){
+				if(match2){
+					std::cout << " shape cand failed lepton veto" << std::endl;
+					h_fail_shape_TT->Fill(9.0);
+				}
+				 continue;
+			 }
 			if(isFakeRate) tauTau=true;
 			if(signal) tauTau=true;
 			if(!isFakeRate&&!signal&&LTcut&&signalPtCuts){
@@ -2382,7 +2470,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_pass.push_back(pass1);
 				Hcand_pass.push_back(pass2);
 				if(shapePass1 && shapePass2 && LTcut && signalPtCuts) Hcand_shape_pass.push_back(1);
-				else Hcand_shape_pass.push_back(0);
+				else{
+					 if(match2){
+						std::cout << "shape cand failed shape cuts" << std::endl;
+						h_fail_shape_TT->Fill(10.0);
+					 }
+					 Hcand_shape_pass.push_back(0);
+				 }
 				usedTauIdx.push_back(index);
 				if(Zmumu) Hcand_type_FR.push_back(4);
 				else if(Zee) Hcand_type_FR.push_back(8);
@@ -2406,6 +2500,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			m_logger << DEBUG << " hindex[0] " << i << SLogger::endmsg;
 			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
 
+		}
+		if(s_match_i > -1 && match2==false)
+		{
+			std::cout << " shape candidate not found" << std::endl;
+			h_fail_shape_TT->Fill(11.0);
 		}
 	}
 	

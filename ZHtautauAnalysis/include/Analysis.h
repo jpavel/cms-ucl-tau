@@ -358,6 +358,7 @@ private:
 		std::vector<TH2*> h_fail_reason;
         std::vector<TH2*> h_sync_summary;
         
+        TH1* h_fail_shape_TT;
 	
         
 
