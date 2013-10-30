@@ -139,6 +139,22 @@ int Analysis::EventTypeConv(int e_type_in)
 	}
 }
 
+std::string Analysis::EventTypeName(int e_type_in)
+{
+	switch(e_type_in)
+	{
+		case 1: return "MMMT";
+		case 2: return "MMME";
+		case 3: return "MMET";
+		case 4: return "MMTT";
+		case 5: return "EEMT";
+		case 6: return "EEEM";
+		case 7: return "EEET";
+		case 8: return "EETT";
+		default: return "";	
+	}
+}
+
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	// sync tree
@@ -149,11 +165,24 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 			return;
 		}else std::cout << "File " << syncFileName << " succesfully opened!" << std::endl;
 		syncTree = (TTree*)syncFile->Get("BG_Tree");
+		
 		std::cout << " sync tree has " << syncTree->GetEntries() << " entries" << std::endl;
 		
 		syncTree->SetBranchAddress( "Run_",    &sync_run );
 		syncTree->SetBranchAddress( "Event_",    &sync_event );
 		syncTree->SetBranchAddress( "Lumi_",    &sync_lumi );
+		
+		syncTree->SetBranchAddress( "Channel_", &sync_Channel );
+        syncTree->SetBranchAddress( "subChannel_", &sync_subChannel );
+		syncTree->SetBranchAddress( "HMass_", &sync_HMass );
+		syncTree->SetBranchAddress( "l3Pt_", &sync_l3Pt );
+		syncTree->SetBranchAddress( "l3Eta_", &sync_l3Eta );
+		syncTree->SetBranchAddress( "l3_CloseJetPt_", &sync_l3_CloseJetPt );
+		syncTree->SetBranchAddress( "l3_CloseJetEta_", &sync_l3_CloseJetEta );
+		syncTree->SetBranchAddress( "l4Pt_", &sync_l4Pt );
+		syncTree->SetBranchAddress( "l4Eta_", &sync_l4Eta );
+		syncTree->SetBranchAddress( "l4_CloseJetPt_", &sync_l4_CloseJetPt );
+		syncTree->SetBranchAddress( "l4_CloseJetEta_", &sync_l4_CloseJetEta );
 		
 		sync_run_vec.clear();
 		sync_lumi_vec.clear();
@@ -192,15 +221,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 			sync_event_vec.push_back(sync_event);	
 			thisRLE = RunLumiEvent(sync_run, sync_lumi, sync_event);
 			
-		}
-		
-		//~ for(uint iEv=0; iEv < sync_event_vec.size(); iEv++)
-		//~ {
-			//~ syncTree->GetEvent(iEv);
-			//~ std::cout << iEv << ": " << sync_run_vec[iEv]-sync_run << ":" << sync_lumi_vec[iEv]-sync_lumi << ":" << sync_event_vec[iEv]-sync_event << std::endl;	
-		//~ }
-		
-	}else{
+		}	
+	}else{ // doSync == false
 		syncFile=NULL;
 		syncTree=NULL;
 	}
@@ -646,6 +668,55 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		h_category1_jetRef_pt_types.push_back(h_category1_temp_jetRef_pt);
 		h_category2_jetRef_pt_types.push_back(h_category2_temp_jetRef_pt);
     
+		
+	}
+	
+	TString subChName[5] = {"cat0","cat1","cat2","sig","BGshape" };
+	TString syncSummaryName[5] = {"only UCL","type UCL","type ULB","OK","only ULB"};
+	TString failReasons[6] = {"trigger","Vx","Z", "iso leptons", "no H", "b tag" };
+	
+	for(uint i = 0; i < 5; i++)
+	{
+		std::stringstream fail_reason_s_name;
+		fail_reason_s_name << "h_fail_reason_reason sch_" << i;
+		std::string fail_reason_name = fail_reason_s_name.str();
+		
+		std::stringstream fail_reason_s_title;
+		fail_reason_s_title << subChName[i];
+		std::string fail_reason_title = fail_reason_s_title.str();
+		
+		TH2D* h_fail_reason_temp 					=  Book(TH2D(TString(fail_reason_name),TString(fail_reason_title),10,-0.5,9.5,8,0.5,8.5));
+		for(uint iBin = 1; iBin <= (uint)h_event_type->GetNbinsX(); iBin++)
+		{
+			h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+		}
+		
+		for(uint jBin = 1; jBin <= (uint)h_fail_reason_temp->GetNbinsX(); jBin++)
+		{
+			h_fail_reason_temp->GetXaxis()->SetBinLabel(jBin,failReasons[jBin-1]);
+		}
+		
+		h_fail_reason.push_back(h_fail_reason_temp);
+		
+		
+		std::stringstream sync_summary_s_name;
+		sync_summary_s_name << "h_sync_summary_reason sch_" << i;
+		std::string sync_summary_name = sync_summary_s_name.str();
+		
+		std::stringstream sync_summary_s_title;
+		sync_summary_s_title << subChName[i];
+		std::string sync_summary_title = sync_summary_s_title.str();
+		
+		TH2D* h_sync_summary_temp 					=  Book(TH2D(TString(sync_summary_name),TString(sync_summary_title),5,-0.5,4.5,8,0.5,8.5));
+		for(uint iBin = 1; iBin <= (uint)h_event_type->GetNbinsX(); iBin++)
+		{
+			h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+		}
+		for(uint jBin = 1; jBin <= (uint)h_sync_summary_temp->GetNbinsX(); jBin++)
+		{
+			h_sync_summary_temp->GetXaxis()->SetBinLabel(jBin,syncSummaryName[jBin-1]);
+		}
+		h_sync_summary.push_back(h_sync_summary_temp);
 		
 	}
 
@@ -1622,13 +1693,25 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << "Examining! Event number " << eNumber << " ENTRY: " << m_allEvents << std::endl;
 	
+	sync_vec_Channel.clear();
+	sync_vec_subChannel.clear();
+	sync_vec_HMass.clear();
+	sync_vec_l3Pt.clear();
+	sync_vec_l3Eta.clear();
+	sync_vec_l3_CloseJetPt.clear();
+	sync_vec_l3_CloseJetEta.clear();
+	sync_vec_l4Pt.clear();
+	sync_vec_l4Eta.clear();
+	sync_vec_l4_CloseJetPt.clear();
+	sync_vec_l4_CloseJetEta.clear();
+
 	if(doSync)
 	{
-		RunLumiEvent thisRLE(207279,556,792599216);
-		//(m->runNumber, m->lumiNumber, m->eventNumber);
+		RunLumiEvent thisRLE(m->runNumber, m->lumiNumber, m->eventNumber);
 		treemap::iterator it=syncTreeMap.find(thisRLE);
 		long index =0;
 		int plusEvents = 0;
+				
 		if(it!=syncTreeMap.end())
 		{
 			index=(it->second).first;
@@ -1636,6 +1719,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			std::cout << " event for sync: " << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber <<
 			" index is " << index << " and plus events are " << plusEvents << std::endl;
 			examineThisEvent=true;
+			syncTree->GetEvent(index);
+			for(int iEv=0; iEv <= plusEvents; iEv++)
+			{
+				syncTree->GetEvent(index+iEv);
+			
+				std::cout << " Obtaining entry#" << index << "/" << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << 
+				"channel/subchannel:" << sync_Channel << "/" << sync_subChannel << std::endl;
+			
+				sync_vec_Channel.push_back(sync_Channel);
+		        sync_vec_subChannel.push_back(sync_subChannel);
+				sync_vec_HMass.push_back(sync_HMass);
+				sync_vec_l3Pt.push_back(sync_l3Pt);
+				sync_vec_l3Eta.push_back(sync_l3Eta);
+				sync_vec_l3_CloseJetPt.push_back(sync_l3_CloseJetPt);
+				sync_vec_l3_CloseJetEta.push_back(sync_l3_CloseJetEta);
+				sync_vec_l4Pt.push_back(sync_l4Pt);
+				sync_vec_l4Eta.push_back(sync_l4Eta);
+				sync_vec_l4_CloseJetPt.push_back(sync_l4_CloseJetPt);
+				sync_vec_l4_CloseJetEta.push_back(sync_l4_CloseJetEta);	
+				
+				syncTree->GetEvent(index+iEv+1);
+				std::cout << " Next entry#" << index << "/" << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << std::endl;
+			}
+			
 		}
 	}
 	
@@ -1674,6 +1781,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(!trigPass)
 	{
 		if(examineThisEvent) std::cout << "Trigger fail! " << examineEvent << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(0.,double(Ch));
+		}
 		return;
 	}
 	
@@ -1681,7 +1797,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
 	// at least one good vertex
-	if(nGoodVx < 1) return;
+	if(nGoodVx < 1){
+		if(examineThisEvent) std::cout << "vertex fail" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(1.,double(Ch));
+		}
+		 return;
+	 
+	 }
 	
 	h_cut_flow->Fill(2,1);
 	h_cut_flow_weight->Fill(2,PUWeight);
@@ -1839,6 +1968,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	else{
 		if(examineThisEvent) std::cout << "No Z cand!" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(2.,double(Ch));
+		}
 			return;
 	}
 	
@@ -1961,7 +2099,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(RelIso(denomMuon[i]) < 0.3 && isLooseMu(denomMuon[i])) isoMuons++;
 	}
 	
-	if(isoElectrons > 2  || isoMuons > 2) return;
+	if(isoElectrons > 2  || isoMuons > 2){
+		if(examineThisEvent) std::cout << " too much iso leptons: " << isoElectrons << " " << isoMuons << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(3.,double(Ch));
+		}
+		 return;
+	 }
 	
 	h_cut_flow->Fill(4,1);
 	h_cut_flow_weight->Fill(4,Z_weight);
@@ -2723,7 +2873,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
 	if((Hcand_cat2.size() + Hcand_cat1.size() + Hcand_cat0.size() + Hcand_FR.size() + Hcand_signal.size()) ==0){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
-	
+		if(examineThisEvent) std::cout << " No Higgs candidate. Going to next event" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(4.,double(Ch));
+		}
 		return;
 	}
 	
@@ -2847,7 +3006,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(bTagVeto)
 	{
-		
+		if(examineThisEvent) std::cout << " B veto fail" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(5.,double(Ch));
+		}	
 		return;
 	}
 	
@@ -2870,9 +3038,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// histogramming
 	
 	// signal saving
+	int sync_sig_index=-1;
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==3) sync_sig_index=iSync;
+	}
+	
 	if(Hcand_signal.size() > 0)
 		{
+			 
 			 int event_type = Hcand_type_signal[0];
+			 if(sync_sig_index < 0) h_sync_summary[3]->Fill(0.0,double(event_type));
+			 else if(EventTypeConv(sync_vec_Channel[sync_sig_index])!=event_type){
+				  h_sync_summary[3]->Fill(1.0,double(event_type));
+				  h_sync_summary[3]->Fill(2.0,double(EventTypeConv(sync_vec_Channel[sync_sig_index])));
+			  }
+			 else h_sync_summary[3]->Fill(3.0,double(event_type));
+			 
 			 Hist( "h_event_type" )->Fill(event_type,weight);
 			 Hist( "h_event_type_raw" )->Fill(event_type);
 			 
@@ -3014,13 +3196,40 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			}
 			 
-		 }
+		}else{ // no sig candidate
+				if(sync_sig_index > -1) // sync event exists
+				{
+					h_sync_summary[3]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_sig_index])));
+				}
+		 
+		}
     // save mass info in SS events to get background shape
+    std::vector<int> sync_BG_index;
+    sync_BG_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==4) sync_BG_index.push_back(iSync);
+	}
+    
     for(uint i=0; i < Hcand_FR.size(); i+=2)
 		{
 			 if(Hcand_shape_pass[i/2] <1) continue; // did not pass loose ID+iso cuts
 			 int event_type = Hcand_type_FR[i/2];
+			 bool common = false;
+			 double Mass;
+			 if(doSync) Mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
 			 
+			 for(uint iSync = 0; iSync < sync_BG_index.size() && !common; iSync++)
+			 {
+				 if(event_type == EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])  && 
+					(fabs(Mass-sync_vec_HMass[sync_BG_index[iSync]]) < 0.1) ) common = true;//
+				if(common){ // remove matched candidates
+					sync_BG_index.erase(sync_BG_index.begin()+iSync);
+					iSync-=1;
+				}
+			 }
+			 if(common) h_sync_summary[4]->Fill(3.0,double(event_type));
+			 else h_sync_summary[4]->Fill(0.0,double(event_type)); // UCL only
 			 //ntuple filling
 			o_run=m->runNumber;
 			o_lumi=m->lumiNumber;
@@ -3117,6 +3326,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			 
 		 }
+		 // not matched sync objects
+		 for(uint iSync = 0; iSync < sync_BG_index.size(); iSync++)
+			 {
+				h_sync_summary[4]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])));
+			 }
 			
 	if(printoutEvents)
 	{
@@ -3348,6 +3562,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		 
 	}
+	
+	std::vector<int> sync_cat0_index;
+    sync_cat0_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==0) sync_cat0_index.push_back(iSync);
+	}
 				
 	if(examineThisEvent) std::cout << " filling AP histo cat0 " << std::endl;
 	for(uint i=0; i < Hcand_cat0.size(); i+=2)
@@ -3355,6 +3576,26 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int exp_event_type=Hcand_type_cat0[i/2];
 			myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
 			myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
+			
+			 bool common = false;
+			 
+			 for(uint iSync = 0; iSync < sync_cat0_index.size() && !common; iSync++)
+			 {
+				 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]]))  && 
+					(fabs(Hcand_cat0[i].pt-sync_vec_l3Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i].eta-sync_vec_l3Eta[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].pt-sync_vec_l4Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].eta-sync_vec_l4Eta[sync_cat0_index[iSync]]) < 0.1)
+				   ) common = true;//
+				if(common){ // remove matched candidates
+					sync_cat0_index.erase(sync_cat0_index.begin()+iSync);
+					iSync-=1;
+				}
+			 }
+			 
+			  if(common) h_sync_summary[0]->Fill(3.0,double(exp_event_type));
+			  else h_sync_summary[0]->Fill(0.0,double(exp_event_type)); // UCL only
+			
 			bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
 			bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 			switch(exp_event_type)
@@ -3387,13 +3628,45 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					break;
 			}
 		}
+		
+		 // not matched sync objects
+		 for(uint iSync = 0; iSync < sync_cat0_index.size(); iSync++)
+			 {
+				h_sync_summary[0]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]])));
+			 }
+			 
 	if(examineThisEvent) std::cout << " filling AP histo cat1 " << std::endl;
 	
+	std::vector<int> sync_cat1_index;
+    sync_cat1_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==1) sync_cat1_index.push_back(iSync);
+	}
 	// messed with categories: cat1 = tau fails or e fails	
 	for(uint i=0; i < Hcand_cat1.size(); i+=2)
 	{
 		int exp_event_type=Hcand_type_cat1[i/2];
 		myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
+		
+		bool common = false;
+			 
+		 for(uint iSync = 0; iSync < sync_cat1_index.size() && !common; iSync++)
+		 {
+			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]]))  && 
+				(fabs(Hcand_cat1[i].pt-sync_vec_l3Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i].eta-sync_vec_l3Eta[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].pt-sync_vec_l4Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].eta-sync_vec_l4Eta[sync_cat1_index[iSync]]) < 0.1)
+			   ) common = true;//
+			if(common){ // remove matched candidates
+				sync_cat1_index.erase(sync_cat1_index.begin()+iSync);
+				iSync-=1;
+			}
+		 }
+		if(common) h_sync_summary[1]->Fill(3.0,double(exp_event_type));
+		else h_sync_summary[1]->Fill(0.0,double(exp_event_type)); // UCL only
+		
 		bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 		
 			h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
@@ -3401,12 +3674,44 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt);
 								
 	}
+	
+	for(uint iSync = 0; iSync < sync_cat1_index.size(); iSync++)
+	 {
+		h_sync_summary[1]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]])));
+	 }
+	
 	if(examineThisEvent) std::cout << " filling AP histo cat2 " << std::endl;
+	
+	std::vector<int> sync_cat2_index;
+    sync_cat2_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==2) sync_cat2_index.push_back(iSync);
+	}
 	
 	for(uint i=0; i < Hcand_cat2.size(); i+=2)
 	{
 		int exp_event_type=Hcand_type_cat2[i/2];
 		myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
+		
+		bool common = false;
+			 
+		 for(uint iSync = 0; iSync < sync_cat2_index.size() && !common; iSync++)
+		 {
+			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]]))  && 
+				(fabs(Hcand_cat2[i].pt-sync_vec_l3Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i].eta-sync_vec_l3Eta[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].pt-sync_vec_l4Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].eta-sync_vec_l4Eta[sync_cat2_index[iSync]]) < 0.1)
+			   ) common = true;//
+			if(common){ // remove matched candidates
+				sync_cat2_index.erase(sync_cat2_index.begin()+iSync);
+				iSync-=1;
+			}
+		 }
+		if(common) h_sync_summary[2]->Fill(3.0,double(exp_event_type));
+		else h_sync_summary[2]->Fill(0.0,double(exp_event_type)); // UCL only
+		
 		bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
 		
 		h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
@@ -3414,6 +3719,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
 		
 	}
+	
+	for(uint iSync = 0; iSync < sync_cat2_index.size(); iSync++)
+	 {
+		h_sync_summary[2]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]])));
+	 }
 	
 	
 	
