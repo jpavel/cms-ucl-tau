@@ -453,7 +453,7 @@ std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _elec
 			bool dZ = fabs(_electron[i].dz_PV) < 0.2;
                         
 			//if ( elPt > elPt_ && fabs(elEta) < elEta_ )
-			if ( elPt > elPt_ && fabs(elEta) < elEta_ && eleHit < 1 && bTag && dZ && tightID)
+			if ( tightID && elPt > elPt_ && fabs(elEta) < elEta_ && eleHit < 1 && bTag && dZ )
 			{
 				if(verb) std::cout << " pre-_electron " << i << " pt eta etaSC: " << elPt << " " 
 					<< elEta << " " << _electron[i].eta << std::endl;
@@ -775,20 +775,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	CrossCleanWithMu(&genericElectron,genericMuon,examineThisEvent,maxDeltaR);
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " selected electrons" << std::endl;
 
-	//select good electron 
-        std::vector<myobject> goodElectron;
-        for(uint i=0; i<genericElectron.size(); i++){
-
-            bool isGsfCtfScPixCC = (genericElectron.at(i)).isGsfCtfScPixChargeConsistent;
-            bool isGsfScPixCC = (genericElectron.at(i)).isGsfScPixChargeConsistent; 
-            bool isGsfCtfCC = (genericElectron.at(i)).isGsfCtfChargeConsistent;
-            bool conversionVeto = (genericElectron.at(i)).passConversionVeto;
-
-            //if(tightID && fabs((genericElectron.at(i)).dz_PV) < 0.2){
-            if( isGsfCtfScPixCC && isGsfScPixCC && isGsfCtfCC && conversionVeto ){
-	       goodElectron.push_back(genericElectron.at(i));
-	    } 
-        }
 	
         //select good muon 
         std::vector<myobject> goodMuon;
@@ -805,7 +791,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         }
          
 	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " good muon before mu_W selection " << endl;
-	if(examineThisEvent) std::cout << " There are " << goodElectron.size() << " good electron before ele_W selection " << endl;
 
         //define all the vector you need for candidates
         std::vector<myobject> muon_W;
@@ -813,9 +798,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> muon_H;
 	muon_H.clear();
 	std::vector<myobject> electron_W;
-	electron_W.clear();
+        electron_W.clear();
 	std::vector<myobject> electron_H;
-	electron_H.clear();
+        electron_H.clear();
 
 	//select leading muon for W
 	for(uint i=0; i<goodMuon.size(); i++){
@@ -906,15 +891,30 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         }
        
         if(!goodCandidate_mmt){
-		//select leading electron for W
+		//select good electron 
+		std::vector<myobject> goodElectron;
+		for(uint i=0; i<genericElectron.size(); i++){
 
+			bool isGsfCtfScPixCC = (genericElectron.at(i)).isGsfCtfScPixChargeConsistent;
+			bool isGsfScPixCC = (genericElectron.at(i)).isGsfScPixChargeConsistent; 
+			bool isGsfCtfCC = (genericElectron.at(i)).isGsfCtfChargeConsistent;
+			bool conversionVeto = (genericElectron.at(i)).passConversionVeto;
+
+			//if(tightID && fabs((genericElectron.at(i)).dz_PV) < 0.2){
+			if( isGsfCtfScPixCC && isGsfScPixCC && isGsfCtfCC && conversionVeto ){
+				goodElectron.push_back(genericElectron.at(i));
+				genericElectron.erase(genericElectron.begin()+i);
+				i = i-1;
+			} 
+		}
+		//select leading electron for W
 		for(uint i=0; i<goodElectron.size(); i++){
 			// pt cut > 20
 			if( (goodElectron.at(i)).pt < 20.)  continue;
 			//
-			if(examineThisEvent) 
+			if(examineThisEvent){ 
 				cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
-					"rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;
+					"rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;}
 			if( fabs((goodElectron.at(i)).eta) < 1.479 ){
 				if( RelIso(goodElectron.at(i)) < 0.15 ){
 					electron_W.push_back(goodElectron.at(i));
@@ -961,8 +961,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(goodElectron[i].pt > electron_W[0].pt) continue;
 				if(deltaR(goodElectron[i],electron_W[0]) < 0.5) continue;
 				//
-				if(examineThisEvent) cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
-					"rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;
+				if(examineThisEvent) cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi << "rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;
+
 				if( fabs((goodElectron.at(i)).eta) < 1.479 ){
 					if( RelIso(goodElectron.at(i)) < 0.20 ){
 						electron_H.push_back(goodElectron.at(i));
@@ -1014,7 +1014,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent){
 			std::cout << "goodCandidate_mmt bool is: " << goodCandidate_mmt << std::endl;
 			std::cout << "goodCandidate_eet bool is: " << goodCandidate_eet << std::endl;
-			std::cout << "goodElectron size after re-pushing is: " << goodElectron.size() << std::endl;
 			std::cout << "lepton_W size is: " << lepton_W.size() << std::endl;
 			std::cout << "lepton_H size is: " << lepton_H.size() << std::endl;
 			std::cout << "electron_W size after re-pushing is: " << electron_W.size() << std::endl;
@@ -1070,7 +1069,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
         //additional cut for eet to reject dy
         double Z_mass = 91.1876;
-	if(goodCandidate_eet) {
+	if(!goodCandidate_mmt && goodCandidate_eet) {
            if( fabs(PairMass(lepton_W[0],lepton_H[0])-Z_mass) < 10. ){
 		if(examineThisEvent){
 			std::cout << "No close enough to Z mass!" << std::endl;
@@ -1078,8 +1077,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		return;
 	   }
-	}
-	h_cut_flow_eet->Fill(7,1);
+	   h_cut_flow_eet->Fill(7,1);
+        }
 
 	//select good taus 
 	std::vector<myobject> goodTau;
@@ -1131,6 +1130,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool TightMuon    = ((goodTau.at(i)).discriminationByMuonTight > 0.5);
 		bool LooseMuon    = ((goodTau.at(i)).discriminationByMuonLoose > 0.5);
 		bool charge = goodTau[i].charge*lepton_H[0].charge < 0; // tau OS sign cut
+
+                double mass1 = fabs(PairMass(lepton_W[0],goodTau.at(i)) - Z_mass);
+                double mass2 = fabs(PairMass(lepton_H[0],goodTau.at(i)) - Z_mass);
+
 		if(goodCandidate_mmt) {
 			if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
 				LooseEleMVA3 << TightMuon << " charge: " << charge << std::endl;
@@ -1141,12 +1144,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(goodCandidate_eet) {
 			if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
 				LooseEleMVA3 << LooseMuon << " charge: " << charge << std::endl;
-			if(fabs(PairMass(lepton_W[0],goodTau.at(i)) - Z_mass) < 10. ||fabs( PairMass(lepton_H[0],goodTau.at(i)) - Z_mass) < 10.){
+			if( mass1 < 10. || mass2 < 10.){
 				if ( TightEleMVA3 && LooseMuon && charge ){
 					tau_H.push_back(goodTau.at(i));
 				}
 			}
-			else if( (10. < fabs(PairMass(lepton_W[0],goodTau.at(i)) - Z_mass)  && fabs(PairMass(lepton_W[0],goodTau.at(i)) - Z_mass) < 20.) || (10. < fabs( PairMass(lepton_H[0],goodTau.at(i)) - Z_mass)  &&  fabs( PairMass(lepton_H[0],goodTau.at(i)) - Z_mass) < 20.) ){
+			else if( (mass1 > 10. && mass2 < 20.) || (mass1 > 10.  &&  mass2 < 20.) ){
 				if ( MediumEleMVA3 && LooseMuon && charge ){
 					tau_H.push_back(goodTau.at(i));
 				}
@@ -1189,7 +1192,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// check the masses of the pair(s)
 	if(PairMass(lepton_W[0],lepton_H[0]) < 20.){
 		if(examineThisEvent){
-			std::cout << " mu pair failed inv mass cut" << std::endl;
+			std::cout << " l-l pair failed inv mass cut" << std::endl;
 			h_fail_reason->Fill(10);
 		}
 		return;
@@ -1200,7 +1203,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	if(PairMass(lepton_H[0],tau_H[0]) < 20.){
 		if(examineThisEvent){
-			std::cout << " mutau pair failed inv mass cut" << std::endl;
+			std::cout << " l-tau pair failed inv mass cut" << std::endl;
 			h_fail_reason->Fill(11);
 		}
 		return;
@@ -1211,7 +1214,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	//check the presence of additional isolated muons
 	//if any, reject the event
-	if(examineThisEvent) std::cout << " Before additional isolated muon veto" << std::endl;
+	if(examineThisEvent){
+                std::cout << " ***** Before VETOES *****" << std::endl;
+                std::cout << lepton_H.size() << " lept_H " << lepton_W.size() << " lept_W " << tau_H.size() << " tau_H " << std::endl;
+                std::cout << " still " << goodTau.size() << " tau, " << genericElectron.size() << " ele, " << goodMuon.size()  << " muon " << std::endl;
+                std::cout << " Before additional isolated muon veto" << std::endl;
+        }
 	bool Ad_muon=false;
 	if(AdMuon_sig(goodMuon,lepton_H.at(0),tau_H.at(0),lepton_W.at(0),examineThisEvent)){
 		Ad_muon=true;
@@ -1323,13 +1331,14 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	//define LT regions
 
-	double LT;
-	bool aboveEvent = false;
-	bool belowEvent = false;
-
-	LT = (lepton_W.at(0)).pt + (lepton_H.at(0)).pt + (tau_H.at(0)).pt;
+		double LT;
+		bool aboveEvent = false;
+		bool belowEvent = false;
+	
 
 	if(goodCandidate_mmt) {
+ 	LT = (lepton_W.at(0)).pt + (lepton_H.at(0)).pt + (tau_H.at(0)).pt;
+
 		if(LT < LTValue_mmt){
 			//h_finalVisMass_below130->Fill(PairMass(lepton_H.at(0),tau_H.at(0)));
 			belowEvent = true;
@@ -1340,6 +1349,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	        }
         }
 	if(goodCandidate_eet) {
+ 	LT = (lepton_W.at(0)).pt + (lepton_H.at(0)).pt + (tau_H.at(0)).pt;
 		if(LT < LTValue_eet){
 			//h_finalVisMass_below130->Fill(PairMass(lepton_H.at(0),tau_H.at(0)));
 			belowEvent = true;
