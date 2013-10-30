@@ -359,6 +359,9 @@ private:
         std::vector<TH2*> h_sync_summary;
         
         TH1* h_fail_shape_TT;
+		TH1* h_fail_shape_MT;
+		TH1* h_fail_shape_ET;
+		TH1* h_fail_shape_EM;
 	
         
 
