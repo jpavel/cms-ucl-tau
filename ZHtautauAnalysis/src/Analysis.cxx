@@ -89,6 +89,7 @@ Analysis::Analysis()
 		
 		//ntuple out
 		
+		DeclareProperty("doNtuple", doNtuple);
 		DeclareProperty("FillPDFInfo",FillPDFInfo);
 		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
 		DeclareProperty("FillZZgenInfo",FillZZgenInfo);
@@ -229,6 +230,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	// ntuple definition
 	//DeclareVariable(out_pt,"el_pt");
+	if(doNtuple){
 	DeclareVariable(o_run,"o_run");
 	DeclareVariable(o_lumi,"o_lumi");
 	DeclareVariable(o_event,"o_event");
@@ -311,8 +313,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_gen_MET_x,"o_gen_MET_x");
 	DeclareVariable(o_gen_MET_y,"o_gen_MET_y");
 	DeclareVariable(o_gen_MET,"o_gen_MET");
-	
-	
+
+}
 
 
 	
@@ -685,7 +687,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		fail_reason_s_title << subChName[i];
 		std::string fail_reason_title = fail_reason_s_title.str();
 		
-		TH2D* h_fail_reason_temp 					=  Book(TH2D(TString(fail_reason_name),TString(fail_reason_title),10,-0.5,9.5,8,0.5,8.5));
+		TH2D* h_fail_reason_temp 					=  Book(TH2D(TString(fail_reason_name),TString(fail_reason_title),6,-0.5,5.5,8,0.5,8.5));
 		for(uint iBin = 1; iBin <= (uint)h_event_type->GetNbinsX(); iBin++)
 		{
 			h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
@@ -1575,6 +1577,7 @@ std::vector<myGenobject> FindTrueZZ(std::vector<myGenobject>* _allGen){
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
+	if(doNtuple){
 	o_run=0;
 	o_lumi=0;
 	o_event=0;
@@ -1657,7 +1660,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_gen_MET_x=0;
 	o_gen_MET_y=0;
 	o_gen_MET=0;
-	
+}
 
 	// bookkepping part
 	++m_allEvents;
@@ -3061,6 +3064,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 			 h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
 			 //ntuple filling
+			if(doNtuple){
 			o_run=m->runNumber;
 			o_lumi=m->lumiNumber;
 			o_event=m->eventNumber;
@@ -3195,7 +3199,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				o_gen_MET=genMET;
 			
 			}
-			 
+		 }
 		}else{ // no sig candidate
 				if(sync_sig_index > -1) // sync event exists
 				{
@@ -3231,6 +3235,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 if(common) h_sync_summary[4]->Fill(3.0,double(event_type));
 			 else h_sync_summary[4]->Fill(0.0,double(event_type)); // UCL only
 			 //ntuple filling
+			 if(doNtuple){
 			o_run=m->runNumber;
 			o_lumi=m->lumiNumber;
 			o_event=m->eventNumber;
@@ -3322,7 +3327,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				o_pdf_signalProcessID=m->signalProcessID; 
 				o_pdf_binningValueSize=m->binningValueSize; 
 			}
-			
+			}
 			
 			 
 		 }
@@ -3578,20 +3583,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
 			
 			 bool common = false;
-			 
 			 for(uint iSync = 0; iSync < sync_cat0_index.size() && !common; iSync++)
 			 {
+				 if(exp_event_type!=2){
 				 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]]))  && 
 					(fabs(Hcand_cat0[i].pt-sync_vec_l3Pt[sync_cat0_index[iSync]]) < 0.1) &&
 					(fabs(Hcand_cat0[i].eta-sync_vec_l3Eta[sync_cat0_index[iSync]]) < 0.1) &&
 					(fabs(Hcand_cat0[i+1].pt-sync_vec_l4Pt[sync_cat0_index[iSync]]) < 0.1) &&
 					(fabs(Hcand_cat0[i+1].eta-sync_vec_l4Eta[sync_cat0_index[iSync]]) < 0.1)
 				   ) common = true;//
+				}else{
+					 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]]))  && 
+					(fabs(Hcand_cat0[i].pt-sync_vec_l4Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i].eta-sync_vec_l4Eta[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].pt-sync_vec_l3Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].eta-sync_vec_l3Eta[sync_cat0_index[iSync]]) < 0.1)
+				   ) common = true;//
+				}
 				if(common){ // remove matched candidates
 					sync_cat0_index.erase(sync_cat0_index.begin()+iSync);
 					iSync-=1;
 				}
 			 }
+			
 			 
 			  if(common) h_sync_summary[0]->Fill(3.0,double(exp_event_type));
 			  else h_sync_summary[0]->Fill(0.0,double(exp_event_type)); // UCL only
@@ -3641,8 +3655,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     sync_cat1_index.clear();
 	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
 	{
-		if(sync_vec_subChannel[iSync]==1) sync_cat1_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==1 && sync_vec_Channel[iSync]!=2) sync_cat1_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==2 && sync_vec_Channel[iSync]==2) sync_cat1_index.push_back(iSync);
+		
 	}
+	
+	
+	
 	// messed with categories: cat1 = tau fails or e fails	
 	for(uint i=0; i < Hcand_cat1.size(); i+=2)
 	{
@@ -3650,15 +3669,24 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
 		
 		bool common = false;
-			 
+		 
 		 for(uint iSync = 0; iSync < sync_cat1_index.size() && !common; iSync++)
 		 {
+			if(exp_event_type!=2){
 			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]]))  && 
 				(fabs(Hcand_cat1[i].pt-sync_vec_l3Pt[sync_cat1_index[iSync]]) < 0.1) &&
 				(fabs(Hcand_cat1[i].eta-sync_vec_l3Eta[sync_cat1_index[iSync]]) < 0.1) &&
 				(fabs(Hcand_cat1[i+1].pt-sync_vec_l4Pt[sync_cat1_index[iSync]]) < 0.1) &&
 				(fabs(Hcand_cat1[i+1].eta-sync_vec_l4Eta[sync_cat1_index[iSync]]) < 0.1)
 			   ) common = true;//
+		   }else{
+			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]]))  && 
+				(fabs(Hcand_cat1[i].pt-sync_vec_l4Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i].eta-sync_vec_l4Eta[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].pt-sync_vec_l3Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].eta-sync_vec_l3Eta[sync_cat1_index[iSync]]) < 0.1)
+			   ) common = true;//
+		   }
 			if(common){ // remove matched candidates
 				sync_cat1_index.erase(sync_cat1_index.begin()+iSync);
 				iSync-=1;
@@ -3686,7 +3714,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     sync_cat2_index.clear();
 	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
 	{
-		if(sync_vec_subChannel[iSync]==2) sync_cat2_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==2 && sync_vec_Channel[iSync]!=2) sync_cat2_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==1 && sync_vec_Channel[iSync]==2) sync_cat2_index.push_back(iSync);
 	}
 	
 	for(uint i=0; i < Hcand_cat2.size(); i+=2)
@@ -3698,12 +3727,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 
 		 for(uint iSync = 0; iSync < sync_cat2_index.size() && !common; iSync++)
 		 {
+			 if(exp_event_type!=2){
 			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]]))  && 
 				(fabs(Hcand_cat2[i].pt-sync_vec_l3Pt[sync_cat2_index[iSync]]) < 0.1) &&
 				(fabs(Hcand_cat2[i].eta-sync_vec_l3Eta[sync_cat2_index[iSync]]) < 0.1) &&
 				(fabs(Hcand_cat2[i+1].pt-sync_vec_l4Pt[sync_cat2_index[iSync]]) < 0.1) &&
 				(fabs(Hcand_cat2[i+1].eta-sync_vec_l4Eta[sync_cat2_index[iSync]]) < 0.1)
 			   ) common = true;//
+		   }else{
+			if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]]))  && 
+				(fabs(Hcand_cat2[i].pt-sync_vec_l4Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i].eta-sync_vec_l4Eta[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].pt-sync_vec_l3Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].eta-sync_vec_l3Eta[sync_cat2_index[iSync]]) < 0.1)
+			   ) common = true;//
+		   }
 			if(common){ // remove matched candidates
 				sync_cat2_index.erase(sync_cat2_index.begin()+iSync);
 				iSync-=1;

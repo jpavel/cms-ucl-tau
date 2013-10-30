@@ -436,6 +436,7 @@ private:
     bool SFShiftDown_Ele;
     double SystUncert_ES;
     
+    bool doNtuple;
     bool FillPDFInfo;
     bool FillSVmassInfo;
     bool FillZZgenInfo;

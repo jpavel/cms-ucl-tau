@@ -17,7 +17,7 @@
 		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
-             <OutputTree Name="redtree"/>
+        <!--     <OutputTree Name="redtree"/> -->
 		</InputData>
 		<UserConfig>
 		<Item Name="InTreeName" Value="t"/>
@@ -116,7 +116,7 @@
                 
                <!-- Output options -->
 
-	       	
+	    <Item Name="doNtuple" Value="False" />   	
 	    <Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
 		<Item Name="FillZZgenInfo" Value="False" />
