@@ -138,8 +138,6 @@ private:
         TH1* h_finalVisMass_below130;
         TH1* h_finalVisMass_above130;
         // syncronisation
-        TH1* h_fail_reason;
-
 	
 	//helpers
 	reweight::LumiReWeighting* LumiWeights_;
@@ -191,6 +189,7 @@ private:
     ofstream evOverlap;
     ofstream evOverlap_mmt;
     ofstream evOverlap_eet;
+    ofstream fail;
     
     ifstream sync_eventList;
     std::vector<long> runs,lumis,events;
