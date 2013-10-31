@@ -2295,6 +2295,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 0) s_s_i_TT.push_back(iSync);
 	}
+	
+	
+	std::vector<int> usedElId;
+	std::vector<int> usedTauId;
+	
+	usedElId.clear();
+	usedTauId.clear();
 
 	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
 	for(uint i = 0; i < goodTau.size(); i++)
@@ -2378,13 +2385,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
 			
-			if(isFakeRate && tauTau){
-				if(matchedSync) {
-					std::cout << "too many pairs for FR" << std::endl;
-					h_fail_shape_TT->Fill(4.0);
-				}
-				 continue; // save only one pair
-			 }
+			//~ if(isFakeRate && tauTau){
+				//~ if(matchedSync) {
+					//~ std::cout << "too many pairs for FR" << std::endl;
+					//~ h_fail_shape_TT->Fill(4.0);
+				//~ }
+				 //~ continue; // save only one pair
+			 //~ }
 			if(goodTau[j].discriminationByElectronLoose <= 0.5){
 				if(matchedSync) {
 					std::cout << "sub tau faild el ID" << std::endl;
@@ -2504,8 +2511,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				
-				Hcand_pass.push_back(pass1);
-				Hcand_pass.push_back(pass2);
+				int result = pass1? 1:0;
+				int result2 = pass2? 1:0;
+				bool usedEl = false;
+				size_t el_helper = std::find(usedElId.begin(), usedElId.end(), i) - usedElId.begin();
+				if(el_helper < usedElId.size()) usedEl=true;
+				
+				if(usedEl) result = -1;
+				Hcand_pass.push_back(result);
+				if(result > -1) usedElId.push_back(i);
+				
+				bool usedTau = false;
+				size_t tau_helper = std::find(usedTauId.begin(), usedTauId.end(), i) - usedTauId.begin();
+				if(tau_helper < usedTauId.size()) usedTau=true;
+				
+				if(usedTau ) result2=-1;
+				Hcand_pass.push_back(result2);
+				if(result2 > -1) usedTauId.push_back(j);
 				if(shapePass1 && shapePass2 && LTcut && signalPtCuts){
 					if(matchedSync){
 						std::cout << "Shape cand accepted!" << std::endl;
@@ -2562,6 +2584,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 1) s_s_i_MT.push_back(iSync);
 	}
 	
+	usedElId.clear();
+	usedTauId.clear();
 	
 	for(uint i = 0; i < genericMuon.size()  ; i++)
 	{
@@ -2630,14 +2654,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 }
 			if(examineThisEvent) std::cout << "Passed pt cut" << std::endl;
 			if(examineThisEvent) std::cout << "Passed WZ rejection" << std::endl;
-			if(isFakeRate && muTau){ 
-				if(matchedSync)
-				 {
-					std::cout << "only one pair" << std::endl;
-					h_fail_shape_MT->Fill(2.0);
-				 }
-				continue; // save only one pair
-			}
+			//~ if(isFakeRate && muTau){ 
+				//~ if(matchedSync)
+				 //~ {
+					//~ std::cout << "only one pair" << std::endl;
+					//~ h_fail_shape_MT->Fill(2.0);
+				 //~ }
+				//~ continue; // save only one pair
+			//~ }
 			if(examineThisEvent) std::cout << "Passed uniqueness cut" << std::endl;
 	
 				
@@ -2771,11 +2795,24 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				int result2 = pass1? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
-				if(!WZ_Rej(m,Hcand[index])) result = -1;	
+				
+				bool usedEl = false;
+				size_t el_helper = std::find(usedElId.begin(), usedElId.end(), i) - usedElId.begin();
+				if(el_helper < usedElId.size()) usedEl=true;
+				
+				if(!WZ_Rej(m,Hcand[index]) || usedEl) result = -1;
 				Hcand_pass.push_back(result);
+				if(result > -1) usedElId.push_back(i);
+				
+				bool usedTau = false;
+				size_t tau_helper = std::find(usedTauId.begin(), usedTauId.end(), i) - usedTauId.begin();
+				if(tau_helper < usedTauId.size()) usedTau=true;
+				
 				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
-				if(!LTptcut) result2=-1;
+				if(!LTptcut || usedTau ) result2=-1;
+		
 				Hcand_pass.push_back(result2);
+				if(result2 > -1) usedTauId.push_back(j);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(matchedSync){
 						std::cout << "Shape cand accepted!" << std::endl;
@@ -2832,6 +2869,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 3) s_s_i_ET.push_back(iSync);
 	}  
 	
+	usedElId.clear();
+	usedTauId.clear();
 	for(uint i = 0; i < genericElectron.size()  ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
@@ -2901,14 +2940,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			 }
 		//	if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "Passed Pt cuts and WZ rej" << std::endl;	
-			if(isFakeRate && eTau){
-				 if(matchedSync)
-				 {
-					std::cout << "One pair only" << std::endl;
-					h_fail_shape_ET->Fill(3.0);
-				 }	
-				 continue; // save only one pair	
-			 }
+			//~ if(isFakeRate && eTau){
+				 //~ if(matchedSync)
+				 //~ {
+					//~ std::cout << "One pair only" << std::endl;
+					//~ h_fail_shape_ET->Fill(3.0);
+				 //~ }	
+				 //~ continue; // save only one pair	
+			 //~ }
 			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
 			
 			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5){
@@ -2996,7 +3035,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 }
 				 continue;
 			 }
-			if(isFakeRate) eTau=true;
+		//	if(isFakeRate) eTau=true;
 			if(signal && !saved_signal ) eTau=true;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
@@ -3043,11 +3082,23 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				int result2 = pass1? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
-				if(!WZ_Rej(m,Hcand[index])) result = -1;
+				
+				bool usedEl = false;
+				size_t el_helper = std::find(usedElId.begin(), usedElId.end(), i) - usedElId.begin();
+				if(el_helper < usedElId.size()) usedEl=true;
+				
+				if(!WZ_Rej(m,Hcand[index]) || usedEl) result = -1;
 				Hcand_pass.push_back(result);
+				if(result > -1) usedElId.push_back(i);
+				
+				bool usedTau = false;
+				size_t tau_helper = std::find(usedTauId.begin(), usedTauId.end(), i) - usedTauId.begin();
+				if(tau_helper < usedTauId.size()) usedTau=true;
+				
 				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
-				if(!LTptcut) result2=-1;
+				if(!LTptcut || usedTau ) result2=-1;
 				Hcand_pass.push_back(result2);
+				if(result2 > -1) usedTauId.push_back(j);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(matchedSync){
 						std::cout << "Shape cand accepted!" << std::endl;
@@ -3127,13 +3178,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 		
-		if(genericElectron[i].numLostHitEleInner > 1){
-			  if(s_match_i > -1){
-				std::cout << "Failed lost hits cut: " << genericElectron[i].numLostHitEleInner << std::endl;
-				h_fail_shape_EM->Fill(0.0);
-			  }
-			 continue;
-		 }
+		//~ if(genericElectron[i].numLostHitEleInner > 1){
+			  //~ if(s_match_i > -1){
+				//~ std::cout << "Failed lost hits cut: " << genericElectron[i].numLostHitEleInner << std::endl;
+				//~ h_fail_shape_EM->Fill(0.0);
+			  //~ }
+			 //~ continue;
+		 //~ }
 		if(examineThisEvent) std::cout << " Checking for eMu " << std::endl;
 		
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << genericMuon.size() << " muons." << std::endl;
@@ -3194,10 +3245,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			Hcand.push_back(genericMuon[j]);
 			int index = Hcand.size() -2;
 			
-			bool pass1 = (RelIso(Hcand[index])<relIso_EM && LooseEleId(Hcand[index]));
+			bool pass1 = (RelIso(Hcand[index])<relIso_EM && LooseEleId(Hcand[index])) && genericElectron[i].numLostHitEleInner < 2;
 			bool pass2 = (RelIso(Hcand[index+1])<relIso_EM && isLooseMu(Hcand[index+1]));
-			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
-			bool shapePass2 = (RelIso(Hcand[index+1])< lep_shape_iso_cut && isLooseMu(Hcand[index+1]));
+			if(examineThisEvent) std::cout << "the values of isolations are" << RelIso(genericElectron[i]) << " " << RelIso(genericMuon[j]) << std::endl;
+			if(examineThisEvent) std::cout << "the ID values are" << LooseEleId(genericElectron[i]) << " " << isLooseMu(genericMuon[j]) << std::endl;
+			bool shapePass1 = RelIso(Hcand[index])< lep_shape_iso_cut;// && LooseEleId(Hcand[index]));
+			bool shapePass2 = RelIso(Hcand[index+1])< lep_shape_iso_cut;// && isLooseMu(Hcand[index+1]));
 			
 			
 		    if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
@@ -3206,6 +3259,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
+			if(examineThisEvent) std::cout << "Sum Pt is" << std::endl;
 			bool LTcut = UseSumPtCut && (sumPt > Cut_leplep_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_leplep_sumPt_FR);
 			if(!LTcut && !LTcut_FR){
@@ -3281,8 +3335,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
-				Hcand_pass.push_back(0);
-				Hcand_pass.push_back(0);
+				Hcand_pass.push_back(-1);
+				Hcand_pass.push_back(-1);
 				if(shapePass1 && shapePass2 && LTcut){
 					if(matchedSync){
 						std::cout << "Shape cand accepted!" << std::endl;
@@ -3291,7 +3345,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}else{
 					  if(matchedSync)
 					{
-						std::cout << "failed shape" << std::endl;
+						std::cout << " EM failed shape " << LTcut <<  std::endl;
 						h_fail_shape_EM->Fill(6.0);
 					}
 					 Hcand_shape_pass.push_back(0);	
