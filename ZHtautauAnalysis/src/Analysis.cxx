@@ -3104,10 +3104,17 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_EM[iSync]] << "/" << sync_vec_l4Eta[s_s_i_EM[iSync]] << std::endl;
 			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=2) continue;
 			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=6) continue;
-			if(fabs(genericElectron[i].pt - sync_vec_l3Pt[s_s_i_EM[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l3Eta[s_s_i_EM[iSync]]) < 0.1){
-				 std::cout << " matched leading ele" << std::endl;
-				 s_match_i=iSync;
-			 }
+			if(Zee){
+				if(fabs(genericElectron[i].pt - sync_vec_l3Pt[s_s_i_EM[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l3Eta[s_s_i_EM[iSync]]) < 0.1){
+					 std::cout << " matched leading ele" << std::endl;
+					 s_match_i=iSync;
+				 }
+			}else{
+				if(fabs(genericElectron[i].pt - sync_vec_l4Pt[s_s_i_EM[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l4Eta[s_s_i_EM[iSync]]) < 0.1){
+					 std::cout << " matched leading ele" << std::endl;
+					 s_match_i=iSync;
+				 }
+			}
 		}
 		
 		if(genericElectron[i].numLostHitEleInner > 1){
@@ -3125,11 +3132,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		{
 			bool matchedSync = false;
 			if(s_match_i >-1){
-				if(fabs(genericMuon[j].pt - sync_vec_l4Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(genericMuon[j].eta - sync_vec_l4Eta[s_s_i_EM[s_match_i]]) < 0.1){
-					 match2=true;
-					 matchedSync=true;
-					 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_EM[s_match_i]] << ")" << std::endl;
-				 }
+				if(Zee){
+					if(fabs(genericMuon[j].pt - sync_vec_l4Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(genericMuon[j].eta - sync_vec_l4Eta[s_s_i_EM[s_match_i]]) < 0.1){
+						 match2=true;
+						 matchedSync=true;
+						 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_EM[s_match_i]] << ")" << std::endl;
+					 }
+				}else{
+					if(fabs(genericMuon[j].pt - sync_vec_l3Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(genericMuon[j].eta - sync_vec_l3Eta[s_s_i_EM[s_match_i]]) < 0.1){
+						 match2=true;
+						 matchedSync=true;
+						 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_EM[s_match_i]] << ")" << std::endl;
+					 }
+				}
 			}
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
@@ -4068,8 +4083,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     sync_cat1_index.clear();
 	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
 	{
-		if(sync_vec_subChannel[iSync]==1 && sync_vec_Channel[iSync]!=2) sync_cat1_index.push_back(iSync);
-		if(sync_vec_subChannel[iSync]==2 && sync_vec_Channel[iSync]==2) sync_cat1_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==1 && ((EventTypeConv(sync_vec_Channel[iSync]))!=2)) sync_cat1_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==2 && ((EventTypeConv(sync_vec_Channel[iSync])))==2) sync_cat1_index.push_back(iSync);
 		
 	}
 	
@@ -4127,8 +4142,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     sync_cat2_index.clear();
 	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
 	{
-		if(sync_vec_subChannel[iSync]==2 && sync_vec_Channel[iSync]!=2) sync_cat2_index.push_back(iSync);
-		if(sync_vec_subChannel[iSync]==1 && sync_vec_Channel[iSync]==2) sync_cat2_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==2 && ((EventTypeConv(sync_vec_Channel[iSync]))!=2)) sync_cat2_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==1 && ((EventTypeConv(sync_vec_Channel[iSync]))==2)) sync_cat2_index.push_back(iSync);
 	}
 	
 	for(uint i=0; i < Hcand_cat2.size(); i+=2)
