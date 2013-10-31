@@ -3121,7 +3121,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(s_match_i >-1){
 				if(fabs(genericMuon[j].pt - sync_vec_l4Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(genericMuon[j].eta - sync_vec_l4Eta[s_s_i_EM[s_match_i]]) < 0.1){
 					 match2=true;
-					 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_ET[s_match_i]] << ")" << std::endl;
+					 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_EM[s_match_i]] << ")" << std::endl;
 				 }
 			}
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
