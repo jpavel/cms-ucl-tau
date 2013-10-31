@@ -2433,7 +2433,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_tautau_sumPt_FR);
-			
+			if(examineThisEvent) std::cout << "shape iso is " << Hcand[index].byIsolationMVA2raw << " " << Hcand[index+1].byIsolationMVA2raw << std::endl;
 			if(!LTcut && !LTcut_FR){
 				if(matchedSync){
 					std::cout << " shape cand failed LT cut" << std::endl;
@@ -2506,8 +2506,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				
 				Hcand_pass.push_back(pass1);
 				Hcand_pass.push_back(pass2);
-				if(shapePass1 && shapePass2 && LTcut && signalPtCuts) Hcand_shape_pass.push_back(1);
-				else{
+				if(shapePass1 && shapePass2 && LTcut && signalPtCuts){
+					if(matchedSync){
+						std::cout << "Shape cand accepted!" << std::endl;
+					}
+					 Hcand_shape_pass.push_back(1);
+				}else{
 					 if(matchedSync){
 						std::cout << "shape cand failed shape cuts" << std::endl;
 						h_fail_shape_TT->Fill(10.0);
@@ -2723,7 +2727,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(signal && !saved_signal ) muTau=true;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
-			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << shapePass1 << shapePass2 << std::endl;
 			
 			if(!isFakeRate && !signal && LTcut && pt2>Cut_tau_base_Pt){
 				if( !pass1 && !pass2 && !category0 && !tightFR)
@@ -2773,6 +2777,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(!LTptcut) result2=-1;
 				Hcand_pass.push_back(result2);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
+					if(matchedSync){
+						std::cout << "Shape cand accepted!" << std::endl;
+					}
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
 				}else{
@@ -2993,7 +3000,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(signal && !saved_signal ) eTau=true;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
-			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << shapePass1 << shapePass2 << std::endl;
 			
 			if(!isFakeRate && !signal &&LTcut && pt2>Cut_tau_base_Pt){
 				if( !pass1 && !pass2 && !category0 && !tightFR)
@@ -3042,15 +3049,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(!LTptcut) result2=-1;
 				Hcand_pass.push_back(result2);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
+					if(matchedSync){
+						std::cout << "Shape cand accepted!" << std::endl;
+					}
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
 				}else{
-					 if(matchedSync)
+					if(matchedSync)
 					{
 						std::cout << "Shape faile" << std::endl;
 						h_fail_shape_ET->Fill(9.0);
 					}
-					 Hcand_shape_pass.push_back(0);	
+					Hcand_shape_pass.push_back(0);	
 				 }
 				if(Zmumu) Hcand_type_FR.push_back(3);
 				else if(Zee) Hcand_type_FR.push_back(7);
@@ -3191,7 +3201,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			
 		    if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
-			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << shapePass1 << shapePass2 << std::endl;
 			
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
@@ -3274,6 +3284,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_pass.push_back(0);
 				Hcand_pass.push_back(0);
 				if(shapePass1 && shapePass2 && LTcut){
+					if(matchedSync){
+						std::cout << "Shape cand accepted!" << std::endl;
+					}
 					Hcand_shape_pass.push_back(1);
 				}else{
 					  if(matchedSync)
@@ -3661,7 +3674,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 			 }
 			 if(common) h_sync_summary[4]->Fill(3.0,double(event_type));
-			 else h_sync_summary[4]->Fill(0.0,double(event_type)); // UCL only
+			 else{
+				if(doSync)  std::cout << " UCL only event of type: " << EventTypeName(event_type) << " mass = " << Mass << std::endl;
+				  h_sync_summary[4]->Fill(0.0,double(event_type)); // UCL only
+			  }
 			 //ntuple filling
 			 if(doNtuple){
 			o_run=m->runNumber;
@@ -3762,6 +3778,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 // not matched sync objects
 		 for(uint iSync = 0; iSync < sync_BG_index.size(); iSync++)
 			 {
+				std::cout << " ULB only event of type: " << EventTypeName(EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])) << " mass = " << sync_vec_HMass[sync_BG_index[iSync]] << std::endl;
 				h_sync_summary[4]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])));
 			 }
 			
