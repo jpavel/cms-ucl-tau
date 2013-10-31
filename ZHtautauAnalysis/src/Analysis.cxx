@@ -1763,7 +1763,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				syncTree->GetEvent(index+iEv);
 			
 				std::cout << " Obtaining entry#" << index << "/" << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << 
-				"channel/subchannel:" << sync_Channel << "/" << sync_subChannel << std::endl;
+				"channel/subchannel:" << sync_Channel << " (" << EventTypeName(EventTypeConv(sync_Channel)) << ")/" << sync_subChannel << std::endl;
 			
 				sync_vec_Channel.push_back(sync_Channel);
 		        sync_vec_subChannel.push_back(sync_subChannel);
@@ -2345,9 +2345,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodTau[j].charge << " mass: " << PairMass(goodTau[i],goodTau[j]) <<std::endl;
 			
 			if(s_match_i >-1){
-				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_TT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l3Eta[s_s_i_TT[s_match_i]]) < 0.1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_TT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_TT[s_match_i]]) < 0.1){
 					 match2=true;
-					 std::cout << "matched sub tau" << std::endl;
+					 std::cout << "matched sub tau (mass " << sync_vec_HMass[s_s_i_TT[s_match_i]] << ")" << std::endl;
 				 }
 			}
 			
@@ -2571,7 +2571,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_MT[iSync]])!=1) continue;
 			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_MT[iSync]])!=5) continue;
 			if(fabs(genericMuon[i].pt - sync_vec_l3Pt[s_s_i_MT[iSync]]) < 0.1 && fabs(genericMuon[i].eta - sync_vec_l3Eta[s_s_i_MT[iSync]]) < 0.1){
-				 std::cout << " matched leading mu" << std::endl;
+				 std::cout << " matched leading mu " << std::endl;
 				 s_match_i=iSync;
 			 }
 		}
@@ -2587,9 +2587,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		{
             
             if(s_match_i >-1){
-				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_MT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l3Eta[s_s_i_MT[s_match_i]]) < 0.1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_MT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_MT[s_match_i]]) < 0.1){
 					 match2=true;
-					 std::cout << "matched sub tau" << std::endl;
+					 std::cout << "matched sub tau (mass " << sync_vec_HMass[s_s_i_MT[s_match_i]] << ")" << std::endl;
 				 }
 			}       
 			
@@ -2832,8 +2832,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			std::cout << " Sync shape candidate #" << iSync << " type:" << EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]]) <<
 			" l3 pt/eta:" << sync_vec_l3Pt[s_s_i_ET[iSync]] << "/" << sync_vec_l3Eta[s_s_i_ET[iSync]] <<
 			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_ET[iSync]] << "/" << sync_vec_l4Eta[s_s_i_ET[iSync]] << std::endl;
-			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=1) continue;
-			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=5) continue;
+			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=3) continue;
+			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=7) continue;
 			if(fabs(genericMuon[i].pt - sync_vec_l3Pt[s_s_i_ET[iSync]]) < 0.1 && fabs(genericMuon[i].eta - sync_vec_l3Eta[s_s_i_ET[iSync]]) < 0.1){
 				 std::cout << " matched leading ele" << std::endl;
 				 s_match_i=iSync;
@@ -2854,9 +2854,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2 &&signal)  ; j++)
 		{
 			if(s_match_i >-1){
-				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_ET[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l3Eta[s_s_i_ET[s_match_i]]) < 0.1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_ET[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_ET[s_match_i]]) < 0.1){
 					 match2=true;
-					 std::cout << "matched sub tau" << std::endl;
+					 std::cout << "matched sub tau (mass " << sync_vec_HMass[s_s_i_ET[s_match_i]] << ")" << std::endl;
 				 }
 			}
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
@@ -3097,8 +3097,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			std::cout << " Sync shape candidate #" << iSync << " type:" << EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]]) <<
 			" l3 pt/eta:" << sync_vec_l3Pt[s_s_i_EM[iSync]] << "/" << sync_vec_l3Eta[s_s_i_EM[iSync]] <<
 			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_EM[iSync]] << "/" << sync_vec_l4Eta[s_s_i_EM[iSync]] << std::endl;
-			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=1) continue;
-			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=5) continue;
+			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=2) continue;
+			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=6) continue;
 			if(fabs(genericMuon[i].pt - sync_vec_l3Pt[s_s_i_EM[iSync]]) < 0.1 && fabs(genericMuon[i].eta - sync_vec_l3Eta[s_s_i_EM[iSync]]) < 0.1){
 				 std::cout << " matched leading ele" << std::endl;
 				 s_match_i=iSync;
@@ -3119,9 +3119,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint j=0; j< genericMuon.size() && !(category0 && category1 && category2 && signal) ; j++)
 		{
 			if(s_match_i >-1){
-				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l3Eta[s_s_i_EM[s_match_i]]) < 0.1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_EM[s_match_i]]) < 0.1){
 					 match2=true;
-					 std::cout << "matched mu" << std::endl;
+					 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_ET[s_match_i]] << ")" << std::endl;
 				 }
 			}
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
