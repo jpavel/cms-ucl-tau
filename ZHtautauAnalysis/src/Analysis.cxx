@@ -2707,7 +2707,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int index = Hcand.size() -2;
 			bool pass2 = (RelIso(Hcand[index])<relIso_MT && isLooseMu(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
-			bool shapePass2 = (RelIso(Hcand[index])< lep_shape_iso_cut && isLooseMu(Hcand[index]));
+			bool shapePass2 = RelIso(Hcand[index])< lep_shape_iso_cut;// && isLooseMu(Hcand[index]));
 			bool shapePass1 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			double pt1=Hcand[index].pt;
@@ -2994,7 +2994,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					
 			bool pass2 = (RelIso(Hcand[index])<relIso_ET && LooseEleId(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
-			bool shapePass2 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
+			bool shapePass2 = RelIso(Hcand[index])< lep_shape_iso_cut;// && LooseEleId(Hcand[index]));
 			bool shapePass1 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			
