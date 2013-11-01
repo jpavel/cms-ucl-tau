@@ -2819,7 +2819,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					<< Hcand[index+1].pt << " LT:" << sumPt << "usedLep" << usedEl << usedTau << std::endl;
 				}
 				
-				if(shapePass1 && shapePass2 && LTptcut && WZ_Rej(m,Hcand[index]) && LTcut){
+				if(shapePass1 && shapePass2 && LTptcut && LTcut){
 					if(matchedSync){
 						std::cout << "MT Shape cand accepted!" << std::endl;
 					}
@@ -3109,7 +3109,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					std::cout << "ET:WZ rej: " << WZ_Rej(m,Hcand[index]) << " LTptcut: " << LTptcut << " pt:" 
 					<< Hcand[index+1].pt << " LT:" << sumPt << "usedLep" << usedEl << usedTau << std::endl;
 				}
-				if(shapePass1 && shapePass2 && LTptcut && WZ_Rej(m,Hcand[index]) && LTcut){
+				if(shapePass1 && shapePass2 && LTptcut && LTcut){
 					if(matchedSync){
 						std::cout << " ET Shape cand accepted!" << std::endl;
 					}
