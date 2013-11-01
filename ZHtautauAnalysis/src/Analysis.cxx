@@ -2372,7 +2372,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			isFakeRate = (goodTau[i].charge*goodTau[j].charge  > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(matchedSync && !isFakeRate){
-				std::cout << "Failed sync charge cut" << std::endl;
+				std::cout << "TT Failed sync charge cut" << std::endl;
 				h_fail_shape_TT->Fill(3.0);
 			}
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
@@ -2530,12 +2530,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(result2 > -1) usedTauId.push_back(j);
 				if(shapePass1 && shapePass2 && LTcut && signalPtCuts){
 					if(matchedSync){
-						std::cout << "Shape cand accepted!" << std::endl;
+						std::cout << "TT Shape cand accepted!" << std::endl;
 					}
 					 Hcand_shape_pass.push_back(1);
 				}else{
 					 if(matchedSync){
-						std::cout << "shape cand failed shape cuts" << std::endl;
+						std::cout << "TT shape cand failed shape cuts" << std::endl;
 						h_fail_shape_TT->Fill(10.0);
 					 }
 					 Hcand_shape_pass.push_back(0);
@@ -2629,7 +2629,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool isFakeRate = (genericMuon[i].charge*goodTau[j].charge  > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(matchedSync && !isFakeRate){
-				std::cout << "Failed sync charge cut" << std::endl;
+				std::cout << "MT Failed sync charge cut" << std::endl;
 				h_fail_shape_MT->Fill(0.0);
 			}
 			
@@ -2815,14 +2815,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(result2 > -1) usedTauId.push_back(j);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(matchedSync){
-						std::cout << "Shape cand accepted!" << std::endl;
+						std::cout << "MT Shape cand accepted!" << std::endl;
 					}
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
 				}else{
 					 if(matchedSync)
 					{
-						std::cout << "Failed shape cut" << std::endl;
+						std::cout << "MT Failed shape cut" << std::endl;
 						h_fail_shape_MT->Fill(9.0);
 					}
 					 Hcand_shape_pass.push_back(0);
@@ -2884,14 +2884,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=3) continue;
 			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=7) continue;
 			if(fabs(genericElectron[i].pt - sync_vec_l3Pt[s_s_i_ET[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l3Eta[s_s_i_ET[iSync]]) < 0.1){
-				 std::cout << " matched leading ele" << std::endl;
+				 std::cout << "ET matched leading ele" << std::endl;
 				 s_match_i=iSync;
 			 }
 		}
 		
 		if(genericElectron[i].numLostHitEleInner > 1){
 			 if(s_match_i > -1){
-				std::cout << "Failed lost hits cut: " << genericElectron[i].numLostHitEleInner << std::endl;
+				std::cout << " ET Failed lost hits cut: " << genericElectron[i].numLostHitEleInner << std::endl;
 				h_fail_shape_ET->Fill(0.0);
 			}
 			 continue;
@@ -2906,7 +2906,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(s_match_i >-1){
 				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_ET[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_ET[s_match_i]]) < 0.1){
 					 match2=true;
-					 matchedSync=false;
+					 matchedSync=true;
 					 std::cout << "matched sub Etau (mass " << sync_vec_HMass[s_s_i_ET[s_match_i]] << ")" << std::endl;
 				 }
 			}
@@ -2916,7 +2916,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			if(matchedSync && !isFakeRate){
-				std::cout << "Failed sync charge cut" << std::endl;
+				std::cout << " ET Failed sync charge cut" << std::endl;
 				h_fail_shape_ET->Fill(1.0);
 			}
 			
@@ -2933,7 +2933,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt){
 				 if(matchedSync)
 				 {
-					std::cout << "Failed subleading Etau cut" << std::endl;
+					std::cout << "ET Failed subleading Etau cut" << std::endl;
 					h_fail_shape_ET->Fill(2.0);
 				 }	
 				 continue;	
@@ -2953,7 +2953,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5){
 				 if(matchedSync)
 				 {
-					std::cout << "failed tau ele ID" << std::endl;
+					std::cout << "ET failed tau ele ID" << std::endl;
 					h_fail_shape_ET->Fill(4.0);
 				 }
 				 continue;
@@ -2963,7 +2963,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR){
 				 if(matchedSync)
 				 {
-					std::cout << "failed dR" << std::endl;
+					std::cout << "ET failed dR" << std::endl;
 					h_fail_shape_ET->Fill(5.0);
 				 }
 				 continue;
@@ -2977,7 +2977,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)){
 				 if(matchedSync)
 				 {
-					std::cout << "Failed dZ" << std::endl;
+					std::cout << "ET Failed dZ" << std::endl;
 					h_fail_shape_ET->Fill(6.0);
 				 }
 				 continue;
@@ -3009,7 +3009,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!LTcut && !LTcut_FR){
 				 if(matchedSync)
 				 {
-					std::cout << " Failed LT" << std::endl;
+					std::cout << "ET Failed LT" << std::endl;
 					h_fail_shape_ET->Fill(7.0);
 				 }
 				 continue;
@@ -3030,7 +3030,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(Ad_lepton){
 				 if(matchedSync)
 				 {
-					std::cout << " Failed lepton veto" << std::endl;
+					std::cout << "ET Failed lepton veto" << std::endl;
 					h_fail_shape_ET->Fill(8.0);
 				 }
 				 continue;
@@ -3101,14 +3101,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(result2 > -1) usedTauId.push_back(j);
 				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
 					if(matchedSync){
-						std::cout << "Shape cand accepted!" << std::endl;
+						std::cout << " ET Shape cand accepted!" << std::endl;
 					}
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
 				}else{
 					if(matchedSync)
 					{
-						std::cout << "Shape faile" << std::endl;
+						std::cout << " ET Shape failed" << std::endl;
 						h_fail_shape_ET->Fill(9.0);
 					}
 					Hcand_shape_pass.push_back(0);	
@@ -3131,7 +3131,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		if(s_match_i > -1 && match2==false)
 		{
-			std::cout << " shape candidate not found" << std::endl;
+			std::cout << " TT shape candidate not found" << std::endl;
 			h_fail_shape_ET->Fill(10.0);
 		}       
 	}
@@ -3212,7 +3212,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool isFakeRate = (genericElectron[i].charge*genericMuon[j].charge > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(matchedSync && !isFakeRate){
-				std::cout << "Failed sync charge cut" << std::endl;
+				std::cout << "EM Failed sync charge cut" << std::endl;
 				h_fail_shape_EM->Fill(1.0);
 			}
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
@@ -3339,7 +3339,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				Hcand_pass.push_back(-1);
 				if(shapePass1 && shapePass2 && LTcut){
 					if(matchedSync){
-						std::cout << "Shape cand accepted!" << std::endl;
+						std::cout << " EM Shape cand accepted!" << std::endl;
 					}
 					Hcand_shape_pass.push_back(1);
 				}else{
