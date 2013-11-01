@@ -680,13 +680,13 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_fail_shape_TT=Retrieve<TH1D>("h_fail_shape_TT");
 	TString failReasonsTT[12] = {"LeadPt","LeadElID","SubPt", "SS", "one pair", "SubEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau" };
 	
-	h_fail_shape_MT = Book(TH1D("h_fail_shape_MT","Reasons failing shape cuts",11,-0.5,10.5));
+	h_fail_shape_MT = Book(TH1D("h_fail_shape_MT","Reasons failing shape cuts",16,-0.5,15.5));
 	h_fail_shape_MT=Retrieve<TH1D>("h_fail_shape_MT");
-	TString failReasonsMT[11] = {"SS", "tau pt", "one pair", "tauMuID", "tauEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau" };
+	TString failReasonsMT[16] = {"SS", "tau pt", "one pair", "tauMuID", "tauEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau","elOverlap", "muOverlap","tau pt","no cat", "no cat0" };
 	
-	h_fail_shape_ET = Book(TH1D("h_fail_shape_ET","Reasons failing shape cuts",11,-0.5,10.5));
+	h_fail_shape_ET = Book(TH1D("h_fail_shape_ET","Reasons failing shape cuts",16,-0.5,15.5));
 	h_fail_shape_ET=Retrieve<TH1D>("h_fail_shape_ET");
-	TString failReasonsET[11] = {"lost hits", "SS", "tau pt", "one pair", "tauEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau" };
+	TString failReasonsET[16] = {"lost hits", "SS", "tau pt", "one pair", "tauEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau","elOverlap", "muOverlap","tau pt","no cat", "no cat0" };
 	
 	h_fail_shape_EM = Book(TH1D("h_fail_shape_EM","Reasons failing shape cuts",8,-0.5,7.5));
 	h_fail_shape_EM=Retrieve<TH1D>("h_fail_shape_EM");
@@ -770,11 +770,12 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		 log_events.open("eventlist.txt");
 		 log_files.open("filelist.txt");
 	 }
+	 
+	 
 	
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
-	
 	
 	
 	return;
@@ -808,6 +809,12 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 		logS.close();
 		log_events.close();
 		log_files.close();
+	}
+	
+	//sync
+	if(doSync)
+	{
+		syncOut = new TFile("syncTree.root","RECREATE");
 	}
 	
 	
@@ -2581,7 +2588,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     s_s_i_MT.clear();
 	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
 	{
-		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 1) s_s_i_MT.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==0 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 1) s_s_i_MT.push_back(iSync); // now checking cat0
 	}
 	
 	usedElId.clear();
@@ -2638,12 +2645,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) verb=true;
 			
 		
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
-			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)){
+				if(matchedSync){
+					std::cout << "MT failed overlap check loose electron" << std::endl;
+					h_fail_shape_MT->Fill(11.0);
+				}
+				 continue;
+			 }
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)){
+				 if(matchedSync){
+					std::cout << "MT failed overlap check loose muon" << std::endl;
+					h_fail_shape_MT->Fill(12.0);
+				}
+				 continue;
+			 }
 			
 			if(examineThisEvent) std::cout << "There are " << genericMuon.size() << " muons." << std::endl;
 			
-			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
+			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2){
+				if(matchedSync){
+					std::cout << "MT tau failed pt" << std::endl;
+					h_fail_shape_MT->Fill(13.0);
+				}
+				 continue;	
+			}
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt){
 				 if(matchedSync)
 				 {
@@ -2754,7 +2779,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << shapePass1 << shapePass2 << std::endl;
 			
 			if(!isFakeRate && !signal && LTcut && pt2>Cut_tau_base_Pt){
-				if( !pass1 && !pass2 && !category0 && !tightFR)
+				if(matchedSync){
+					std::cout << "MT is category candidate!" << std::endl;
+					std::cout << pass1 << pass2 << tightFR << category0 << category1 << category2 << std::endl;
+				}
+				if( !pass1 && (!pass2||!tightFR) && !category0 )
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
 					category0=true;
@@ -2762,6 +2791,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hcand_cat0.push_back(Hcand[index+1]);
 					if(Zmumu) Hcand_type_cat0.push_back(1);
 					else if(Zee) Hcand_type_cat0.push_back(5);
+				}else{
+					if(matchedSync){
+					std::cout << "MT failed cat0" << std::endl;
+					h_fail_shape_MT->Fill(15.0);
+				}
 				}
 				if(!pass1 && pass2 && !category1 && tightFR)
 				{	
@@ -2773,7 +2807,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat1.push_back(1);
 					else if(Zee) Hcand_type_cat1.push_back(5);
 				}
-				if(pass1 && !pass2 && !category2 && !tightFR)
+				if(pass1 && (!pass2||!tightFR) && !category2 )
 				{
 					if(examineThisEvent) std::cout << " in category 2!" << std::endl;
 					category2=true;
@@ -2845,6 +2879,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_signal.push_back(1);
 				else if(Zee) Hcand_type_signal.push_back(5);
 				saved_signal=true;
+			}else{
+				if(matchedSync){
+					std::cout << "MT is not in any category" << std::endl;
+					h_fail_shape_MT->Fill(14.0);
+				}
 			}
 			
 		
@@ -2929,13 +2968,31 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool verb=false;
 			if(examineThisEvent) verb=true;
 	
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
-			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)){
+				if(matchedSync){
+					std::cout << "ET failed overlap check loose electron" << std::endl;
+					h_fail_shape_ET->Fill(11.0);
+				}
+				 continue;
+			 }
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)){
+				if(matchedSync){
+					std::cout << "ET failed overlap check loose muon" << std::endl;
+					h_fail_shape_ET->Fill(12.0);
+				}
+				 continue;
+			 }
 		
 			if(examineThisEvent) std::cout << "There are " << genericElectron.size() << " electrons	." << std::endl;
 		
 			
-			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
+			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2){
+				if(matchedSync){
+					std::cout << "ET failed overlap check loose electron" << std::endl;
+					h_fail_shape_ET->Fill(13.0);
+				}
+				 continue;	
+			 }
 			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt){
 				 if(matchedSync)
 				 {
@@ -3048,7 +3105,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << shapePass1 << shapePass2 << std::endl;
 			
 			if(!isFakeRate && !signal &&LTcut && pt2>Cut_tau_base_Pt){
-				if( !pass1 && !pass2 && !category0 && !tightFR)
+				if( !pass1 && (!pass2||!tightFR) && !category0 )
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
 					category0=true;
@@ -3056,6 +3113,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hcand_cat0.push_back(Hcand[index+1]);
 					if(Zmumu) Hcand_type_cat0.push_back(3);
 					else if(Zee) Hcand_type_cat0.push_back(7);
+				}else if(matchedSync){
+					std::cout << "ET failed cat0" << std::endl;
+					std::cout << pass1 << pass2 << tightFR << category0 << category1 << category2 << std::endl;
+					h_fail_shape_ET->Fill(15.0);
 				}
 				if(!pass1 && pass2 && !category1 && tightFR)
 				{
@@ -3066,7 +3127,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat1.push_back(3);
 					else if(Zee) Hcand_type_cat1.push_back(7);
 				}
-				if(pass1 && !pass2 && !category2 && !tightFR)
+				if(pass1 && (!pass2||!tightFR) && !category2 )
 				{
 					if(examineThisEvent) std::cout << "in category2" << std::endl;
 					category2=true;
@@ -3135,13 +3196,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_signal.push_back(3);
 				else if(Zee) Hcand_type_signal.push_back(7);
 				saved_signal=true;
-			}
+			}else if(matchedSync){
+					std::cout << "ET matched no category" << std::endl;
+					h_fail_shape_ET->Fill(14.0);
+				}
 		
 		
 		}
 		if(s_match_i > -1 && match2==false)
 		{
-			std::cout << " TT shape candidate not found" << std::endl;
+			std::cout << " ET shape candidate not found" << std::endl;
 			h_fail_shape_ET->Fill(10.0);
 		}       
 	}

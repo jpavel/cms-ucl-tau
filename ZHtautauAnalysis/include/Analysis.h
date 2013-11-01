@@ -362,6 +362,10 @@ private:
 		TH1* h_fail_shape_MT;
 		TH1* h_fail_shape_ET;
 		TH1* h_fail_shape_EM;
+		
+		// sync output
+		
+		TFile* syncOut;
 	
         
 
