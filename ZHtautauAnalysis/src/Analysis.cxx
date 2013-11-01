@@ -2813,7 +2813,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 				Hcand_pass.push_back(result2);
 				if(result2 > -1) usedTauId.push_back(j);
-				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
+				
+				if(matchedSync){
+					std::cout << "MT:WZ rej: " << WZ_Rej(m,Hcand[index]) << " LTptcut: " << LTptcut << " pt:" 
+					<< Hcand[index+1].pt << " LT:" << sumPt << "usedLep" << usedEl << usedTau << std::endl;
+				}
+				
+				if(shapePass1 && shapePass2 && LTptcut && WZ_Rej(m,Hcand[index]) && LTcut){
 					if(matchedSync){
 						std::cout << "MT Shape cand accepted!" << std::endl;
 					}
@@ -3099,7 +3105,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(!LTptcut || usedTau ) result2=-1;
 				Hcand_pass.push_back(result2);
 				if(result2 > -1) usedTauId.push_back(j);
-				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
+				if(matchedSync){
+					std::cout << "ET:WZ rej: " << WZ_Rej(m,Hcand[index]) << " LTptcut: " << LTptcut << " pt:" 
+					<< Hcand[index+1].pt << " LT:" << sumPt << "usedLep" << usedEl << usedTau << std::endl;
+				}
+				if(shapePass1 && shapePass2 && LTptcut && WZ_Rej(m,Hcand[index]) && LTcut){
 					if(matchedSync){
 						std::cout << " ET Shape cand accepted!" << std::endl;
 					}
