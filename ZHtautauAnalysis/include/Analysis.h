@@ -57,7 +57,8 @@ public:
    virtual void BeginCycle() throw( SError );
    /// Function called at the end of the cycle
    virtual void EndCycle() throw( SError );
-   int EventTypeConv(int e_type_in);	
+   int EventTypeConv(int e_type_in);
+   int EventTypeConvAbdollah(int e_type_in); 	
    std::string EventTypeName(int e_type_in);
    /// Function called at the beginning of a new input data
    virtual void BeginInputData( const SInputData& ) throw( SError );
@@ -366,6 +367,23 @@ private:
 		// sync output
 		
 		TFile* syncOut;
+		TTree* syncOutTree;
+		
+		UInt_t sync_o_event;
+        UInt_t sync_o_lumi;
+        UInt_t sync_o_run;
+        
+        Short_t sync_o_Channel;
+        Short_t sync_o_subChannel;
+		Float_t sync_o_HMass;
+		Float_t sync_o_l3Pt;
+		Float_t sync_o_l3Eta;
+		Float_t sync_o_l3_CloseJetPt;
+		Float_t sync_o_l3_CloseJetEta;
+		Float_t sync_o_l4Pt;
+		Float_t sync_o_l4Eta;
+		Float_t sync_o_l4_CloseJetPt;
+		Float_t sync_o_l4_CloseJetEta;
 	
         
 

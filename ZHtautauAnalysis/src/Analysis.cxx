@@ -140,6 +140,22 @@ int Analysis::EventTypeConv(int e_type_in)
 	}
 }
 
+int Analysis::EventTypeConvAbdollah(int e_type_in)
+{
+	switch(e_type_in)
+	{
+		case 1: return 3;
+		case 2: return 4;
+		case 3: return 2;
+		case 4: return 1;
+		case 5: return 6;
+		case 6: return 8;
+		case 7: return 7;
+		case 8: return 5;
+		default: return -1;	
+	}
+}
+
 std::string Analysis::EventTypeName(int e_type_in)
 {
 	switch(e_type_in)
@@ -777,6 +793,26 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
 	
+	if(doSync){
+		syncOutTree = new TTree("UCL_tree","UCL_tree");
+		syncOutTree->Branch( "Run_",    &sync_o_run , "Run_/i");
+		syncOutTree->Branch( "Event_",    &sync_o_event, "Event_/i" );
+		syncOutTree->Branch( "Lumi_",    &sync_o_lumi, "Lumi/i" );
+		
+		syncOutTree->Branch( "Channel_", &sync_o_Channel, "Channel_/S" );
+        syncOutTree->Branch( "subChannel_", &sync_o_subChannel, "Channel_/S" );
+		syncOutTree->Branch( "HMass_", &sync_o_HMass, "HMass_/F" );
+		syncOutTree->Branch( "l3Pt_", &sync_o_l3Pt, "l3Pt_/F" );
+		syncOutTree->Branch( "l3Eta_", &sync_o_l3Eta, "l3Eta_/F" );
+		syncOutTree->Branch( "l3_CloseJetPt_", &sync_o_l3_CloseJetPt, "l3_CloseJetPt_/F" );
+		syncOutTree->Branch( "l3_CloseJetEta_", &sync_o_l3_CloseJetEta, "l3_CloseJetEta_/F" );
+		syncOutTree->Branch( "l4Pt_", &sync_o_l4Pt, "l4Pt_/F" );
+		syncOutTree->Branch( "l4Eta_", &sync_o_l4Eta, "l4Eta_/F" );
+		syncOutTree->Branch( "l4_CloseJetPt_", &sync_o_l4_CloseJetPt, "l4_CloseJetPt_/F" );
+		syncOutTree->Branch( "l4_CloseJetEta_", &sync_o_l4_CloseJetEta, "l4_CloseJetEta_/F" );
+	}
+	
+	
 	
 	return;
 
@@ -815,6 +851,8 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 	if(doSync)
 	{
 		syncOut = new TFile("syncTree.root","RECREATE");
+		syncOutTree->Write();
+		syncOut->Close();
 	}
 	
 	
@@ -4181,7 +4219,38 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			 
 			  if(common) h_sync_summary[0]->Fill(3.0,double(exp_event_type));
-			  else h_sync_summary[0]->Fill(0.0,double(exp_event_type)); // UCL only
+			  else if(doSync){
+				   h_sync_summary[0]->Fill(0.0,double(exp_event_type)); // UCL only
+				   // fill information about this event
+					Float_t mass = PairMass(Hcand_cat0[i],Hcand_cat0[i+1]);
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = EventTypeConvAbdollah(exp_event_type);
+					 sync_o_subChannel = 0;
+					 sync_o_HMass = mass;
+					 if(exp_event_type!=2){
+						 sync_o_l3Pt = Hcand_cat0[i].pt;
+						 sync_o_l3Eta = Hcand_cat0[i].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet.eta;
+						 sync_o_l4Pt = Hcand_cat0[i+1].pt;
+						 sync_o_l4Eta = Hcand_cat0[i+1].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 }else{
+						 sync_o_l4Pt = Hcand_cat0[i].pt;
+						 sync_o_l4Eta = Hcand_cat0[i].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet.eta;
+						 sync_o_l3Pt = Hcand_cat0[i+1].pt;
+						 sync_o_l3Eta = Hcand_cat0[i+1].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet2.eta; 
+					 }
+					 syncOutTree->Fill();	   
+			   }
 			
 			bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
 			bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
@@ -4266,7 +4335,39 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		 }
 		if(common) h_sync_summary[1]->Fill(3.0,double(exp_event_type));
-		else h_sync_summary[1]->Fill(0.0,double(exp_event_type)); // UCL only
+		else if(doSync){
+			 h_sync_summary[1]->Fill(0.0,double(exp_event_type)); // UCL only
+				myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
+				Float_t mass = PairMass(Hcand_cat1[i],Hcand_cat1[i+1]);
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = EventTypeConvAbdollah(exp_event_type);
+					 sync_o_subChannel = 1;
+					 sync_o_HMass = mass;
+					 if(exp_event_type!=2){
+						 sync_o_l3Pt = Hcand_cat1[i].pt;
+						 sync_o_l3Eta = Hcand_cat1[i].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet.eta;
+						 sync_o_l4Pt = Hcand_cat1[i+1].pt;
+						 sync_o_l4Eta = Hcand_cat1[i+1].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 }else{
+						 sync_o_l4Pt = Hcand_cat1[i].pt;
+						 sync_o_l4Eta = Hcand_cat1[i].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet.eta;
+						 sync_o_l3Pt = Hcand_cat1[i+1].pt;
+						 sync_o_l3Eta = Hcand_cat1[i+1].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet2.eta; 
+					 }
+					 syncOutTree->Fill();	   
+		 
+		 }
 		
 		bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
 		
@@ -4321,7 +4422,39 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		 }
 		if(common) h_sync_summary[2]->Fill(3.0,double(exp_event_type));
-		else h_sync_summary[2]->Fill(0.0,double(exp_event_type)); // UCL only
+		else if(doSync){
+			 h_sync_summary[2]->Fill(0.0,double(exp_event_type)); // UCL only
+			Float_t mass = PairMass(Hcand_cat2[i],Hcand_cat2[i+1]);
+			myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
+		
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = EventTypeConvAbdollah(exp_event_type);
+					 sync_o_subChannel = 2;
+					 sync_o_HMass = mass;
+					 if(exp_event_type!=2){
+						 sync_o_l3Pt = Hcand_cat2[i].pt;
+						 sync_o_l3Eta = Hcand_cat2[i].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet.eta;
+						 sync_o_l4Pt = Hcand_cat2[i+1].pt;
+						 sync_o_l4Eta = Hcand_cat2[i+1].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 }else{
+						 sync_o_l4Pt = Hcand_cat2[i].pt;
+						 sync_o_l4Eta = Hcand_cat2[i].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet.eta;
+						 sync_o_l3Pt = Hcand_cat2[i+1].pt;
+						 sync_o_l3Eta = Hcand_cat2[i+1].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet2.eta; 
+					 }
+					 syncOutTree->Fill();	   
+		 }
 		
 		bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
 		
