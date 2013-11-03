@@ -4158,9 +4158,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 bool common1 = false;
 		 bool common2 = false;
+		 if(doSyncFR) std::cout << " size if denom/loose/tight is" << sync_FRdenom_index.size() << "/" <<
+		 sync_FRnumL_index.size() << "/" << sync_FRnumT_index.size() << "/" << std::endl;
 		 
 		 for(uint iSync =0; iSync < sync_FRdenom_index.size(); iSync+=2)
 		 {
+			std::cout << " object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
 			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
 			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)) common1 = true;
@@ -4168,15 +4171,21 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync+1]]) < 0.1) &&
 			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync+1]]) < 0.1)) common2 = true;
 			if(common1){ // remove matched candidates
+				std::cout << "removing 1" << std::endl;
 				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
 				iSync-=1;
+				std::cout << "removed 1" << std::endl;
 				if(common2){
+					std::cout << "removing 12" << std::endl;
 					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
 					iSync-=1;
+					std::cout << "removed 12" << std::endl;
 				}
 			}else if(common2){
+					std::cout << "removing 2" << std::endl;
 					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync+1);
 					iSync-=1;
+					std::cout << "removed 2" << std::endl;
 				}
 		 }
 		 
