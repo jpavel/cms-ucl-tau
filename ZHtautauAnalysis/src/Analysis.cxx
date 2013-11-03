@@ -692,7 +692,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	}
 	TString FRchannelName[6] ={"tauB TT","tauEC TT","tauB LT","tauEC LT","el FR","mu FR"};
 	TString subChName[5] = {"cat0","cat1","cat2","sig","BGshape" };
-	TString syncSummaryName[5] = {"only UCL","type UCL","type ULB","OK","only ULB"};
+	TString syncSummaryName[6] = {"only UCL","type UCL l1","only UCL l2","OK","only ULB","wrong order"};
 	TString failReasons[6] = {"trigger","Vx","Z", "iso leptons", "no H", "b tag" };
 	h_fail_shape_TT = Book(TH1D("h_fail_shape_TT","Reasons failing shape cuts",12,-0.5,11.5));
 	h_fail_shape_TT=Retrieve<TH1D>("h_fail_shape_TT");
@@ -763,7 +763,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		sync_summary_s_title << subChName[i];
 		std::string sync_summary_title = sync_summary_s_title.str();
 		
-		TH2D* h_sync_summary_temp 					=  Book(TH2D(TString(sync_summary_name),TString(sync_summary_title),5,-0.5,4.5,14,0.5,14.5));
+		TH2D* h_sync_summary_temp 					=  Book(TH2D(TString(sync_summary_name),TString(sync_summary_title),6,-0.5,5.5,14,0.5,14.5));
 		for(uint iBin = 1; iBin <= (uint)h_sync_summary_temp->GetNbinsY(); iBin++)
 		{
 			if(iBin < 9) h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
@@ -4158,38 +4158,60 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 bool common1 = false;
 		 bool common2 = false;
+		 bool correctOrder = false;
 		 if(doSyncFR) std::cout << " size if denom/loose/tight is" << sync_FRdenom_index.size() << "/" <<
 		 sync_FRnumL_index.size() << "/" << sync_FRnumT_index.size() << "/" << std::endl;
 		 
-		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size(); iSync+=2)
+		 // find sync match for the lepton 1
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common1; iSync++)
 		 {
-			std::cout << " object #" << iSync << std::endl;
+			std::cout << "1: object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
 			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
-			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)) common1 = true;
-			if(sync_vec_Channel[sync_FRdenom_index[iSync+1]] == myChannel2 && 
-			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync+1]]) < 0.1) &&
-			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync+1]]) < 0.1)) common2 = true;
-			if(common1){ // remove matched candidates
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)){
+				 common1 = true;
+				 correctOrder=true;
+			 }
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
+			((fabs(Hcand_FR[i].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync]]) < 0.1))) 
+				common1 = true;
+			if(common1)
+			{
 				std::cout << "removing 1:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
 				
 				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
 				iSync-=1;
 				std::cout << "removed 1:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
-				if(common2){
-					std::cout << "removing 12:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
-					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync+1);
-					iSync-=1;
-					std::cout << "removed 12" << sync_FRdenom_index.size() << std::endl;
-				}
-			}else if(common2){
-					std::cout << "removing 2" << std::endl;
-					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync+1);
-					iSync-=1;
-					std::cout << "removed 2" << std::endl;
-				}
-			if(iSync<0) iSync=sync_FRdenom_index.size();
-		 }
+			}
+		}
+		
+		// find sync match for the lepton 2
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common2; iSync++)
+		 {
+			std::cout << "2: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel2 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l3Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)){
+				 correctOrder=false;
+				 common2 = true;
+			 }
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel2 && 
+			((fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync]]) < 0.1)))
+				common2 = true;
+			if(common2)
+			{
+				std::cout << "removing 2:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+				
+				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 2:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+			}
+		}
+		
+		
+			
 		 
 		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
 		 else{
@@ -4201,99 +4223,164 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
 				  h_sync_summary[1]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
+		 if(!correctOrder)
+		 {
+			if(!common1) h_sync_summary[1]->Fill(1.0,double(myChannel1));
+			else if(!common2) h_sync_summary[1]->Fill(2.0,double(myChannel1));
+			else h_sync_summary[1]->Fill(5.0,double(myChannel1));
+		 }
 			  
 		// numerator Loose
 		
 		common1 = false;
 		common2 = false;
-		 
-		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size(); iSync+=2)
+		correctOrder = false;
+		
+		// find sync match for the lepton 1
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common1; iSync++)
 		 {
-			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i]>0 &&
+			std::cout << "1: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i] > 0 && 
 			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
-			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumL_index[iSync]]) < 0.1)) common1 = true;
-			if(sync_vec_Channel[sync_FRnumL_index[iSync+1]] == myChannel2 && Hcand_pass[i+1]>0 && 
-			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync+1]]) < 0.1) &&
-			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync+1]]) < 0.1)) common2 = true;
-			if(common1){ // remove matched candidates
-				std::cout << "Lremoving 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumL_index[iSync]]) < 0.1)){
+				 common1 = true;
+				 correctOrder=true;
+			 }
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i] > 0 &&
+			((fabs(Hcand_FR[i].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync]]) < 0.1))) 
+				common1 = true;
+			if(common1)
+			{
+				std::cout << "removing 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
 				
 				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
 				iSync-=1;
-				std::cout << "Lremoved 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				std::cout << "removed 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+			}
+		}
+
+
+		// find sync match for the lepton 2
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common2; iSync++)
+		 {
+			std::cout << "2: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l3Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l3Eta[sync_FRnumL_index[iSync]]) < 0.1)){
+				 common2 = true;
+				 correctOrder=false;
+			 }
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
+			((fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync]]) < 0.1))) 
+				common2 = true;
+			if(common2)
+			{
+				std::cout << "removing 2:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
 				
-				if(common2){
-					std::cout << "Lremoving 12:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
-				
-					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
-					iSync-=1;
-					std::cout << "Lremoved 12:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
-				
-				}
-			}else if(common2){
-					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
-					iSync-=1;
-				}
-			if(iSync<0) iSync=sync_FRnumL_index.size();
-		 }
+				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 2:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+			}
+		}
+	
+		
 		 
 		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
-		 else{
+		 else if(Hcand_pass[i]){
 				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
 				  h_sync_summary[3]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
-		 else{
+		 else if(Hcand_pass[i+1]){
 				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
 				  h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
+			  
+		 if(!correctOrder)
+		 {
+			if(!common1 && Hcand_pass[i] >0) h_sync_summary[1]->Fill(1.0,double(myChannel1));
+			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
+			else if(Hcand_pass[i] >0 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(5.0,double(myChannel1));
+		 }
 			  
 		// numerator Tight
 		
 		common1 = false;
 		common2 = false;
-		 
-		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size(); iSync+=2)
+		correctOrder = false;
+		
+		// find sync match for the lepton 1 - tight is only for lepton !
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common1; iSync++)
 		 {
-			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i]==2 && 
+			if(myChannel1!= 13 && myChannel1!=14) continue; // just e and mu
+			std::cout << "1: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i] ==2 && 
 			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
-			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumT_index[iSync]]) < 0.1)) common1 = true;
-			if(sync_vec_Channel[sync_FRnumT_index[iSync+1]] == myChannel2 && Hcand_pass[i+1]==2 &&
-			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync+1]]) < 0.1) &&
-			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync+1]]) < 0.1)) common2 = true;
-			if(common1){ // remove matched candidates
-			std::cout << "Tremoving 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
-					
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumT_index[iSync]]) < 0.1)){
+				 common1 = true;
+				 correctOrder=true;
+			 }
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i] ==2 &&
+			((fabs(Hcand_FR[i].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync]]) < 0.1))) 
+				common1 = true;
+			if(common1)
+			{
+				std::cout << "removing 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+				
 				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
 				iSync-=1;
-			std::cout << "Tremoved 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
-			
-				if(common2){
-					std::cout << "Tremoving 12:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
-			
-					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
-					iSync-=1;
-					std::cout << "Tremoved 12:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
-			
-				}
-			}else if(common2){
-					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
-					iSync-=1;
-				}
-			if(iSync<0) iSync=sync_FRnumT_index.size();
-		 }
-		 
+				std::cout << "removed 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			}
+		}
+		
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common2; iSync++)
+		 {
+			if(myChannel1!= 13 && myChannel1!=14) continue; // just in case
+			std::cout << "2: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l3Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l3Eta[sync_FRnumT_index[iSync]]) < 0.1)){
+				 common2 = true;
+				 correctOrder=false;
+			 }
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel2 && Hcand_pass[i+1] >2 &&
+			((fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync]]) < 0.1))) 
+				common2 = true;
+			if(common2)
+			{
+				std::cout << "removing 2:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+				
+				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 2:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			}
+		}
+
+
+		
+		
+		 		 
 		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
-		 else{
+		 else if(Hcand_pass[i]==2){
 				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
-		 else{
+		 else if(Hcand_pass[i+1] > 0){
 				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
 		
+		 if(!correctOrder)
+		 {
+			if(!common1 && Hcand_pass[i] == 2) h_sync_summary[1]->Fill(1.0,double(myChannel1));
+			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
+			else if(Hcand_pass[i]==2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(5.0,double(myChannel1));
+		 }
 		 
 		 
 		 switch(exp_event_type)
