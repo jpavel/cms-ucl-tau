@@ -128,7 +128,7 @@
 		<Item Name="IgnoreLTforFR_LL" Value="True" />
 		
 		<!-- Sync tree stuff -->
-		<Item Name="syncFileName" Value="Tree_DoubleEle_Run2012D_FR.root" />
+		<Item Name="syncFileName" Value="Tree_DoubleMuParked_Run2012D_FR.root" />
 		<Item Name="doSync" Value="True" />
 		<Item Name="doSyncFR" Value="True" />
                 

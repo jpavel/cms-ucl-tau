@@ -694,9 +694,9 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	TString subChName[5] = {"cat0","cat1","cat2","sig","BGshape" };
 	TString syncSummaryName[6] = {"only UCL","type UCL l1","only UCL l2","OK","only ULB","wrong order"};
 	TString failReasons[6] = {"trigger","Vx","Z", "iso leptons", "no H", "b tag" };
-	h_fail_shape_TT = Book(TH1D("h_fail_shape_TT","Reasons failing shape cuts",12,-0.5,11.5));
+	h_fail_shape_TT = Book(TH1D("h_fail_shape_TT","Reasons failing shape cuts",15,-0.5,14.5));
 	h_fail_shape_TT=Retrieve<TH1D>("h_fail_shape_TT");
-	TString failReasonsTT[12] = {"LeadPt","LeadElID","SubPt", "SS", "one pair", "SubEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau" };
+	TString failReasonsTT[15] = {"LeadPt","LeadElID","SubPt", "SS", "one pair", "SubEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau", "wrong pair", "BarrelFail1", "BarrelFail2" };
 	
 	h_fail_shape_MT = Book(TH1D("h_fail_shape_MT","Reasons failing shape cuts",16,-0.5,15.5));
 	h_fail_shape_MT=Retrieve<TH1D>("h_fail_shape_MT");
@@ -2347,7 +2347,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     s_s_i_TT.clear();
 	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
 	{
-		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 0) s_s_i_TT.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==1 && (sync_vec_Channel[iSync] ==9 || sync_vec_Channel[iSync] ==10 )) s_s_i_TT.push_back(iSync);
 	}
 	
 	
@@ -2364,13 +2364,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		goodTau[i].discriminationByElectronLoose << std::endl;
 		// finding the sync match
 		int s_match_i = -1;
-		for(uint iSync =0; iSync < s_s_i_TT.size(); iSync++)
+		for(uint iSync =0; iSync < s_s_i_TT.size() && s_match_i < -1; iSync++)
 		{
-			std::cout << " Sync shape candidate #" << iSync << " type:" << EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]]) <<
-			" l3 pt/eta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] <<
-			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_TT[iSync]] << std::endl;
-			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=4) continue;
-			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=8) continue;
+			std::cout << " Sync FR candidate #" << iSync << " type:" << sync_vec_Channel[s_s_i_TT[iSync]] <<
+			" l3 pt/eta/jeta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l3_CloseJetEta[s_s_i_TT[iSync]] << 
+			" l4 pt/eta/jeta:" << sync_vec_l4Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l4_CloseJetEta[s_s_i_TT[iSync]] << std::endl;
+			//if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=4) continue;
+			//if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=8) continue;
 			if(fabs(goodTau[i].pt - sync_vec_l3Pt[s_s_i_TT[iSync]]) < 0.1 && fabs(goodTau[i].eta - sync_vec_l3Eta[s_s_i_TT[iSync]]) < 0.1){
 				 std::cout << " matched leading tau" << std::endl;
 				 s_match_i=iSync;
@@ -2406,11 +2406,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << "ch: " << 
 			goodTau[j].charge << " mass: " << PairMass(goodTau[i],goodTau[j]) <<std::endl;
 			
-			if(s_match_i >-1){
-				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_TT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_TT[s_match_i]]) < 0.1){
-					 match2=true;
+			int s_match2_i = -1;
+			for(uint iSync =0; iSync < s_s_i_TT.size() && (int)iSync!=s_match_i && s_match2_i < 0 ; iSync++)
+			{
+				std::cout << "SUB Sync FR candidate #" << iSync << " type:" << sync_vec_Channel[s_s_i_TT[iSync]] <<
+				" l3 pt/eta/jeta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l3_CloseJetEta[s_s_i_TT[iSync]] << 
+				" l4 pt/eta/jeta:" << sync_vec_l4Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l4_CloseJetEta[s_s_i_TT[iSync]] << std::endl;
+				//if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=4) continue;
+				//if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=8) continue;
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_TT[iSync]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_TT[iSync]]) < 0.1){
+					 std::cout << " matched sub leading tau (mass " << sync_vec_HMass[s_s_i_TT[iSync]] << ")" << std::endl;
+					 s_match2_i=iSync;
+					  match2=true;
 					 matchedSync = true;
-					 std::cout << "matched sub tau (mass " << sync_vec_HMass[s_s_i_TT[s_match_i]] << ")" << std::endl;
+				 }
+			}
+			
+			
+			if(s_match_i >-1 && s_match2_i > -1){
+				if(fabs(sync_vec_l4Pt[s_s_i_TT[s_match2_i]] - sync_vec_l4Pt[s_s_i_TT[s_match_i]]) > 0.1 || 
+				fabs(sync_vec_l4Eta[s_s_i_TT[s_match2_i]] - sync_vec_l4Eta[s_s_i_TT[s_match_i]]) > 0.1){
+					
+					 std::cout << "matched wrong pair! (orig mass " << sync_vec_HMass[s_s_i_TT[s_match_i]] << ")" << std::endl;
+					 h_fail_shape_TT->Fill(12.0);
 				 }
 			}
 			
@@ -2557,11 +2575,29 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 			}else if(isFakeRate){
 				if(examineThisEvent){
-					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					myobject ClosestJet = ClosestInCollection(Hcand[index],m->RecPFJetsAK5);
+					myobject ClosestJet2 = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					
 					std::cout << "Saving denom fake candidates with pass = " << pass1 << " " << pass2 << 
-					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " " << ClosestJet.pt << " " << 
+					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " jet etas" << ClosestJet.eta << " " << ClosestJet2.eta << " M= " <<
 					PairMass(Hcand[index],Hcand[index+1]) << std::endl;
+				
+				bool barrelMatch1 =true;
+				bool barrelMatch2 =true;
+				
+				if(doSync && doSyncFR){
+					barrelMatch1 = (ClosestJet.eta < 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 9) || (ClosestJet.eta >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 10);
+					barrelMatch2 = (ClosestJet2.eta < 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 9) || (ClosestJet2.eta >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 10);
+					if(!barrelMatch1){
+						std::cout << "Lead tau failed barrel cut!" << std::endl;
+						h_fail_shape_TT->Fill(13.0);
+					}
+					if(!barrelMatch2){
+						std::cout << "Sub tau failed barrel cut!" << std::endl;
+						h_fail_shape_TT->Fill(14.0);
+					}
 				}
+			}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				
@@ -4215,12 +4251,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
 		 else{
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[1]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[1]->Fill(3.0,double(myChannel2));
 		 else{
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				"jeta= " << ClosestJet2.eta << std::endl;
 				  h_sync_summary[1]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
 		 if(!correctOrder)
@@ -4289,13 +4327,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
 		 else if(Hcand_pass[i]){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[3]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
 		 else if(Hcand_pass[i+1]){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
-				  h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				"jeta= " << ClosestJet2.eta << std::endl;
+				 h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
 			  
 		 if(!correctOrder)
@@ -4366,12 +4406,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 		 
 		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
 		 else if(Hcand_pass[i]==2){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
 		 else if(Hcand_pass[i+1] > 0){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				"jeta= " << ClosestJet2.eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
 		
@@ -4463,24 +4505,27 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 for(uint iSync = 0; iSync < sync_FRdenom_index.size(); iSync++)
 			 {
 				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRdenom_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRdenom_index[iSync]] 
-				<< " pt = " << sync_vec_l3Pt[sync_FRdenom_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRdenom_index[iSync]]  
-				<< " 2: pt = " << sync_vec_l4Pt[sync_FRdenom_index[iSync]] << "eta " << sync_vec_l4Eta[sync_FRdenom_index[iSync]] << std::endl;
+				<< " pt = " << sync_vec_l3Pt[sync_FRdenom_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRdenom_index[iSync]] << " jeta " 
+				<< sync_vec_l3_CloseJetEta[sync_FRdenom_index[iSync]] << " 2: pt = " << sync_vec_l4Pt[sync_FRdenom_index[iSync]] << "eta " 
+				<< sync_vec_l4Eta[sync_FRdenom_index[iSync]] << " jeta " << sync_vec_l4_CloseJetEta[sync_FRdenom_index[iSync]] << std::endl;
 				h_sync_summary[1]->Fill(4.0,sync_vec_Channel[sync_FRdenom_index[iSync]]);
 			 }
 			 
 		 	 for(uint iSync = 0; iSync < sync_FRnumL_index.size(); iSync++)
 			 {
 				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRnumL_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRnumL_index[iSync]] 
-				<< " pt = " << sync_vec_l3Pt[sync_FRnumL_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumL_index[iSync]]  
-				<< " 2: pt = " << sync_vec_l4Pt[sync_FRnumL_index[iSync]] << "eta " << sync_vec_l4Eta[sync_FRnumL_index[iSync]] << std::endl;
+				<< " pt = " << sync_vec_l3Pt[sync_FRnumL_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumL_index[iSync]]  << " jeta " 
+				<< sync_vec_l3_CloseJetEta[sync_FRnumL_index[iSync]] << " 2: pt = " << sync_vec_l4Pt[sync_FRnumL_index[iSync]] << "eta "
+				 << sync_vec_l4Eta[sync_FRnumL_index[iSync]] << " jeta " << sync_vec_l4_CloseJetEta[sync_FRnumL_index[iSync]] << std::endl;
 				h_sync_summary[3]->Fill(4.0,sync_vec_Channel[sync_FRnumL_index[iSync]]);
 			 }
 			 
 			 for(uint iSync = 0; iSync < sync_FRnumT_index.size(); iSync++)
 			 {
 				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRnumT_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRnumT_index[iSync]] 
-				<< " pt = " << sync_vec_l3Pt[sync_FRnumT_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumT_index[iSync]]  
-				<< " 2: pt = " << sync_vec_l4Pt[sync_FRnumT_index[iSync]] << "eta " << sync_vec_l4Eta[sync_FRnumT_index[iSync]] << std::endl;
+				<< " pt = " << sync_vec_l3Pt[sync_FRnumT_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumT_index[iSync]]  << " jeta " 
+				<< sync_vec_l3_CloseJetEta[sync_FRnumT_index[iSync]] << " 2: pt = " << sync_vec_l4Pt[sync_FRnumT_index[iSync]] << "eta "
+				 << sync_vec_l4Eta[sync_FRnumT_index[iSync]] << " jeta " << sync_vec_l4_CloseJetEta[sync_FRnumT_index[iSync]] << std::endl;
 				h_sync_summary[2]->Fill(4.0,sync_vec_Channel[sync_FRnumT_index[iSync]]);
 			 }
 			 
