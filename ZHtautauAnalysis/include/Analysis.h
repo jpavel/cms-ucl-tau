@@ -479,6 +479,7 @@ private:
     
     std::string syncFileName;
     bool doSync;
+    bool doSyncFR;
     
             
     

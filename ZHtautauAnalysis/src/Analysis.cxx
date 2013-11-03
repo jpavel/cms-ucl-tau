@@ -104,6 +104,8 @@ Analysis::Analysis()
 		
 		DeclareProperty("syncFileName",syncFileName);
 		DeclareProperty("doSync",doSync);
+		DeclareProperty("doSyncFR",doSyncFR);
+		
 
 	}
 
@@ -136,7 +138,7 @@ int Analysis::EventTypeConv(int e_type_in)
 		case 6: return 5;
 		case 7: return 7;
 		case 8: return 6;
-		default: return -1;	
+		default: return e_type_in;	
 	}
 }
 
@@ -152,7 +154,7 @@ int Analysis::EventTypeConvAbdollah(int e_type_in)
 		case 6: return 8;
 		case 7: return 7;
 		case 8: return 5;
-		default: return -1;	
+		default: return e_type_in;	
 	}
 }
 
@@ -688,7 +690,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     
 		
 	}
-	
+	TString FRchannelName[6] ={"tauB TT","tauEC TT","tauB LT","tauEC LT","el FR","mu FR"};
 	TString subChName[5] = {"cat0","cat1","cat2","sig","BGshape" };
 	TString syncSummaryName[5] = {"only UCL","type UCL","type ULB","OK","only ULB"};
 	TString failReasons[6] = {"trigger","Vx","Z", "iso leptons", "no H", "b tag" };
@@ -738,10 +740,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		fail_reason_s_title << subChName[i];
 		std::string fail_reason_title = fail_reason_s_title.str();
 		
-		TH2D* h_fail_reason_temp 					=  Book(TH2D(TString(fail_reason_name),TString(fail_reason_title),6,-0.5,5.5,8,0.5,8.5));
-		for(uint iBin = 1; iBin <= (uint)h_event_type->GetNbinsX(); iBin++)
+		TH2D* h_fail_reason_temp 					=  Book(TH2D(TString(fail_reason_name),TString(fail_reason_title),6,-0.5,5.5,14,0.5,14.5));
+		for(uint iBin = 1; iBin <= (uint)h_fail_reason_temp->GetNbinsY(); iBin++)
 		{
-			h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+			if(iBin <9) h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+			else h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,FRchannelName[iBin-9]);
 		}
 		
 		for(uint jBin = 1; jBin <= (uint)h_fail_reason_temp->GetNbinsX(); jBin++)
@@ -760,10 +763,11 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		sync_summary_s_title << subChName[i];
 		std::string sync_summary_title = sync_summary_s_title.str();
 		
-		TH2D* h_sync_summary_temp 					=  Book(TH2D(TString(sync_summary_name),TString(sync_summary_title),5,-0.5,4.5,8,0.5,8.5));
-		for(uint iBin = 1; iBin <= (uint)h_event_type->GetNbinsX(); iBin++)
+		TH2D* h_sync_summary_temp 					=  Book(TH2D(TString(sync_summary_name),TString(sync_summary_title),5,-0.5,4.5,14,0.5,14.5));
+		for(uint iBin = 1; iBin <= (uint)h_sync_summary_temp->GetNbinsY(); iBin++)
 		{
-			h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+			if(iBin < 9) h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+			else h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,FRchannelName[iBin-9]);
 		}
 		for(uint jBin = 1; jBin <= (uint)h_sync_summary_temp->GetNbinsX(); jBin++)
 		{
@@ -1791,6 +1795,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(doSync)
 	{
 		RunLumiEvent thisRLE(m->runNumber, m->lumiNumber, m->eventNumber);
+		//(203912,105,135623662);
+		//(203912,107,138473080);
+		//
 		treemap::iterator it=syncTreeMap.find(thisRLE);
 		long index =0;
 		int plusEvents = 0;
@@ -1809,8 +1816,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 				std::cout << " Obtaining entry#" << index << "/" << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << 
 				"channel/subchannel:" << sync_Channel << " (" << EventTypeName(EventTypeConv(sync_Channel)) << ")/" << sync_subChannel << std::endl;
+				std::cout << "  -> Hmass = " << sync_HMass << " l3pt= " << sync_l3Pt << " " << sync_l3Eta << " l4Pt= " << sync_l4Pt << " " << sync_l4Eta << std::endl;
 			
-				sync_vec_Channel.push_back(sync_Channel);
+				if(sync_Channel > -1) sync_vec_Channel.push_back(sync_Channel);
+				else sync_vec_Channel.push_back(sync_Channel+48);
 		        sync_vec_subChannel.push_back(sync_subChannel);
 				sync_vec_HMass.push_back(sync_HMass);
 				sync_vec_l3Pt.push_back(sync_l3Pt);
@@ -4086,7 +4095,28 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			h_H_mass_signal_types[event_type-1]->Fill(mass,weight);	
 		}
 	if(examineThisEvent) std::cout << " filling FR histo " << std::endl;
-				
+			
+	std::vector<int> sync_FRdenom_index;
+    sync_FRdenom_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==1 && sync_vec_Channel[iSync]>8) sync_FRdenom_index.push_back(iSync);
+	}
+	
+	std::vector<int> sync_FRnumL_index;
+    sync_FRnumL_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==2 && sync_vec_Channel[iSync]>8) sync_FRnumL_index.push_back(iSync);
+	}
+	
+	std::vector<int> sync_FRnumT_index;
+    sync_FRnumT_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==3 && sync_vec_Channel[iSync]>8) sync_FRnumT_index.push_back(iSync);
+	}
+		
 	for(uint i=0; i < Hcand_FR.size(); i+=2)
 	{
 		 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
@@ -4101,7 +4131,142 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 if(Hcand_shape_pass[i/2] > 1) h_H_mass_FRt_types[exp_event_type-1]->Fill(mass,weight);
 		 	
 		 if(examineThisEvent) std::cout << " filled mass " << std::endl;
-	
+		 
+		 //
+		 int myChannel1 = -1;
+		 int myChannel2 = -1;
+		 if(doSync && doSyncFR)
+		 {
+			switch(exp_event_type%4)
+			{
+				case 0: // TT
+				 myChannel1 = barrel1 ? 9 : 10;
+				 myChannel2 = barrel2 ? 9 : 10;
+				 break;
+				case 1: // MT
+				  myChannel1 = 14;
+				  myChannel2 = barrel2 ? 11: 12;
+				  break;
+				case 3: // ET
+				  myChannel1 = 13;
+				  myChannel2 = barrel2 ? 11: 12;
+				  break;
+				 default:
+				  break;
+			}
+		 }
+		 
+		 bool common1 = false;
+		 bool common2 = false;
+		 
+		 for(uint iSync =0; iSync < sync_FRdenom_index.size(); iSync+=2)
+		 {
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
+			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)) common1 = true;
+			if(sync_vec_Channel[sync_FRdenom_index[iSync+1]] == myChannel2 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync+1]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync+1]]) < 0.1)) common2 = true;
+			if(common1){ // remove matched candidates
+				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
+				iSync-=1;
+				if(common2){
+					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
+					iSync-=1;
+				}
+			}else if(common2){
+					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync+1);
+					iSync-=1;
+				}
+		 }
+		 
+		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
+				  h_sync_summary[1]->Fill(0.0,double(myChannel1)); // UCL only
+			  }
+		 if(common2) h_sync_summary[1]->Fill(3.0,double(myChannel2));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
+				  h_sync_summary[1]->Fill(0.0,double(myChannel2)); // UCL only
+			  }
+			  
+		// numerator Loose
+		
+		common1 = false;
+		common2 = false;
+		 
+		 for(uint iSync =0; iSync < sync_FRnumL_index.size(); iSync+=2)
+		 {
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i]>0 &&
+			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumL_index[iSync]]) < 0.1)) common1 = true;
+			if(sync_vec_Channel[sync_FRnumL_index[iSync+1]] == myChannel2 && Hcand_pass[i+1]>0 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync+1]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync+1]]) < 0.1)) common2 = true;
+			if(common1){ // remove matched candidates
+				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
+				iSync-=1;
+				if(common2){
+					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
+					iSync-=1;
+				}
+			}else if(common2){
+					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
+					iSync-=1;
+				}
+		 }
+		 
+		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
+				  h_sync_summary[3]->Fill(0.0,double(myChannel1)); // UCL only
+			  }
+		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
+				  h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
+			  }
+			  
+		// numerator Tight
+		
+		common1 = false;
+		common2 = false;
+		 
+		 for(uint iSync =0; iSync < sync_FRnumT_index.size(); iSync+=2)
+		 {
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i]==2 && 
+			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumT_index[iSync]]) < 0.1)) common1 = true;
+			if(sync_vec_Channel[sync_FRnumT_index[iSync+1]] == myChannel2 && Hcand_pass[i+1]==2 &&
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync+1]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync+1]]) < 0.1)) common2 = true;
+			if(common1){ // remove matched candidates
+				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
+				iSync-=1;
+				if(common2){
+					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
+					iSync-=1;
+				}
+			}else if(common2){
+					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
+					iSync-=1;
+				}
+		 }
+		 
+		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << std::endl;
+				  h_sync_summary[2]->Fill(0.0,double(myChannel1)); // UCL only
+			  }
+		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << std::endl;
+				  h_sync_summary[2]->Fill(0.0,double(myChannel2)); // UCL only
+			  }
+		
+		 
+		 
 		 switch(exp_event_type)
 			{
 				case 4:
@@ -4178,6 +4343,32 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		 
 	}
+	// not matched sync objects
+		 for(uint iSync = 0; iSync < sync_FRdenom_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRdenom_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRdenom_index[iSync]] 
+				<< " pt = " << sync_vec_l3Pt[sync_FRdenom_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRdenom_index[iSync]]  
+				<< " 2: pt = " << sync_vec_l4Pt[sync_FRdenom_index[iSync]] << "eta " << sync_vec_l4Eta[sync_FRdenom_index[iSync]] << std::endl;
+				h_sync_summary[1]->Fill(4.0,sync_vec_Channel[sync_FRdenom_index[iSync]]);
+			 }
+			 
+		 	 for(uint iSync = 0; iSync < sync_FRnumL_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRnumL_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRnumL_index[iSync]] 
+				<< " pt = " << sync_vec_l3Pt[sync_FRnumL_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumL_index[iSync]]  
+				<< " 2: pt = " << sync_vec_l4Pt[sync_FRnumL_index[iSync]] << "eta " << sync_vec_l4Eta[sync_FRnumL_index[iSync]] << std::endl;
+				h_sync_summary[3]->Fill(4.0,sync_vec_Channel[sync_FRnumL_index[iSync]]);
+			 }
+			 
+			 for(uint iSync = 0; iSync < sync_FRnumT_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRnumT_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRnumT_index[iSync]] 
+				<< " pt = " << sync_vec_l3Pt[sync_FRnumT_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumT_index[iSync]]  
+				<< " 2: pt = " << sync_vec_l4Pt[sync_FRnumT_index[iSync]] << "eta " << sync_vec_l4Eta[sync_FRnumT_index[iSync]] << std::endl;
+				h_sync_summary[2]->Fill(4.0,sync_vec_Channel[sync_FRnumT_index[iSync]]);
+			 }
+			 
+			 
 	
 	std::vector<int> sync_cat0_index;
     sync_cat0_index.clear();
