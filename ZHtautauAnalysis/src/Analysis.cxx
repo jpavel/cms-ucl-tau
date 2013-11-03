@@ -4177,7 +4177,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				std::cout << "removed 1" << std::endl;
 				if(common2){
 					std::cout << "removing 12" << std::endl;
-					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
+					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync+1);
 					iSync-=1;
 					std::cout << "removed 12" << std::endl;
 				}
@@ -4217,7 +4217,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
 				iSync-=1;
 				if(common2){
-					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
+					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
 					iSync-=1;
 				}
 			}else if(common2){
@@ -4254,7 +4254,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
 				iSync-=1;
 				if(common2){
-					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
+					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
 					iSync-=1;
 				}
 			}else if(common2){
