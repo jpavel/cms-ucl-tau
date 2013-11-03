@@ -4161,7 +4161,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 if(doSyncFR) std::cout << " size if denom/loose/tight is" << sync_FRdenom_index.size() << "/" <<
 		 sync_FRnumL_index.size() << "/" << sync_FRnumT_index.size() << "/" << std::endl;
 		 
-		 for(uint iSync =0; iSync < sync_FRdenom_index.size(); iSync+=2)
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size(); iSync+=2)
 		 {
 			std::cout << " object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
@@ -4188,6 +4188,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					iSync-=1;
 					std::cout << "removed 2" << std::endl;
 				}
+			if(iSync<0) iSync=sync_FRdenom_index.size();
 		 }
 		 
 		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
@@ -4206,7 +4207,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		common1 = false;
 		common2 = false;
 		 
-		 for(uint iSync =0; iSync < sync_FRnumL_index.size(); iSync+=2)
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size(); iSync+=2)
 		 {
 			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i]>0 &&
 			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
@@ -4233,6 +4234,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
 					iSync-=1;
 				}
+			if(iSync<0) iSync=sync_FRnumL_index.size();
 		 }
 		 
 		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
@@ -4251,7 +4253,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		common1 = false;
 		common2 = false;
 		 
-		 for(uint iSync =0; iSync < sync_FRnumT_index.size(); iSync+=2)
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size(); iSync+=2)
 		 {
 			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i]==2 && 
 			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
@@ -4278,6 +4280,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
 					iSync-=1;
 				}
+			if(iSync<0) iSync=sync_FRnumT_index.size();
 		 }
 		 
 		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
