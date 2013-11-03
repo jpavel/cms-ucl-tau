@@ -4171,15 +4171,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync+1]]) < 0.1) &&
 			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync+1]]) < 0.1)) common2 = true;
 			if(common1){ // remove matched candidates
-				std::cout << "removing 1" << std::endl;
+				std::cout << "removing 1:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+				
 				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
 				iSync-=1;
-				std::cout << "removed 1" << std::endl;
+				std::cout << "removed 1:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
 				if(common2){
-					std::cout << "removing 12" << std::endl;
+					std::cout << "removing 12:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
 					sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync+1);
 					iSync-=1;
-					std::cout << "removed 12" << std::endl;
+					std::cout << "removed 12" << sync_FRdenom_index.size() << std::endl;
 				}
 			}else if(common2){
 					std::cout << "removing 2" << std::endl;
@@ -4214,11 +4215,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync+1]]) < 0.1) &&
 			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync+1]]) < 0.1)) common2 = true;
 			if(common1){ // remove matched candidates
+				std::cout << "Lremoving 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				
 				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
 				iSync-=1;
+				std::cout << "Lremoved 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				
 				if(common2){
+					std::cout << "Lremoving 12:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				
 					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
 					iSync-=1;
+					std::cout << "Lremoved 12:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				
 				}
 			}else if(common2){
 					sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync+1);
@@ -4251,11 +4260,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			(fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync+1]]) < 0.1) &&
 			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync+1]]) < 0.1)) common2 = true;
 			if(common1){ // remove matched candidates
+			std::cout << "Tremoving 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+					
 				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
 				iSync-=1;
+			std::cout << "Tremoved 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			
 				if(common2){
+					std::cout << "Tremoving 12:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			
 					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
 					iSync-=1;
+					std::cout << "Tremoved 12:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			
 				}
 			}else if(common2){
 					sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync+1);
