@@ -14,10 +14,10 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="Analysis" OutputDirectory="./" PostFix="" TargetLumi="1.0" RunMode="LOCAL" ProofServer="lite://" ProofWorkDir="" ProofNodes="-1">
-		<InputData Lumi="0.0" NEventsMax="400" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
-             <OutputTree Name="redtree"/>
+        <!--     <OutputTree Name="redtree"/> -->
 		</InputData>
 		<UserConfig>
 		<Item Name="InTreeName" Value="t"/>
@@ -116,7 +116,7 @@
                 
                <!-- Output options -->
 
-	       	
+	    <Item Name="doNtuple" Value="False" />   	
 	    <Item Name="FillPDFInfo" Value="False" />
 		<Item Name="FillSVmassInfo" Value="True" />
 		<Item Name="FillZZgenInfo" Value="False" />
@@ -126,6 +126,11 @@
 		<Item Name="IgnoreLTforFR_TT" Value="False" />
 		<Item Name="IgnoreLTforFR_LT" Value="True" />
 		<Item Name="IgnoreLTforFR_LL" Value="True" />
+		
+		<!-- Sync tree stuff -->
+		<Item Name="syncFileName" Value="Tree_DoubleMuParked_Run2012D_FR.root" />
+		<Item Name="doSync" Value="True" />
+		<Item Name="doSyncFR" Value="True" />
                 
                       
 		</UserConfig>

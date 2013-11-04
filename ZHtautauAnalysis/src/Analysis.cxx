@@ -89,6 +89,7 @@ Analysis::Analysis()
 		
 		//ntuple out
 		
+		DeclareProperty("doNtuple", doNtuple);
 		DeclareProperty("FillPDFInfo",FillPDFInfo);
 		DeclareProperty("FillSVmassInfo",FillSVmassInfo);
 		DeclareProperty("FillZZgenInfo",FillZZgenInfo);
@@ -100,6 +101,11 @@ Analysis::Analysis()
 		DeclareProperty("IgnoreLTforFR_LT",IgnoreLTforFR_LT);
 		DeclareProperty("IgnoreLTforFR_LL",IgnoreLTforFR_LL);
 		DeclareProperty("reverseFR",reverseFR);
+		
+		DeclareProperty("syncFileName",syncFileName);
+		DeclareProperty("doSync",doSync);
+		DeclareProperty("doSyncFR",doSyncFR);
+		
 
 	}
 
@@ -132,15 +138,117 @@ int Analysis::EventTypeConv(int e_type_in)
 		case 6: return 5;
 		case 7: return 7;
 		case 8: return 6;
-		default: return -1;	
+		default: return e_type_in;	
+	}
+}
+
+int Analysis::EventTypeConvAbdollah(int e_type_in)
+{
+	switch(e_type_in)
+	{
+		case 1: return 3;
+		case 2: return 4;
+		case 3: return 2;
+		case 4: return 1;
+		case 5: return 6;
+		case 6: return 8;
+		case 7: return 7;
+		case 8: return 5;
+		default: return e_type_in;	
+	}
+}
+
+std::string Analysis::EventTypeName(int e_type_in)
+{
+	switch(e_type_in)
+	{
+		case 1: return "MMMT";
+		case 2: return "MMME";
+		case 3: return "MMET";
+		case 4: return "MMTT";
+		case 5: return "EEMT";
+		case 6: return "EEEM";
+		case 7: return "EEET";
+		case 8: return "EETT";
+		default: return "";	
 	}
 }
 
 void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
+	// sync tree
+	if(doSync){
+		syncFile = TFile::Open(syncFileName.c_str());
+		if(!syncFile) {
+			std::cerr << "Error: file " << syncFileName << " could not be opened." << std::endl; 
+			return;
+		}else std::cout << "File " << syncFileName << " succesfully opened!" << std::endl;
+		syncTree = (TTree*)syncFile->Get("BG_Tree");
+		
+		std::cout << " sync tree has " << syncTree->GetEntries() << " entries" << std::endl;
+		
+		syncTree->SetBranchAddress( "Run_",    &sync_run );
+		syncTree->SetBranchAddress( "Event_",    &sync_event );
+		syncTree->SetBranchAddress( "Lumi_",    &sync_lumi );
+		
+		syncTree->SetBranchAddress( "Channel_", &sync_Channel );
+        syncTree->SetBranchAddress( "subChannel_", &sync_subChannel );
+		syncTree->SetBranchAddress( "HMass_", &sync_HMass );
+		syncTree->SetBranchAddress( "l3Pt_", &sync_l3Pt );
+		syncTree->SetBranchAddress( "l3Eta_", &sync_l3Eta );
+		syncTree->SetBranchAddress( "l3_CloseJetPt_", &sync_l3_CloseJetPt );
+		syncTree->SetBranchAddress( "l3_CloseJetEta_", &sync_l3_CloseJetEta );
+		syncTree->SetBranchAddress( "l4Pt_", &sync_l4Pt );
+		syncTree->SetBranchAddress( "l4Eta_", &sync_l4Eta );
+		syncTree->SetBranchAddress( "l4_CloseJetPt_", &sync_l4_CloseJetPt );
+		syncTree->SetBranchAddress( "l4_CloseJetEta_", &sync_l4_CloseJetEta );
+		
+		sync_run_vec.clear();
+		sync_lumi_vec.clear();
+		sync_event_vec.clear();
+		
+		syncTreeMap.clear();
+		int n_same=0;
+		bool smaller = false;
+		bool equal = false;
+		treemap::iterator it=syncTreeMap.begin();
+		for(uint iEv = 0; iEv < syncTree->GetEntries(); iEv++)
+		{
+			if(equal) n_same++;
+			RunLumiEvent prevRLE(sync_run, sync_lumi, sync_event);
+			syncTree->GetEvent(iEv);
+			RunLumiEvent thisRLE(sync_run, sync_lumi, sync_event);
+			if(prevRLE < thisRLE) smaller=true;
+			else smaller=false;
+			if(prevRLE==thisRLE) equal=true;
+			else equal=false;
+			if(!equal){
+				std::cout << "write " << prevRLE.run <<":" << prevRLE.lumi <<":" << prevRLE.event << " " << n_same << " " << iEv - n_same -1 << std::endl;
+				it=syncTreeMap.find(prevRLE);
+				treeinfo myinfo = std::make_pair(iEv-n_same-1,n_same);
+				if(it==syncTreeMap.end())
+				{
+					syncTreeMap.insert(std::make_pair(prevRLE,myinfo));
+				}else{
+					m_logger << ERROR << " WTF ??? !!! " << SLogger::endmsg;
+				}
+				n_same=0;
+			}
+			std::cout << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << " "  << smaller << equal << std::endl;
+			sync_run_vec.push_back(sync_run);
+			sync_lumi_vec.push_back(sync_lumi);
+			sync_event_vec.push_back(sync_event);	
+			thisRLE = RunLumiEvent(sync_run, sync_lumi, sync_event);
+			
+		}	
+	}else{ // doSync == false
+		syncFile=NULL;
+		syncTree=NULL;
+	}
 	
 	// ntuple definition
 	//DeclareVariable(out_pt,"el_pt");
+	if(doNtuple){
 	DeclareVariable(o_run,"o_run");
 	DeclareVariable(o_lumi,"o_lumi");
 	DeclareVariable(o_event,"o_event");
@@ -223,8 +331,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_gen_MET_x,"o_gen_MET_x");
 	DeclareVariable(o_gen_MET_y,"o_gen_MET_y");
 	DeclareVariable(o_gen_MET,"o_gen_MET");
-	
-	
+
+}
 
 
 	
@@ -582,6 +690,92 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
     
 		
 	}
+	TString FRchannelName[6] ={"tauB TT","tauEC TT","tauB LT","tauEC LT","el FR","mu FR"};
+	TString subChName[5] = {"cat0","cat1","cat2","sig","BGshape" };
+	TString syncSummaryName[6] = {"only UCL","type UCL l1","only UCL l2","OK","only ULB","wrong order"};
+	TString failReasons[6] = {"trigger","Vx","Z", "iso leptons", "no H", "b tag" };
+	h_fail_shape_TT = Book(TH1D("h_fail_shape_TT","Reasons failing shape cuts",15,-0.5,14.5));
+	h_fail_shape_TT=Retrieve<TH1D>("h_fail_shape_TT");
+	TString failReasonsTT[15] = {"LeadPt","LeadElID","SubPt", "SS", "one pair", "SubEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau", "wrong pair", "BarrelFail1", "BarrelFail2" };
+	
+	h_fail_shape_MT = Book(TH1D("h_fail_shape_MT","Reasons failing shape cuts",16,-0.5,15.5));
+	h_fail_shape_MT=Retrieve<TH1D>("h_fail_shape_MT");
+	TString failReasonsMT[16] = {"SS", "tau pt", "one pair", "tauMuID", "tauEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau","elOverlap", "muOverlap","tau pt","no cat", "no cat0" };
+	
+	h_fail_shape_ET = Book(TH1D("h_fail_shape_ET","Reasons failing shape cuts",16,-0.5,15.5));
+	h_fail_shape_ET=Retrieve<TH1D>("h_fail_shape_ET");
+	TString failReasonsET[16] = {"lost hits", "SS", "tau pt", "one pair", "tauEleID", "dR", "dZ","LT","lepVeto","shape","no2nd tau","elOverlap", "muOverlap","tau pt","no cat", "no cat0" };
+	
+	h_fail_shape_EM = Book(TH1D("h_fail_shape_EM","Reasons failing shape cuts",8,-0.5,7.5));
+	h_fail_shape_EM=Retrieve<TH1D>("h_fail_shape_EM");
+	TString failReasonsEM[8] = {"lost hits", "SS", "dR", "dZ","LT","lepVeto","shape","no2nd tau" };
+	
+	for(uint jBin = 1; jBin <= (uint)h_fail_shape_TT->GetNbinsX(); jBin++)
+		{
+			h_fail_shape_TT->GetXaxis()->SetBinLabel(jBin,failReasonsTT[jBin-1]);
+		}
+		
+	for(uint jBin = 1; jBin <= (uint)h_fail_shape_MT->GetNbinsX(); jBin++)
+		{
+			h_fail_shape_MT->GetXaxis()->SetBinLabel(jBin,failReasonsMT[jBin-1]);
+		}
+	
+		for(uint jBin = 1; jBin <= (uint)h_fail_shape_ET->GetNbinsX(); jBin++)
+		{
+			h_fail_shape_ET->GetXaxis()->SetBinLabel(jBin,failReasonsET[jBin-1]);
+		}
+		
+		for(uint jBin = 1; jBin <= (uint)h_fail_shape_EM->GetNbinsX(); jBin++)
+		{
+			h_fail_shape_EM->GetXaxis()->SetBinLabel(jBin,failReasonsEM[jBin-1]);
+		}
+	
+	for(uint i = 0; i < 5; i++)
+	{
+		std::stringstream fail_reason_s_name;
+		fail_reason_s_name << "h_fail_reason_reason sch_" << i;
+		std::string fail_reason_name = fail_reason_s_name.str();
+		
+		std::stringstream fail_reason_s_title;
+		fail_reason_s_title << subChName[i];
+		std::string fail_reason_title = fail_reason_s_title.str();
+		
+		TH2D* h_fail_reason_temp 					=  Book(TH2D(TString(fail_reason_name),TString(fail_reason_title),6,-0.5,5.5,14,0.5,14.5));
+		for(uint iBin = 1; iBin <= (uint)h_fail_reason_temp->GetNbinsY(); iBin++)
+		{
+			if(iBin <9) h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+			else h_fail_reason_temp->GetYaxis()->SetBinLabel(iBin,FRchannelName[iBin-9]);
+		}
+		
+		for(uint jBin = 1; jBin <= (uint)h_fail_reason_temp->GetNbinsX(); jBin++)
+		{
+			h_fail_reason_temp->GetXaxis()->SetBinLabel(jBin,failReasons[jBin-1]);
+		}
+		
+		h_fail_reason.push_back(h_fail_reason_temp);
+		
+		
+		std::stringstream sync_summary_s_name;
+		sync_summary_s_name << "h_sync_summary_reason sch_" << i;
+		std::string sync_summary_name = sync_summary_s_name.str();
+		
+		std::stringstream sync_summary_s_title;
+		sync_summary_s_title << subChName[i];
+		std::string sync_summary_title = sync_summary_s_title.str();
+		
+		TH2D* h_sync_summary_temp 					=  Book(TH2D(TString(sync_summary_name),TString(sync_summary_title),6,-0.5,5.5,14,0.5,14.5));
+		for(uint iBin = 1; iBin <= (uint)h_sync_summary_temp->GetNbinsY(); iBin++)
+		{
+			if(iBin < 9) h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,h_event_type->GetXaxis()->GetBinLabel(iBin));
+			else h_sync_summary_temp->GetYaxis()->SetBinLabel(iBin,FRchannelName[iBin-9]);
+		}
+		for(uint jBin = 1; jBin <= (uint)h_sync_summary_temp->GetNbinsX(); jBin++)
+		{
+			h_sync_summary_temp->GetXaxis()->SetBinLabel(jBin,syncSummaryName[jBin-1]);
+		}
+		h_sync_summary.push_back(h_sync_summary_temp);
+		
+	}
 
 
 	// Lumi weights
@@ -596,10 +790,31 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 		 log_events.open("eventlist.txt");
 		 log_files.open("filelist.txt");
 	 }
+	 
+	 
 	
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
+	
+	if(doSync){
+		syncOutTree = new TTree("UCL_tree","UCL_tree");
+		syncOutTree->Branch( "Run_",    &sync_o_run , "Run_/i");
+		syncOutTree->Branch( "Event_",    &sync_o_event, "Event_/i" );
+		syncOutTree->Branch( "Lumi_",    &sync_o_lumi, "Lumi/i" );
+		
+		syncOutTree->Branch( "Channel_", &sync_o_Channel, "Channel_/S" );
+        syncOutTree->Branch( "subChannel_", &sync_o_subChannel, "Channel_/S" );
+		syncOutTree->Branch( "HMass_", &sync_o_HMass, "HMass_/F" );
+		syncOutTree->Branch( "l3Pt_", &sync_o_l3Pt, "l3Pt_/F" );
+		syncOutTree->Branch( "l3Eta_", &sync_o_l3Eta, "l3Eta_/F" );
+		syncOutTree->Branch( "l3_CloseJetPt_", &sync_o_l3_CloseJetPt, "l3_CloseJetPt_/F" );
+		syncOutTree->Branch( "l3_CloseJetEta_", &sync_o_l3_CloseJetEta, "l3_CloseJetEta_/F" );
+		syncOutTree->Branch( "l4Pt_", &sync_o_l4Pt, "l4Pt_/F" );
+		syncOutTree->Branch( "l4Eta_", &sync_o_l4Eta, "l4Eta_/F" );
+		syncOutTree->Branch( "l4_CloseJetPt_", &sync_o_l4_CloseJetPt, "l4_CloseJetPt_/F" );
+		syncOutTree->Branch( "l4_CloseJetEta_", &sync_o_l4_CloseJetEta, "l4_CloseJetEta_/F" );
+	}
 	
 	
 	
@@ -634,6 +849,14 @@ void Analysis::EndInputData( const SInputData& ) throw( SError ) {
 		logS.close();
 		log_events.close();
 		log_files.close();
+	}
+	
+	//sync
+	if(doSync)
+	{
+		syncOut = new TFile("syncTree.root","RECREATE");
+		syncOutTree->Write();
+		syncOut->Close();
 	}
 	
 	
@@ -809,7 +1032,7 @@ bool Analysis::Trg_MC_12(myevent* m, bool found) {
 
 double Analysis::Tmass(myevent *m, myobject mu) {
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	double tMass_v = sqrt(2*mu.pt*Met.front().et*(1-cos(Met.front().phi-mu.phi)));
 	return tMass_v;
@@ -1438,6 +1661,7 @@ std::vector<myGenobject> FindTrueZZ(std::vector<myGenobject>* _allGen){
 void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	entries++;
 
+	if(doNtuple){
 	o_run=0;
 	o_lumi=0;
 	o_event=0;
@@ -1520,7 +1744,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_gen_MET_x=0;
 	o_gen_MET_y=0;
 	o_gen_MET=0;
-	
+}
 
 	// bookkepping part
 	++m_allEvents;
@@ -1537,7 +1761,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		Hist("h_nPU_InfoTrue")->Fill(m->PUInfo_true);
 		Hist("h_nPU_Bunch0")->Fill(m->PUInfo_Bunch0);
 
-
+	// sync check
+	
+	
 	
 
 	
@@ -1554,6 +1780,63 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(examineThisEvent) std::cout << "Examining! Event number " << eNumber << " ENTRY: " << m_allEvents << std::endl;
 	
+	sync_vec_Channel.clear();
+	sync_vec_subChannel.clear();
+	sync_vec_HMass.clear();
+	sync_vec_l3Pt.clear();
+	sync_vec_l3Eta.clear();
+	sync_vec_l3_CloseJetPt.clear();
+	sync_vec_l3_CloseJetEta.clear();
+	sync_vec_l4Pt.clear();
+	sync_vec_l4Eta.clear();
+	sync_vec_l4_CloseJetPt.clear();
+	sync_vec_l4_CloseJetEta.clear();
+
+	if(doSync)
+	{
+		RunLumiEvent thisRLE(m->runNumber, m->lumiNumber, m->eventNumber);
+		//(203912,105,135623662);
+		//(203912,107,138473080);
+		//
+		treemap::iterator it=syncTreeMap.find(thisRLE);
+		long index =0;
+		int plusEvents = 0;
+				
+		if(it!=syncTreeMap.end())
+		{
+			index=(it->second).first;
+			plusEvents=(it->second).second;
+			std::cout << " event for sync: " << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber <<
+			" index is " << index << " and plus events are " << plusEvents << std::endl;
+			examineThisEvent=true;
+			syncTree->GetEvent(index);
+			for(int iEv=0; iEv <= plusEvents; iEv++)
+			{
+				syncTree->GetEvent(index+iEv);
+			
+				std::cout << " Obtaining entry#" << index << "/" << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << 
+				"channel/subchannel:" << sync_Channel << " (" << EventTypeName(EventTypeConv(sync_Channel)) << ")/" << sync_subChannel << std::endl;
+				std::cout << "  -> Hmass = " << sync_HMass << " l3pt= " << sync_l3Pt << " " << sync_l3Eta << " l4Pt= " << sync_l4Pt << " " << sync_l4Eta << std::endl;
+			
+				if(sync_Channel > -1) sync_vec_Channel.push_back(sync_Channel);
+				else sync_vec_Channel.push_back(sync_Channel+48);
+		        sync_vec_subChannel.push_back(sync_subChannel);
+				sync_vec_HMass.push_back(sync_HMass);
+				sync_vec_l3Pt.push_back(sync_l3Pt);
+				sync_vec_l3Eta.push_back(sync_l3Eta);
+				sync_vec_l3_CloseJetPt.push_back(sync_l3_CloseJetPt);
+				sync_vec_l3_CloseJetEta.push_back(sync_l3_CloseJetEta);
+				sync_vec_l4Pt.push_back(sync_l4Pt);
+				sync_vec_l4Eta.push_back(sync_l4Eta);
+				sync_vec_l4_CloseJetPt.push_back(sync_l4_CloseJetPt);
+				sync_vec_l4_CloseJetEta.push_back(sync_l4_CloseJetEta);	
+				
+				syncTree->GetEvent(index+iEv+1);
+				std::cout << " Next entry#" << index << "/" << iEv << ": " << sync_run << ":" << sync_lumi << ":" << sync_event << std::endl;
+			}
+			
+		}
+	}
 	
 	double PUWeight = 1.0;
 	double nPU = 0.0;
@@ -1590,6 +1873,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(!trigPass)
 	{
 		if(examineThisEvent) std::cout << "Trigger fail! " << examineEvent << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(0.,double(Ch));
+		}
 		return;
 	}
 	
@@ -1597,13 +1889,26 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_weight->Fill(1,PUWeight);
 	
 	// at least one good vertex
-	if(nGoodVx < 1) return;
+	if(nGoodVx < 1){
+		if(examineThisEvent) std::cout << "vertex fail" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(1.,double(Ch));
+		}
+		 return;
+	 
+	 }
 	
 	h_cut_flow->Fill(2,1);
 	h_cut_flow_weight->Fill(2,PUWeight);
 	
 
-	vector<myobject> Met = m->RecPFMet;
+	vector<myobject> Met = m->RecMVAMet;
 
 	Hist("h_PF_MET")->Fill(Met.front().et,PUWeight);
 	h_PF_MET_nPU->Fill(nGoodVx,Met.front().et,PUWeight);
@@ -1755,6 +2060,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	else{
 		if(examineThisEvent) std::cout << "No Z cand!" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(2.,double(Ch));
+		}
 			return;
 	}
 	
@@ -1877,7 +2191,19 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(RelIso(denomMuon[i]) < 0.3 && isLooseMu(denomMuon[i])) isoMuons++;
 	}
 	
-	if(isoElectrons > 2  || isoMuons > 2) return;
+	if(isoElectrons > 2  || isoMuons > 2){
+		if(examineThisEvent) std::cout << " too much iso leptons: " << isoElectrons << " " << isoMuons << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(3.,double(Ch));
+		}
+		 return;
+	 }
 	
 	h_cut_flow->Fill(4,1);
 	h_cut_flow_weight->Fill(4,Z_weight);
@@ -2016,14 +2342,55 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " There are " << genericMuon.size() << " mu candidates " << std::endl;
 	
 	bool tauTau =false;
+	
+	std::vector<int> s_s_i_TT; //sync_shape_index
+    s_s_i_TT.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==1 && (sync_vec_Channel[iSync] ==9 || sync_vec_Channel[iSync] ==10 )) s_s_i_TT.push_back(iSync);
+	}
+	
+	
+	std::vector<int> usedElId;
+	std::vector<int> usedTauId;
+	
+	usedElId.clear();
+	usedTauId.clear();
 
 	if(examineThisEvent) std::cout << " Checking tautau " << std::endl;
 	for(uint i = 0; i < goodTau.size(); i++)
 	{
 		if(examineThisEvent) std::cout << " Tau candidate i= " << i << " " << goodTau[i].pt << " " <<  goodTau[i].charge << " " <<
 		goodTau[i].discriminationByElectronLoose << std::endl;
-		if(goodTau[i].pt < Cut_tautau_Pt_1) continue;
-		if(goodTau[i].discriminationByElectronLoose <= 0.5) continue;
+		// finding the sync match
+		int s_match_i = -1;
+		for(uint iSync =0; iSync < s_s_i_TT.size() && s_match_i < 0; iSync++)
+		{
+			std::cout << " Sync FR candidate #" << iSync << " type:" << sync_vec_Channel[s_s_i_TT[iSync]] <<
+			" l3 pt/eta/jeta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l3_CloseJetEta[s_s_i_TT[iSync]] << 
+			" l4 pt/eta/jeta:" << sync_vec_l4Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l4_CloseJetEta[s_s_i_TT[iSync]] << std::endl;
+			//if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=4) continue;
+			//if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=8) continue;
+			if(fabs(goodTau[i].pt - sync_vec_l3Pt[s_s_i_TT[iSync]]) < 0.1 && fabs(goodTau[i].eta - sync_vec_l3Eta[s_s_i_TT[iSync]]) < 0.1){
+				 std::cout << " matched leading tau" << std::endl;
+				 s_match_i=iSync;
+			 }
+		}
+		
+		if(goodTau[i].pt < Cut_tautau_Pt_1){
+			if(s_match_i > -1){
+				std::cout << "Failed lead tau cut: " << goodTau[i].pt << std::endl;
+				h_fail_shape_TT->Fill(0.0);
+			}
+			 continue;
+		 }
+		if(goodTau[i].discriminationByElectronLoose <= 0.5){
+			if(s_match_i > -1){
+				std::cout << "Failed lead tau ElId cut: " << std::endl;
+				h_fail_shape_TT->Fill(1.0);
+			}
+			 continue;
+		 }
 				
 		//if(goodTau[i].discriminationByElectronMedium <=0.5) continue;
 		//if(goodTau[i].discriminationByMuonMedium <=0.5) continue;
@@ -2031,17 +2398,56 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double dZ1=deltaR(goodTau[i],Zcand[0]);
 		double dZ2=deltaR(goodTau[i],Zcand[1]);
 		
+		bool match2 = false;
 		for(uint j=i+1; j< goodTau.size() && !(category0 && category1 && category2 && signal); j++)
 		{
 			bool isFakeRate=false;
+			bool matchedSync = false;
 			if(examineThisEvent) std::cout << " Tau candidate j= " << j << " " << goodTau[j].pt << "ch: " << 
 			goodTau[j].charge << " mass: " << PairMass(goodTau[i],goodTau[j]) <<std::endl;
 			
+			int s_match2_i = -1;
+			for(uint iSync =0; iSync < s_s_i_TT.size() && s_match2_i < 0 ; iSync++)
+			{
+				if((int)iSync==s_match_i) continue;
+				std::cout << "SUB Sync FR candidate #" << iSync << " type:" << sync_vec_Channel[s_s_i_TT[iSync]] <<
+				" l3 pt/eta/jeta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l3_CloseJetEta[s_s_i_TT[iSync]] << 
+				" l4 pt/eta/jeta:" << sync_vec_l4Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l4_CloseJetEta[s_s_i_TT[iSync]] << std::endl;
+				//if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=4) continue;
+				//if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_TT[iSync]])!=8) continue;
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_TT[iSync]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_TT[iSync]]) < 0.1){
+					 std::cout << " matched sub leading tau (mass " << sync_vec_HMass[s_s_i_TT[iSync]] << ")" << std::endl;
+					 s_match2_i=iSync;
+					  match2=true;
+					 matchedSync = true;
+				 }
+			}
 			
-			if(goodTau[j].pt < Cut_tautau_Pt_2) continue;	
+			
+			if(s_match_i >-1 && s_match2_i > -1){
+				if(fabs(sync_vec_l4Pt[s_s_i_TT[s_match2_i]] - sync_vec_l4Pt[s_s_i_TT[s_match_i]]) > 0.1 || 
+				fabs(sync_vec_l4Eta[s_s_i_TT[s_match2_i]] - sync_vec_l4Eta[s_s_i_TT[s_match_i]]) > 0.1){
+					
+					 std::cout << "matched wrong pair! (orig mass " << sync_vec_HMass[s_s_i_TT[s_match_i]] << ")" << std::endl;
+					 h_fail_shape_TT->Fill(12.0);
+				 }
+			}
+			
+			if(goodTau[j].pt < Cut_tautau_Pt_2){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed subleading tau cut" << std::endl;
+					h_fail_shape_TT->Fill(2.0);
+				 }
+				 continue;	
+			 }
 			if(examineThisEvent) std::cout << "  j passed pt cut" << j << " " << Cut_tautau_Pt_2 << std::endl;
 			isFakeRate = (goodTau[i].charge*goodTau[j].charge  > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
+			if(matchedSync && !isFakeRate){
+				std::cout << "TT Failed sync charge cut" << std::endl;
+				h_fail_shape_TT->Fill(3.0);
+			}
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
@@ -2052,17 +2458,41 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
 			
 			
-			if(isFakeRate && tauTau) continue; // save only one pair
-			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
+			//~ if(isFakeRate && tauTau){
+				//~ if(matchedSync) {
+					//~ std::cout << "too many pairs for FR" << std::endl;
+					//~ h_fail_shape_TT->Fill(4.0);
+				//~ }
+				 //~ continue; // save only one pair
+			 //~ }
+			if(goodTau[j].discriminationByElectronLoose <= 0.5){
+				if(matchedSync) {
+					std::cout << "sub tau faild el ID" << std::endl;
+					h_fail_shape_TT->Fill(5.0);
+				}
+				 continue;
+			 }
 		
 			//if(goodTau[j].discriminationByElectronMedium <=0.5) continue;
 			//if(goodTau[j].discriminationByMuonMedium <=0.5) continue;
 			if(examineThisEvent) std::cout << "   j Passed pre-selection" << std::endl;
 		
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,goodTau[i].eta,goodTau[i].phi)< maxDeltaR){
+				if(matchedSync){
+					std::cout << " shape cand failed delta R" << std::endl;
+					h_fail_shape_TT->Fill(6.0);
+				}
+				 continue;
+			 }
 			if(examineThisEvent) std::cout << "   Passed selection" << std::endl;
 			
-			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)) continue; 			
+			if(!DZ_expo(Zcand[0],Zcand[1],goodTau[i],goodTau[j], verb)){
+				if(matchedSync){
+					std::cout << " shape cand failed dZ cut" << std::endl;
+					h_fail_shape_TT->Fill(7.0);
+				}
+				 continue; 			
+			 }
 			if(goodTau[i].pt > goodTau[j].pt){ 
 				Hcand.push_back(goodTau[i]);
 				Hcand.push_back(goodTau[j]);
@@ -2083,8 +2513,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool signalPtCuts = ( pt1 > Cut_tau_base_Pt && pt2 > Cut_tau_base_Pt);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_tautau_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_tautau_sumPt_FR);
-			
-			if(!LTcut && !LTcut_FR) continue;
+			if(examineThisEvent) std::cout << "shape iso is " << Hcand[index].byIsolationMVA2raw << " " << Hcand[index+1].byIsolationMVA2raw << std::endl;
+			if(!LTcut && !LTcut_FR){
+				if(matchedSync){
+					std::cout << " shape cand failed LT cut" << std::endl;
+					h_fail_shape_TT->Fill(8.0);
+				}
+				 continue;
+			 }
 			signal = pass1 && pass2 && signalPtCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2098,7 +2534,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Ad_lepton=true;
 				}
 			}
-			if(Ad_lepton) continue;
+			if(Ad_lepton){
+				if(matchedSync){
+					std::cout << " shape cand failed lepton veto" << std::endl;
+					h_fail_shape_TT->Fill(9.0);
+				}
+				 continue;
+			 }
 			if(isFakeRate) tauTau=true;
 			if(signal) tauTau=true;
 			if(!isFakeRate&&!signal&&LTcut&&signalPtCuts){
@@ -2134,18 +2576,66 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 			}else if(isFakeRate){
 				if(examineThisEvent){
-					myobject ClosestJet = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					myobject ClosestJet = ClosestInCollection(Hcand[index],m->RecPFJetsAK5);
+					myobject ClosestJet2 = ClosestInCollection(Hcand[index+1],m->RecPFJetsAK5);
+					
 					std::cout << "Saving denom fake candidates with pass = " << pass1 << " " << pass2 << 
-					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " " << ClosestJet.pt << " " << 
+					" and pts " << Hcand[index].pt << " " << Hcand[index+1].pt << " jet etas" << ClosestJet.eta << " " << ClosestJet2.eta << " M= " <<
 					PairMass(Hcand[index],Hcand[index+1]) << std::endl;
+				
+				bool barrelMatch1 =true;
+				bool barrelMatch2 =true;
+				
+				if(doSync && doSyncFR){
+					barrelMatch1 = (fabs(ClosestJet.eta) < 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 9) || (fabs(ClosestJet.eta) >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 10);
+					barrelMatch2 = (fabs(ClosestJet2.eta) < 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 9) || (fabs(ClosestJet2.eta) >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 10);
+					if(!barrelMatch1){
+						std::cout << "Lead tau failed barrel cut!" << std::endl;
+						h_fail_shape_TT->Fill(13.0);
+					}else{
+						std::cout << "Lead tau passed barrel cut with type " << sync_vec_Channel[s_s_i_TT[s_match_i]] << " and eta " << ClosestJet.eta << "!" << std::endl;
+					}
+					if(!barrelMatch2){
+						std::cout << "Sub tau failed barrel cut!" << std::endl;
+						h_fail_shape_TT->Fill(14.0);
+					}else{
+						std::cout << "Sub tau passed barrel cut with type " << sync_vec_Channel[s_s_i_TT[s_match2_i]] << " and eta " << ClosestJet2.eta << "!" << std::endl;
+					
+					}
 				}
+			}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
 				
-				Hcand_pass.push_back(pass1);
-				Hcand_pass.push_back(pass2);
-				if(shapePass1 && shapePass2 && LTcut && signalPtCuts) Hcand_shape_pass.push_back(1);
-				else Hcand_shape_pass.push_back(0);
+				int result = pass1? 1:0;
+				int result2 = pass2? 1:0;
+				bool usedEl = false;
+				size_t el_helper = std::find(usedElId.begin(), usedElId.end(), i) - usedElId.begin();
+				if(el_helper < usedElId.size()) usedEl=true;
+				
+				if(usedEl) result = -1;
+				Hcand_pass.push_back(result);
+				if(result > -1) usedElId.push_back(i);
+				
+				bool usedTau = false;
+				size_t tau_helper = std::find(usedTauId.begin(), usedTauId.end(), i) - usedTauId.begin();
+				if(tau_helper < usedTauId.size()) usedTau=true;
+				
+				if(usedTau ) result2=-1;
+				Hcand_pass.push_back(result2);
+				if(result2 > -1) usedTauId.push_back(j);
+				if(shapePass1 && shapePass2 && LTcut && signalPtCuts){
+					if(matchedSync){
+						std::cout << "TT Shape cand accepted!" << std::endl;
+					}
+					 Hcand_shape_pass.push_back(1);
+				}else{
+					 if(matchedSync){
+						std::cout << "TT shape cand failed shape cuts" << std::endl;
+						h_fail_shape_TT->Fill(10.0);
+					 }
+					 Hcand_shape_pass.push_back(0);
+				 }
 				usedTauIdx.push_back(index);
 				if(Zmumu) Hcand_type_FR.push_back(4);
 				else if(Zee) Hcand_type_FR.push_back(8);
@@ -2170,6 +2660,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			m_logger << DEBUG << " hindex[1] " << j << SLogger::endmsg;
 
 		}
+		if(s_match_i > -1 && match2==false)
+		{
+			std::cout << "TT shape candidate not found" << std::endl;
+			h_fail_shape_TT->Fill(11.0);
+		}
 	}
 	
 	if(examineThisEvent) std::cout << " After TT, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2 "<<
@@ -2178,11 +2673,34 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	category1= false;
 	category2=false;     
 	
+	std::vector<int> s_s_i_MT; //sync_shape_index
+    s_s_i_MT.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==0 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 1) s_s_i_MT.push_back(iSync); // now checking cat0
+	}
+	
+	usedElId.clear();
+	usedTauId.clear();
+	
 	for(uint i = 0; i < genericMuon.size()  ; i++)
 	{
 	
 		if(examineThisEvent) std::cout << " Looping over muon no.  " << i << std::endl;
-	
+		// finding the sync match
+		int s_match_i = -1;
+		for(uint iSync =0; iSync < s_s_i_MT.size(); iSync++)
+		{
+			std::cout << " Sync shape candidate #" << iSync << " type:" << EventTypeConv(sync_vec_Channel[s_s_i_MT[iSync]]) <<
+			" l3 pt/eta:" << sync_vec_l3Pt[s_s_i_MT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_MT[iSync]] <<
+			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_MT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_MT[iSync]] << std::endl;
+			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_MT[iSync]])!=1) continue;
+			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_MT[iSync]])!=5) continue;
+			if(fabs(genericMuon[i].pt - sync_vec_l3Pt[s_s_i_MT[iSync]]) < 0.1 && fabs(genericMuon[i].eta - sync_vec_l3Eta[s_s_i_MT[iSync]]) < 0.1){
+				 std::cout << " matched leading mu " << std::endl;
+				 s_match_i=iSync;
+			 }
+		}
 	
 		m_logger << DEBUG << " Checking for muTau " << SLogger::endmsg;
 		
@@ -2190,47 +2708,120 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Mu candidate i= " << i << " " << genericMuon[i].pt << " " << genericMuon[i].charge << std::endl;
 		//if(!WZ_Rej(m,genericMuon[i])) continue;
 		if(examineThisEvent) std::cout << " Passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;	
+		bool match2 = false;
 		for(uint j=0; j< goodTau.size() && !(category0 && category1 && category2 && signal) ; j++)
 		{
-                       
+            bool matchedSync = false;
+            if(s_match_i >-1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_MT[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_MT[s_match_i]]) < 0.1){
+					 match2=true;
+					 matchedSync=true;
+					 std::cout << "matched sub Mtau (mass " << sync_vec_HMass[s_s_i_MT[s_match_i]] << ")" << std::endl;
+				 }
+			}       
 			
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericMuon[i]) << std::endl;
 			bool isFakeRate = (genericMuon[i].charge*goodTau[j].charge  > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
+			if(matchedSync && !isFakeRate){
+				std::cout << "MT Failed sync charge cut" << std::endl;
+				h_fail_shape_MT->Fill(0.0);
+			}
+			
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			bool verb=false;
 			if(examineThisEvent) verb=true;
 			
 		
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
-			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)){
+				if(matchedSync){
+					std::cout << "MT failed overlap check loose electron" << std::endl;
+					h_fail_shape_MT->Fill(11.0);
+				}
+				 continue;
+			 }
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)){
+				 if(matchedSync){
+					std::cout << "MT failed overlap check loose muon" << std::endl;
+					h_fail_shape_MT->Fill(12.0);
+				}
+				 continue;
+			 }
 			
 			if(examineThisEvent) std::cout << "There are " << genericMuon.size() << " muons." << std::endl;
 			
-			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
-			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
+			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2){
+				if(matchedSync){
+					std::cout << "MT tau failed pt" << std::endl;
+					h_fail_shape_MT->Fill(13.0);
+				}
+				 continue;	
+			}
+			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed subleading Mtau cut" << std::endl;
+					h_fail_shape_MT->Fill(1.0);
+				 }	
+				 continue;	
+			 }
 			if(examineThisEvent) std::cout << "Passed pt cut" << std::endl;
 			if(examineThisEvent) std::cout << "Passed WZ rejection" << std::endl;
-			if(isFakeRate && muTau) continue; // save only one pair
+			//~ if(isFakeRate && muTau){ 
+				//~ if(matchedSync)
+				 //~ {
+					//~ std::cout << "only one pair" << std::endl;
+					//~ h_fail_shape_MT->Fill(2.0);
+				 //~ }
+				//~ continue; // save only one pair
+			//~ }
 			if(examineThisEvent) std::cout << "Passed uniqueness cut" << std::endl;
 	
 				
-			if(goodTau[j].discriminationByMuonTight2 <=0.5) continue;
-			if(goodTau[j].discriminationByElectronLoose <= 0.5) continue;
+			if(goodTau[j].discriminationByMuonTight2 <=0.5){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed tau mu ID" << std::endl;
+					h_fail_shape_MT->Fill(3.0);
+				 }
+				 continue;
+			 }
+			if(goodTau[j].discriminationByElectronLoose <= 0.5){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed tau el ID" << std::endl;
+					h_fail_shape_MT->Fill(4.0);
+				 }
+				 continue;
+			 }
 		
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR) continue;  
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi)< maxDeltaR){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed dR" << std::endl;
+					h_fail_shape_MT->Fill(5.0);
+				 }
+				 continue;  
+			 }
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericMuon[i].eta,genericMuon[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << " j passed pre-selection " << std::endl;
 			
-			if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)) continue;
+			if(!DZ_expo(Zcand[0],Zcand[1],genericMuon[i],goodTau[j], verb)){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed dZ" << std::endl;
+					h_fail_shape_MT->Fill(6.0);
+				 }
+				 continue;
+			 }
 			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
 			Hcand.push_back(genericMuon[i]);
 			Hcand.push_back(goodTau[j]);
 			int index = Hcand.size() -2;
 			bool pass2 = (RelIso(Hcand[index])<relIso_MT && isLooseMu(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
-			bool shapePass2 = (RelIso(Hcand[index])< lep_shape_iso_cut && isLooseMu(Hcand[index]));
+			bool shapePass2 = RelIso(Hcand[index])< lep_shape_iso_cut;// && isLooseMu(Hcand[index]));
 			bool shapePass1 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			double pt1=Hcand[index].pt;
@@ -2240,7 +2831,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool signalCuts = ( pt2 > Cut_tau_base_Pt && tightFR);
 			bool LTcut = UseSumPtCut && (sumPt > Cut_mutau_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_mutau_sumPt_FR);
-			if(!LTcut && !LTcut_FR) continue;
+			if(!LTcut && !LTcut_FR){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed LT" << std::endl;
+					h_fail_shape_MT->Fill(7.0);
+				 }
+				 continue;
+			 }
 			
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
@@ -2255,15 +2853,26 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Ad_lepton=true;
 				}
 			}
-			if(Ad_lepton) continue;
+			if(Ad_lepton){
+				 if(matchedSync)
+				 {
+					std::cout << "Failed lep veto" << std::endl;
+					h_fail_shape_MT->Fill(8.0);
+				 }
+				 continue;
+			 }
 			if(isFakeRate) muTau=true;
 			if(signal && !saved_signal ) muTau=true;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
-			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass2 << pass1 << shapePass1 << shapePass2 << std::endl;
 			
 			if(!isFakeRate && !signal && LTcut && pt2>Cut_tau_base_Pt){
-				if( !pass1 && !pass2 && !category0 && !tightFR)
+				if(matchedSync){
+					std::cout << "MT is category candidate!" << std::endl;
+					std::cout << pass1 << pass2 << tightFR << category0 << category1 << category2 << std::endl;
+				}
+				if( !pass1 && (!pass2||!tightFR) && !category0 )
 				{
 					if(examineThisEvent) std::cout << " in category 0!" << std::endl;
 					category0=true;
@@ -2271,6 +2880,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hcand_cat0.push_back(Hcand[index+1]);
 					if(Zmumu) Hcand_type_cat0.push_back(1);
 					else if(Zee) Hcand_type_cat0.push_back(5);
+				}else{
+					if(matchedSync){
+					std::cout << "MT failed cat0" << std::endl;
+					h_fail_shape_MT->Fill(15.0);
+				}
 				}
 				if(!pass1 && pass2 && !category1 && tightFR)
 				{	
@@ -2282,7 +2896,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat1.push_back(1);
 					else if(Zee) Hcand_type_cat1.push_back(5);
 				}
-				if(pass1 && !pass2 && !category2 && !tightFR)
+				if(pass1 && (!pass2||!tightFR) && !category2 )
 				{
 					if(examineThisEvent) std::cout << " in category 2!" << std::endl;
 					category2=true;
@@ -2304,15 +2918,44 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				int result2 = pass1? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
-				if(!WZ_Rej(m,Hcand[index])) result = -1;	
+				
+				bool usedEl = false;
+				size_t el_helper = std::find(usedElId.begin(), usedElId.end(), i) - usedElId.begin();
+				if(el_helper < usedElId.size()) usedEl=true;
+				
+				if(!WZ_Rej(m,Hcand[index]) || usedEl) result = -1;
 				Hcand_pass.push_back(result);
+				if(result > -1) usedElId.push_back(i);
+				
+				bool usedTau = false;
+				size_t tau_helper = std::find(usedTauId.begin(), usedTauId.end(), i) - usedTauId.begin();
+				if(tau_helper < usedTauId.size()) usedTau=true;
+				
 				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
-				if(!LTptcut) result2=-1;
+				if(!LTptcut || usedTau ) result2=-1;
+		
 				Hcand_pass.push_back(result2);
-				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
+				if(result2 > -1) usedTauId.push_back(j);
+				
+				if(matchedSync){
+					std::cout << "MT:WZ rej: " << WZ_Rej(m,Hcand[index]) << " LTptcut: " << LTptcut << " pt:" 
+					<< Hcand[index+1].pt << " LT:" << sumPt << "usedLep" << usedEl << usedTau << std::endl;
+				}
+				
+				if(shapePass1 && shapePass2 && LTptcut && LTcut){
+					if(matchedSync){
+						std::cout << "MT Shape cand accepted!" << std::endl;
+					}
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
-				}else Hcand_shape_pass.push_back(0);
+				}else{
+					 if(matchedSync)
+					{
+						std::cout << "MT Failed shape cut" << std::endl;
+						h_fail_shape_MT->Fill(9.0);
+					}
+					 Hcand_shape_pass.push_back(0);
+				 }
 				if(Zmumu) Hcand_type_FR.push_back(1);
 				else if(Zee) Hcand_type_FR.push_back(5);
 			}else if(signal && !saved_signal){
@@ -2325,10 +2968,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_signal.push_back(1);
 				else if(Zee) Hcand_type_signal.push_back(5);
 				saved_signal=true;
+			}else{
+				if(matchedSync){
+					std::cout << "MT is not in any category" << std::endl;
+					h_fail_shape_MT->Fill(14.0);
+				}
 			}
 			
 		
 			
+		}
+		if(s_match_i > -1 && match2==false)
+		{
+			std::cout << " shape candidate not found" << std::endl;
+			h_fail_shape_MT->Fill(10.0);
 		}             
 	}
 	
@@ -2341,51 +2994,146 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " ele candidates " << std::endl;
 	category0 = false;
 	category1= false;
-	category2=false;     
+	category2=false;   
 	
+	std::vector<int> s_s_i_ET; //sync_shape_index
+    s_s_i_ET.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 3) s_s_i_ET.push_back(iSync);
+	}  
+	
+	usedElId.clear();
+	usedTauId.clear();
 	for(uint i = 0; i < genericElectron.size()  ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
+		// finding the sync match
+		int s_match_i = -1;
+		for(uint iSync =0; iSync < s_s_i_ET.size(); iSync++)
+		{
+			std::cout << " Sync shape candidate #" << iSync << " type:" << EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]]) <<
+			" l3 pt/eta:" << sync_vec_l3Pt[s_s_i_ET[iSync]] << "/" << sync_vec_l3Eta[s_s_i_ET[iSync]] <<
+			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_ET[iSync]] << "/" << sync_vec_l4Eta[s_s_i_ET[iSync]] << std::endl;
+			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=3) continue;
+			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_ET[iSync]])!=7) continue;
+			if(fabs(genericElectron[i].pt - sync_vec_l3Pt[s_s_i_ET[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l3Eta[s_s_i_ET[iSync]]) < 0.1){
+				 std::cout << "ET matched leading ele" << std::endl;
+				 s_match_i=iSync;
+			 }
+		}
 		
-		if(genericElectron[i].numLostHitEleInner > 1) continue;
+		if(genericElectron[i].numLostHitEleInner > 1){
+			 if(s_match_i > -1){
+				std::cout << " ET Failed lost hits cut: " << genericElectron[i].numLostHitEleInner << std::endl;
+				h_fail_shape_ET->Fill(0.0);
+			}
+			 continue;
+		 }
 		if(examineThisEvent) std::cout << " Checking for eTau " << std::endl;
 	
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << goodTau.size() << " taus." << std::endl;
+		bool match2 = false;
 		for(uint j=0; j< goodTau.size() &&!(category0 && category1 && category2 &&signal)  ; j++)
 		{
-			
+			bool matchedSync = false;
+			if(s_match_i >-1){
+				if(fabs(goodTau[j].pt - sync_vec_l4Pt[s_s_i_ET[s_match_i]]) < 0.1 && fabs(goodTau[j].eta - sync_vec_l4Eta[s_s_i_ET[s_match_i]]) < 0.1){
+					 match2=true;
+					 matchedSync=true;
+					 std::cout << "matched sub Etau (mass " << sync_vec_HMass[s_s_i_ET[s_match_i]] << ")" << std::endl;
+				 }
+			}
 			if(examineThisEvent) std::cout << "   > tau no. " << j << " " << goodTau[j].pt << " " << goodTau[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(goodTau[j],genericElectron[i]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*goodTau[j].charge  > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
+			if(matchedSync && !isFakeRate){
+				std::cout << " ET Failed sync charge cut" << std::endl;
+				h_fail_shape_ET->Fill(1.0);
+			}
+			
 			bool verb=false;
 			if(examineThisEvent) verb=true;
 	
-			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)) continue;
-			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)) continue;
+			if(!isFakeRate && CheckOverlapLooseElectron(goodTau[j], denomElectron, maxDeltaR, 0.3, verb)){
+				if(matchedSync){
+					std::cout << "ET failed overlap check loose electron" << std::endl;
+					h_fail_shape_ET->Fill(11.0);
+				}
+				 continue;
+			 }
+			if(!isFakeRate && CheckOverlapLooseMuon(goodTau[j], denomMuon, maxDeltaR, 0.3)){
+				if(matchedSync){
+					std::cout << "ET failed overlap check loose muon" << std::endl;
+					h_fail_shape_ET->Fill(12.0);
+				}
+				 continue;
+			 }
 		
 			if(examineThisEvent) std::cout << "There are " << genericElectron.size() << " electrons	." << std::endl;
 		
 			
-			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2) continue;	
-			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt) continue;	
+			if(!isFakeRate && goodTau[j].pt < Cut_tautau_Pt_2){
+				if(matchedSync){
+					std::cout << "ET failed overlap check loose electron" << std::endl;
+					h_fail_shape_ET->Fill(13.0);
+				}
+				 continue;	
+			 }
+			if(isFakeRate && goodTau[j].pt < Cut_leptau_Pt){
+				 if(matchedSync)
+				 {
+					std::cout << "ET Failed subleading Etau cut" << std::endl;
+					h_fail_shape_ET->Fill(2.0);
+				 }	
+				 continue;	
+			 }
 		//	if(isFakeRate && !WZ_Rej(m,genericElectron[i])) continue;
 			if(examineThisEvent) std::cout << "Passed Pt cuts and WZ rej" << std::endl;	
-			if(isFakeRate && eTau) continue; // save only one pair	
+			//~ if(isFakeRate && eTau){
+				 //~ if(matchedSync)
+				 //~ {
+					//~ std::cout << "One pair only" << std::endl;
+					//~ h_fail_shape_ET->Fill(3.0);
+				 //~ }	
+				 //~ continue; // save only one pair	
+			 //~ }
 			if(examineThisEvent) std::cout << "The event has not been used for application so far" << std::endl;
 			
-			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5) continue;
+			if(goodTau[j].discriminationByElectronMVA3Tight <=0.5){
+				 if(matchedSync)
+				 {
+					std::cout << "ET failed tau ele ID" << std::endl;
+					h_fail_shape_ET->Fill(4.0);
+				 }
+				 continue;
+			 }
 			
 		
-			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR) continue;
+			if(deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi)< maxDeltaR){
+				 if(matchedSync)
+				 {
+					std::cout << "ET failed dR" << std::endl;
+					h_fail_shape_ET->Fill(5.0);
+				 }
+				 continue;
+			 }
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(goodTau[j].eta,goodTau[j].phi,genericElectron[i].eta,genericElectron[i].phi) << std::endl;            
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			if(examineThisEvent) std::cout << "   > candidate passed WZ rejection" << std::endl;
 			
 			
 			if(examineThisEvent) verb=true;
-			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)) continue;
+			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],goodTau[j], verb)){
+				 if(matchedSync)
+				 {
+					std::cout << "ET Failed dZ" << std::endl;
+					h_fail_shape_ET->Fill(6.0);
+				 }
+				 continue;
+			 }
 			double jetDist = DistanceToClosestInCollection(genericElectron[i],m->RecPFJetsAK5);
 			myobject ClosestJet = ClosestInCollection(genericElectron[i],m->RecPFJetsAK5);
 			if(examineThisEvent) std::cout << "The closest jet distance is " << jetDist << " " << ClosestJet.pt << std::endl;
@@ -2398,7 +3146,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					
 			bool pass2 = (RelIso(Hcand[index])<relIso_ET && LooseEleId(Hcand[index]));
 			bool pass1 = Hcand[index+1].byLooseCombinedIsolationDeltaBetaCorr3Hits >0.5;
-			bool shapePass2 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
+			bool shapePass2 = RelIso(Hcand[index])< lep_shape_iso_cut;// && LooseEleId(Hcand[index]));
 			bool shapePass1 = Hcand[index+1].byIsolationMVA2raw > tau_shape_iso_cut;
 			
 			
@@ -2410,7 +3158,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool LTcut = UseSumPtCut && (sumPt > Cut_etau_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_etau_sumPt_FR);
 			
-			if(!LTcut && !LTcut_FR) continue;
+			if(!LTcut && !LTcut_FR){
+				 if(matchedSync)
+				 {
+					std::cout << "ET Failed LT" << std::endl;
+					h_fail_shape_ET->Fill(7.0);
+				 }
+				 continue;
+			 }
 			signal = pass1 && pass2 && signalCuts && !isFakeRate && LTcut;
 			bool Ad_lepton=false;
 			if(!signal){
@@ -2424,15 +3179,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Ad_lepton=true;
 				}
 			}
-			if(Ad_lepton) continue;
-			if(isFakeRate) eTau=true;
+			if(Ad_lepton){
+				 if(matchedSync)
+				 {
+					std::cout << "ET Failed lepton veto" << std::endl;
+					h_fail_shape_ET->Fill(8.0);
+				 }
+				 continue;
+			 }
+		//	if(isFakeRate) eTau=true;
 			if(signal && !saved_signal ) eTau=true;
 			
 			if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
-			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << shapePass1 << shapePass2 << std::endl;
 			
 			if(!isFakeRate && !signal &&LTcut && pt2>Cut_tau_base_Pt){
-				if( !pass1 && !pass2 && !category0 && !tightFR)
+				if( !pass1 && (!pass2||!tightFR) && !category0 )
 				{
 					if(examineThisEvent) std::cout << "In category0" << std::endl;
 					category0=true;
@@ -2440,6 +3202,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hcand_cat0.push_back(Hcand[index+1]);
 					if(Zmumu) Hcand_type_cat0.push_back(3);
 					else if(Zee) Hcand_type_cat0.push_back(7);
+				}else if(matchedSync){
+					std::cout << "ET failed cat0" << std::endl;
+					std::cout << pass1 << pass2 << tightFR << category0 << category1 << category2 << std::endl;
+					h_fail_shape_ET->Fill(15.0);
 				}
 				if(!pass1 && pass2 && !category1 && tightFR)
 				{
@@ -2450,7 +3216,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(Zmumu) Hcand_type_cat1.push_back(3);
 					else if(Zee) Hcand_type_cat1.push_back(7);
 				}
-				if(pass1 && !pass2 && !category2 && !tightFR)
+				if(pass1 && (!pass2||!tightFR) && !category2 )
 				{
 					if(examineThisEvent) std::cout << "in category2" << std::endl;
 					category2=true;
@@ -2472,15 +3238,41 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				int result2 = pass1? 1:0;
 				int tight = tightFR? 1:0;
 				if(pass2) result+=tightFR;
-				if(!WZ_Rej(m,Hcand[index])) result = -1;
+				
+				bool usedEl = false;
+				size_t el_helper = std::find(usedElId.begin(), usedElId.end(), i) - usedElId.begin();
+				if(el_helper < usedElId.size()) usedEl=true;
+				
+				if(!WZ_Rej(m,Hcand[index]) || usedEl) result = -1;
 				Hcand_pass.push_back(result);
+				if(result > -1) usedElId.push_back(i);
+				
+				bool usedTau = false;
+				size_t tau_helper = std::find(usedTauId.begin(), usedTauId.end(), i) - usedTauId.begin();
+				if(tau_helper < usedTauId.size()) usedTau=true;
+				
 				bool LTptcut=Hcand[index+1].pt > Cut_tautau_Pt_2;
-				if(!LTptcut) result2=-1;
+				if(!LTptcut || usedTau ) result2=-1;
 				Hcand_pass.push_back(result2);
-				if(shapePass1 && shapePass2 && LTptcut && result > -0.5 && LTcut){
+				if(result2 > -1) usedTauId.push_back(j);
+				if(matchedSync){
+					std::cout << "ET:WZ rej: " << WZ_Rej(m,Hcand[index]) << " LTptcut: " << LTptcut << " pt:" 
+					<< Hcand[index+1].pt << " LT:" << sumPt << "usedLep" << usedEl << usedTau << std::endl;
+				}
+				if(shapePass1 && shapePass2 && LTptcut && LTcut){
+					if(matchedSync){
+						std::cout << " ET Shape cand accepted!" << std::endl;
+					}
 					if(tightFR) Hcand_shape_pass.push_back(2);
 					else Hcand_shape_pass.push_back(1);
-				}else Hcand_shape_pass.push_back(0);	
+				}else{
+					if(matchedSync)
+					{
+						std::cout << " ET Shape failed" << std::endl;
+						h_fail_shape_ET->Fill(9.0);
+					}
+					Hcand_shape_pass.push_back(0);	
+				 }
 				if(Zmumu) Hcand_type_FR.push_back(3);
 				else if(Zee) Hcand_type_FR.push_back(7);
 			}else if(signal && !saved_signal){
@@ -2493,10 +3285,18 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(Zmumu) Hcand_type_signal.push_back(3);
 				else if(Zee) Hcand_type_signal.push_back(7);
 				saved_signal=true;
-			}
+			}else if(matchedSync){
+					std::cout << "ET matched no category" << std::endl;
+					h_fail_shape_ET->Fill(14.0);
+				}
 		
 		
 		}
+		if(s_match_i > -1 && match2==false)
+		{
+			std::cout << " ET shape candidate not found" << std::endl;
+			h_fail_shape_ET->Fill(10.0);
+		}       
 	}
 	if(examineThisEvent) std::cout << " After ET, there are " << Hcand_cat0.size() << " cat0 "<< Hcand_cat1.size() << " cat1 "<< Hcand_cat2.size() << " cat2 "<<
 	 Hcand_FR.size() << " FR." <<   std::endl;
@@ -2508,25 +3308,86 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	category1= false;
 	category2=false;     
 	
+	std::vector<int> s_s_i_EM; //sync_shape_index
+    s_s_i_EM.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==4 && ((EventTypeConv(sync_vec_Channel[iSync]))%4) == 2) s_s_i_EM.push_back(iSync);
+	}  
+	
 	
 	for(uint i = 0; i < genericElectron.size() ; i++)
 	{
 		if(examineThisEvent) std::cout << " electron no. "<< i << "/" << genericElectron.size() << " " << genericElectron[i].pt << " " << genericElectron[i].charge << std::endl;
+			// finding the sync match
+		int s_match_i = -1;
+		for(uint iSync =0; iSync < s_s_i_EM.size(); iSync++)
+		{
+			std::cout << " Sync shape candidate #" << iSync << " type:" << EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]]) <<
+			" l3 pt/eta:" << sync_vec_l3Pt[s_s_i_EM[iSync]] << "/" << sync_vec_l3Eta[s_s_i_EM[iSync]] <<
+			" l4 pt/eta:" << sync_vec_l4Pt[s_s_i_EM[iSync]] << "/" << sync_vec_l4Eta[s_s_i_EM[iSync]] << std::endl;
+			if(Zmumu && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=2) continue;
+			if(Zee && EventTypeConv(sync_vec_Channel[s_s_i_EM[iSync]])!=6) continue;
+			if(Zee){
+				if(fabs(genericElectron[i].pt - sync_vec_l3Pt[s_s_i_EM[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l3Eta[s_s_i_EM[iSync]]) < 0.1){
+					 std::cout << " matched leading ele" << std::endl;
+					 s_match_i=iSync;
+				 }
+			}else{
+				if(fabs(genericElectron[i].pt - sync_vec_l4Pt[s_s_i_EM[iSync]]) < 0.1 && fabs(genericElectron[i].eta - sync_vec_l4Eta[s_s_i_EM[iSync]]) < 0.1){
+					 std::cout << " matched leading ele" << std::endl;
+					 s_match_i=iSync;
+				 }
+			}
+		}
 		
-		if(genericElectron[i].numLostHitEleInner > 1) continue;
+		//~ if(genericElectron[i].numLostHitEleInner > 1){
+			  //~ if(s_match_i > -1){
+				//~ std::cout << "Failed lost hits cut: " << genericElectron[i].numLostHitEleInner << std::endl;
+				//~ h_fail_shape_EM->Fill(0.0);
+			  //~ }
+			 //~ continue;
+		 //~ }
 		if(examineThisEvent) std::cout << " Checking for eMu " << std::endl;
 		
 		if(examineThisEvent) std::cout << " i passed pre-selection. Looping over " << genericMuon.size() << " muons." << std::endl;
+		bool match2=false;
 		for(uint j=0; j< genericMuon.size() && !(category0 && category1 && category2 && signal) ; j++)
 		{
-			
+			bool matchedSync = false;
+			if(s_match_i >-1){
+				if(Zee){
+					if(fabs(genericMuon[j].pt - sync_vec_l4Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(genericMuon[j].eta - sync_vec_l4Eta[s_s_i_EM[s_match_i]]) < 0.1){
+						 match2=true;
+						 matchedSync=true;
+						 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_EM[s_match_i]] << ")" << std::endl;
+					 }
+				}else{
+					if(fabs(genericMuon[j].pt - sync_vec_l3Pt[s_s_i_EM[s_match_i]]) < 0.1 && fabs(genericMuon[j].eta - sync_vec_l3Eta[s_s_i_EM[s_match_i]]) < 0.1){
+						 match2=true;
+						 matchedSync=true;
+						 std::cout << "matched sub mu (mass " << sync_vec_HMass[s_s_i_EM[s_match_i]] << ")" << std::endl;
+					 }
+				}
+			}
 			if(examineThisEvent) std::cout << "   > muon no. " << j << "/" << genericMuon.size() << " " << genericMuon[j].pt << " " << genericMuon[j].charge << std::endl;
 			if(examineThisEvent) std::cout << " H candidate mass is " << PairMass(genericElectron[i],genericMuon[j]) << std::endl;
 			bool isFakeRate = (genericElectron[i].charge*genericMuon[j].charge > 0);
 			if(reverseFR) isFakeRate=!(isFakeRate);
+			if(matchedSync && !isFakeRate){
+				std::cout << "EM Failed sync charge cut" << std::endl;
+				h_fail_shape_EM->Fill(1.0);
+			}
 			if(examineThisEvent && isFakeRate) std::cout << "Fake candidate!" << std::endl;
 			
-			if(deltaR(genericMuon[j],genericElectron[i])< maxDeltaR) continue;
+			if(deltaR(genericMuon[j],genericElectron[i])< maxDeltaR){
+				  if(matchedSync)
+				 {
+					std::cout << "failed dR" << std::endl;
+					h_fail_shape_EM->Fill(2.0);
+				 }
+				 continue;
+			 }
 			if(examineThisEvent) std::cout << " j distance is " << deltaR(genericMuon[j],genericElectron[i]) << std::endl;            
 			if(examineThisEvent) std::cout << "   > j passed pre-selection." << std::endl;
 			
@@ -2534,27 +3395,44 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(examineThisEvent) verb = true;
 		
 			
-			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],genericMuon[j], verb)) continue;
+			if(!DZ_expo(Zcand[0],Zcand[1],genericElectron[i],genericMuon[j], verb)){
+				  if(matchedSync)
+				 {
+					std::cout << "failed dz" << std::endl;
+					h_fail_shape_EM->Fill(3.0);
+				 }
+				 continue;
+			 }
 			if(examineThisEvent) std::cout << "PASSED!" << std::endl;
 			Hcand.push_back(genericElectron[i]);
 			Hcand.push_back(genericMuon[j]);
 			int index = Hcand.size() -2;
 			
-			bool pass1 = (RelIso(Hcand[index])<relIso_EM && LooseEleId(Hcand[index]));
+			bool pass1 = (RelIso(Hcand[index])<relIso_EM && LooseEleId(Hcand[index])) && genericElectron[i].numLostHitEleInner < 2;
 			bool pass2 = (RelIso(Hcand[index+1])<relIso_EM && isLooseMu(Hcand[index+1]));
-			bool shapePass1 = (RelIso(Hcand[index])< lep_shape_iso_cut && LooseEleId(Hcand[index]));
-			bool shapePass2 = (RelIso(Hcand[index+1])< lep_shape_iso_cut && isLooseMu(Hcand[index+1]));
+			if(examineThisEvent) std::cout << "the values of isolations are" << RelIso(genericElectron[i]) << " " << RelIso(genericMuon[j]) << std::endl;
+			if(examineThisEvent) std::cout << "the ID values are" << LooseEleId(genericElectron[i]) << " " << isLooseMu(genericMuon[j]) << std::endl;
+			bool shapePass1 = RelIso(Hcand[index])< lep_shape_iso_cut;// && LooseEleId(Hcand[index]));
+			bool shapePass2 = RelIso(Hcand[index+1])< lep_shape_iso_cut;// && isLooseMu(Hcand[index+1]));
 			
 			
 		    if(examineThisEvent) std::cout << "checking categories: " << category0 << category1 << category2 << std::endl;
-			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << std::endl;
+			if(examineThisEvent) std::cout << "The isolation is " << pass1 << pass2 << shapePass1 << shapePass2 << std::endl;
 			
 			double pt1=Hcand[index].pt;
 			double pt2=Hcand[index+1].pt;
 			double sumPt = pt1+pt2;
+			if(examineThisEvent) std::cout << "Sum Pt is" << std::endl;
 			bool LTcut = UseSumPtCut && (sumPt > Cut_leplep_sumPt);
 			bool LTcut_FR = UseSumPtCut && (sumPt > Cut_leplep_sumPt_FR);
-			if(!LTcut && !LTcut_FR) continue;
+			if(!LTcut && !LTcut_FR){
+				  if(matchedSync)
+				 {
+					std::cout << "failed LT" << std::endl;
+					h_fail_shape_EM->Fill(4.0);
+				 }
+				 continue;
+			 }
 			signal = pass1 && pass2 && LTcut && !isFakeRate;
 			bool Ad_lepton=false;
 			if(signal){
@@ -2563,7 +3441,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Ad_lepton=true;
 				}
 			}
-			if(Ad_lepton) continue;
+			if(Ad_lepton){
+				  if(matchedSync)
+				 {
+					std::cout << "failed lepton veto" << std::endl;
+					h_fail_shape_EM->Fill(5.0);
+				 }
+				 continue;
+			 }
 			if(signal && !saved_signal ) eMu=true;
 			
 			if(!signal && !isFakeRate &&LTcut){
@@ -2613,21 +3498,31 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 				Hcand_FR.push_back(Hcand[index]);
 				Hcand_FR.push_back(Hcand[index+1]);
-				Hcand_pass.push_back(0);
-				Hcand_pass.push_back(0);
+				Hcand_pass.push_back(-1);
+				Hcand_pass.push_back(-1);
 				if(shapePass1 && shapePass2 && LTcut){
+					if(matchedSync){
+						std::cout << " EM Shape cand accepted!" << std::endl;
+					}
 					Hcand_shape_pass.push_back(1);
-				}else Hcand_shape_pass.push_back(0);	
+				}else{
+					  if(matchedSync)
+					{
+						std::cout << " EM failed shape " << LTcut <<  std::endl;
+						h_fail_shape_EM->Fill(6.0);
+					}
+					 Hcand_shape_pass.push_back(0);	
+				 }
 				if(Zmumu) Hcand_type_FR.push_back(2);
 				else if(Zee) Hcand_type_FR.push_back(6);
 			}
-			
-			
-			
-	
-			
-			
+				
 		}
+		if(s_match_i > -1 && match2==false)
+		{
+			std::cout << " shape candidate not found" << std::endl;
+			h_fail_shape_EM->Fill(7.0);
+		}       
     
 		
 	}
@@ -2639,7 +3534,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " " << muTau << muE << eTau << tauTau << std::endl;
 	if((Hcand_cat2.size() + Hcand_cat1.size() + Hcand_cat0.size() + Hcand_FR.size() + Hcand_signal.size()) ==0){ 
 		m_logger << DEBUG << " No Higgs candidate. Going to next event" << SLogger::endmsg; 
-	
+		if(examineThisEvent) std::cout << " No Higgs candidate. Going to next event" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(4.,double(Ch));
+		}
 		return;
 	}
 	
@@ -2763,7 +3667,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	if(bTagVeto)
 	{
-		
+		if(examineThisEvent) std::cout << " B veto fail" << std::endl;
+		for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+		{
+			std::cout << " Channel " << sync_vec_Channel[iSync] << " " << EventTypeConv(sync_vec_Channel[iSync]) << " " << EventTypeName(EventTypeConv(sync_vec_Channel[iSync])) 
+			<< " subch: " << sync_vec_subChannel[iSync] << std::endl;
+			int subCh = sync_vec_subChannel[iSync];
+			int Ch = EventTypeConv(sync_vec_Channel[iSync]);
+			
+			h_fail_reason[subCh]->Fill(5.,double(Ch));
+		}	
 		return;
 	}
 	
@@ -2786,15 +3699,30 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	// histogramming
 	
 	// signal saving
+	int sync_sig_index=-1;
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==3) sync_sig_index=iSync;
+	}
+	
 	if(Hcand_signal.size() > 0)
 		{
+			 
 			 int event_type = Hcand_type_signal[0];
+			 if(sync_sig_index < 0) h_sync_summary[3]->Fill(0.0,double(event_type));
+			 else if(EventTypeConv(sync_vec_Channel[sync_sig_index])!=event_type){
+				  h_sync_summary[3]->Fill(1.0,double(event_type));
+				  h_sync_summary[3]->Fill(2.0,double(EventTypeConv(sync_vec_Channel[sync_sig_index])));
+			  }
+			 else h_sync_summary[3]->Fill(3.0,double(event_type));
+			 
 			 Hist( "h_event_type" )->Fill(event_type,weight);
 			 Hist( "h_event_type_raw" )->Fill(event_type);
 			 
 			 Hist("h_PF_MET_selected")->Fill(Met.front().et,weight);
 			 h_PF_MET_nPU_selected->Fill(nGoodVx,Met.front().et,weight);
 			 //ntuple filling
+			if(doNtuple){
 			o_run=m->runNumber;
 			o_lumi=m->lumiNumber;
 			o_event=m->eventNumber;
@@ -2929,15 +3857,46 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				o_gen_MET=genMET;
 			
 			}
-			 
 		 }
+		}else{ // no sig candidate
+				if(sync_sig_index > -1) // sync event exists
+				{
+					h_sync_summary[3]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_sig_index])));
+				}
+		 
+		}
     // save mass info in SS events to get background shape
+    std::vector<int> sync_BG_index;
+    sync_BG_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==4) sync_BG_index.push_back(iSync);
+	}
+    
     for(uint i=0; i < Hcand_FR.size(); i+=2)
 		{
 			 if(Hcand_shape_pass[i/2] <1) continue; // did not pass loose ID+iso cuts
 			 int event_type = Hcand_type_FR[i/2];
+			 bool common = false;
+			 double Mass;
+			 if(doSync) Mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
 			 
+			 for(uint iSync = 0; iSync < sync_BG_index.size() && !common; iSync++)
+			 {
+				 if(event_type == EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])  && 
+					(fabs(Mass-sync_vec_HMass[sync_BG_index[iSync]]) < 0.1) ) common = true;//
+				if(common){ // remove matched candidates
+					sync_BG_index.erase(sync_BG_index.begin()+iSync);
+					iSync-=1;
+				}
+			 }
+			 if(common) h_sync_summary[4]->Fill(3.0,double(event_type));
+			 else{
+				if(doSync)  std::cout << " UCL only event of type: " << EventTypeName(event_type) << " mass = " << Mass << std::endl;
+				  h_sync_summary[4]->Fill(0.0,double(event_type)); // UCL only
+			  }
 			 //ntuple filling
+			 if(doNtuple){
 			o_run=m->runNumber;
 			o_lumi=m->lumiNumber;
 			o_event=m->eventNumber;
@@ -3029,10 +3988,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				o_pdf_signalProcessID=m->signalProcessID; 
 				o_pdf_binningValueSize=m->binningValueSize; 
 			}
-			
+			}
 			
 			 
 		 }
+		 // not matched sync objects
+		 for(uint iSync = 0; iSync < sync_BG_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << EventTypeName(EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])) << " mass = " << sync_vec_HMass[sync_BG_index[iSync]] << std::endl;
+				h_sync_summary[4]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_BG_index[iSync]])));
+			 }
 			
 	if(printoutEvents)
 	{
@@ -3172,13 +4137,34 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			h_H_mass_signal_types[event_type-1]->Fill(mass,weight);	
 		}
 	if(examineThisEvent) std::cout << " filling FR histo " << std::endl;
-				
+			
+	std::vector<int> sync_FRdenom_index;
+    sync_FRdenom_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==1 && sync_vec_Channel[iSync]>8) sync_FRdenom_index.push_back(iSync);
+	}
+	
+	std::vector<int> sync_FRnumL_index;
+    sync_FRnumL_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==2 && sync_vec_Channel[iSync]>8) sync_FRnumL_index.push_back(iSync);
+	}
+	
+	std::vector<int> sync_FRnumT_index;
+    sync_FRnumT_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==3 && sync_vec_Channel[iSync]>8) sync_FRnumT_index.push_back(iSync);
+	}
+		
 	for(uint i=0; i < Hcand_FR.size(); i+=2)
 	{
 		 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
 		 myobject ClosestJet2 = ClosestInCollection(Hcand_FR[i+1],jet); //tau in LT
-		 bool barrel1= fabs(ClosestJet.eta) < 1.4 ? true : false;
-		 bool barrel2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
+		 bool barrel1= ClosestJet.eta < 1.4 ? true : false; // BUG!!!
+		 bool barrel2= ClosestJet2.eta < 1.4 ? true : false; // BUG!!!
 		 
 		 int exp_event_type=Hcand_type_FR[i/2];
 		 double mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
@@ -3187,7 +4173,264 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 if(Hcand_shape_pass[i/2] > 1) h_H_mass_FRt_types[exp_event_type-1]->Fill(mass,weight);
 		 	
 		 if(examineThisEvent) std::cout << " filled mass " << std::endl;
+		 
+		 //
+		 int myChannel1 = -1;
+		 int myChannel2 = -1;
+		 if(doSync && doSyncFR)
+		 {
+			switch(exp_event_type%4)
+			{
+				case 0: // TT
+				 myChannel1 = barrel1 ? 9 : 10;
+				 myChannel2 = barrel2 ? 9 : 10;
+				 break;
+				case 1: // MT
+				  myChannel1 = 14;
+				  myChannel2 = barrel2 ? 11: 12;
+				  break;
+				case 3: // ET
+				  myChannel1 = 13;
+				  myChannel2 = barrel2 ? 11: 12;
+				  break;
+				 default:
+				  break;
+			}
+		 }
+		 
+		 bool common1 = false;
+		 bool common2 = false;
+		 bool correctOrder = false;
+		 if(doSyncFR) std::cout << " size if denom/loose/tight is" << sync_FRdenom_index.size() << "/" <<
+		 sync_FRnumL_index.size() << "/" << sync_FRnumT_index.size() << "/" << std::endl;
+		 
+		 // find sync match for the lepton 1
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common1; iSync++)
+		 {
+			std::cout << "1: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
+			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)){
+				 common1 = true;
+				 correctOrder=true;
+			 }
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
+			((fabs(Hcand_FR[i].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync]]) < 0.1))) 
+				common1 = true;
+			if(common1)
+			{
+				std::cout << "removing 1:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+				
+				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 1:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+			}
+		}
+		
+		// find sync match for the lepton 2
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common2; iSync++)
+		 {
+			std::cout << "2: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel2 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l3Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l3Eta[sync_FRdenom_index[iSync]]) < 0.1)){
+				 correctOrder=false;
+				 common2 = true;
+			 }
+			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel2 && 
+			((fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRdenom_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRdenom_index[iSync]]) < 0.1)))
+				common2 = true;
+			if(common2)
+			{
+				std::cout << "removing 2:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+				
+				sync_FRdenom_index.erase(sync_FRdenom_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 2:" << sync_FRdenom_index.size() << " " << iSync << std::endl;
+			}
+		}
+		
+		
+			
+		 
+		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				"jeta= " << ClosestJet.eta << std::endl;
+				  h_sync_summary[1]->Fill(0.0,double(myChannel1)); // UCL only
+			  }
+		 if(common2) h_sync_summary[1]->Fill(3.0,double(myChannel2));
+		 else{
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				"jeta= " << ClosestJet2.eta << std::endl;
+				  h_sync_summary[1]->Fill(0.0,double(myChannel2)); // UCL only
+			  }
+		 if(!correctOrder)
+		 {
+			if(!common1) h_sync_summary[1]->Fill(1.0,double(myChannel1));
+			else if(!common2) h_sync_summary[1]->Fill(2.0,double(myChannel1));
+			else h_sync_summary[1]->Fill(5.0,double(myChannel1));
+		 }
+			  
+		// numerator Loose
+		
+		common1 = false;
+		common2 = false;
+		correctOrder = false;
+		
+		// find sync match for the lepton 1
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common1; iSync++)
+		 {
+			std::cout << "1: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i] > 0 && 
+			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumL_index[iSync]]) < 0.1)){
+				 common1 = true;
+				 correctOrder=true;
+			 }
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i] > 0 &&
+			((fabs(Hcand_FR[i].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync]]) < 0.1))) 
+				common1 = true;
+			if(common1)
+			{
+				std::cout << "removing 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				
+				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 1:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+			}
+		}
+
+
+		// find sync match for the lepton 2
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common2; iSync++)
+		 {
+			std::cout << "2: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l3Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l3Eta[sync_FRnumL_index[iSync]]) < 0.1)){
+				 common2 = true;
+				 correctOrder=false;
+			 }
+			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
+			((fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumL_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumL_index[iSync]]) < 0.1))) 
+				common2 = true;
+			if(common2)
+			{
+				std::cout << "removing 2:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+				
+				sync_FRnumL_index.erase(sync_FRnumL_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 2:" << sync_FRnumL_index.size() << " " << iSync << std::endl;
+			}
+		}
 	
+		
+		 
+		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
+		 else if(Hcand_pass[i]){
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				"jeta= " << ClosestJet.eta << std::endl;
+				  h_sync_summary[3]->Fill(0.0,double(myChannel1)); // UCL only
+			  }
+		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
+		 else if(Hcand_pass[i+1]){
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				"jeta= " << ClosestJet2.eta << std::endl;
+				 h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
+			  }
+			  
+		 if(!correctOrder)
+		 {
+			if(!common1 && Hcand_pass[i] >0) h_sync_summary[1]->Fill(1.0,double(myChannel1));
+			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
+			else if(Hcand_pass[i] >0 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(5.0,double(myChannel1));
+		 }
+			  
+		// numerator Tight
+		
+		common1 = false;
+		common2 = false;
+		correctOrder = false;
+		
+		// find sync match for the lepton 1 - tight is only for lepton !
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common1; iSync++)
+		 {
+			if(myChannel1!= 13 && myChannel1!=14) continue; // just e and mu
+			std::cout << "1: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i] ==2 && 
+			(fabs(Hcand_FR[i].pt-sync_vec_l3Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l3Eta[sync_FRnumT_index[iSync]]) < 0.1)){
+				 common1 = true;
+				 correctOrder=true;
+			 }
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel1 && Hcand_pass[i] ==2 &&
+			((fabs(Hcand_FR[i].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync]]) < 0.1))) 
+				common1 = true;
+			if(common1)
+			{
+				std::cout << "removing 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+				
+				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 1:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			}
+		}
+		
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common2; iSync++)
+		 {
+			if(myChannel1!= 13 && myChannel1!=14) continue; // just in case
+			std::cout << "2: object #" << iSync << std::endl;
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
+			(fabs(Hcand_FR[i+1].pt-sync_vec_l3Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l3Eta[sync_FRnumT_index[iSync]]) < 0.1)){
+				 common2 = true;
+				 correctOrder=false;
+			 }
+			if(sync_vec_Channel[sync_FRnumT_index[iSync]] == myChannel2 && Hcand_pass[i+1] >2 &&
+			((fabs(Hcand_FR[i+1].pt-sync_vec_l4Pt[sync_FRnumT_index[iSync]]) < 0.1) &&
+			(fabs(Hcand_FR[i+1].eta-sync_vec_l4Eta[sync_FRnumT_index[iSync]]) < 0.1))) 
+				common2 = true;
+			if(common2)
+			{
+				std::cout << "removing 2:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+				
+				sync_FRnumT_index.erase(sync_FRnumT_index.begin()+iSync);
+				iSync-=1;
+				std::cout << "removed 2:" << sync_FRnumT_index.size() << " " << iSync << std::endl;
+			}
+		}
+
+
+		
+		
+		 		 
+		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
+		 else if(Hcand_pass[i]==2){
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				"jeta= " << ClosestJet.eta << std::endl;
+				  h_sync_summary[2]->Fill(0.0,double(myChannel1)); // UCL only
+			  }
+		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
+		 else if(Hcand_pass[i+1] > 0){
+				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				"jeta= " << ClosestJet2.eta << std::endl;
+				  h_sync_summary[2]->Fill(0.0,double(myChannel2)); // UCL only
+			  }
+		
+		 if(!correctOrder)
+		 {
+			if(!common1 && Hcand_pass[i] == 2) h_sync_summary[1]->Fill(1.0,double(myChannel1));
+			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
+			else if(Hcand_pass[i]==2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(5.0,double(myChannel1));
+		 }
+		 
+		 
 		 switch(exp_event_type)
 			{
 				case 4:
@@ -3264,6 +4507,42 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		 
 	}
+	// not matched sync objects
+		 for(uint iSync = 0; iSync < sync_FRdenom_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRdenom_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRdenom_index[iSync]] 
+				<< " pt = " << sync_vec_l3Pt[sync_FRdenom_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRdenom_index[iSync]] << " jeta " 
+				<< sync_vec_l3_CloseJetEta[sync_FRdenom_index[iSync]] << " 2: pt = " << sync_vec_l4Pt[sync_FRdenom_index[iSync]] << "eta " 
+				<< sync_vec_l4Eta[sync_FRdenom_index[iSync]] << " jeta " << sync_vec_l4_CloseJetEta[sync_FRdenom_index[iSync]] << std::endl;
+				h_sync_summary[1]->Fill(4.0,sync_vec_Channel[sync_FRdenom_index[iSync]]);
+			 }
+			 
+		 	 for(uint iSync = 0; iSync < sync_FRnumL_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRnumL_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRnumL_index[iSync]] 
+				<< " pt = " << sync_vec_l3Pt[sync_FRnumL_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumL_index[iSync]]  << " jeta " 
+				<< sync_vec_l3_CloseJetEta[sync_FRnumL_index[iSync]] << " 2: pt = " << sync_vec_l4Pt[sync_FRnumL_index[iSync]] << "eta "
+				 << sync_vec_l4Eta[sync_FRnumL_index[iSync]] << " jeta " << sync_vec_l4_CloseJetEta[sync_FRnumL_index[iSync]] << std::endl;
+				h_sync_summary[3]->Fill(4.0,sync_vec_Channel[sync_FRnumL_index[iSync]]);
+			 }
+			 
+			 for(uint iSync = 0; iSync < sync_FRnumT_index.size(); iSync++)
+			 {
+				std::cout << " ULB only event of type: " << sync_vec_Channel[sync_FRnumT_index[iSync]] << " mass = " << sync_vec_HMass[sync_FRnumT_index[iSync]] 
+				<< " pt = " << sync_vec_l3Pt[sync_FRnumT_index[iSync]] << "eta " << sync_vec_l3Eta[sync_FRnumT_index[iSync]]  << " jeta " 
+				<< sync_vec_l3_CloseJetEta[sync_FRnumT_index[iSync]] << " 2: pt = " << sync_vec_l4Pt[sync_FRnumT_index[iSync]] << "eta "
+				 << sync_vec_l4Eta[sync_FRnumT_index[iSync]] << " jeta " << sync_vec_l4_CloseJetEta[sync_FRnumT_index[iSync]] << std::endl;
+				h_sync_summary[2]->Fill(4.0,sync_vec_Channel[sync_FRnumT_index[iSync]]);
+			 }
+			 
+			 
+	
+	std::vector<int> sync_cat0_index;
+    sync_cat0_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==0) sync_cat0_index.push_back(iSync);
+	}
 				
 	if(examineThisEvent) std::cout << " filling AP histo cat0 " << std::endl;
 	for(uint i=0; i < Hcand_cat0.size(); i+=2)
@@ -3271,8 +4550,68 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			int exp_event_type=Hcand_type_cat0[i/2];
 			myobject ClosestJet = ClosestInCollection(Hcand_cat0[i],jet);
 			myobject ClosestJet2 = ClosestInCollection(Hcand_cat0[i+1],jet);
-			bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
-			bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
+			
+			 bool common = false;
+			 for(uint iSync = 0; iSync < sync_cat0_index.size() && !common; iSync++)
+			 {
+				 if(exp_event_type!=2){
+				 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]]))  && 
+					(fabs(Hcand_cat0[i].pt-sync_vec_l3Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i].eta-sync_vec_l3Eta[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].pt-sync_vec_l4Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].eta-sync_vec_l4Eta[sync_cat0_index[iSync]]) < 0.1)
+				   ) common = true;//
+				}else{
+					 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]]))  && 
+					(fabs(Hcand_cat0[i].pt-sync_vec_l4Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i].eta-sync_vec_l4Eta[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].pt-sync_vec_l3Pt[sync_cat0_index[iSync]]) < 0.1) &&
+					(fabs(Hcand_cat0[i+1].eta-sync_vec_l3Eta[sync_cat0_index[iSync]]) < 0.1)
+				   ) common = true;//
+				}
+				if(common){ // remove matched candidates
+					sync_cat0_index.erase(sync_cat0_index.begin()+iSync);
+					iSync-=1;
+				}
+			 }
+			
+			 
+			  if(common) h_sync_summary[0]->Fill(3.0,double(exp_event_type));
+			  else if(doSync){
+				   h_sync_summary[0]->Fill(0.0,double(exp_event_type)); // UCL only
+				   // fill information about this event
+					Float_t mass = PairMass(Hcand_cat0[i],Hcand_cat0[i+1]);
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = EventTypeConvAbdollah(exp_event_type);
+					 sync_o_subChannel = 0;
+					 sync_o_HMass = mass;
+					 if(exp_event_type!=2){
+						 sync_o_l3Pt = Hcand_cat0[i].pt;
+						 sync_o_l3Eta = Hcand_cat0[i].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet.eta;
+						 sync_o_l4Pt = Hcand_cat0[i+1].pt;
+						 sync_o_l4Eta = Hcand_cat0[i+1].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 }else{
+						 sync_o_l4Pt = Hcand_cat0[i].pt;
+						 sync_o_l4Eta = Hcand_cat0[i].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet.eta;
+						 sync_o_l3Pt = Hcand_cat0[i+1].pt;
+						 sync_o_l3Eta = Hcand_cat0[i+1].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet2.eta; 
+					 }
+					 syncOutTree->Fill();	   
+			   }
+			
+			bool B1= ClosestJet.eta < 1.4 ? true : false; //BUG!!!
+			bool B2= ClosestJet2.eta < 1.4 ? true : false; //BUG!!!
 			switch(exp_event_type)
 			{
 				case 1: //MT, ET
@@ -3303,33 +4642,190 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					break;
 			}
 		}
+		
+		 // not matched sync objects
+		 for(uint iSync = 0; iSync < sync_cat0_index.size(); iSync++)
+			 {
+				h_sync_summary[0]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_cat0_index[iSync]])));
+			 }
+			 
 	if(examineThisEvent) std::cout << " filling AP histo cat1 " << std::endl;
+	
+	std::vector<int> sync_cat1_index;
+    sync_cat1_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==1 && ((EventTypeConv(sync_vec_Channel[iSync]))!=2)) sync_cat1_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==2 && ((EventTypeConv(sync_vec_Channel[iSync])))==2) sync_cat1_index.push_back(iSync);
+		
+	}
+	
+	
 	
 	// messed with categories: cat1 = tau fails or e fails	
 	for(uint i=0; i < Hcand_cat1.size(); i+=2)
 	{
 		int exp_event_type=Hcand_type_cat1[i/2];
 		myobject ClosestJet2 = ClosestInCollection(Hcand_cat1[i+1],jet);
-		bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false;
+		
+		bool common = false;
+		 
+		 for(uint iSync = 0; iSync < sync_cat1_index.size() && !common; iSync++)
+		 {
+			if(exp_event_type!=2){
+			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]]))  && 
+				(fabs(Hcand_cat1[i].pt-sync_vec_l3Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i].eta-sync_vec_l3Eta[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].pt-sync_vec_l4Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].eta-sync_vec_l4Eta[sync_cat1_index[iSync]]) < 0.1)
+			   ) common = true;//
+		   }else{
+			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]]))  && 
+				(fabs(Hcand_cat1[i].pt-sync_vec_l4Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i].eta-sync_vec_l4Eta[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].pt-sync_vec_l3Pt[sync_cat1_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat1[i+1].eta-sync_vec_l3Eta[sync_cat1_index[iSync]]) < 0.1)
+			   ) common = true;//
+		   }
+			if(common){ // remove matched candidates
+				sync_cat1_index.erase(sync_cat1_index.begin()+iSync);
+				iSync-=1;
+			}
+		 }
+		if(common) h_sync_summary[1]->Fill(3.0,double(exp_event_type));
+		else if(doSync){
+			 h_sync_summary[1]->Fill(0.0,double(exp_event_type)); // UCL only
+				myobject ClosestJet = ClosestInCollection(Hcand_cat1[i],jet);
+				Float_t mass = PairMass(Hcand_cat1[i],Hcand_cat1[i+1]);
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = EventTypeConvAbdollah(exp_event_type);
+					 sync_o_subChannel = 1;
+					 sync_o_HMass = mass;
+					 if(exp_event_type!=2){
+						 sync_o_l3Pt = Hcand_cat1[i].pt;
+						 sync_o_l3Eta = Hcand_cat1[i].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet.eta;
+						 sync_o_l4Pt = Hcand_cat1[i+1].pt;
+						 sync_o_l4Eta = Hcand_cat1[i+1].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 }else{
+						 sync_o_l4Pt = Hcand_cat1[i].pt;
+						 sync_o_l4Eta = Hcand_cat1[i].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet.eta;
+						 sync_o_l3Pt = Hcand_cat1[i+1].pt;
+						 sync_o_l3Eta = Hcand_cat1[i+1].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet2.eta; 
+					 }
+					 syncOutTree->Fill();	   
+		 
+		 }
+		
+		bool B2= ClosestJet2.eta < 1.4 ? true : false; // BUG!!!!
 		
 			h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
 			B2? h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt) : h_category1_jet_EC_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt);
 			h_category1_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].jetPt);
 								
 	}
+	
+	for(uint iSync = 0; iSync < sync_cat1_index.size(); iSync++)
+	 {
+		h_sync_summary[1]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_cat1_index[iSync]])));
+	 }
+	
 	if(examineThisEvent) std::cout << " filling AP histo cat2 " << std::endl;
+	
+	std::vector<int> sync_cat2_index;
+    sync_cat2_index.clear();
+	for(uint iSync=0; iSync < sync_vec_subChannel.size(); iSync++)
+	{
+		if(sync_vec_subChannel[iSync]==2 && ((EventTypeConv(sync_vec_Channel[iSync]))!=2)) sync_cat2_index.push_back(iSync);
+		if(sync_vec_subChannel[iSync]==1 && ((EventTypeConv(sync_vec_Channel[iSync]))==2)) sync_cat2_index.push_back(iSync);
+	}
 	
 	for(uint i=0; i < Hcand_cat2.size(); i+=2)
 	{
 		int exp_event_type=Hcand_type_cat2[i/2];
 		myobject ClosestJet = ClosestInCollection(Hcand_cat2[i],jet);
-		bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false;
+		
+		bool common = false;
+			 
+		 for(uint iSync = 0; iSync < sync_cat2_index.size() && !common; iSync++)
+		 {
+			 if(exp_event_type!=2){
+			 if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]]))  && 
+				(fabs(Hcand_cat2[i].pt-sync_vec_l3Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i].eta-sync_vec_l3Eta[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].pt-sync_vec_l4Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].eta-sync_vec_l4Eta[sync_cat2_index[iSync]]) < 0.1)
+			   ) common = true;//
+		   }else{
+			if((exp_event_type == EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]]))  && 
+				(fabs(Hcand_cat2[i].pt-sync_vec_l4Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i].eta-sync_vec_l4Eta[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].pt-sync_vec_l3Pt[sync_cat2_index[iSync]]) < 0.1) &&
+				(fabs(Hcand_cat2[i+1].eta-sync_vec_l3Eta[sync_cat2_index[iSync]]) < 0.1)
+			   ) common = true;//
+		   }
+			if(common){ // remove matched candidates
+				sync_cat2_index.erase(sync_cat2_index.begin()+iSync);
+				iSync-=1;
+			}
+		 }
+		if(common) h_sync_summary[2]->Fill(3.0,double(exp_event_type));
+		else if(doSync){
+			 h_sync_summary[2]->Fill(0.0,double(exp_event_type)); // UCL only
+			Float_t mass = PairMass(Hcand_cat2[i],Hcand_cat2[i+1]);
+			myobject ClosestJet2 = ClosestInCollection(Hcand_cat2[i+1],jet);
+		
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = EventTypeConvAbdollah(exp_event_type);
+					 sync_o_subChannel = 2;
+					 sync_o_HMass = mass;
+					 if(exp_event_type!=2){
+						 sync_o_l3Pt = Hcand_cat2[i].pt;
+						 sync_o_l3Eta = Hcand_cat2[i].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet.eta;
+						 sync_o_l4Pt = Hcand_cat2[i+1].pt;
+						 sync_o_l4Eta = Hcand_cat2[i+1].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 }else{
+						 sync_o_l4Pt = Hcand_cat2[i].pt;
+						 sync_o_l4Eta = Hcand_cat2[i].eta;
+						 sync_o_l4_CloseJetPt = ClosestJet.pt;
+						 sync_o_l4_CloseJetEta = ClosestJet.eta;
+						 sync_o_l3Pt = Hcand_cat2[i+1].pt;
+						 sync_o_l3Eta = Hcand_cat2[i+1].eta;
+						 sync_o_l3_CloseJetPt = ClosestJet2.pt;
+						 sync_o_l3_CloseJetEta = ClosestJet2.eta; 
+					 }
+					 syncOutTree->Fill();	   
+		 }
+		
+		bool B1= ClosestJet.eta < 1.4 ? true : false; // BUG!!!
 		
 		h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
 		B1? h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt) : h_category2_jet_EC_pt_types[exp_event_type-1]->Fill(ClosestJet.pt);
 		h_category2_jetRef_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].jetPt);
 		
 	}
+	
+	for(uint iSync = 0; iSync < sync_cat2_index.size(); iSync++)
+	 {
+		h_sync_summary[2]->Fill(4.0,double(EventTypeConv(sync_vec_Channel[sync_cat2_index[iSync]])));
+	 }
 	
 	
 	

@@ -104,6 +104,7 @@ private:
 	
 	// histograms
 	
+	TH1* h_visMass;
 	TH1* h_PU_weight;
 	TH1* h_count;
 	TH1* h_count_mmt;

@@ -19,18 +19,23 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <map>
 
 // my classes
 #include "myevent.h"
 #include "TLorentzVector.h"
 #include "TProfile.h"
 #include "TH2.h"
+#include "RunLumiEvent.h"
 
 // PU weight
 
 #include "LumiReweightingStandAlone.h"
 //#include "Corrector2.h"
 
+
+typedef pair<long, int> treeinfo;
+typedef map<RunLumiEvent, treeinfo> treemap;
 
 /**
  *   @short Put short description of class here
@@ -52,7 +57,9 @@ public:
    virtual void BeginCycle() throw( SError );
    /// Function called at the end of the cycle
    virtual void EndCycle() throw( SError );
-   int EventTypeConv(int e_type_in);	
+   int EventTypeConv(int e_type_in);
+   int EventTypeConvAbdollah(int e_type_in); 	
+   std::string EventTypeName(int e_type_in);
    /// Function called at the beginning of a new input data
    virtual void BeginInputData( const SInputData& ) throw( SError );
    /// Function called after finishing to process an input data
@@ -307,6 +314,76 @@ private:
         ofstream log_events;
         ofstream log_files;
         
+        //sync variables
+        TFile* syncFile;
+        TTree* syncTree;
+        
+        std::vector<long> sync_event_vec;
+        std::vector<long> sync_lumi_vec;
+        std::vector<long> sync_run_vec;
+        
+        Int_t sync_event;
+        Int_t sync_lumi;
+        Int_t sync_run;
+        
+        Int_t sync_Channel;
+        Int_t sync_subChannel;
+		Float_t sync_HMass;
+		Float_t sync_l3Pt;
+		Float_t sync_l3Eta;
+		Float_t sync_l3_CloseJetPt;
+		Float_t sync_l3_CloseJetEta;
+		Float_t sync_l4Pt;
+		Float_t sync_l4Eta;
+		Float_t sync_l4_CloseJetPt;
+		Float_t sync_l4_CloseJetEta;
+		
+		std::vector<Int_t> sync_vec_Channel;
+        std::vector<Int_t> sync_vec_subChannel;
+		std::vector<Float_t> sync_vec_HMass;
+		std::vector<Float_t> sync_vec_l3Pt;
+		std::vector<Float_t> sync_vec_l3Eta;
+		std::vector<Float_t> sync_vec_l3_CloseJetPt;
+		std::vector<Float_t> sync_vec_l3_CloseJetEta;
+		std::vector<Float_t> sync_vec_l4Pt;
+		std::vector<Float_t> sync_vec_l4Eta;
+		std::vector<Float_t> sync_vec_l4_CloseJetPt;
+		std::vector<Float_t> sync_vec_l4_CloseJetEta;
+		
+	
+        
+        treemap syncTreeMap;
+
+		// sync histograms
+		
+		std::vector<TH2*> h_fail_reason;
+        std::vector<TH2*> h_sync_summary;
+        
+        TH1* h_fail_shape_TT;
+		TH1* h_fail_shape_MT;
+		TH1* h_fail_shape_ET;
+		TH1* h_fail_shape_EM;
+		
+		// sync output
+		
+		TFile* syncOut;
+		TTree* syncOutTree;
+		
+		UInt_t sync_o_event;
+        UInt_t sync_o_lumi;
+        UInt_t sync_o_run;
+        
+        Short_t sync_o_Channel;
+        Short_t sync_o_subChannel;
+		Float_t sync_o_HMass;
+		Float_t sync_o_l3Pt;
+		Float_t sync_o_l3Eta;
+		Float_t sync_o_l3_CloseJetPt;
+		Float_t sync_o_l3_CloseJetEta;
+		Float_t sync_o_l4Pt;
+		Float_t sync_o_l4Eta;
+		Float_t sync_o_l4_CloseJetPt;
+		Float_t sync_o_l4_CloseJetEta;
 	
         
 
@@ -385,6 +462,7 @@ private:
     bool SFShiftDown_Ele;
     double SystUncert_ES;
     
+    bool doNtuple;
     bool FillPDFInfo;
     bool FillSVmassInfo;
     bool FillZZgenInfo;
@@ -398,6 +476,10 @@ private:
     bool IgnoreLTforFR_LL;
     
     bool reverseFR;
+    
+    std::string syncFileName;
+    bool doSync;
+    bool doSyncFR;
     
             
     

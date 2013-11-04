@@ -13,7 +13,7 @@
     <Package Name="ZHtautauAnalysis.par"/>
 	
 	<Cycle Name="WHanalysis" OutputDirectory="./" PostFix="" TargetLumi="1.0">
-		<InputData Lumi="0.0" NEventsMax="-1" Type="Data1" Version="Reco">
+		<InputData Lumi="0.0" NEventsMax="10000" Type="Data1" Version="Reco">
                        &grid;
             <InputTree Name="t"/>
              <OutputTree Name="redtree"/>
@@ -22,8 +22,7 @@
 		<Item Name="InTreeName" Value="t"/>
 		<Item Name="maxDeltaR" Value="0.1" />   
 	        <Item Name="bTagValue" Value="0.898" />
-	        <Item Name="LTValue_mmt" Value="130." />
-	        <Item Name="LTValue_eet" Value="100." />
+	        <Item Name="LTValue" Value="130." />
 	
 		<Item Name="ElectronTriggerName" Value="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v" />
 		<Item Name="ElectronTriggerName2" Value="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v" />
@@ -63,15 +62,16 @@
 		Number of event to print depug
 --> 		
 		<Item Name="UseLongEvent" Value="false" /> <!-- In case the event number is very large (> 10^7) -->
-		<Item Name="examineEvent" Value="" />
+		<Item Name="examineEvent" Value="63028" />
 		<Item Name="OverM" Value="" />  <!-- Event# * 10^6 -->
 		
 		<Item Name="BelowM" Value="" /> <!-- Event# mod 10^6 -->
 		
 		<!--syncing -->
 		
-		<Item Name="syncFileName" Value="Mauro_eet.txt" />
-		<Item Name="doSync" Value="true" />
+		<Item Name="syncFileName" Value="Mauro.txt" />
+		<Item Name="doSync" Value="True" />
+		<Item Name="checkF3" Value="True" />
 		
 		</UserConfig>
 	</Cycle>
