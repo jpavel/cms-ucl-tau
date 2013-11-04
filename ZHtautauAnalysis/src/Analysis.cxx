@@ -2407,8 +2407,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			goodTau[j].charge << " mass: " << PairMass(goodTau[i],goodTau[j]) <<std::endl;
 			
 			int s_match2_i = -1;
-			for(uint iSync =0; iSync < s_s_i_TT.size() && (int)iSync!=s_match_i && s_match2_i < 0 ; iSync++)
+			for(uint iSync =0; iSync < s_s_i_TT.size() && s_match2_i < 0 ; iSync++)
 			{
+				if((int)iSync==s_match_i) continue;
 				std::cout << "SUB Sync FR candidate #" << iSync << " type:" << sync_vec_Channel[s_s_i_TT[iSync]] <<
 				" l3 pt/eta/jeta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l3_CloseJetEta[s_s_i_TT[iSync]] << 
 				" l4 pt/eta/jeta:" << sync_vec_l4Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l4Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l4_CloseJetEta[s_s_i_TT[iSync]] << std::endl;
@@ -2586,8 +2587,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				bool barrelMatch2 =true;
 				
 				if(doSync && doSyncFR){
-					barrelMatch1 = (ClosestJet.eta < 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 9) || (ClosestJet.eta >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 10);
-					barrelMatch2 = (ClosestJet2.eta < 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 9) || (ClosestJet2.eta >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 10);
+					barrelMatch1 = (fabs(ClosestJet.eta) < 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 9) || (fabs(ClosestJet.eta) >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match_i]] == 10);
+					barrelMatch2 = (fabs(ClosestJet2.eta) < 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 9) || (fabs(ClosestJet2.eta) >= 1.4 && sync_vec_Channel[s_s_i_TT[s_match2_i]] == 10);
 					if(!barrelMatch1){
 						std::cout << "Lead tau failed barrel cut!" << std::endl;
 						h_fail_shape_TT->Fill(13.0);
@@ -2661,7 +2662,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		if(s_match_i > -1 && match2==false)
 		{
-			std::cout << " shape candidate not found" << std::endl;
+			std::cout << "TT shape candidate not found" << std::endl;
 			h_fail_shape_TT->Fill(11.0);
 		}
 	}
