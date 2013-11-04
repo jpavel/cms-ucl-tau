@@ -389,16 +389,16 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 		if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
 
 		bool dZ = fabs(_muon[i].dz_PV) < 0.2;
-		if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
-			<< muEta << " pixelHits " << _muon[i].intrkLayerpixel << " btag " << bTag << " dz " << fabs(_muon[i].dz_PV) << std::endl;
+		//if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
+		//	<< muEta << " pixelHits " << _muon[i].intrkLayerpixel << " btag " << bTag << " dz " << fabs(_muon[i].dz_PV) << std::endl;
 
 		if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && bTag && dZ ){
-			if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
-				<< muEta << std::endl;
+			//if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
+			//	<< muEta << std::endl;
 			outMu_.push_back(_muon[i]);
 		}else{
-			if(verb) std::cout << " pre-_muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
-				muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
+			//if(verb) std::cout << " pre-_muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
+			//	muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
 		}
 	}
 	return outMu_;
@@ -414,8 +414,8 @@ std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _elec
 	
 			double elPt = _electron[i].pt;
 			double elEta = _electron[i].eta_SC;
-                        int eleHit = _electron[i].numLostHitEleInner;
-			bool tightID = TightEleId(_electron[i]);
+                        int eleHit = _electron[i].numHitEleInner;
+			bool looseID = LooseEleId(_electron[i]);
                         double max = 0.4;
                         double minDist = 1.0;
                         int index = -1;
@@ -436,13 +436,27 @@ std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _elec
 			bool dZ = fabs(_electron[i].dz_PV) < 0.2;
                         
 			//if ( elPt > elPt_ && fabs(elEta) < elEta_ )
-			if ( tightID && elPt > elPt_ && fabs(elEta) < elEta_ && eleHit < 1 && bTag && dZ )
+			if ( looseID && elPt > elPt_ && fabs(elEta) < elEta_ && eleHit == 0 && bTag && dZ )
 			{
-				if(verb) std::cout << " pre-_electron " << i << " pt eta etaSC: " << elPt << " " 
-					<< elEta << " " << _electron[i].eta << std::endl;
+				if(verb){ 
+                                cout << " pre-electron " << endl;
+                                cout << "looseID " << looseID << endl;
+                                cout << "Pt " << elPt << endl;
+                                cout << "eta " << fabs(elEta) << endl;
+                                cout <<  "hit " << eleHit <<  endl;
+                                cout << " bTag " << bTag << endl;
+                                cout << " dZ " << dZ << endl;
+                                }
 				outEl_.push_back(_electron[i]);
 	        }else{
-				if(verb) std::cout << "Pre-_electron no. " << i << " rejected: " << elPt << " " << elEta << std::endl;
+				if(verb){ 
+                                if( !looseID ) cout << " FAILED loose ID! " << endl;
+                                if( elPt<elPt_ ) cout << " FAILED PT! " << endl;
+                                if( fabs(elEta) < elEta_ ) cout << " FAILED ETA! " << endl;
+                                if( eleHit != 0 ) cout << " FAILED HIT! " << endl;
+                                if( !bTag ) cout << " FAILED bTag! " << endl;
+                                if( !dZ ) cout << " FAILED dZ! " << endl;
+                                }
 			}
 		}
 	return outEl_;
@@ -547,9 +561,9 @@ bool WHanalysis::TightEleId(float pt, float eta, double value){
 
 	if(pt>20. && fabs(eta)<0.8 && value>0.925)
 		passingId=true;
-	if(pt>20. && fabs(eta)>=0.8 && fabs(eta)<1.479 && value>0.975)
+	if(pt>20. && fabs(eta)>0.8 && fabs(eta)<1.479 && value>0.975)
 		passingId=true;
-	if(pt>20. && fabs(eta)>=1.479 && value>0.985)
+	if(pt>20. && fabs(eta)>1.479 && value>0.985)
 		passingId=true;
 	// if(value>10.)cout<<"pt==== "<<pt<<" "<<"eta=== "<<eta<<" "<<"value=== "<<value<<endl;
 	return passingId;
@@ -684,7 +698,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		uint pos_helper=0;
         pos_helper = std::find(events.begin(), events.end(), m->eventNumber) - events.begin();
 		if(pos_helper < events.size()) examineThisEvent=true;
-                else return;
 	}
 	
 	if(examineThisEvent) std::cout << "Examining! Event number " << eNumber << " ENTRY: " << m_allEvents << std::endl;
@@ -893,6 +906,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		for(uint i=0; i<goodElectron.size(); i++){
 			// pt cut > 20
 			if( (goodElectron.at(i)).pt < 20.)  continue;
+			if( !TightEleId(goodElectron.at(i)) )  continue;
 			//
 			if(examineThisEvent){ 
 				cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
@@ -1029,19 +1043,39 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_mmt->Fill(4,1);
 	h_cut_flow_eet->Fill(4,1);
 
+	if(examineThisEvent){
+		std::cout << " trigger object details for l_W" << std::endl;
+                std::cout << " eta: " << lepton_W[0].TrgObjectEta_loose << std::endl;
+                std::cout << " pt: " << lepton_W[0].TrgObjectPt_loose << std::endl;
+                std::cout << " phi: " << lepton_W[0].TrgObjectPhi_loose << std::endl;
+	}
+
 	if(!lepton_W[0].hasTrgObject_loose){
 		if(examineThisEvent){
 			std::cout << "Lepton from W not matched to trigger!" << std::endl;
+			std::cout << " eta: " << lepton_W[0].TrgObjectEta_loose << std::endl;
+			std::cout << " pt: " << lepton_W[0].TrgObjectPt_loose << std::endl;
+			std::cout << " phi: " << lepton_W[0].TrgObjectPhi_loose << std::endl;
 			fail << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << ":WtrigMatch" << endl ; 
 		}
 		return;
 	}
 	h_cut_flow_mmt->Fill(5,1);
 	h_cut_flow_eet->Fill(5,1);
+	
+        if(examineThisEvent){
+		std::cout << " trigger object details for l_H" << std::endl;
+                std::cout << " eta: " << lepton_H[0].TrgObjectEta_loose << std::endl;
+                std::cout << " pt: " << lepton_H[0].TrgObjectPt_loose << std::endl;
+                std::cout << " phi: " << lepton_H[0].TrgObjectPhi_loose << std::endl;
+	}
 
 	if(!lepton_H[0].hasTrgObject_loose){
 		if(examineThisEvent){
 			std::cout << "Lepton from H not matched to trigger!" << std::endl;
+			std::cout << " eta: " << lepton_H[0].TrgObjectEta_loose << std::endl;
+			std::cout << " pt: " << lepton_H[0].TrgObjectPt_loose << std::endl;
+			std::cout << " phi: " << lepton_H[0].TrgObjectPhi_loose << std::endl;
 			fail << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << ":HtrigMatch" << endl ; 
 		}
 		return;
@@ -1050,7 +1084,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_eet->Fill(6,1);
 
         //additional cut for eet to reject dy
-        double Z_mass = 91.1876;
+        double Z_mass = 91.2;
 	if(!goodCandidate_mmt && goodCandidate_eet) {
            if( fabs(PairMass(lepton_W[0],lepton_H[0])-Z_mass) < 10. ){
 		if(examineThisEvent){
@@ -1131,7 +1165,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					tau_H.push_back(goodTau.at(i));
 				}
 			}
-			else if( (mass1 > 10. && mass2 < 20.) || (mass1 > 10.  &&  mass2 < 20.) ){
+			else if( mass1 < 20. || mass2 < 20. ){
+			//else if( (mass1 > 10. && mass2 < 20.) || (mass1 > 10.  &&  mass2 < 20.) ){
 				if ( MediumEleMVA3 && LooseMuon && charge ){
 					tau_H.push_back(goodTau.at(i));
 				}
