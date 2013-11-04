@@ -2364,7 +2364,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		goodTau[i].discriminationByElectronLoose << std::endl;
 		// finding the sync match
 		int s_match_i = -1;
-		for(uint iSync =0; iSync < s_s_i_TT.size() && s_match_i < -1; iSync++)
+		for(uint iSync =0; iSync < s_s_i_TT.size() && s_match_i < 0; iSync++)
 		{
 			std::cout << " Sync FR candidate #" << iSync << " type:" << sync_vec_Channel[s_s_i_TT[iSync]] <<
 			" l3 pt/eta/jeta:" << sync_vec_l3Pt[s_s_i_TT[iSync]] << "/" << sync_vec_l3Eta[s_s_i_TT[iSync]] << "/" << sync_vec_l3_CloseJetEta[s_s_i_TT[iSync]] << 
@@ -2591,10 +2591,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					if(!barrelMatch1){
 						std::cout << "Lead tau failed barrel cut!" << std::endl;
 						h_fail_shape_TT->Fill(13.0);
+					}else{
+						std::cout << "Lead tau passed barrel cut with type " << sync_vec_Channel[s_s_i_TT[s_match_i]] << " and eta " << ClosestJet.eta << "!" << std::endl;
 					}
 					if(!barrelMatch2){
 						std::cout << "Sub tau failed barrel cut!" << std::endl;
 						h_fail_shape_TT->Fill(14.0);
+					}else{
+						std::cout << "Sub tau passed barrel cut with type " << sync_vec_Channel[s_s_i_TT[s_match2_i]] << " and eta " << ClosestJet2.eta << "!" << std::endl;
+					
 					}
 				}
 			}
