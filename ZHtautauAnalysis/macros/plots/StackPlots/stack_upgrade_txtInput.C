@@ -53,7 +53,7 @@ int stack_upgrade() {
   std::vector<TString> bg_titles;
   
   std::ifstream myfile;
-  myfile.open ("BGinput.txt");	
+  myfile.open ("BGinput_v22.txt");	
   if (myfile.is_open()){
 	while ( myfile.good() ){
 		TString name;
@@ -89,7 +89,7 @@ int stack_upgrade() {
  
   
   std::ifstream datafile;
-  datafile.open ("Datainput.txt");	
+  datafile.open ("Datainput_v22.txt");	
   if (datafile.is_open()){
 	while ( datafile.good() ){
 		TString name;
@@ -111,7 +111,7 @@ int stack_upgrade() {
  
   
   std::ifstream signalfile;
-  signalfile.open ("Signalinput.txt");	
+  signalfile.open ("Signalinput_v22.txt");	
   if (signalfile.is_open()){
 	while ( signalfile.good() ){
 		TString title;
@@ -143,9 +143,9 @@ int stack_upgrade() {
   "GG2L2L",
   "GG4L"};
   
-  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary2/";
+  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary_v22/";
   
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_v22";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/pdf");
  
@@ -190,8 +190,8 @@ int stack_upgrade() {
   
   // tau ES
   
-  TString tauESplusSuffix=	"TauESplus";
-  TString tauESminusSuffix=	"TauESminus";
+  TString tauESplusSuffix=	"ESUp";
+  TString tauESminusSuffix=	"ESDown";
 
   std::vector<TFile*> f_bg_ESplus;
   std::vector<TFile*> f_bg_ESminus;
@@ -435,8 +435,8 @@ for(int iFile = 0; iFile < signal_names.size(); iFile++)
 	 if(iHist>1) h_1d_data[0]->Add(h_1d_data[iHist]);				 
   }
   
-  std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root",
-		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput/2012.root");
+  std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput_v22/2012.root",
+		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput_v22/2012.root");
   //getting histograms for the background
   
   for(int iBG=0; iBG < BGcounts->size(); iBG++)
@@ -599,7 +599,7 @@ TString lumist="19.7 fb^{-1}";
   TString outputROOTDir = "/home/jpavel/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/LimitInput/";
  
   
-  TFile out(outputROOTDir+"vhtt_llLL.inputs-sm-8TeV.root","RECREATE");
+  TFile out(outputROOTDir+"vhtt_llLL.inputs2-sm-8TeV.root","RECREATE");
   TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
   TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
   TString nameES="_CMS_scale_t_";
