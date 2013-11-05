@@ -4361,13 +4361,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
 		 else if(Hcand_pass[i]){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				if(doSyncFR)  std::cout << "Loose FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[3]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
 		 else if(Hcand_pass[i+1]){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				if(doSyncFR)  std::cout << "Loose FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 				"jeta= " << ClosestJet2.eta << std::endl;
 				 h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
 			  }
@@ -4440,13 +4440,13 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 		 
 		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
 		 else if(Hcand_pass[i]==2){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				if(doSyncFR)  std::cout << "Tight FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel1)); // UCL only
 			  }
 		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
 		 else if(Hcand_pass[i+1] > 0){
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				if(doSyncFR)  std::cout << "Tight FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 				"jeta= " << ClosestJet2.eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel2)); // UCL only
 			  }

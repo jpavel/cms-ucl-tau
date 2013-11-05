@@ -42,7 +42,7 @@ bool isMC = true ;
           // *** 2011 *** //
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-double Cor_ID_Iso_Mu_Loose_2011(myobject const& a) {
+float Cor_ID_Iso_Mu_Loose_2011(myobject const& a) {
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.5) return 0.9895;
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) >= 1.5 && fabs(a.eta) < 2.1) return 1.0303;
     if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.5) return 1.0168;
@@ -52,6 +52,48 @@ double Cor_ID_Iso_Mu_Loose_2011(myobject const& a) {
     if (a.pt < 10 || a.pt >= 100 || fabs(a.eta) >= 2.10) return 1.000;
     return 1.0;
 }
+
+float Cor_ID_Iso_Mu_Tight_2011(myobject const& a) {
+    if (a.pt > 17 && a.pt < 20 && fabs(a.eta) < 1.6) return 0.997 * 0.930;
+    if (a.pt > 17 && a.pt < 20 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986 * 0.929;
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.6) return 0.995 * 0.977;
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986 * 0.984;
+    if (a.pt > 30 && fabs(a.eta) < 1.6) return 1.030 * 1.010;
+    if (a.pt > 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.990 * 0.997;
+    if (a.pt < 17 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
+    return 1.0;
+}
+
+float Cor_ID_Iso_Ele_Loose_2011(myobject const& a) {
+    if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.479) return 1.0396;
+    if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 0.9758;
+    if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.479) return 0.9622;
+    if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 1.1483;
+    if (a.pt >= 20 && fabs(a.eta) < 1.479) return 0.9849;
+    if (a.pt >= 20 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 1.0117;
+    if (a.pt < 10 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
+    return 1.0;
+}
+
+float Cor_ID_Iso_Ele_Tight_2011(myobject const& a) {
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 0.955 * 0.980;
+    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.938 * 0.967;
+    if (a.pt > 30 && fabs(a.eta) < 1.479) return 1.044 * 0.984;
+    if (a.pt > 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.977 * 0.989;
+    if (a.pt < 20 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
+    return 1.0;
+}
+
+//~ double Cor_ID_Iso_Mu_Loose_2011(myobject const& a) {
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.5) return 0.9895;
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) >= 1.5 && fabs(a.eta) < 2.1) return 1.0303;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.5) return 1.0168;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) >= 1.5 && fabs(a.eta) < 2.1) return 1.0247;
+    //~ if (a.pt > 20 && fabs(a.eta) < 1.5) return 1.0061;
+    //~ if (a.pt > 20 && fabs(a.eta) >= 1.5 && fabs(a.eta) < 2.1) return 1.0144;
+    //~ if (a.pt < 10 || a.pt >= 100 || fabs(a.eta) >= 2.10) return 1.000;
+    //~ return 1.0;
+//~ }
 
 double Unc_ID_Iso_Mu_Loose_2011(myobject const& a) {
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.5) return 0.0141;
@@ -64,27 +106,27 @@ double Unc_ID_Iso_Mu_Loose_2011(myobject const& a) {
     return 0.01;
 }
 
-double Cor_ID_Iso_Mu_Tight_2011(myobject const& a) {
-    if (a.pt > 17 && a.pt < 20 && fabs(a.eta) < 1.6) return 0.997*0.930;
-    if (a.pt > 17 && a.pt < 20 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986*0.929;
-    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.6) return 0.995*0.977;
-    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986*0.984;
-    if (a.pt > 30 && fabs(a.eta) < 1.6) return 1.030*1.010;
-    if (a.pt > 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.990*0.997;
-    if (a.pt < 17 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
-    return 1.0;
-}
+//~ double Cor_ID_Iso_Mu_Tight_2011(myobject const& a) {
+    //~ if (a.pt > 17 && a.pt < 20 && fabs(a.eta) < 1.6) return 0.997*0.930;
+    //~ if (a.pt > 17 && a.pt < 20 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986*0.929;
+    //~ if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.6) return 0.995*0.977;
+    //~ if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.986*0.984;
+    //~ if (a.pt > 30 && fabs(a.eta) < 1.6) return 1.030*1.010;
+    //~ if (a.pt > 30 && fabs(a.eta) > 1.6 && fabs(a.eta) < 2.1) return 0.990*0.997;
+    //~ if (a.pt < 17 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
+    //~ return 1.0;
+//~ }
 
-double Cor_ID_Iso_Ele_Loose_2011(myobject const& a) {
-    if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.479) return 1.0396;
-    if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 0.9758;
-    if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.479) return 0.9622;
-    if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 1.1483;
-    if (a.pt >= 20 && fabs(a.eta) < 1.479) return 0.9849;
-    if (a.pt >= 20 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 1.0117;
-    if (a.pt < 10 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
-    return 1.0;
-}
+//~ double Cor_ID_Iso_Ele_Loose_2011(myobject const& a) {
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.479) return 1.0396;
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 0.9758;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.479) return 0.9622;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 1.1483;
+    //~ if (a.pt >= 20 && fabs(a.eta) < 1.479) return 0.9849;
+    //~ if (a.pt >= 20 && fabs(a.eta) >= 1.479 && fabs(a.eta) < 2.1) return 1.0117;
+    //~ if (a.pt < 10 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
+    //~ return 1.0;
+//~ }
 
 double Unc_ID_Iso_Ele_Loose_2011(myobject const& a) {
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.479) return 0.0056;
@@ -97,14 +139,14 @@ double Unc_ID_Iso_Ele_Loose_2011(myobject const& a) {
     return 0.01;
 }
 
-double Cor_ID_Iso_Ele_Tight_2011(myobject const& a) {
-    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 0.955*0.980;
-    if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.938*0.967;
-    if (a.pt > 30 && fabs(a.eta) < 1.479) return 1.044*0.984;
-    if (a.pt > 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.977*0.989;
-    if (a.pt < 20 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
-    return 1.0;
-}
+//~ double Cor_ID_Iso_Ele_Tight_2011(myobject const& a) {
+    //~ if (a.pt > 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 0.955*0.980;
+    //~ if (a.pt > 20 && a.pt < 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.938*0.967;
+    //~ if (a.pt > 30 && fabs(a.eta) < 1.479) return 1.044*0.984;
+    //~ if (a.pt > 30 && fabs(a.eta) > 1.479 && fabs(a.eta) < 2.1) return 0.977*0.989;
+    //~ if (a.pt < 20 || a.pt >= 100 || fabs(a.eta) >= 2.1) return 1.000;
+    //~ return 1.0;
+//~ }
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
           // *** 2012 *** //
@@ -678,8 +720,7 @@ double Cor_Trg_Ele_SubLead_2011(myobject const& a) {
     return 1.0;
 }
 
-double Corr_Trg_Mu_2011(myobject const& a)
-{
+float Corr_Trg_Mu_2011(myobject const& a) {
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.5) return 1.01;
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) > 1.5) return 1.03;
     if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.5) return 0.99;
@@ -688,11 +729,10 @@ double Corr_Trg_Mu_2011(myobject const& a)
     if (a.pt >= 20 && a.pt < 30 && fabs(a.eta) > 1.5) return 1.4;
     if (a.pt > 30 && fabs(a.eta) < 1.5) return 0.992;
     if (a.pt > 30 && fabs(a.eta) > 1.5) return 1.06;
-    return 1.0;
+    return 1;
 }
 
-double Corr_Trg_Ele_2011(myobject const& a)
-{
+float Corr_Trg_Ele_2011(myobject const& a) {
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.479) return 0.98;
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) > 1.479) return 0.97;
     if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.479) return 1.00;
@@ -701,8 +741,35 @@ double Corr_Trg_Ele_2011(myobject const& a)
     if (a.pt >= 20 && a.pt < 30 && fabs(a.eta) > 1.479) return 1.00;
     if (a.pt > 30 && fabs(a.eta) < 1.479) return 1.003;
     if (a.pt > 30 && fabs(a.eta) > 1.479) return 1.008;
-    return 1.0;
+    return 1;
 }
+
+
+//~ double Corr_Trg_Mu_2011(myobject const& a)
+//~ {
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.5) return 1.01;
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) > 1.5) return 1.03;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.5) return 0.99;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) > 1.5) return 1.07;
+    //~ if (a.pt >= 20 && a.pt < 30 && fabs(a.eta) < 1.5) return 0.99;
+    //~ if (a.pt >= 20 && a.pt < 30 && fabs(a.eta) > 1.5) return 1.4;
+    //~ if (a.pt > 30 && fabs(a.eta) < 1.5) return 0.992;
+    //~ if (a.pt > 30 && fabs(a.eta) > 1.5) return 1.06;
+    //~ return 1.0;
+//~ }
+//~ 
+//~ double Corr_Trg_Ele_2011(myobject const& a)
+//~ {
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 1.479) return 0.98;
+    //~ if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) > 1.479) return 0.97;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) < 1.479) return 1.00;
+    //~ if (a.pt >= 15 && a.pt < 20 && fabs(a.eta) > 1.479) return 1.05;
+    //~ if (a.pt >= 20 && a.pt < 30 && fabs(a.eta) < 1.479) return 1.001;
+    //~ if (a.pt >= 20 && a.pt < 30 && fabs(a.eta) > 1.479) return 1.00;
+    //~ if (a.pt > 30 && fabs(a.eta) < 1.479) return 1.003;
+    //~ if (a.pt > 30 && fabs(a.eta) > 1.479) return 1.008;
+    //~ return 1.0;
+//~ }
 
 float Corr_Trg_Mu_2012_53X(myobject const& a) {
     if (a.pt >= 10 && a.pt < 15 && fabs(a.eta) < 0.8) return 0.9818;
