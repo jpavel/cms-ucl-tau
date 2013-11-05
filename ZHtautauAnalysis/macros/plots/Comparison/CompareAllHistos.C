@@ -77,6 +77,10 @@ int CompareAllHistos(TString input1 = "Abdollah.root", TString input2 = "mine.ro
 	if(!hist2) continue;
 	int binmax = hist->GetMaximumBin();
 	double max = 1.2*(hist->GetBinContent(binmax)+hist->GetBinError(binmax));
+	int binmax2 = hist2->GetMaximumBin();
+	double max2 = 1.2*(hist2->GetBinContent(binmax2)+hist2->GetBinError(binmax2));
+	max = max2 > max ? max2 : max;
+	
 	hist->SetMaximum(max);
 	hist->SetMarkerStyle(20);
 	hist->SetMarkerSize(2);

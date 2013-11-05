@@ -3792,8 +3792,36 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			
 			if(FillSVmassInfo){
-				o_MET_x=Met.front().px;
-				o_MET_y=Met.front().py;
+				float tauEScorrX = 0.;
+				float tauEScorrY = 0.;
+				
+				if(ShiftTauES_up||ShiftTauES_down){
+					switch(event_type){
+						case 1:
+						case 3:
+						case 5:
+						case 7:
+						   tauEScorrX=Hcand_signal[1].px*(-SystUncert_ES/(1.+SystUncert_ES));
+						   tauEScorrY=Hcand_signal[1].py*(-SystUncert_ES/(1.+SystUncert_ES));
+						   break;
+						case 4:
+						case 8:
+							tauEScorrX=Hcand_signal[1].px*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrX+=Hcand_signal[0].px*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrY=Hcand_signal[1].py*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrY+=Hcand_signal[0].py*(-SystUncert_ES/(1.+SystUncert_ES));
+							break;
+						default:
+							break;
+					}
+				}
+				if(ShiftTauES_down){
+					tauEScorrX=-tauEScorrX;
+					tauEScorrY=-tauEScorrY;
+				}
+					 
+				o_MET_x=(Met.front().px+tauEScorrX);
+				o_MET_y=(Met.front().py+tauEScorrY);
 				
 				
 				o_covMET_00=m->MVAMet_sigMatrix_00;
@@ -4163,8 +4191,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	{
 		 myobject ClosestJet = ClosestInCollection(Hcand_FR[i],jet);
 		 myobject ClosestJet2 = ClosestInCollection(Hcand_FR[i+1],jet); //tau in LT
-		 bool barrel1= ClosestJet.eta < 1.4 ? true : false; // BUG!!!
-		 bool barrel2= ClosestJet2.eta < 1.4 ? true : false; // BUG!!!
+		 bool barrel1= fabs(ClosestJet.eta) < 1.4 ? true : false; 
+		 bool barrel2= fabs(ClosestJet2.eta) < 1.4 ? true : false; 
 		 
 		 int exp_event_type=Hcand_type_FR[i/2];
 		 double mass=PairMass(Hcand_FR[i],Hcand_FR[i+1]);
@@ -4610,8 +4638,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 syncOutTree->Fill();	   
 			   }
 			
-			bool B1= ClosestJet.eta < 1.4 ? true : false; //BUG!!!
-			bool B2= ClosestJet2.eta < 1.4 ? true : false; //BUG!!!
+			bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false; 
+			bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false; 
 			switch(exp_event_type)
 			{
 				case 1: //MT, ET
@@ -4727,7 +4755,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 }
 		
-		bool B2= ClosestJet2.eta < 1.4 ? true : false; // BUG!!!!
+		bool B2= fabs(ClosestJet2.eta) < 1.4 ? true : false; 
 		
 			h_category1_pt_types[exp_event_type-1]->Fill(Hcand_cat1[i+1].pt); 
 			B2? h_category1_jet_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt) : h_category1_jet_EC_pt_types[exp_event_type-1]->Fill(ClosestJet2.pt);
@@ -4814,7 +4842,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 syncOutTree->Fill();	   
 		 }
 		
-		bool B1= ClosestJet.eta < 1.4 ? true : false; // BUG!!!
+		bool B1= fabs(ClosestJet.eta) < 1.4 ? true : false; 
 		
 		h_category2_pt_types[exp_event_type-1]->Fill(Hcand_cat2[i].pt); 
 		B1? h_category2_jet_pt_types[exp_event_type-1]->Fill(ClosestJet.pt) : h_category2_jet_EC_pt_types[exp_event_type-1]->Fill(ClosestJet.pt);
