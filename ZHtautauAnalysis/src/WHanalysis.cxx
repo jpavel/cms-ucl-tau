@@ -289,7 +289,7 @@ double WHanalysis::deltaR(myobject o1, myobject o2){
 }
 
 double WHanalysis::RelIso(myobject mu,bool verb=false){
-	if(verb) std::cout << "mu pt/eta=" << mu.pt << "/" << mu.eta << std::endl;
+	if(verb) std::cout << " lep pt/eta=" << mu.pt << "/" << mu.eta << std::endl;
 	double MuIsoTrk = mu.pfIsoAll;
 	double MuIsoEcal = mu.pfIsoGamma;
 	double MuIsoHcal = mu.pfIsoNeutral;
@@ -485,6 +485,21 @@ void WHanalysis::CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myo
 		}
 }
 
+void WHanalysis::CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myobject> _input, bool verb, double _maxDeltaR){
+	
+	for(int i = 0; i < int(_input.size()); i++)
+		{
+			if(verb) std::cout << "Looping over input object no. " << i << " out of " << _input.size() << std::endl;
+			bool removed = false;
+		
+			for(uint j = 0; j < _ele->size() && !removed; j++)
+			{
+				if(deltaR(_input.at(i),_ele->at(j))< _maxDeltaR) 
+				{	_input.erase(_input.begin()+i); i--; removed = true;}
+			}
+		}
+}
+
 bool WHanalysis::CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb){
 	
 		if(verb) std::cout << "Looking for extra electron!" << std::endl;
@@ -629,9 +644,9 @@ bool WHanalysis::AdElectron_sig(std::vector<myobject> genericElectron, myobject 
 	if(verbose) std::cout << "There are " << genericElectron.size() << " additional electrons." << std::endl;
 	for(uint i = 0; i < genericElectron.size(); i++)
 	{
-		double dR1= deltaR(genericElectron[i].eta,genericElectron[i].phi,Wcand.eta,Wcand.phi); 
-		double dR2= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi); 
-		double dR3= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi); 
+		double dR1= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi); 
+		double dR2= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi); 
+		double dR3= deltaR(genericElectron[i].eta,genericElectron[i].phi,Wcand.eta,Wcand.phi); 
 
 		if(verbose) std::cout << " Ele cand no. " << i << std::endl;
 		if(verbose) std::cout << " Isolation is " << RelIso(genericElectron[i]) << std::endl;
@@ -772,12 +787,14 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << " There are " << electron.size() << " preselected electrons " << std::endl;
 	//std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent);
 	std::vector<myobject> genericElectron = SelectGoodElVector(electron,jet,examineThisEvent);
-	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " selected electrons " << std::endl;
+	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " generic electrons " << std::endl;
 	
 	//overlap cleaning
 	CrossCleanWithMu(&genericElectron,genericMuon,examineThisEvent,maxDeltaR);
-	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " selected electrons" << std::endl;
+	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " generic electrons" << std::endl;
 
+	std::vector<myobject> tau = m->PreSelectedHPSTaus;
+	CrossCleanWithEle(&genericElectron,tau,examineThisEvent,0.4);
 	
         //select good muon 
         std::vector<myobject> goodMuon;
@@ -786,14 +803,14 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
             h_dZ_PV_muon->Fill(fabs((genericMuon.at(i)).dz_PV));
 
             bool pfID = PFMuonID(genericMuon.at(i));
-            if(examineThisEvent) std::cout << "The muon no. " << i << " has id " << pfID << " and dz " << fabs(genericMuon[i].dz_PV) << std::endl;
+            //if(examineThisEvent) std::cout << "The muon no. " << i << " has id " << pfID << " and dz " << fabs(genericMuon[i].dz_PV) << std::endl;
 
             if(pfID && fabs((genericMuon.at(i)).dz_PV) < 0.2){
 	       goodMuon.push_back(genericMuon.at(i));
 	    } 
         }
          
-	if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " good muon before mu_W selection " << endl;
+	//if(examineThisEvent) std::cout << " There are " << goodMuon.size() << " good muon before mu_W selection " << endl;
 
         //define all the vector you need for candidates
         std::vector<myobject> muon_W;
@@ -810,9 +827,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 // pt cut > 20
 		if( (goodMuon.at(i)).pt < 20.)  continue;
                 //
-                if(examineThisEvent) 
-                cout << "muon pt: " << goodMuon[i].pt << " eta " << goodMuon[i].eta << " phi " << goodMuon[i].phi <<
-                "rel iso is: " << RelIso(goodMuon.at(i),examineThisEvent) << endl;
+                //if(examineThisEvent) 
+                //cout << "muon pt: " << goodMuon[i].pt << " eta " << goodMuon[i].eta << " phi " << goodMuon[i].phi <<
+                //"rel iso is: " << RelIso(goodMuon.at(i),examineThisEvent) << endl;
             if( fabs((goodMuon.at(i)).eta) < 1.479 ){
 			if( RelIso(goodMuon.at(i)) < 0.15 ){
 				muon_W.push_back(goodMuon.at(i));
@@ -829,8 +846,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}        
         
-	if(examineThisEvent) std::cout << " There are " << muon_W.size() << " muon for W " << endl;
-	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon for mu_H selection " << endl;
+	//if(examineThisEvent) std::cout << " There are " << muon_W.size() << " muon for W " << endl;
+	//if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon for mu_H selection " << endl;
 
 
 	//select sub-leading muon for H
@@ -841,9 +858,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		{
 			if(muon_W[iMu].pt > muon_W[0].pt) continue;
 			if(deltaR(muon_W[iMu],muon_W[0]) > 0.5){
-				if(examineThisEvent)
-					cout << "muon pt: " << muon_W[iMu].pt << " eta " << muon_W[iMu].eta << " phi " << muon_W[iMu].phi <<
-						"rel iso is: " << RelIso(muon_W[iMu]) << endl;
+				//if(examineThisEvent)
+				//	cout << "muon pt: " << muon_W[iMu].pt << " eta " << muon_W[iMu].eta << " phi " << muon_W[iMu].phi <<
+				//		"rel iso is: " << RelIso(muon_W[iMu]) << endl;
 				muon_H.push_back(muon_W[iMu]);
 				found = true;
 				muon_W.erase(muon_W.begin()+iMu);
@@ -861,8 +878,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(goodMuon[i].pt > muon_W[0].pt) continue;
 			if(deltaR(goodMuon[i],muon_W[0]) < 0.5) continue;
 			//
-			if(examineThisEvent) cout << "muon pt: " << goodMuon[i].pt << " eta " << goodMuon[i].eta << " phi " << goodMuon[i].phi <<
-				"rel iso is: " << RelIso(goodMuon.at(i),examineThisEvent) << endl;
+			//if(examineThisEvent) cout << "muon pt: " << goodMuon[i].pt << " eta " << goodMuon[i].eta << " phi " << goodMuon[i].phi <<
+			//	"rel iso is: " << RelIso(goodMuon.at(i),examineThisEvent) << endl;
 			if( fabs((goodMuon.at(i)).eta) < 1.479 ){
 				if( RelIso(goodMuon.at(i)) < 0.20 ){
 					muon_H.push_back(goodMuon.at(i));
@@ -880,8 +897,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 	}        
         
-        if(examineThisEvent) std::cout << " There are " << muon_H.size() << " muon for H " << endl;
-	if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon " << endl;
+        //if(examineThisEvent) std::cout << " There are " << muon_H.size() << " muon for H " << endl;
+	//if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon " << endl;
 	
         bool goodCandidate_mmt = false;
 	bool goodCandidate_eet = false;
@@ -905,20 +922,31 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 			//if(tightID && fabs((genericElectron.at(i)).dz_PV) < 0.2){
 			if( isGsfCtfScPixCC && isGsfScPixCC && isGsfCtfCC && conversionVeto ){
+				if(examineThisEvent){
+                                std::cout << "pt " << (genericElectron.at(i)).pt << " ctfSc - ScPix - CtfCC - cv " << isGsfCtfScPixCC << " - " << isGsfScPixCC << " - " << isGsfCtfCC << " - " << conversionVeto << endl;
+                                }
 				goodElectron.push_back(genericElectron.at(i));
 				genericElectron.erase(genericElectron.begin()+i);
 				i = i-1;
 			} 
 		}
+		if(examineThisEvent){ 
+			cout << "after track req" << endl;
+			if(examineThisEvent) std::cout  << goodElectron.size() << " good electron " << endl;
+			if(examineThisEvent) std::cout << genericElectron.size() << " generic electron " << endl;
+		}
 		//select leading electron for W
 		for(uint i=0; i<goodElectron.size(); i++){
 			// pt cut > 20
-			if( (goodElectron.at(i)).pt < 20.)  continue;
-			if( !TightEleId(goodElectron.at(i)) )  continue;
-			//
 			if(examineThisEvent){ 
 				cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
 					"rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;}
+			if(examineThisEvent){ 
+				cout << "electron pt: " << goodElectron[i].pt << " tight ID " << TightEleId(goodElectron.at(i)) << endl;
+			}
+			if( (goodElectron.at(i)).pt < 20.)  continue;
+			if( !TightEleId(goodElectron.at(i)) )  continue;
+			//
 			if( fabs((goodElectron.at(i)).eta) < 1.479 ){
 				if( RelIso(goodElectron.at(i)) < 0.15 ){
 					electron_W.push_back(goodElectron.at(i));
@@ -934,15 +962,19 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}  
 			}
 		}        
-		if(examineThisEvent) std::cout << " There are " << electron_W.size() << " electron for W " << endl;
-		if(examineThisEvent) std::cout << " There are still " << goodElectron.size() << " good electron for ele_H selection " << endl;
+		if(examineThisEvent) std::cout << electron_W.size() << " electron for W " << endl;
+		if(examineThisEvent) std::cout << goodElectron.size() << " remaining good electron" << endl;
 
 		//select sub-leading electron for H
 		// every W candidate is good H candidate      
 		if(electron_W.size() > 1){
 			bool found = false;
+			if(examineThisEvent) std::cout << "more than 1 good ele for W, looking for ele Higgs!!!" << std::endl;
 			for(uint iEl=1; iEl < electron_W.size() && !found; iEl++)
 			{
+				if(examineThisEvent) std::cout << "0) pt: " << electron_W[0].pt << std::endl;
+				if(examineThisEvent) std::cout << "i) pt: " << electron_W[iEl].pt << std::endl;
+				if(examineThisEvent) std::cout << "dR: " << deltaR(electron_W[iEl],electron_W[0]) << std::endl;
 				if(electron_W[iEl].pt > electron_W[0].pt) continue;
 				if(deltaR(electron_W[iEl],electron_W[0]) > 0.5){
 					if(examineThisEvent)
@@ -956,15 +988,21 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 
 		}
+		
+                if(examineThisEvent) std::cout << electron_W.size() << " electron for W " << endl;
+                if(examineThisEvent) std::cout << electron_H.size() << " electron for H (first attempt) " << endl;
+
 		// if no W candidate suitable, check the rest
-		if(electron_H.size()==0 && electron_W.size() > 0){
+		if(electron_H.size() == 0 && electron_W.size() == 1){
 			if(examineThisEvent) std::cout << "searching for suitable ele2 candidate" << std::endl;
 			for(uint i=0; i<goodElectron.size(); i++){
-				// pt cut > 10
 				if( (goodElectron.at(i)).pt < 10. ) continue;
 				if(goodElectron[i].pt > electron_W[0].pt) continue;
+
+				if(examineThisEvent) cout << "electron pt: " << goodElectron[i].pt << " dR " << deltaR(goodElectron[i],electron_W[0]) << endl;
+
 				if(deltaR(goodElectron[i],electron_W[0]) < 0.5) continue;
-				//
+
 				if(examineThisEvent) cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi << "rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;
 
 				if( fabs((goodElectron.at(i)).eta) < 1.479 ){
@@ -983,9 +1021,20 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 			}
 		}        
+                
+		if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " generic electron after l_W selection" << endl;
+		
+                if(goodElectron.size()>0){
+			for(uint i=0; i< goodElectron.size(); i++){
+				genericElectron.push_back(goodElectron.at(i));
+				goodElectron.erase(goodElectron.begin()+i);
+				i = i-1;
+			}
+		}
 
-		if(examineThisEvent) std::cout << " There are " << electron_H.size() << " electron for H " << endl;
-		if(examineThisEvent) std::cout << " There are still " << goodElectron.size() << " good electron " << endl;
+		if(examineThisEvent) std::cout << " There are " << electron_H.size() << " possible good electron for H " << endl;
+		if(examineThisEvent) std::cout << " There are still " << goodElectron.size() << " good electron after the rearrangement" << endl;
+		if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " generic electron after the rearrangement" << endl;
 
 		if( electron_H.size() == 1 && electron_W.size() == 1 ){
 			if(examineThisEvent){
@@ -993,6 +1042,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			goodCandidate_eet = true;
 		}
+		
         }//close if(!goodCandidate_mmt)
 
         //if !mmt and !eet no problem! reject the event
@@ -1027,6 +1077,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         
 	//if eet you are examing a possible good event for eet
 	if(goodCandidate_eet) {
+		
+
            lepton_W.push_back(electron_W.at(0));
            lepton_H.push_back(electron_H.at(0));
 		if(examineThisEvent){
@@ -1083,7 +1135,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			std::cout << "Lepton from H not matched to trigger!" << std::endl;
 			std::cout << " eta: " << lepton_H[0].TrgObjectEta_loose << std::endl;
 			std::cout << " pt: " << lepton_H[0].TrgObjectPt_loose << std::endl;
-			std::cout << " phi: " << lepton_H[0].TrgObjectPhi_loose << std::endl;
+		        std::cout << " phi: " << lepton_H[0].TrgObjectPhi_loose << std::endl;
 			fail << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << ":HtrigMatch" << endl ; 
 		}
 		return;
@@ -1107,7 +1159,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	//select good taus 
 	std::vector<myobject> goodTau;
 	goodTau.clear();
-	std::vector<myobject> tau = m->PreSelectedHPSTaus;
 
 	for (uint i = 0; i < tau.size(); i++) {
 
@@ -1118,9 +1169,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(checkF3) Loose3Hit=!Loose3Hit;
 		bool DecayMode = ((tau.at(i)).discriminationByDecayModeFinding > 0.5);
 		// overlap removal
+		
 		if(deltaR(lepton_W[0],tau[i]) < 0.5) continue;
 		if(deltaR(lepton_H[0],tau[i]) < 0.5) continue;
-
+                
 		if(examineThisEvent) std::cout << " tau #" << i << "pt/eta/phi:"
 			<< tau[i].pt << "/" << tau[i].eta << "/" << tau[i].phi << " dz: " <<
 				tauDZ << " loose iso " << Loose3Hit << " DM " << DecayMode;
@@ -1332,14 +1384,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	//define LT regions
 
-<<<<<<< HEAD
 		double LT;
 		bool aboveEvent = false;
 		bool belowEvent = false;
 	
-=======
-        h_visMass->Fill(PairMass(muon_H.at(0),tau_H.at(0)));
->>>>>>> d94e99fd216826b806a6395eae028579ef33f562
 
 	if(goodCandidate_mmt) {
  	LT = (lepton_W.at(0)).pt + (lepton_H.at(0)).pt + (tau_H.at(0)).pt;
