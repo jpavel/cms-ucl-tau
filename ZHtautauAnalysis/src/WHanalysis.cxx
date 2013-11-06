@@ -2,6 +2,7 @@
 
 // Local include(s):
 #include "../include/WHanalysis.h"
+#include "Corrector_new.h"
 
 
 
@@ -43,6 +44,7 @@ WHanalysis::WHanalysis()
 	DeclareProperty("syncFileName",syncFileName);
 	DeclareProperty("doSync",doSync);
 	DeclareProperty("checkF3",checkF3);
+	DeclareProperty("checkEleCR",checkEleCR);
 }
 
 WHanalysis::~WHanalysis() {
@@ -69,6 +71,9 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	// histogram booking
         Double_t bins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 130, 300 };
         h_visMass                                        = Book(TH1D("h_visMass","H vis mass", 9, bins));
+	h_LT                                             = Book(TH1D("h_LT","LT",300,0,300));
+        h_visMass_w                                      = Book(TH1D("h_visMass_w","H vis mass w", 9, bins));
+	h_LT_w                                           = Book(TH1D("h_LT_w","LT w",300,0,300));
 
 	h_PU_weight					 = Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
 	h_nPU_raw					 = Book(TH1D("h_nPU_raw","raw PU distribution",100,0,100));
@@ -407,8 +412,8 @@ std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon
 }
 
 
-//std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =10., double elEta_ = 2.5){
-std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, std::vector<myobject> _jets, bool verb, double elPt_ =10., double elEta_ = 2.5){
+std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, bool _eleCR, double elPt_ =10., double elEta_ = 2.5){
+//std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, std::vector<myobject> _jets, bool verb, bool _eleCR, double elPt_ =10., double elEta_ = 2.5){
 
 	std::vector<myobject> outEl_;
 	outEl_.clear();
@@ -416,51 +421,21 @@ std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _elec
 	
 			double elPt = _electron[i].pt;
 			double elEta = _electron[i].eta_SC;
-                        int eleHit = _electron[i].numHitEleInner;
 			bool looseID = LooseEleId(_electron[i]);
-                        double max = 0.4;
-                        double minDist = 1.0;
-                        int index = -1;
-			
-                        for(uint j = 0; j< _jets.size(); j++)
-			{
-				if(_jets[j].pt < 12.) continue;
-				double dR = deltaR(_electron[i],_jets[j]);
-				if(dR< max && dR < minDist)
-				{
-					index=j;
-					minDist=dR;
-				}
-			}
-			bool bTag=true;
-			if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
+			if(_eleCR) looseID = !looseID;
 
 			bool dZ = fabs(_electron[i].dz_PV) < 0.2;
-                        
-			//if ( elPt > elPt_ && fabs(elEta) < elEta_ )
-			if ( looseID && elPt > elPt_ && fabs(elEta) < elEta_ && eleHit == 0 && bTag && dZ )
+
+                        if(verb) cout << "ele n* " << i+1 << " pt " << elPt << " eta " << fabs(elEta) << " mva " << _electron[i].Id_mvaNonTrg << " looseID " << looseID << " dZ " << dZ << endl; 
+			if ( looseID && elPt > elPt_ && fabs(elEta) < elEta_ && dZ )
 			{
-				if(verb){ 
-                                cout << " pre-electron " << endl;
-                                cout << "looseID " << looseID << endl;
-                                cout << "Pt " << elPt << endl;
-                                cout << "eta " << fabs(elEta) << endl;
-                                cout <<  "hit " << eleHit <<  endl;
-                                cout << " bTag " << bTag << endl;
-                                cout << " dZ " << dZ << endl;
-                                }
 				outEl_.push_back(_electron[i]);
-	        }else{
+			}else{
 				if(verb){ 
-                                if( !looseID ) cout << " FAILED loose ID! " << endl;
-                                if( elPt<elPt_ ) cout << " FAILED PT! " << endl;
-                                if( fabs(elEta) < elEta_ ) cout << " FAILED ETA! " << endl;
-                                if( eleHit != 0 ) cout << " FAILED HIT! " << endl;
-                                if( !bTag ) cout << " FAILED bTag! " << endl;
-                                if( !dZ ) cout << " FAILED dZ! " << endl;
-                                }
+                        cout << "ele n* " << i+1 << " failed: pt " << elPt << " eta " << fabs(elEta) << " mva " << _electron[i].Id_mvaNonTrg << " looseID " << looseID << " dZ " << dZ << endl; 
+				}
 			}
-		}
+	}
 	return outEl_;
 }
 
@@ -489,13 +464,13 @@ void WHanalysis::CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myob
 	
 	for(int i = 0; i < int(_input.size()); i++)
 		{
-			if(verb) std::cout << "Looping over input object no. " << i << " out of " << _input.size() << std::endl;
 			bool removed = false;
 		
 			for(uint j = 0; j < _ele->size() && !removed; j++)
 			{
 				if(deltaR(_input.at(i),_ele->at(j))< _maxDeltaR && RelIso(_ele->at(j)) < 0.3) 
-				{	_input.erase(_input.begin()+i); i--; removed = true;}
+				{      if(verb) cout << "I'm erasing tau with pt " << (_input.at(i)).pt << endl;	
+                                       _input.erase(_input.begin()+i); i--; removed = true;}
 			}
 		}
 }
@@ -611,7 +586,7 @@ bool WHanalysis::LooseEleId(float pt, float eta, double value){
 }
 
 bool WHanalysis::LooseEleId(myobject o){
-	if( o.numLostHitEleInner > 0) return false;
+	//if( o.numLostHitEleInner > 0) return false;
 	return LooseEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
 }
 
@@ -785,8 +760,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	//select generic electron with pt > 5 GeV and |eta| < 2.5
 	std::vector<myobject> electron = m->PreSelectedElectrons;
 	if(examineThisEvent) std::cout << " There are " << electron.size() << " preselected electrons " << std::endl;
-	//std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent);
-	std::vector<myobject> genericElectron = SelectGoodElVector(electron,jet,examineThisEvent);
+	std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent,checkEleCR);
 	if(examineThisEvent) std::cout << " There are " << genericElectron.size() << " generic electrons " << std::endl;
 	
 	//overlap cleaning
@@ -848,7 +822,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         
 	//if(examineThisEvent) std::cout << " There are " << muon_W.size() << " muon for W " << endl;
 	//if(examineThisEvent) std::cout << " There are still " << goodMuon.size() << " good muon for mu_H selection " << endl;
-
 
 	//select sub-leading muon for H
 	// every W candidate is good H candidate      
@@ -914,6 +887,23 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		//select good electron 
 		std::vector<myobject> goodElectron;
 		for(uint i=0; i<genericElectron.size(); i++){
+                        
+                        int eleHit = genericElectron[i].numHitEleInner;
+                        int index = -1;
+                        double max = 0.4;
+                        double minDist = 1.0;
+                        for(uint j = 0; j< jet.size(); j++)
+			{
+				if(jet[j].pt < 12.) continue;
+				double dR = deltaR(genericElectron[i],jet[j]);
+				if(dR< max && dR < minDist)
+				{
+					index=j;
+					minDist=dR;
+				}
+			}
+			bool bTag=true;
+			if(index>-1){ bTag = jet[index].bDiscriminatiors_CSV < 0.8;}
 
 			bool isGsfCtfScPixCC = (genericElectron.at(i)).isGsfCtfScPixChargeConsistent;
 			bool isGsfScPixCC = (genericElectron.at(i)).isGsfScPixChargeConsistent; 
@@ -921,7 +911,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			bool conversionVeto = (genericElectron.at(i)).passConversionVeto;
 
 			//if(tightID && fabs((genericElectron.at(i)).dz_PV) < 0.2){
-			if( isGsfCtfScPixCC && isGsfScPixCC && isGsfCtfCC && conversionVeto ){
+			if( eleHit == 0 && bTag && isGsfCtfScPixCC && isGsfScPixCC && isGsfCtfCC && conversionVeto ){
 				if(examineThisEvent){
                                 std::cout << "pt " << (genericElectron.at(i)).pt << " ctfSc - ScPix - CtfCC - cv " << isGsfCtfScPixCC << " - " << isGsfScPixCC << " - " << isGsfCtfCC << " - " << conversionVeto << endl;
                                 }
@@ -937,6 +927,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		//select leading electron for W
 		for(uint i=0; i<goodElectron.size(); i++){
+		        bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.15;
+		        bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.10;
+		        bool tightEleID = TightEleId(goodElectron.at(i));
 			// pt cut > 20
 			if(examineThisEvent){ 
 				cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
@@ -945,17 +938,21 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				cout << "electron pt: " << goodElectron[i].pt << " tight ID " << TightEleId(goodElectron.at(i)) << endl;
 			}
 			if( (goodElectron.at(i)).pt < 20.)  continue;
-			if( !TightEleId(goodElectron.at(i)) )  continue;
+                        //CR!
+                        if(checkEleCR) tightEleID = !tightEleID;
 			//
+			if( !TightEleId(goodElectron.at(i)) )  continue;
 			if( fabs((goodElectron.at(i)).eta) < 1.479 ){
-				if( RelIso(goodElectron.at(i)) < 0.15 ){
+                                if(checkEleCR) relIsoTight_W = !relIsoTight_W;
+				if( relIsoTight_W ){
 					electron_W.push_back(goodElectron.at(i));
 					goodElectron.erase(goodElectron.begin()+i);
 					i = i-1;
 				}  
 			}
 			else{
-				if( RelIso(goodElectron.at(i)) < 0.10 ){
+                                if(checkEleCR) relIsoLoose_W = !relIsoLoose_W;
+				if( relIsoLoose_W ){
 					electron_W.push_back(goodElectron.at(i));
 					goodElectron.erase(goodElectron.begin()+i);
 					i = i-1;
@@ -996,6 +993,10 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(electron_H.size() == 0 && electron_W.size() == 1){
 			if(examineThisEvent) std::cout << "searching for suitable ele2 candidate" << std::endl;
 			for(uint i=0; i<goodElectron.size(); i++){
+
+				bool relIsoTight_H = RelIso(goodElectron.at(i)) < 0.20;
+				bool relIsoLoose_H = RelIso(goodElectron.at(i)) < 0.15;
+
 				if( (goodElectron.at(i)).pt < 10. ) continue;
 				if(goodElectron[i].pt > electron_W[0].pt) continue;
 
@@ -1006,14 +1007,16 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if(examineThisEvent) cout << "electron pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi << "rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << endl;
 
 				if( fabs((goodElectron.at(i)).eta) < 1.479 ){
-					if( RelIso(goodElectron.at(i)) < 0.20 ){
+					if(checkEleCR) relIsoTight_H = !relIsoTight_H;
+					if( relIsoTight_H ){
 						electron_H.push_back(goodElectron.at(i));
 						goodElectron.erase(goodElectron.begin()+i);
 						i = i-1;
 					}  
 				}
 				else{
-					if( RelIso(goodElectron.at(i)) < 0.15 ){
+					if(checkEleCR) relIsoLoose_H = !relIsoLoose_H;
+					if( relIsoLoose_H ){
 						electron_H.push_back(goodElectron.at(i));
 						goodElectron.erase(goodElectron.begin()+i);
 						i = i-1;
@@ -1144,8 +1147,9 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	h_cut_flow_eet->Fill(6,1);
 
         //additional cut for eet to reject dy
-        double Z_mass = 91.2;
+        double Z_mass = 90.54;
 	if(!goodCandidate_mmt && goodCandidate_eet) {
+		if(examineThisEvent) cout << " pair mass: " << fabs(PairMass(lepton_W[0],lepton_H[0])-Z_mass) << endl;
            if( fabs(PairMass(lepton_W[0],lepton_H[0])-Z_mass) < 10. ){
 		if(examineThisEvent){
 			std::cout << "No close enough to Z mass!" << std::endl;
@@ -1411,8 +1415,21 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			//h_finalVisMass_above130->Fill(PairMass(lepton_H.at(0),tau_H.at(0)));
 			aboveEvent = true;
 	        }
-        }
 
+
+       /////////////////// USEFUL PLOTS !!!!
+		if(isSimulation && !IgnoreSF){
+			double eleW_SF = (Cor_ID_Iso_Ele_Loose_2012_53X(lepton_W[0])) * (Corr_Trg_Ele_2012_53X(lepton_W[0])); 
+			double eleH_SF = (Cor_ID_Iso_Ele_Tight_2012_53X(lepton_H[0])) * (Corr_Trg_Ele_2012_53X(lepton_H[0]));
+			double final_weight = PUWeight * eleW_SF * eleH_SF;
+
+                        h_visMass->Fill( PairMass(lepton_H.at(0),tau_H.at(0)) ); 
+                        h_visMass_w->Fill( PairMass(lepton_H.at(0),tau_H.at(0)), final_weight); 
+                        h_LT->Fill( LT ); 
+                        h_LT_w->Fill( LT, final_weight); 
+		}
+	}
+       /////////////////// 
 
 	if(examineThisEvent) {
 		if(belowEvent)

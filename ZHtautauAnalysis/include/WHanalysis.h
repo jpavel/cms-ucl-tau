@@ -78,8 +78,7 @@ public:
      bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb);
    bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
    std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
-   //std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_ );
-   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, std::vector<myobject> _jets, bool verb, double elPt_, double elEta_ );
+   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, bool _eleCR, double elPt_, double elEta_);
    bool AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
@@ -106,6 +105,9 @@ private:
 	// histograms
 	
 	TH1* h_visMass;
+	TH1* h_visMass_w;
+	TH1* h_LT;
+	TH1* h_LT_w;
 	TH1* h_PU_weight;
 	TH1* h_count;
 	TH1* h_count_mmt;
@@ -181,6 +183,7 @@ private:
     std::string syncFileName;
     bool doSync;
     bool checkF3;
+    bool checkEleCR;
     
 	
 	 // bookkeeping variables
