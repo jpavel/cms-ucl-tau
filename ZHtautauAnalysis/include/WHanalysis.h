@@ -88,6 +88,7 @@ public:
    bool TightEleId(float pt, float eta, double value);
    bool TightEleId(myobject o);
    void CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso, bool _looseMuId);
+   void CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myobject> _input, bool verb, double _maxDeltaR);
    bool isGoodMu(myobject mu);
    bool isLooseMu(myobject mu);
    bool isGoodEl(myobject el);
@@ -104,6 +105,7 @@ private:
 	
 	// histograms
 	
+	TH1* h_visMass;
 	TH1* h_PU_weight;
 	TH1* h_count;
 	TH1* h_count_mmt;
