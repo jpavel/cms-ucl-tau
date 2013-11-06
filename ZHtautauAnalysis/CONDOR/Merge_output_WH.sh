@@ -18,7 +18,6 @@ for block in  `seq -s ' ' 1 ${max}`; do
     cat event_eet.list >> ${pwd}/${2}/${1}_event_eet.list
     cat overlap_eet.list >> ${pwd}/${2}/${1}_overlap_eet.list
     cat overlap_mmt.list >> ${pwd}/${2}/${1}_overlap_mmt.list
-    cat fail.list >> ${pwd}/${2}/${1}_fail.list
 
     cd ${pwd}
 done

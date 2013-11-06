@@ -70,7 +70,7 @@
 		
 		<!--syncing -->
 		
-		<Item Name="syncFileName" Value="Mauro_eet.txt" />
+		<Item Name="syncFileName" Value="UCL_eet.txt" />
 		<Item Name="doSync" Value="true" />
 		
 		</UserConfig>
