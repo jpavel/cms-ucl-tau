@@ -4233,7 +4233,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 sync_FRnumL_index.size() << "/" << sync_FRnumT_index.size() << "/" << std::endl;
 		 
 		 // find sync match for the lepton 1
-		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common1; iSync++)
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common1 && i <2; iSync++)
 		 {
 			std::cout << "1: object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel1 && 
@@ -4257,7 +4257,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		}
 		
 		// find sync match for the lepton 2
-		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common2; iSync++)
+		 for(int iSync =0; (uint)iSync < sync_FRdenom_index.size() && !common2 && i <2; iSync++)
 		 {
 			std::cout << "2: object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRdenom_index[iSync]] == myChannel2 && 
@@ -4284,8 +4284,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 		 
 		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
-		 else{
-				if(doSyncFR){  
+		 else if (i<2){
+				if(doSyncFR && Hcand_pass[i] > -1){  
 					std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 					"jeta= " << ClosestJet.eta << std::endl;
 					h_sync_summary[1]->Fill(0.0,double(myChannel1)); // UCL only
@@ -4310,7 +4310,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				}
 			  }
 		 if(common2) h_sync_summary[1]->Fill(3.0,double(myChannel2));
-		 else{
+		 else if (i<2 && Hcand_pass[1+1] > -1){
 				if(doSyncFR){
 					  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 					"jeta= " << ClosestJet2.eta << std::endl;
@@ -4335,7 +4335,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 syncOutTree->Fill();	
 				}
 			  }
-		 if(!correctOrder && doSyncFR)
+		 if(!correctOrder && doSyncFR && i < 2)
 		 {
 			if(!common1) h_sync_summary[1]->Fill(1.0,double(myChannel1));
 			else if(!common2) h_sync_summary[1]->Fill(2.0,double(myChannel1));
@@ -4349,7 +4349,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		correctOrder = false;
 		
 		// find sync match for the lepton 1
-		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common1; iSync++)
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common1 && i < 2; iSync++)
 		 {
 			std::cout << "1: object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel1 && Hcand_pass[i] > 0 && 
@@ -4374,7 +4374,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 
 		// find sync match for the lepton 2
-		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common2; iSync++)
+		 for(int iSync =0; (uint)iSync < sync_FRnumL_index.size() && !common2 && i < 2 ; iSync++)
 		 {
 			std::cout << "2: object #" << iSync << std::endl;
 			if(sync_vec_Channel[sync_FRnumL_index[iSync]] == myChannel2 && Hcand_pass[i+1] > 0 && 
@@ -4400,7 +4400,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		 
 		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
-		 else if(Hcand_pass[i]){
+		 else if(Hcand_pass[i]>0 && i < 2){
 				if(doSyncFR){  
 					std::cout << "Loose FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 				"jeta= " << ClosestJet.eta << std::endl;
@@ -4427,7 +4427,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 }
 			  }
 		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
-		 else if(Hcand_pass[i+1]){
+		 else if(Hcand_pass[i+1]>0 && i < 2){
 				if(doSyncFR){
 					  std::cout << "Loose FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 				"jeta= " << ClosestJet2.eta << std::endl;
@@ -4454,7 +4454,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 }
 			  }
 			  
-		 if(!correctOrder && doSyncFR)
+		 if(!correctOrder && doSyncFR && i < 2)
 		 {
 			if(!common1 && Hcand_pass[i] >0) h_sync_summary[1]->Fill(1.0,double(myChannel1));
 			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
@@ -4468,7 +4468,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		correctOrder = false;
 		
 		// find sync match for the lepton 1 - tight is only for lepton !
-		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common1; iSync++)
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common1 && i < 2; iSync++)
 		 {
 			if(myChannel1!= 13 && myChannel1!=14) continue; // just e and mu
 			std::cout << "1: object #" << iSync << std::endl;
@@ -4492,7 +4492,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 		}
 		
-		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common2; iSync++)
+		 for(int iSync =0; (uint)iSync < sync_FRnumT_index.size() && !common2 && i < 2; iSync++)
 		 {
 			if(myChannel1!= 13 && myChannel1!=14) continue; // just in case
 			std::cout << "2: object #" << iSync << std::endl;
@@ -4521,7 +4521,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		 		 
 		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
-		 else if(Hcand_pass[i]==2){
+		 else if(Hcand_pass[i]==2 && i < 2){
 				if(doSyncFR){
 					  std::cout << "Tight FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 				"jeta= " << ClosestJet.eta << std::endl;
@@ -4547,7 +4547,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 }
 			  }
 		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
-		 else if(Hcand_pass[i+1] > 0){
+		 else if(Hcand_pass[i+1] > 0 && i < 2){
 				if(doSyncFR){
 					  std::cout << "Tight FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 				"jeta= " << ClosestJet2.eta << std::endl;
@@ -4573,14 +4573,14 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 }
 			  }
 		
-		 if(!correctOrder && doSyncFR)
+		 if(!correctOrder && doSyncFR && i < 2)
 		 {
 			if(!common1 && Hcand_pass[i] == 2) h_sync_summary[1]->Fill(1.0,double(myChannel1));
 			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
 			else if(Hcand_pass[i]==2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(5.0,double(myChannel1));
 		 }
 		 
-		 
+		 if(i<2){
 		 switch(exp_event_type)
 			{
 				case 4:
@@ -4654,6 +4654,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				default:
 					break;
 			}
+		}
 		}
 		 
 	}
