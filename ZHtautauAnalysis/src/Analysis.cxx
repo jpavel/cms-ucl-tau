@@ -4285,17 +4285,57 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 if(common1) h_sync_summary[1]->Fill(3.0,double(myChannel1));
 		 else{
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
-				"jeta= " << ClosestJet.eta << std::endl;
-				  h_sync_summary[1]->Fill(0.0,double(myChannel1)); // UCL only
+				if(doSyncFR){  
+					std::cout << " UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+					"jeta= " << ClosestJet.eta << std::endl;
+					h_sync_summary[1]->Fill(0.0,double(myChannel1)); // UCL only
+					Float_t mass = PairMass(Hcand_FR[i],Hcand_FR[i+1]);
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = myChannel1;
+					 sync_o_subChannel = 1;
+					 sync_o_HMass = mass;
+					 sync_o_l3Pt = Hcand_FR[i].pt;
+					 sync_o_l3Eta = Hcand_FR[i].eta;
+					 sync_o_l3_CloseJetPt = ClosestJet.pt;
+					 sync_o_l3_CloseJetEta = ClosestJet.eta;
+					 sync_o_l4Pt = Hcand_FR[i+1].pt;
+					 sync_o_l4Eta = Hcand_FR[i+1].eta;
+					 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+					 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 
+					 syncOutTree->Fill();	
+				}
 			  }
 		 if(common2) h_sync_summary[1]->Fill(3.0,double(myChannel2));
 		 else{
-				if(doSyncFR)  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
-				"jeta= " << ClosestJet2.eta << std::endl;
+				if(doSyncFR){
+					  std::cout << " UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+					"jeta= " << ClosestJet2.eta << std::endl;
 				  h_sync_summary[1]->Fill(0.0,double(myChannel2)); // UCL only
+				  Float_t mass = PairMass(Hcand_FR[i],Hcand_FR[i+1]);
+					 sync_o_event = m->eventNumber;
+					 sync_o_lumi = m->lumiNumber;
+					 sync_o_run = m->runNumber;
+					
+					 sync_o_Channel = myChannel2;
+					 sync_o_subChannel = 1;
+					 sync_o_HMass = mass;
+					 sync_o_l3Pt = Hcand_FR[i].pt;
+					 sync_o_l3Eta = Hcand_FR[i].eta;
+					 sync_o_l3_CloseJetPt = ClosestJet.pt;
+					 sync_o_l3_CloseJetEta = ClosestJet.eta;
+					 sync_o_l4Pt = Hcand_FR[i+1].pt;
+					 sync_o_l4Eta = Hcand_FR[i+1].eta;
+					 sync_o_l4_CloseJetPt = ClosestJet2.pt;
+					 sync_o_l4_CloseJetEta = ClosestJet2.eta;
+					 
+					 syncOutTree->Fill();	
+				}
 			  }
-		 if(!correctOrder)
+		 if(!correctOrder && doSyncFR)
 		 {
 			if(!common1) h_sync_summary[1]->Fill(1.0,double(myChannel1));
 			else if(!common2) h_sync_summary[1]->Fill(2.0,double(myChannel1));
@@ -4361,7 +4401,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 
 		 if(common1) h_sync_summary[3]->Fill(3.0,double(myChannel1));
 		 else if(Hcand_pass[i]){
-				if(doSyncFR)  std::cout << "Loose FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				if(doSyncFR){  
+					std::cout << "Loose FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[3]->Fill(0.0,double(myChannel1)); // UCL only
 				  // fill information about this event
@@ -4383,10 +4424,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 sync_o_l4_CloseJetEta = ClosestJet2.eta;
 					 
 					 syncOutTree->Fill();	   
+				 }
 			  }
 		 if(common2) h_sync_summary[3]->Fill(3.0,double(myChannel2));
 		 else if(Hcand_pass[i+1]){
-				if(doSyncFR)  std::cout << "Loose FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				if(doSyncFR){
+					  std::cout << "Loose FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 				"jeta= " << ClosestJet2.eta << std::endl;
 				 h_sync_summary[3]->Fill(0.0,double(myChannel2)); // UCL only
 				 
@@ -4408,9 +4451,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 sync_o_l4_CloseJetEta = ClosestJet2.eta;
 					 
 					 syncOutTree->Fill();	
+				 }
 			  }
 			  
-		 if(!correctOrder)
+		 if(!correctOrder && doSyncFR)
 		 {
 			if(!common1 && Hcand_pass[i] >0) h_sync_summary[1]->Fill(1.0,double(myChannel1));
 			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
@@ -4478,7 +4522,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		 		 
 		 if(common1) h_sync_summary[2]->Fill(3.0,double(myChannel1));
 		 else if(Hcand_pass[i]==2){
-				if(doSyncFR)  std::cout << "Tight FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
+				if(doSyncFR){
+					  std::cout << "Tight FR: UCL only event of type: " << myChannel1 << " mass = " << mass << " pt = " << Hcand_FR[i].pt << " eta= " << Hcand_FR[i].eta << 
 				"jeta= " << ClosestJet.eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel1)); // UCL only
 				  Float_t mass = PairMass(Hcand_FR[i],Hcand_FR[i+1]);
@@ -4499,10 +4544,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 sync_o_l4_CloseJetEta = ClosestJet2.eta;
 					 
 					 syncOutTree->Fill();	
+				 }
 			  }
 		 if(common2) h_sync_summary[2]->Fill(3.0,double(myChannel2));
 		 else if(Hcand_pass[i+1] > 0){
-				if(doSyncFR)  std::cout << "Tight FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
+				if(doSyncFR){
+					  std::cout << "Tight FR: UCL only event of type: " << myChannel2 << " mass = " << mass << " pt = " << Hcand_FR[i+1].pt << " eta= " << Hcand_FR[i+1].eta << 
 				"jeta= " << ClosestJet2.eta << std::endl;
 				  h_sync_summary[2]->Fill(0.0,double(myChannel2)); // UCL only
 				  Float_t mass = PairMass(Hcand_FR[i],Hcand_FR[i+1]);
@@ -4523,9 +4570,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 sync_o_l4_CloseJetEta = ClosestJet2.eta;
 					 
 					 syncOutTree->Fill();	
+				 }
 			  }
 		
-		 if(!correctOrder)
+		 if(!correctOrder && doSyncFR)
 		 {
 			if(!common1 && Hcand_pass[i] == 2) h_sync_summary[1]->Fill(1.0,double(myChannel1));
 			else if(!common2 && Hcand_pass[i+1] >0) h_sync_summary[1]->Fill(2.0,double(myChannel1));
