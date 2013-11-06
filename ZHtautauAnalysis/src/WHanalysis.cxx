@@ -494,7 +494,7 @@ void WHanalysis::CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myob
 		
 			for(uint j = 0; j < _ele->size() && !removed; j++)
 			{
-				if(deltaR(_input.at(i),_ele->at(j))< _maxDeltaR) 
+				if(deltaR(_input.at(i),_ele->at(j))< _maxDeltaR && RelIso(_ele->at(j)) < 0.3) 
 				{	_input.erase(_input.begin()+i); i--; removed = true;}
 			}
 		}
