@@ -215,6 +215,14 @@ void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
 	
 	ConnectVariable(InTreeName.c_str(),"o_E_H1", in_E_H1);
 	ConnectVariable(InTreeName.c_str(),"o_E_H2", in_E_H2);
+	
+	ConnectVariable(InTreeName.c_str(),"o_MET_x",  in_MET_x);
+	ConnectVariable(InTreeName.c_str(),"o_MET_y",  in_MET_y);
+	ConnectVariable(InTreeName.c_str(),"o_covMET_00",  in_covMET_00);
+	ConnectVariable(InTreeName.c_str(),"o_covMET_01",  in_covMET_01);
+	ConnectVariable(InTreeName.c_str(),"o_covMET_10",  in_covMET_10);
+	ConnectVariable(InTreeName.c_str(),"o_covMET_11",  in_covMET_11);
+
 
 
 	ConnectVariable(InTreeName.c_str(),"o_FR_type",   in_FR_type );
@@ -304,6 +312,12 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(in_pass2){
 				 h_H_svMass_types[in_type2-1]->Fill(in_svMass,in_event_weight2);
 				 Hist("h_svMass")->Fill(in_svMass,in_event_weight2);
+				 std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
+				 << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_E_H1 
+				 << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_E_H2 
+				 << " " << in_MET_x << " " << in_MET_y << " " 
+				 << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
+				 << std::endl;
 			}
 			if(in_FR2){
 				for(int iFR=0; iFR< in_FR_n2; iFR++)

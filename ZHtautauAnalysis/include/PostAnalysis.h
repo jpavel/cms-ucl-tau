@@ -94,6 +94,13 @@ private:
 	
 	Float_t in_E_H1;
 	Float_t in_E_H2;
+	
+	Float_t in_MET_x;
+	Float_t in_MET_y;
+	Float_t in_covMET_00;
+	Float_t in_covMET_01;
+	Float_t in_covMET_10;
+	Float_t in_covMET_11;
 
 
 	
