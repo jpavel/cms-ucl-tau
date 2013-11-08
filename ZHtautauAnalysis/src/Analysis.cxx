@@ -269,10 +269,10 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_pz_Z2,"o_pz_Z2");
 	DeclareVariable(o_pz_H1,"o_pz_H1");
 	DeclareVariable(o_pz_H2,"o_pz_H2");
-	DeclareVariable(o_E_Z1,"o_E_Z1");
-	DeclareVariable(o_E_Z2,"o_E_Z2");
-	DeclareVariable(o_E_H1,"o_E_H1");
-	DeclareVariable(o_E_H2,"o_E_H2");
+	DeclareVariable(o_M_Z1,"o_M_Z1");
+	DeclareVariable(o_M_Z2,"o_M_Z2");
+	DeclareVariable(o_M_H1,"o_M_H1");
+	DeclareVariable(o_M_H2,"o_M_H2");
 	DeclareVariable(o_pdg_Z1,"o_pdg_Z1");
 	DeclareVariable(o_pdg_Z2,"o_pdg_Z2");
 	DeclareVariable(o_pdg_H1,"o_pdg_H1");
@@ -287,8 +287,8 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	DeclareVariable(o_FR_py_H2,"o_FR_py_H2");
 	DeclareVariable(o_FR_pz_H1,"o_FR_pz_H1");
 	DeclareVariable(o_FR_pz_H2,"o_FR_pz_H2");
-	DeclareVariable(o_FR_E_H1,"o_FR_E_H1");
-	DeclareVariable(o_FR_E_H2,"o_FR_E_H2");
+	DeclareVariable(o_FR_M_H1,"o_FR_M_H1");
+	DeclareVariable(o_FR_M_H2,"o_FR_M_H2");
 	DeclareVariable(o_FR_pdg_H1,"o_FR_pdg_H1");
 	DeclareVariable(o_FR_pdg_H2,"o_FR_pdg_H2");
 	
@@ -1684,10 +1684,10 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_pz_Z2=0.;
 	o_pz_H1=0.;
 	o_pz_H2=0.;
-	o_E_Z1=0.;
-	o_E_Z2=0.;
-	o_E_H1=0.;
-	o_E_H2=0.;
+	o_M_Z1=0.;
+	o_M_Z2=0.;
+	o_M_H1=0.;
+	o_M_H2=0.;
 	o_pdg_Z1=0.;
 	o_pdg_Z2=0.;
 	o_pdg_H1=0.;
@@ -1702,8 +1702,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	o_FR_py_H2.clear();
 	o_FR_pz_H1.clear();
 	o_FR_pz_H2.clear();
-	o_FR_E_H1.clear();
-	o_FR_E_H2.clear();
+	o_FR_M_H1.clear();
+	o_FR_M_H2.clear();
 	o_FR_pdg_H1.clear();
 	o_FR_pdg_H2.clear();
 
@@ -3736,8 +3736,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			o_py_H1=Hcand_signal[0].py;o_py_H2=Hcand_signal[1].py;
 			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
 			o_pz_H1=Hcand_signal[0].pz;o_pz_H2=Hcand_signal[1].pz;
-			o_E_Z1=Zcand[0].E;o_E_Z2=Zcand[1].E;
-			o_E_H1=Hcand_signal[0].E;o_E_H2=Hcand_signal[1].E;
+			o_M_Z1=Zcand[0].mass;o_M_Z2=Zcand[1].mass;
+			o_M_H1=Hcand_signal[0].mass;o_M_H2=Hcand_signal[1].mass;
 			
 			//~ 
 			switch(event_type){
@@ -3939,7 +3939,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			o_FR_px_H1.push_back(Hcand_FR[i].px);o_FR_px_H2.push_back(Hcand_FR[i+1].px);
 			o_FR_py_H1.push_back(Hcand_FR[i].py);o_FR_py_H2.push_back(Hcand_FR[i+1].py);
 			o_FR_pz_H1.push_back(Hcand_FR[i].pz);o_FR_pz_H2.push_back(Hcand_FR[i+1].pz);
-			o_FR_E_H1.push_back(Hcand_FR[i].E);o_FR_E_H2.push_back(Hcand_FR[i+1].E);
+			o_FR_M_H1.push_back(Hcand_FR[i].mass);o_FR_M_H2.push_back(Hcand_FR[i+1].mass);
 		//~ 
 		
 			//~ o_px.push_back(Zcand[0].px);o_px.push_back(Zcand[1].px);

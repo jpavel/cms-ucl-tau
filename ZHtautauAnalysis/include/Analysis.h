@@ -516,10 +516,10 @@ Float_t o_pz_Z2;
 Float_t o_pz_H1;
 Float_t o_pz_H2;
 
-Float_t o_E_Z1;
-Float_t o_E_Z2;
-Float_t o_E_H1;
-Float_t o_E_H2;
+Float_t o_M_Z1;
+Float_t o_M_Z2;
+Float_t o_M_H1;
+Float_t o_M_H2;
 
 Float_t o_pdg_Z1;
 Float_t o_pdg_Z2;
@@ -540,8 +540,8 @@ std::vector<Float_t> o_FR_py_H2;
 std::vector<Float_t> o_FR_pz_H1;
 std::vector<Float_t> o_FR_pz_H2;
 
-std::vector<Float_t> o_FR_E_H1;
-std::vector<Float_t> o_FR_E_H2;
+std::vector<Float_t> o_FR_M_H1;
+std::vector<Float_t> o_FR_M_H2;
 
 std::vector<Float_t> o_FR_pdg_H1;
 std::vector<Float_t> o_FR_pdg_H2;
