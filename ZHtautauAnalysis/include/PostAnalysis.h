@@ -54,6 +54,9 @@ public:
    virtual void BeginInputFile( const SInputData& ) throw( SError );
    double PairMass(double px1, double py1, double pz1, double E1,
 double px2, double py2, double pz2, double E2);
+    double PairMassM(double px1, double py1, double pz1, double M1,
+double px2, double py2, double pz2, double M2);
+
 
 
    /// Function called for every event
@@ -92,8 +95,8 @@ private:
 	Float_t in_pz_H1;
 	Float_t in_pz_H2;
 	
-	Float_t in_E_H1;
-	Float_t in_E_H2;
+	Float_t in_M_H1;
+	Float_t in_M_H2;
 	
 	Float_t in_MET_x;
 	Float_t in_MET_y;
@@ -132,8 +135,8 @@ private:
 	std::vector<Float_t>* in_FR_pz_H1;
 	std::vector<Float_t>* in_FR_pz_H2;
 
-	std::vector<Float_t>* in_FR_E_H1;
-	std::vector<Float_t>* in_FR_E_H2;
+	std::vector<Float_t>* in_FR_M_H1;
+	std::vector<Float_t>* in_FR_M_H2;
 
 	
 	

@@ -70,8 +70,8 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	in_FR_pz_H1 = new std::vector<Float_t>;
 	in_FR_pz_H2 = new std::vector<Float_t>;
 	
-	in_FR_E_H1 = new std::vector<Float_t>;
-	in_FR_E_H2 = new std::vector<Float_t>;
+	in_FR_M_H1 = new std::vector<Float_t>;
+	in_FR_M_H2 = new std::vector<Float_t>;
 	
 	
 	h_H_svMass_types.clear();
@@ -213,8 +213,8 @@ void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
 	ConnectVariable(InTreeName.c_str(),"o_pz_H1", in_pz_H1);
 	ConnectVariable(InTreeName.c_str(),"o_pz_H2", in_pz_H2);
 	
-	ConnectVariable(InTreeName.c_str(),"o_E_H1", in_E_H1);
-	ConnectVariable(InTreeName.c_str(),"o_E_H2", in_E_H2);
+	ConnectVariable(InTreeName.c_str(),"o_M_H1", in_M_H1);
+	ConnectVariable(InTreeName.c_str(),"o_M_H2", in_M_H2);
 	
 	ConnectVariable(InTreeName.c_str(),"o_MET_x",  in_MET_x);
 	ConnectVariable(InTreeName.c_str(),"o_MET_y",  in_MET_y);
@@ -236,8 +236,8 @@ void PostAnalysis::BeginInputFile( const SInputData& ) throw( SError ) {
 	ConnectVariable(InTreeName.c_str(),"o_FR_pz_H1", in_FR_pz_H1);
 	ConnectVariable(InTreeName.c_str(),"o_FR_pz_H2", in_FR_pz_H2);
 	
-	ConnectVariable(InTreeName.c_str(),"o_FR_E_H1", in_FR_E_H1);
-	ConnectVariable(InTreeName.c_str(),"o_FR_E_H2", in_FR_E_H2);
+	ConnectVariable(InTreeName.c_str(),"o_FR_M_H1", in_FR_M_H1);
+	ConnectVariable(InTreeName.c_str(),"o_FR_M_H2", in_FR_M_H2);
 
 	
 	SVTree->SetBranchAddress( "o_svMass",    &in_svMass );
@@ -275,12 +275,21 @@ double px2, double py2, double pz2, double E2){
 	return H_sum.M();
 }
 
+double PostAnalysis::PairMassM(double px1, double py1, double pz1, double M1,
+double px2, double py2, double pz2, double M2){
+	TLorentzVector H_1,H_2,H_sum;
+    H_1.SetXYZM(px1,py1,pz1,M1);
+    H_2.SetXYZM(px2,py2,pz2,M2);
+    H_sum = H_1 + H_2;
+	return H_sum.M();
+}
+
 void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
     //m_logger << DEBUG << "(" << in_pass << ") Now executing event " << in_event << " in a run " << in_run << SLogger::endmsg;
 	if(in_pass || in_FR){
 		 SVTree->GetEntry(m_allEvents);
-		 double visMass = PairMass(in_px_H1,in_py_H1,in_pz_H1,in_E_H1,in_px_H2,in_py_H2,in_pz_H2,in_E_H2);
+		 double visMass = PairMassM(in_px_H1,in_py_H1,in_pz_H1,in_M_H1,in_px_H2,in_py_H2,in_pz_H2,in_M_H2);
 		if(in_pass){
 			 h_H_visMass_types[in_type-1]->Fill(visMass,in_event_weight);
 			 Hist("h_visMass")->Fill(visMass,in_event_weight);
@@ -289,10 +298,10 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			for(int iFR=0; iFR< in_FR_n; iFR++)
 			{
 				if(in_FR_type->at(iFR) == 0) continue;
-				double in_FR_visMass=PairMass(in_FR_px_H1->at(iFR),in_FR_py_H1->at(iFR),
-											  in_FR_pz_H1->at(iFR),in_FR_E_H1->at(iFR),
+				double in_FR_visMass=PairMassM(in_FR_px_H1->at(iFR),in_FR_py_H1->at(iFR),
+											  in_FR_pz_H1->at(iFR),in_FR_M_H1->at(iFR),
 											  in_FR_px_H2->at(iFR),in_FR_py_H2->at(iFR),
-											  in_FR_pz_H2->at(iFR),in_FR_E_H2->at(iFR));
+											  in_FR_pz_H2->at(iFR),in_FR_M_H2->at(iFR));
 				h_H_FR_visMass_types[in_FR_type->at(iFR)-1]->Fill(in_FR_visMass,in_event_weight);
 				Hist("h_FR_visMass")->Fill(in_FR_visMass,in_event_weight);
 					
@@ -313,8 +322,8 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				 h_H_svMass_types[in_type2-1]->Fill(in_svMass,in_event_weight2);
 				 Hist("h_svMass")->Fill(in_svMass,in_event_weight2);
 				 std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
-				 << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_E_H1 
-				 << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_E_H2 
+				 << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_M_H1 
+				 << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_M_H2 
 				 << " " << in_MET_x << " " << in_MET_y << " " 
 				 << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
 				 << std::endl;
