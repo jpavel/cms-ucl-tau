@@ -11,6 +11,8 @@ PostAnalysis::PostAnalysis()
 
    SetLogName( GetName() );
    DeclareProperty("InTreeName",InTreeName);
+   DeclareProperty("UseAbdollahTree",UseAbdollahTree);
+   DeclareProperty("syncFileName",syncFileName);
 	
 }
 
@@ -44,10 +46,35 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_FR_visMass                      	 = Book(TH1D("h_FR_visMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
 	h_FRt_visMass                      	 = Book(TH1D("h_FRt_visMass","Invariant mass of tau pair;m_{#tau#tau}[GeV]",300,0.0,300.0));
 	
+	h_svCorrelation						 = Book(TH2D("h_svCorrelation","Mass correlation;ULB mass [GeV];UCL mass [GeV]",300,0.,300.,300,0.,300.));
+    h_svDifference						 = Book(TH1D("h_svDifference","Mass difference;#Delta M[GeV]",100,-50.,50.));
+	h_svDifference_MET					 = Book(TH2D("h_svDifference_MET","Mass difference;#Delta MET; #Delta M[GeV]",100,-0.003,0.003,100,-20,20));
+	h_svDifference_METphi				 = Book(TH2D("h_svDifference_METphi","Mass difference;#Delta METphi; #Delta M[GeV]",100,-1.0,0.1,100,-20,20));
+	
+	h_pxDiff						 = Book(TH1D("h_pxDiff","P_{x} difference;rel. #Delta P_{x}",200,-0.1,0.1));
+	h_pyDiff						 = Book(TH1D("h_pyDiff","P_{y} difference;rel. #Delta P_{y}",200,-0.1,0.1));
+	h_pzDiff						 = Book(TH1D("h_pzDiff","P_{z} difference;rel. #Delta P_{z}",200,-0.1,0.1));
+	h_MDiff						 = Book(TH1D("h_MDiff","M difference;rel. #Delta M",200,-0.1,0.1));
+	
+	h_pxDiff2						 = Book(TH1D("h_pxDiff2","P_{x} difference;rel. #Delta P_{x}",200,-0.1,0.1));
+	h_pyDiff2						 = Book(TH1D("h_pyDiff2","P_{y} difference;rel. #Delta P_{y}",200,-0.1,0.1));
+	h_pzDiff2						 = Book(TH1D("h_pzDiff2","P_{z} difference;rel. #Delta P_{z}",200,-0.1,0.1));
+	h_MDiff2						 = Book(TH1D("h_MDiff2","M difference;rel. #Delta M",200,-0.1,0.1));
+	
+	h_METDiff						 = Book(TH1D("h_METDiff","MET difference;rel. #Delta MET",200,-0.003,0.003));
+	h_METPhiDiff						 = Book(TH1D("h_METPhiDiff","METPhi difference;rel. #Delta METPhi",200,-1.0,0.1));
+	h_covMET11Diff						 = Book(TH1D("h_covMET11Diff","covMET11 difference;rel. #Delta covMET11",200,-0.1,0.1));
+	h_covMET12Diff						 = Book(TH1D("h_covMET12Diff","covMET12 difference;rel. #Delta covMET12",200,-0.1,0.1));
+	h_covMET21Diff						 = Book(TH1D("h_covMET21Diff","covMET21 difference;rel. #Delta covMET21",200,-0.1,0.1));
+	h_covMET22Diff						 = Book(TH1D("h_covMET22Diff","covMET22 difference;rel. #Delta covMET22",200,-0.1,0.1));
+	
+	
 	
 	// old histograms
 	
 	h_nPU_raw					 = 		  Book(TH1D("h_nPU_raw","raw PU distribution",50,0,50),"AnalysisHistos");
+	
+	//h_svCorrelation =
 	
 	SVTree = new TTree();
 	MainTree = new TTree();
@@ -164,6 +191,42 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 		
 		TH1D* h_temp 						=  Book(TH1D(TString(name),TString(title),300,0.,300.));
 		h_H_FRt_visMass_types.push_back(h_temp);	
+	}
+	
+	
+	if(UseAbdollahTree){
+		syncFile = TFile::Open(syncFileName.c_str());
+		if(!syncFile) {
+			std::cerr << "Error: file " << syncFileName << " could not be opened." << std::endl; 
+			return;
+		}else std::cout << "File " << syncFileName << " succesfully opened!" << std::endl;
+		syncTree = (TTree*)syncFile->Get("Mass_tree");
+		
+		std::cout << " sync tree has " << syncTree->GetEntries() << " entries" << std::endl;
+		
+		syncTree->SetBranchAddress( "Run_",    &sync_run );
+		syncTree->SetBranchAddress( "Event_",    &sync_event );
+		syncTree->SetBranchAddress( "Lumi_",    &sync_lumi );
+		
+		syncTree->SetBranchAddress( "Chanel_", &sync_Channel );
+		syncTree->SetBranchAddress( "HMass_Markov", &sync_HMass_Markov );
+		syncTree->SetBranchAddress( "l3Px_", &sync_l3Px );
+		syncTree->SetBranchAddress( "l3Py_", &sync_l3Py );
+		syncTree->SetBranchAddress( "l3Pz_", &sync_l3Pz );
+		syncTree->SetBranchAddress( "l3M_", &sync_l3M );
+		syncTree->SetBranchAddress( "l4Px_", &sync_l4Px );
+		syncTree->SetBranchAddress( "l4Py_", &sync_l4Py );
+		syncTree->SetBranchAddress( "l4Pz_", &sync_l4Pz );
+		syncTree->SetBranchAddress( "l4M_", &sync_l4M );
+		
+		syncTree->SetBranchAddress( "SVmass", &sync_SVmass );
+		syncTree->SetBranchAddress( "met_", &sync_met );
+		syncTree->SetBranchAddress( "metPhi_", &sync_metPhi );
+		syncTree->SetBranchAddress( "covMet11_", &sync_covMet11 );
+		syncTree->SetBranchAddress( "covMet12_", &sync_covMet12 );
+		syncTree->SetBranchAddress( "covMet21_", &sync_covMet21 );
+		syncTree->SetBranchAddress( "covMet22_", &sync_covMet22 );
+		
 	}
 	
    return;
@@ -321,12 +384,106 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(in_pass2){
 				 h_H_svMass_types[in_type2-1]->Fill(in_svMass,in_event_weight2);
 				 Hist("h_svMass")->Fill(in_svMass,in_event_weight2);
-				 std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
+				 //~ std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
+				 //~ << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_M_H1 
+				 //~ << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_M_H2 
+				 //~ << " " << in_MET_x << " " << in_MET_y << " " 
+				 //~ << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
+				 //~ << std::endl;
+				 if(UseAbdollahTree){
+				 bool foundEv = false;
+					 for(uint iEv=0; iEv < syncTree->GetEntries() && !foundEv; iEv++)
+					 {
+						syncTree->GetEntry(iEv);
+						if(sync_run==in_run && sync_event==in_event){ 
+						 foundEv=true;
+						}
+					 }
+				if(foundEv){
+					double Svdiff=sync_SVmass-in_svMass;
+					if(fabs(Svdiff>5.0)){ 
+						std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
 				 << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_M_H1 
 				 << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_M_H2 
 				 << " " << in_MET_x << " " << in_MET_y << " " 
 				 << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
 				 << std::endl;
+						std::cout << 
+							"Abdollah   "  << in_type2 << " " << sync_SVmass << " " 
+						 << sync_l3Px << " " << sync_l3Py << " " << sync_l3Pz << " " << sync_l3M 
+						 << " " << sync_l4Px << " " << sync_l4Py << " " << sync_l4Pz << " " << sync_l4M
+						 << " " << sync_met*cos(sync_metPhi) << " " << sync_met*sin(sync_metPhi) << " " 
+						 << sync_covMet11 << " " << sync_covMet21 << " " << sync_covMet12 << " " << sync_covMet22
+						 << std::endl;
+					 }
+						double pxDiff,pyDiff,pzDiff,MDiff;
+						double pxDiff2,pyDiff2,pzDiff2,MDiff2;
+					if(in_type2!=2){
+						pxDiff = ((double)sync_l3Px - (double)in_px_H1)/(double)in_px_H1;
+						pyDiff = ((double)sync_l3Py - (double)in_py_H1)/(double)in_py_H1;
+						pzDiff = ((double)sync_l3Pz - (double)in_pz_H1)/(double)in_pz_H1;
+						MDiff = ((double)sync_l3M - (double)in_M_H1)/(double)in_M_H1;
+						
+						pxDiff2 = ((double)sync_l4Px - (double)in_px_H2)/(double)in_px_H2;
+						pyDiff2 = ((double)sync_l4Py - (double)in_py_H2)/(double)in_py_H2;
+						pzDiff2 = ((double)sync_l4Pz - (double)in_pz_H2)/(double)in_pz_H2;
+						MDiff2 = ((double)sync_l4M - (double)in_M_H2)/(double)in_M_H2;
+					}else{
+						pxDiff = ((double)sync_l4Px - (double)in_px_H1)/(double)in_px_H1;
+						pyDiff = ((double)sync_l4Py - (double)in_py_H1)/(double)in_py_H1;
+						pzDiff = ((double)sync_l4Pz - (double)in_pz_H1)/(double)in_pz_H1;
+						MDiff = ((double)sync_l4M - (double)in_M_H1)/(double)in_M_H1;
+						
+						pxDiff2 = ((double)sync_l3Px - (double)in_px_H2)/(double)in_px_H2;
+						pyDiff2 = ((double)sync_l3Py - (double)in_py_H2)/(double)in_py_H2;
+						pzDiff2 = ((double)sync_l3Pz - (double)in_pz_H2)/(double)in_pz_H2;
+						MDiff2 = ((double)sync_l3M - (double)in_M_H2)/(double)in_M_H2;
+					}
+					double met=sqrt((double)in_MET_x*(double)in_MET_x+(double)in_MET_y*(double)in_MET_y);
+					double metPhi = acos((double)in_MET_x/met);
+					if(in_MET_y < 0) metPhi=-metPhi; 	
+					double metDiffABS = (double)sync_met - met;
+					double metDiff=		metDiffABS/(double)met;
+					double metPhiDiffABS = (double)sync_metPhi - metPhi;
+					double metPhiDiff = metPhiDiffABS/(double)metPhi;					
+					double cov11Diff = ((double)sync_covMet11 - (double)in_covMET_00)/(double)in_covMET_00;
+					double cov12Diff = ((double)sync_covMet12 - (double)in_covMET_01)/(double)in_covMET_01;
+					double cov21Diff = ((double)sync_covMet21 - (double)in_covMET_10)/(double)in_covMET_10;
+					double cov22Diff = ((double)sync_covMet22 - (double)in_covMET_11)/(double)in_covMET_11;
+					
+					if(fabs(Svdiff>5.0)) std::cout << pxDiff << " " << pyDiff << " " << pzDiff << " " << MDiff
+					<< " " << pxDiff2 << " " << pyDiff2 << " " << pzDiff2 << " " << MDiff2
+					<< " " << metDiff << " " << metPhiDiff << " " << metPhiDiffABS << " "
+					<< cov11Diff << " " << cov21Diff << " " << cov12Diff << " " << cov22Diff << std::endl;
+					            
+				    Hist("h_pxDiff")->Fill(pxDiff);
+					Hist("h_pyDiff")->Fill(pyDiff);
+					Hist("h_pzDiff")->Fill(pzDiff);
+					Hist("h_MDiff")->Fill(MDiff);
+					
+					Hist("h_pxDiff2")->Fill(pxDiff2);
+					Hist("h_pyDiff2")->Fill(pyDiff2);
+					Hist("h_pzDiff2")->Fill(pzDiff2);
+					Hist("h_MDiff2")->Fill(MDiff2);
+					
+					Hist("h_METDiff")->Fill(metDiff);
+					Hist("h_METPhiDiff")->Fill(metPhiDiff);
+					Hist("h_covMET11Diff")->Fill(cov11Diff);
+					Hist("h_covMET12Diff")->Fill(cov21Diff);
+					Hist("h_covMET21Diff")->Fill(cov12Diff);
+					Hist("h_covMET22Diff")->Fill(cov22Diff);
+					
+	
+					
+					
+					Hist("h_svCorrelation")->Fill(sync_SVmass,in_svMass);
+					Hist("h_svDifference")->Fill(Svdiff);
+					Hist("h_svDifference_MET")->Fill(metDiffABS,Svdiff);
+					Hist("h_svDifference_METphi")->Fill(metPhiDiffABS,Svdiff);
+					
+				}
+				}
+				 
 			}
 			if(in_FR2){
 				for(int iFR=0; iFR< in_FR_n2; iFR++)

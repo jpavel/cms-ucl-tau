@@ -22,6 +22,8 @@
 
 #include <TTree.h>
 #include <TLorentzVector.h>
+#include <TFile.h>
+#include <TH2.h>
 
 
 /**
@@ -70,6 +72,8 @@ private:
    // properties
    
    std::string InTreeName;
+   bool UseAbdollahTree;
+   std::string syncFileName;
 	
    
    // input variables
@@ -143,6 +147,34 @@ private:
 	TTree* SVTree;
 	TTree* MainTree;
 	
+	 //sync variables
+    TFile* syncFile;
+    TTree* syncTree;
+    
+    Int_t sync_event;
+	Int_t sync_lumi;
+	Int_t sync_run;
+	
+	Int_t sync_Channel;
+	Float_t sync_HMass_Markov;
+	Float_t sync_SVmass;
+	Float_t sync_l3Px;
+	Float_t sync_l3Py;
+	Float_t sync_l3Pz;
+	Float_t sync_l3M;
+	Float_t sync_l4Px;
+	Float_t sync_l4Py;
+	Float_t sync_l4Pz;
+	Float_t sync_l4M;
+	Float_t sync_met;
+	Float_t sync_metPhi;
+	Float_t sync_covMet11;
+	Float_t sync_covMet12;
+	Float_t sync_covMet21;
+	Float_t sync_covMet22;
+	
+       
+	
 	// histograms
 	
 	TH1* h_svMass;
@@ -155,7 +187,30 @@ private:
 	
 	TH1D* h_nPU_raw;
     TH1D* h_nPU_raw_old;
+    
+    TH2* h_svCorrelation;
+    TH1* h_svDifference;
+    TH2* h_svDifference_MET;
+    TH2* h_svDifference_METphi;
+    
                 
+                
+    TH1 * h_pxDiff;
+	TH1 * h_pyDiff;
+	TH1 * h_pzDiff;
+	TH1 * h_MDiff;
+	
+	TH1 * h_pxDiff2;
+	TH1 * h_pyDiff2;
+	TH1 * h_pzDiff2;
+	TH1 * h_MDiff2;
+	
+	TH1 * h_METDiff;
+	TH1 * h_METPhiDiff;
+	TH1 * h_covMET11Diff;
+	TH1 * h_covMET12Diff;
+	TH1 * h_covMET21Diff;
+	TH1 * h_covMET22Diff;
 	
 	
 	std::vector<TH1*>  h_H_svMass_types;

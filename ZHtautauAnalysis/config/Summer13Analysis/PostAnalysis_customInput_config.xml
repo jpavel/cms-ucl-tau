@@ -20,6 +20,8 @@
 		</InputData>
 		<UserConfig>
 			<Item Name="InTreeName" Value="redtree"/>
+			<Item Name="UseAbdollahTree" Value="True" />
+			<Item Name="syncFileName" Value="Vegas_Data_8TeV.root" />
        
 		</UserConfig>
 	</Cycle>
