@@ -297,6 +297,7 @@ void Analysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	DeclareVariable(o_MET_x,"o_MET_x");
 	DeclareVariable(o_MET_y,"o_MET_y");
+	
 	DeclareVariable(o_covMET_00,"o_covMET_00");
 	DeclareVariable(o_covMET_01,"o_covMET_01"); 
 	DeclareVariable(o_covMET_10,"o_covMET_10");
@@ -1710,6 +1711,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	
 	o_MET_x=0;
 	o_MET_y=0;
+	
 	o_covMET_00=0;
 	o_covMET_01=0;
 	o_covMET_10=0;
@@ -3792,8 +3794,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			}
 			
 			if(FillSVmassInfo){
-				float tauEScorrX = 0.;
-				float tauEScorrY = 0.;
+				double tauEScorrX = 0.;
+				double tauEScorrY = 0.;
 				
 				if(ShiftTauES_up||ShiftTauES_down){
 					switch(event_type){
@@ -3801,15 +3803,15 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 						case 3:
 						case 5:
 						case 7:
-						   tauEScorrX=Hcand_signal[1].px*(-SystUncert_ES/(1.+SystUncert_ES));
-						   tauEScorrY=Hcand_signal[1].py*(-SystUncert_ES/(1.+SystUncert_ES));
+						   tauEScorrX=(double)Hcand_signal[1].px*(-SystUncert_ES/(1.+SystUncert_ES));
+						   tauEScorrY=(double)Hcand_signal[1].py*(-SystUncert_ES/(1.+SystUncert_ES));
 						   break;
 						case 4:
 						case 8:
-							tauEScorrX=Hcand_signal[1].px*(-SystUncert_ES/(1.+SystUncert_ES));
-							tauEScorrX+=Hcand_signal[0].px*(-SystUncert_ES/(1.+SystUncert_ES));
-							tauEScorrY=Hcand_signal[1].py*(-SystUncert_ES/(1.+SystUncert_ES));
-							tauEScorrY+=Hcand_signal[0].py*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrX=(double)Hcand_signal[1].px*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrX+=(double)Hcand_signal[0].px*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrY=(double)Hcand_signal[1].py*(-SystUncert_ES/(1.+SystUncert_ES));
+							tauEScorrY+=(double)Hcand_signal[0].py*(-SystUncert_ES/(1.+SystUncert_ES));
 							break;
 						default:
 							break;
@@ -3819,9 +3821,12 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					tauEScorrX=-tauEScorrX;
 					tauEScorrY=-tauEScorrY;
 				}
+				
+				double metX=Met.front().et*TMath::Cos(Met.front().phi);
+				double metY=Met.front().et*TMath::Sin(Met.front().phi);
 					 
-				o_MET_x=(Met.front().px+tauEScorrX);
-				o_MET_y=(Met.front().py+tauEScorrY);
+				o_MET_x=metX+tauEScorrX;
+				o_MET_y=metY+tauEScorrY;
 				
 				
 				o_covMET_00=m->MVAMet_sigMatrix_00;
