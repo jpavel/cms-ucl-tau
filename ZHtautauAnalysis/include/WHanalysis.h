@@ -30,6 +30,7 @@
 // PU weight
 
 #include "LumiReweightingStandAlone.h"
+#include "kNNEvaluator.h"
 
 /**
  *   @short Put short description of class here
@@ -78,7 +79,7 @@ public:
      bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb);
    bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
    std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
-   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, bool _eleCR, double elPt_, double elEta_);
+   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_);
    bool AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
@@ -103,10 +104,26 @@ private:
 	myevent *m;
 	
 	// histograms
-	
-	TH1* h_visMass;
+
+	TH1* h_visMass_P1P2P3;
+	TH1* h_visMass_F1P2P3;
+	TH1* h_visMass_P1F2P3;
+	TH1* h_visMass_P1P2F3;
+	TH1* h_visMass_F1F2F3;
+        TH1* h_visMass_P1F2F3;
+	TH1* h_visMass_F1F2P3;
+	TH1* h_visMass_F1P2F3;
+
+	TH1* h_LT_P1P2P3;
+	TH1* h_LT_F1P2P3;
+	TH1* h_LT_P1F2P3;
+	TH1* h_LT_P1P2F3;
+	TH1* h_LT_F1F2F3;
+	TH1* h_LT_P1F2F3;
+	TH1* h_LT_F1F2P3;
+        TH1* h_LT_F1P2F3;
+
 	TH1* h_visMass_w;
-	TH1* h_LT;
 	TH1* h_LT_w;
 	TH1* h_PU_weight;
 	TH1* h_count;
@@ -183,19 +200,25 @@ private:
     std::string syncFileName;
     bool doSync;
     bool checkF3;
-    bool checkEleCR;
+    bool checkEleCR_loose;
+    bool checkEleCR_tight;
     
 	
 	 // bookkeeping variables
     
     ofstream lumi;
-    ofstream eventList_mmt;
-    ofstream eventList_eet;
-    ofstream evOverlap;
-    ofstream evOverlap_mmt;
-    ofstream evOverlap_eet;
-    ofstream fail;
-    
+    ofstream eventList_P1P2P3;
+    ofstream eventList_P1P2F3;
+    ofstream eventList_P1F2P3;
+    ofstream eventList_F1P2P3;
+    ofstream eventList_P1F2F3;
+    ofstream eventList_F1P2F3;
+    ofstream eventList_F1F2P3;
+    ofstream eventList_F1F2F3;
+   
+
+
+    MVAEvaluator *kNNEval; 
     ifstream sync_eventList;
     std::vector<long> runs,lumis,events;
     
