@@ -216,9 +216,26 @@ private:
     ofstream eventList_F1F2P3;
     ofstream eventList_F1F2F3;
    
+    int o_selected;
+    int o_run;
+    int o_lumi;
+    int o_event;
+    double o_weight;
+    int o_id_iso_eleW;
+    int o_id_iso_eleH;
+    int o_isF3;
+    double o_pt_eW;
+    double o_pt_eH;
+    double o_pt_tH;
+    double o_pt_jet_eW;
+    double o_pt_jet_eH;
+    int o_njets;
+    double o_maxPt_eW;
+    double o_maxPt_eH;
+    double o_mass;
+    double o_LT;
 
-
-    MVAEvaluator *kNNEval; 
+    //MVAEvaluator *kNNEval; 
     ifstream sync_eventList;
     std::vector<long> runs,lumis,events;
     

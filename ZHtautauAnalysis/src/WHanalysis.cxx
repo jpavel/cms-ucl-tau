@@ -64,8 +64,25 @@ void WHanalysis::EndCycle() throw( SError ) {
 void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	// ntuple definition
-	DeclareVariable(out_pt,"pt");
-	
+	DeclareVariable(o_selected,"selected");
+	DeclareVariable(o_isF3,"isF3");
+	DeclareVariable(o_run,"run");
+	DeclareVariable(o_lumi,"lumi");
+	DeclareVariable(o_event,"event");
+        DeclareVariable(o_weight,"weight");
+	DeclareVariable(o_id_iso_eleW,"id_iso_eleW");
+	DeclareVariable(o_id_iso_eleH,"id_iso_eleH");
+        DeclareVariable(o_pt_eW,"pt_eW");
+        DeclareVariable(o_pt_eH,"pt_eH");
+        DeclareVariable(o_pt_tH,"pt_tH");
+        DeclareVariable(o_pt_jet_eW,"pt_jet_eW");
+        DeclareVariable(o_pt_jet_eH,"pt_jet_eH");
+        DeclareVariable(o_njets,"njets");
+        DeclareVariable(o_maxPt_eW,"maxPt_eW");
+        DeclareVariable(o_maxPt_eH,"maxPt_eH");
+        DeclareVariable(o_mass,"mass");
+        DeclareVariable(o_LT,"LT");
+
 	// histogram booking
         Double_t bins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 130, 300 };
 
@@ -87,7 +104,6 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_LT_F1F2P3                                             = Book(TH1D("h_LT_F1F2P3","LT",300,0,300));
 	h_LT_F1P2F3                                             = Book(TH1D("h_LT_F1P2F3","LT",300,0,300));
 
-        h_visMass_w                                      = Book(TH1D("h_visMass_w","H vis mass w", 9, bins));
 	h_LT_w                                           = Book(TH1D("h_LT_w","LT w",300,0,300));
 
 	h_PU_weight					 = Book(TH1D("h_PU_weight","PU weights distribution",100,0,5));
@@ -666,13 +682,17 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 		bool tauEta = fabs((genericTau[i]).eta) < 2.5;
 		bool tauDZ = (genericTau[i]).dz_Ver_match < 0.2;
 		bool Loose3Hit = ((genericTau[i]).byLooseCombinedIsolationDeltaBetaCorr3Hits > 0.5);
+
 		bool pass = tauPt && tauEta && fabs(tauDZ) && Loose3Hit;
+
 		if(!pass) continue;
+
 		if(verbose) std::cout << " Tau cand no. " << i << "pt/eta/phi:" << genericTau[i].pt << "/"
 		<< genericTau[i].eta << "/" << genericTau[i].phi << std::endl;
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
+
 		if(dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4 && pass)
 			Ad_tau=true;
 	}
@@ -682,7 +702,25 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 
 void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
-        kNNEval = new MVAEvaluator("2012");
+        o_selected = 0;           
+        o_isF3 = 0;           
+        o_run = 0;           
+        o_lumi = 0;          
+        o_event = 0;
+        o_weight = 0;
+        o_id_iso_eleW = 0;
+        o_id_iso_eleH = 0;
+        o_pt_eW = 0;
+        o_pt_eH = 0;
+        o_pt_tH = 0;
+        o_pt_jet_eW = 0;
+        o_pt_jet_eH = 0;
+        o_njets = 0;
+        o_maxPt_eW = 0;
+        o_maxPt_eH = 0;
+        o_mass = 0;
+        o_LT = 0;
+        //kNNEval = new MVAEvaluator("2012");
 	
 	// bookkepping part
 	++m_allEvents;
@@ -859,271 +897,215 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout  << goodElectron.size() << " good electron " << endl;
 		if(examineThisEvent) std::cout << genericElectron.size() << " generic electron " << endl;
 	}
+	
 	bool isP1 = false;
+	bool isP2 = false;
 	bool isF1 = false;
+	bool isF2 = false;
+	bool isP1P2 = false;
+	bool isP1F2 = false;
+	bool isF1P2 = false;
+	bool isF1F2 = false;
 
 	//select electrons for W: signal and/or fake
 
-	for(uint i=0; i<goodElectron.size(); i++){
-		bool relIsoTight_W = false;
-		bool relIsoLoose_W = false;
-                if( fabs((goodElectron.at(i).eta)) < 1.479 ){
-			if( RelIso(goodElectron.at(i)) < 0.15 ) relIsoTight_W = true;
-                }else{
-			if( RelIso(goodElectron.at(i)) < 0.10 ) relIsoLoose_W = true;
-                }
-		bool tightEleID = false;
-		if( TightEleId(goodElectron.at(i)) ) tightEleID = true;
-		
+        if( goodElectron.size() < 2 )
+		return;
 
+
+	for(uint i=0; i<goodElectron.size(); i++){
+		bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
+		bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.15;
+		bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.10;
+		bool pt20 = goodElectron[i].pt > 20.;
+		bool looseEleID = LooseEleId(goodElectron.at(i));
+		bool tightEleID = TightEleId(goodElectron.at(i));
+		
 		if(examineThisEvent){ 
 			cout << "ele pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
-				" rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << " rel iso tight " << relIsoTight_W << 
-				" rel iso loose " << relIsoLoose_W << " tight ID " << tightEleID << endl;}
-		if( (goodElectron.at(i)).pt < 20.)  continue;
-	
-                if( tightEleID && ( relIsoTight_W || relIsoLoose_W ) ){
+				" rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) <<
+				" loose ID " << looseEleID << " tight ID " << tightEleID << endl;}
+                if( tightEleID && ( (!etaR&&relIsoTight_W) || (etaR&&relIsoLoose_W) ) && pt20 ){
 			electronW_sig.push_back(goodElectron.at(i));
 		        goodElectron.erase(goodElectron.begin()+i);
 		        i = i-1; isP1 = true;
-                }
-                else if( !tightEleID || !relIsoTight_W ){ 
-			electronW_fake.push_back(goodElectron.at(i));
-		        goodElectron.erase(goodElectron.begin()+i);
-		        i = i-1; isF1 = true;
-                }
-                else if( !tightEleID || !relIsoLoose_W ){ 
-			electronW_fake.push_back(goodElectron.at(i));
-		        goodElectron.erase(goodElectron.begin()+i);
-		        i = i-1; isF1 = true;
-                }
-	m_logger << DEBUG << " inside ele W for" << SLogger::endmsg;
-	}
-
-        bool WfakeGoodForH   = false;
-        bool WsigGoodForHsig = false;
-
-        
-	//if pt signal W > pt fake W --> use fake W to search a fake or signal higgs
-	//if pt signal W < pt fake W --> use signal W to search a signal higgs
-        if( isP1 && isF1 && goodElectron.size() == 0 ){
-		if( electronW_sig[0].pt > electronW_fake[0].pt ) 
-			WfakeGoodForH = true;
-                else
-			WsigGoodForHsig = true;
-        }
-        
-	if(examineThisEvent) cout << " ele W size " << electronW_sig.size() << endl;
-	if(examineThisEvent) cout << " ele W size fake " << electronW_fake.size() << endl;
-	m_logger << DEBUG << " ele W size " << electronW_sig.size() << SLogger::endmsg;
-	m_logger << DEBUG << " ele W size fake " << electronW_fake.size() << SLogger::endmsg;
-	m_logger << DEBUG << " goodElectron size " << goodElectron.size() << SLogger::endmsg;
-
-
-	bool isP2 = false;
-	bool isF2 = false;
-        bool isP1P2 = false;
-        bool isP1F2 = false;
-        bool isF1P2 = false;
-        bool isF1F2 = false;
-        bool attempt1_ = false;
-        bool attempt2_ = false;
-        bool attempt3_ = false;
-        bool attempt4_ = false;
-
-	if( !isP1 && !isF1 )
-		return;
-
-        if( WfakeGoodForH ) {
-		if( !LooseEleId( electronW_fake[0] ) ){
-			electronH_fake.push_back(electronW_fake[0]);
-			electronW_fake.erase(electronW_fake.begin());
-			isF2 = true;
-                        isF1 = false;}
-		else{
-			if( RelIso( electronW_fake[0] ) < 0.20 ){
-				electronH_sig.push_back(electronW_fake[0]);
-				electronW_fake.erase(electronW_fake.begin());
-				isP2 = true;
-                                isF1 = false;}
-			else if( RelIso( electronW_fake[0] ) > 0.15 ){
-				electronH_fake.push_back(electronW_fake[0]);
-				electronW_fake.erase(electronW_fake.begin());
-				isF2 = true;
-                                isF1 = false;}
-		}
-	}else if( WsigGoodForHsig ){
-		if( RelIso( electronW_sig[0] ) < 0.20 ){
-			electronH_sig.push_back(electronW_sig[0]);
-			electronW_sig.erase(electronW_sig.begin());
-			isP2 = true;
-                        isP1 = false;}
-		else if( RelIso( electronW_sig[0] ) > 0.15 ){
-			electronH_fake.push_back(electronW_sig[0]);
-			electronW_sig.erase(electronW_sig.begin());
-			isF2 = true;
-                        isP1 = false;}
-	}
-
-        if( (isP1 && isP2) || (isP1 && isF2) || (isF1 && isP2) || (isF1 && isF2) ) 
-        	attempt1_ = true;
-	
-        m_logger << DEBUG << " isP1/isF1/isP2/isF2 " << isP1 <<"/"<< isF1 << "/" << isP2 << "/" << isF2 << SLogger::endmsg;
-
-        if( isP1P2 || isP1F2 || isF1P2 || isF1F2 )
-		attempt1_ = true;
-
-        m_logger << DEBUG << " attempt1 " << attempt1_ << SLogger::endmsg;
-
-	if( !attempt1_ && electronW_sig.size() > 1 ){
-		bool found = false;
-		if(examineThisEvent) std::cout << " >1 lead. ele for W, looking for sub-lead signal ele among them!" << std::endl;
-
-		for(uint iEl=1; iEl < electronW_sig.size() && !found; iEl++)
-		{
-			if(examineThisEvent) std::cout << "0) pt: " << electronW_sig[0].pt << std::endl;
-			if(examineThisEvent) std::cout << "i) pt: " << electronW_sig[iEl].pt << std::endl;
-			if(examineThisEvent) std::cout << "dR: " << deltaR(electronW_sig[iEl],electronW_sig[0]) << std::endl;
-
-			if(electronW_sig[iEl].pt > electronW_sig[0].pt) continue;
-			if(deltaR(electronW_sig[iEl],electronW_sig[0]) > 0.5){
-				if(examineThisEvent)
-					cout << "electron pt: " << electronW_sig[iEl].pt << " eta " << electronW_sig[iEl].eta << " phi " << electronW_sig[iEl].phi <<
-						"rel iso is: " << RelIso(electronW_sig[iEl]) << endl;
-				if( RelIso( electronW_sig[iEl] ) < 0.20 ){
-					electronH_sig.push_back(electronW_sig[iEl]);
-					electronW_sig.erase(electronW_sig.begin());
-					found = true;
-					electronW_sig.erase(electronW_sig.begin()+iEl);
-					isP2 = true;
-					attempt2_ = true;
-				}
-				else if( RelIso( electronW_sig[iEl] ) > 0.15 ){
-					electronH_fake.push_back(electronW_sig[iEl]);
-					electronW_sig.erase(electronW_sig.begin());
-					found = true;
-					electronW_sig.erase(electronW_sig.begin()+iEl);
-					isF2 = true;
-					attempt2_ = true;
-				}
-			}
-		}
-	}
-        
-        m_logger << DEBUG << " attempt2 " << attempt2_ << SLogger::endmsg;
-
-	if(examineThisEvent) std::cout << "is P2 after the if electronW_sig.size() > 1 " << isP2 << std::endl;
-
-	if(examineThisEvent) std::cout << electronW_sig.size() << " SIGNAL leading electrons for W " << endl;
-	if(examineThisEvent) std::cout << electronW_fake.size() << " FAKE leading electrons for W " << endl;
-	if(examineThisEvent) std::cout << electronH_sig.size() << " SIGNAL sub-leading electrons for H " << endl;
-	if(examineThisEvent) std::cout << electronH_fake.size() << " FAKE sub-leading electrons for H " << endl;
-
-	// if no W candidate suitable, check the rest
-	bool isP2_ptOrder = false; bool isP2_dR = false;                       
-
-	if( !attempt2_ && electronW_fake.size() > 1 ){
-		if(examineThisEvent) std::cout << "FIRST ATTEMPT FAILED! Searching for suitable ele H candidate!" << std::endl;
-		if(examineThisEvent) std::cout << "good electron size: " <<goodElectron.size()<< std::endl;
-
-		bool found = false;
-		bool found2 = false;
-		for(uint iEl=1; iEl < electronW_fake.size() && !found; iEl++)
-		{
-                        isF1 = true;
-			if( electronW_fake[iEl].pt > electronW_fake[0].pt ) continue;
-			if(examineThisEvent)
-				cout << "electron pt: " << electronW_fake[iEl].pt << " eta " << electronW_fake[iEl].eta << 
-					" phi " << electronW_fake[iEl].phi <<
-					"rel iso is: " << RelIso(electronW_fake[iEl]) << " loose ID " << LooseEleId( electronW_fake[iEl] ) << endl;
-			if( !LooseEleId( electronW_fake[iEl] ) ){
-				electronH_fake.push_back(electronW_fake[iEl]);
-				electronW_fake.erase(electronW_fake.begin()+iEl);
-				isF2 = true;
-			}else{
-				if( RelIso( electronW_fake[iEl] ) < 0.20 ){
-					electronH_sig.push_back(electronW_fake[iEl]);
-					electronW_fake.erase(electronW_fake.begin()+iEl);
-					isP2 = true;
-				}
-				else if( RelIso( electronW_fake[iEl] ) > 0.15 ){
-					electronH_fake.push_back(electronW_fake[iEl]);
-					electronW_fake.erase(electronW_fake.begin()+iEl);
-					isF2 = true;
-				}
-			}
-		}
-
-                if ( isF2 || isP2 ){
-			for(uint i=0; i<goodElectron.size(); i++){
-		        	vetoElectron.push_back(goodElectron[i]);
- 		                goodElectron.erase(goodElectron.begin()+i);
-                                i = i-1;
-                        }
-                        attempt3_ = true;
+                        break;
                 }
 	}
-        
-	m_logger << DEBUG << " attempt3 " << attempt3_ << SLogger::endmsg;
- 
-        if( !attempt3_ ){
-		if( isF1 && electronW_sig.size() == 0 && goodElectron.size() != 0 ){
-			for(uint i=0; i<goodElectron.size(); i++){
-				bool relIsoTight_H = false;
-				bool relIsoLoose_H = false;
-				if( fabs((goodElectron.at(i).eta)) < 1.479 ){
-					if( RelIso(goodElectron.at(i)) < 0.20 ) relIsoTight_H = true;
-				}else{
-					if( RelIso(goodElectron.at(i)) < 0.15 ) relIsoLoose_H = true;
-				}
-				bool looseEleID = false;
-				if( LooseEleId(goodElectron.at(i)) ) looseEleID = true;
 
-				if(examineThisEvent){ 
-					cout << "ele pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
-						"rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) << 
-						" tight ID " << TightEleId(goodElectron.at(i)) << endl;
-				}
-				if( (goodElectron.at(i)).pt < 10. ) continue;
+	if(examineThisEvent) cout << " electronW_sig size " << electronW_sig.size() << endl;
+	if(examineThisEvent) cout << " goodElectron size " << goodElectron.size() << endl;
 
-				if( goodElectron[i].pt < electronW_fake[0].pt ) isP2_ptOrder = true;
-				if( deltaR(goodElectron[i],electronW_fake[0]) > 0.5 ) isP2_dR = true;
+	for(uint i=0; i<goodElectron.size(); i++){
+		bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
+		bool relIsoLoose_H = RelIso(goodElectron.at(i)) < 0.20;
+		bool relIsoTight_H = RelIso(goodElectron.at(i)) < 0.15;
+		bool pt10 = goodElectron[i].pt > 10.;
+		bool looseEleID = LooseEleId(goodElectron.at(i));
+		bool tightEleID = TightEleId(goodElectron.at(i));
 
-				//if( looseEleID && ( relIsoTight_H || relIsoLoose_H ) ){
-				if( isP2_ptOrder && isP2_dR && (looseEleID && ( relIsoTight_H || relIsoLoose_H )) ){
+		if(examineThisEvent){ 
+			cout << "ele pt: " << goodElectron[i].pt << " eta " << goodElectron[i].eta << " phi " << goodElectron[i].phi <<
+				" rel iso is: " << RelIso(goodElectron.at(i),examineThisEvent) <<
+				" loose ID " << looseEleID << " tight ID " << tightEleID << endl;}
+		if( pt10 && ( looseEleID && ( (!etaR&&relIsoTight_H) || (etaR&&relIsoLoose_H) ) ) ){
+		        if( isP1 ){
+                        	if( electronW_sig[0].pt > goodElectron[i].pt ){
 					electronH_sig.push_back(goodElectron.at(i));
 					goodElectron.erase(goodElectron.begin()+i);
-					i = i-1; isP2 = true; 
-					attempt4_ = true;
-				}else if( !looseEleID || ( !relIsoTight_H || !relIsoLoose_H ) ){ 
+					i = i-1; isP2 = true;
+					break;
+				}
+			}else{
+					electronH_sig.push_back(goodElectron.at(i));
+					goodElectron.erase(goodElectron.begin()+i);
+					i = i-1; isP2 = true;
+					break;
+			}	
+		}
+	}
+
+
+	if(examineThisEvent) cout << " electronH_sig size " << electronH_sig.size() << endl;
+	if(examineThisEvent) cout << " goodElectron size " << goodElectron.size() << endl;
+	
+	if( isP1 && isP2 ){
+		isP1P2 = true;
+	}
+	if(examineThisEvent) cout << " isP1P2 " << isP1P2 << endl;
+	//else{
+	if(!isP1P2){
+	    if(examineThisEvent) cout << " isP1 " << isP1 << " isP2 " << isP2 << endl;
+	  if( isP1 && !isP2 ){
+			for(uint i=0; i<goodElectron.size(); i++){
+				bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
+				bool relIsoTight_H = RelIso(goodElectron.at(i)) < 0.15;
+				bool relIsoLoose_H = RelIso(goodElectron.at(i)) < 0.20;
+				bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.10;
+				bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.15;
+				bool pt10 = goodElectron[i].pt > 10.;
+				bool pt20 = goodElectron[i].pt > 20.;
+				bool looseEleID = LooseEleId(goodElectron.at(i));
+				bool tightEleID = TightEleId(goodElectron.at(i));
+
+				if( pt10 ){
+					if( electronW_sig[0].pt > goodElectron[i].pt ){
+						if( !looseEleID || ( !(!etaR&&relIsoTight_H) || !(etaR&&relIsoLoose_H) ) ){
+							electronH_fake.push_back(goodElectron.at(i));
+							goodElectron.erase(goodElectron.begin()+i);
+							i = i-1; isF2 = true;
+							break;
+						}                            
+					}
+					if( electronW_sig[0].pt < goodElectron[i].pt ){
+						if( pt20 && ( !tightEleID || ( !(!etaR&&relIsoTight_W) || !(etaR&&relIsoLoose_W) )) ){
+							electronW_fake.push_back(goodElectron.at(i));
+							goodElectron.erase(goodElectron.begin()+i);
+							i = i-1; isF1 = true;
+                                                        electronH_sig.push_back( electronW_sig[0] );
+                                                        electronW_sig.clear();
+                                                        isP2 = true;  
+							break;
+						}                            
+					}
+				}
+			}
+		}
+                else if( !isP1 && isP2 ){
+			for(uint i=0; i<goodElectron.size(); i++){
+				bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
+				bool pt20 = goodElectron[i].pt > 20.;
+				bool pt10 = goodElectron[i].pt > 10.;
+				bool relIsoTight_H = RelIso(goodElectron.at(i)) < 0.15;
+				bool relIsoLoose_H = RelIso(goodElectron.at(i)) < 0.20;
+				bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.10;
+				bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.15;
+				bool tightEleID = TightEleId(goodElectron.at(i));
+				bool looseEleID = LooseEleId(goodElectron.at(i));
+
+				if( pt10 ){
+					if( electronH_sig[0].pt < goodElectron[i].pt ){
+						if( pt20 && ( !tightEleID || ( !(!etaR&&relIsoTight_W) || !(etaR&&relIsoLoose_W) )) ){
+							electronW_fake.push_back(goodElectron.at(i));
+							goodElectron.erase(goodElectron.begin()+i);
+							i = i-1; isF1 = true;
+							break;
+						}                            
+					}
+					else if( electronH_sig[0].pt > goodElectron[i].pt ){
+						if( looseEleID && ( (!etaR&&relIsoTight_H) || (etaR&&relIsoLoose_H) )){
+							electronW_fake.push_back( electronH_sig[0] );
+							electronH_sig.clear();
+							electronH_sig.push_back(goodElectron.at(i));
+							goodElectron.erase(goodElectron.begin()+i);
+							i = i-1; isF1 = true; isP2 = true;
+							break;
+						}
+						else if( !looseEleID || (!(!etaR&&relIsoTight_H) || !(etaR&&relIsoLoose_H)) ){
+							electronW_fake.push_back( electronH_sig[0] );
+							electronH_sig.clear();
+							electronH_fake.push_back(goodElectron.at(i));
+							goodElectron.erase(goodElectron.begin()+i);
+							i = i-1; isF1 = true; isF2 = true;
+						}                           
+					}
+				}
+			}
+		}
+		else if( !isP1 && !isP2 ){
+			for(uint i=0; i<goodElectron.size(); i++){
+				bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
+				bool pt20 = goodElectron[i].pt > 20.;
+				bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.10;
+				bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.15;
+				bool tightEleID = TightEleId(goodElectron.at(i));
+
+				if( pt20 && ( !tightEleID || ( !(!etaR&&relIsoTight_W) || !(etaR&&relIsoLoose_W) ) ) ){
+					electronW_fake.push_back(goodElectron.at(i));
+					goodElectron.erase(goodElectron.begin()+i);
+					i = i-1; isF1 = true;
+					break;
+				}                            
+			}                            
+			for(uint i=0; i<goodElectron.size(); i++){
+				bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
+				bool relIsoTight_H = RelIso(goodElectron.at(i)) < 0.15;
+				bool relIsoLoose_H = RelIso(goodElectron.at(i)) < 0.20;
+				bool pt10 = goodElectron[i].pt > 10.;
+				bool looseEleID = LooseEleId(goodElectron.at(i));
+				if( pt10 && ( !looseEleID || ( !(!etaR&&relIsoTight_H) || !(etaR&&relIsoLoose_H) ) ) ){
 					electronH_fake.push_back(goodElectron.at(i));
 					goodElectron.erase(goodElectron.begin()+i);
 					i = i-1; isF2 = true;
-					attempt4_ = true;
-				}
+					break;
+				}                            
 			}
+
+
+			if(electronW_fake.size() != 0 && electronH_fake.size() != 0 ){
+				if( electronW_fake[0].pt < electronH_fake[0].pt ){
+					std::vector<myobject> tmp;
+					tmp.push_back( electronH_fake[0] );
+					tmp.push_back( electronW_fake[0] );
+					electronW_fake.clear();              
+					electronH_fake.clear();              
+					electronH_fake.push_back( tmp[1] );              
+					electronW_fake.push_back( tmp[0] );
+				}
+			}//else{
+			//	isF1 = false; isF2 = false;
+			//}        
 		}
+
+		if( isP1 && isF2) isP1F2 = true; 
+		if( isF1 && isP2) isF1P2 = true; 
+		if( isF1 && isF2) isF1F2 = true; 
 	}
-        
-
-	if( attempt1_ || attempt2_ || attempt3_ || attempt4_ ){
-		if( isP1 && isP2 ) isP1P2 = true;
-		else if( isP1 && isF2 ) isP1F2 = true;
-		else if( isF1 && isP2 ) isF1P2 = true;
-		else if( isF1 && isF2 ) isF1F2 = true;
-	}
-
-
-	if(examineThisEvent){ 
-		std::cout << "P2: " << isP2 << " - F2: " << isF2 << endl;
-			std::cout << electronH_sig.size() << " SIGNAL sub-leading electrons " << endl;
-			std::cout << electronH_fake.size() << " FAKE sub-leading electrons " << endl;
-	}	
 
 	std::vector<myobject> electronLead;
-        electronLead.clear();
+	electronLead.clear();
 	std::vector<myobject> electronSubLead;
-        electronSubLead.clear();
+	electronSubLead.clear();
 
 	if( isP1P2 ){
 		if(examineThisEvent) std::cout << "P1P2" << std::endl;
@@ -1145,39 +1127,24 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		electronLead.push_back(electronW_fake[0]);
 		electronSubLead.push_back(electronH_fake[0]);
 	}
-        else return;
-	//h_cut_flow_eet->Fill(3,1);
+	else return;
 
-        bool isP1P2_SS = false;     
-        bool isP1F2_SS = false; //bool isP1F2_OS = false; 
-        bool isF1P2_SS = false; //bool isF1P2_OS = false;
-        bool isF1F2_SS = false; //bool isF1F2_OS = false;
-        bool fake_SS = false;   //bool fake_OS = false;
-    
-	if( isP1P2 ){
-		if( electronLead[0].charge == electronSubLead[0].charge ){
-			if(examineThisEvent) std::cout << "Signal candidates has Same charge?" << std::endl;
-			isP1P2_SS = true;}
-        }else{
-		if( electronLead[0].charge == electronSubLead[0].charge ){
-			if(isP1F2) isP1P2_SS = true;
-			if(isF1P2) isF1P2_SS = true;
-			if(isF1F2) isF1F2_SS = true;
+	bool signal_SS = false;   //bool signal_OS = false;
+	bool fake_SS = false;   //bool fake_OS = false;
+
+	if( electronLead[0].charge == electronSubLead[0].charge ){
+		if( isP1P2 ) 	
+			signal_SS = true;
+		if( isP1F2 || isF1P2 || isF1F2 ) 	
 			fake_SS = true;
-                }
 	}
-	//if( !isP1P2 && electronLead[0].charge != electronSubLead[0].charge ){
-	//	if(isP1F2) isP1F2_OS = true;
-	//	if(isF1P2) isF1P2_OS = true;
-	//	if(isF1F2) isF1F2_OS = true;
-	//	fake_OS = true;
-        //}
 
-	if(examineThisEvent) std::cout << "P1P2SS/fakeSS: " << isP1P2_SS << "/" << fake_SS << std::endl;
-        if( isP1P2 && !isP1P2_SS ) return;
-			if(examineThisEvent) std::cout << "SS YES!" << std::endl;
-        if( !isP1P2 && !fake_SS ) return;
-			if(examineThisEvent) std::cout << "ma e' qui?!" << std::endl;
+	if(examineThisEvent) std::cout << "signalSS/fakeSS: " << signal_SS << "/" << fake_SS << std::endl;
+
+	if( isP1P2 && !signal_SS ) return;
+	if(examineThisEvent) std::cout << "signal --> SS YES! " << std::endl;
+	if( !isP1P2 && !fake_SS ) return;
+	if(examineThisEvent) std::cout << "fake --> SS YES! " << std::endl;
 
 	//h_cut_flow_mmt->Fill(4,1);
 	//h_cut_flow_eet->Fill(4,1);
@@ -1216,7 +1183,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) cout << "Pair mass SS: " << fabs(PairMass(electronLead[0],electronSubLead[0])-Z_mass_SS) << endl;
 	//if(examineThisEvent) cout << "Pair mass OS: " << fabs(PairMass(electronLead[0],electronSubLead[0])-Z_mass_OS) << endl;
 
-	if( isP1P2_SS && fabs(PairMass(electronLead[0],electronSubLead[0])-Z_mass_SS) < 10. ){
+	if( signal_SS && fabs(PairMass(electronLead[0],electronSubLead[0])-Z_mass_SS) < 10. ){
 		if(examineThisEvent){
 			std::cout << "SIGNAL: No close enough to Z mass!" << std::endl;
 		}
@@ -1251,14 +1218,16 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		
 		//if(deltaR(electronW_sig[0],tau[i]) < 0.5) continue; if(deltaR(electronH_sig[0],tau[i]) < 0.5) continue;
                 
-		if(examineThisEvent) std::cout << " tau #" << i << "pt/eta/phi:"
-			<< tau[i].pt << "/" << tau[i].eta << "/" << tau[i].phi << " dz: " <<
-				tauDZ << " DM " << DecayMode;
+		//if(examineThisEvent) std::cout << " tau #" << i << "pt/eta/phi:"
+		//	<< tau[i].pt << "/" << tau[i].eta << "/" << tau[i].phi << " dz: " <<
+		//		tauDZ << " DM " << DecayMode;
 
 		//if (tauPt > 20. && fabs(tauEta) < 2.3 && Loose3Hit && DecayMode && fabs(tauDZ) < 0.2){
 		if (tauPt > 20. && fabs(tauEta) < 2.3 && DecayMode && fabs(tauDZ) < 0.2){
 			if(examineThisEvent) std::cout << " -> Selected (NO ISO APPLIED)!" << std::endl;
 			goodTau.push_back(tau.at(i));
+                        tau.erase(tau.begin()+i);
+                        i=i-1;
 		}
 	}
 
@@ -1290,16 +1259,18 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 double mass1 = fabs(PairMass(electronLead[0],goodTau.at(i)) - Z_mass_SS);
                 double mass2 = fabs(PairMass(electronSubLead[0],goodTau.at(i)) - Z_mass_SS);
 
-			if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
-				LooseEleMVA3 << LooseMuon << " charge: " << charge << " isolation: " << Loose3Hit << std::endl;
+			//if(examineThisEvent) std::cout << "Checking the tau at pt/eta:" << goodTau[i].pt << "/" << goodTau[i].eta << "anti-e,anti-mu" << 
+			//	LooseEleMVA3 << LooseMuon << " charge: " << charge << " isolation: " << Loose3Hit << std::endl;
 			if( mass1 < 10. || mass2 < 10.){
 				if ( TightEleMVA3 && LooseMuon && charge ){
                                         if( Loose3Hit ) {
 						tauH_sig.push_back(goodTau.at(i));
+						if(examineThisEvent) std::cout << "signal tau: 1^ mass range! " << goodTau[i].pt << endl; 
 						goodTau.erase(goodTau.begin()+i); 
 						i = i-1;
 					}else{
 						tauH_fake.push_back(goodTau.at(i));
+						if(examineThisEvent) std::cout << "fake tau: 1^ mass range! " << goodTau[i].pt << endl; 
 						goodTau.erase(goodTau.begin()+i); 
 						i = i-1;
                                         }
@@ -1309,10 +1280,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if ( MediumEleMVA3 && LooseMuon && charge ){
                                         if( Loose3Hit ) {
 						tauH_sig.push_back(goodTau.at(i));
+						if(examineThisEvent) std::cout << "signal tau: 2^ mass range! " << goodTau[i].pt << endl; 
 						goodTau.erase(goodTau.begin()+i); 
 						i = i-1;
 					}else{
 						tauH_fake.push_back(goodTau.at(i));
+						if(examineThisEvent) std::cout << "fake tau: 2^ mass range! " << goodTau[i].pt << endl; 
 						goodTau.erase(goodTau.begin()+i); 
 						i = i-1;
                                         }
@@ -1322,10 +1295,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				if ( LooseEleMVA3 && LooseMuon && charge ){
                                         if( Loose3Hit ) {
 						tauH_sig.push_back(goodTau.at(i));
+						if(examineThisEvent) std::cout << "signal tau: 3^ mass range! " << goodTau[i].pt << endl; 
 						goodTau.erase(goodTau.begin()+i); 
 						i = i-1;
 					}else{
 						tauH_fake.push_back(goodTau.at(i));
+						if(examineThisEvent) std::cout << "fake tau: 3^ mass range! " << goodTau[i].pt << endl; 
 						goodTau.erase(goodTau.begin()+i); 
 						i = i-1;
                                         }
@@ -1357,6 +1332,11 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 isF3 = true;
 	}
 
+	if(isP3 || isF3){
+		for(uint i=0; i<goodTau.size(); i++){
+			tau.push_back(goodTau[i]);
+		}
+	}
 	//h_cut_flow_mmt->Fill(8,1);
 	//h_cut_flow_eet->Fill(9,1);
 
@@ -1462,11 +1442,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                    i = i-1;
 		}
 	}
-        	//for(uint j=0;j<genericElectron.size();j++){
-        	//	if( deltaR(vetoElectron[i],genericElectron[j]) < 0.1 ){
-		//		vetoElectron.erase(vetoElectron.begin()+i);
-	//			i = i-1;}
-	//	}
+	
 	bool Ad_electron=false;
 	if(AdElectron_sig(vetoElectron,electronSubLead[0],tauH[0],electronLead[0],examineThisEvent)){
 		Ad_electron=true;
@@ -1511,6 +1487,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		double bTag = jet[i].bDiscriminatiors_CSV;
 		double PUjetID = jet[i].puJetIdLoose;
 		if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "btag " << bTag << "PU jet ID" << std::endl;
+		
 		if(jetPt > 20. && fabs(jetEta) < 2.4 && PUjetID){
 			double dR1_,dR2_,dR3_;
 			dR1_=deltaR(jet.at(i),electronLead[0]);
@@ -1519,6 +1496,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(dR1_ > 0.4 && dR2_ > 0.4 && dR3_ > 0.4)
 				count_Jets++;
 		}
+
 		if(jetPt > 20. && fabs(jetEta) < 2.4 && bTag > bTagValue && PUjetID){
 			count_bJets++;
 			if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
@@ -1548,6 +1526,32 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         double maxPt_SubLead;
 	
         double LT;
+	double eleW_SF;
+	double eleH_SF;
+	double final_weight;
+
+	if(isSimulation && !IgnoreSF && !IgnorePUW){
+		eleW_SF = (Cor_ID_Iso_Ele_Loose_2012_53X(electronLead[0])) * (Corr_Trg_Ele_2012_53X(electronLead[0])); 
+		eleH_SF = (Cor_ID_Iso_Ele_Tight_2012_53X(electronSubLead[0])) * (Corr_Trg_Ele_2012_53X(electronSubLead[0]));
+		final_weight = PUWeight * eleW_SF * eleH_SF;
+	}else
+		final_weight = PUWeight;
+
+        if( isP1P2P3 || isP1P2F3 ){
+		if(examineThisEvent) std::cout << " isP1P2P3 or isP1P2F3 ? " << isP1P2P3 << " - " << isP1P2F3 << std::endl;
+		if(examineThisEvent) std::cout << " Electron Lead pt: " << electronLead[0].pt << std::endl;
+		if(examineThisEvent) std::cout << " Electron SubLead pt: " << electronSubLead[0].pt << std::endl;
+		
+		LT = electronLead[0].pt + electronSubLead[0].pt + tauH[0].pt;
+		o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+		o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+		o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+		o_weight = final_weight;
+		o_id_iso_eleW = 1;
+		o_id_iso_eleH = 1;
+		o_selected = 1;
+                if( isP1P2F3 ) o_isF3 = 1;
+	}
 
         if( isF1P2P3 || isF1P2F3){
         	myobject ClosestJet_Leading = ClosestInCollection(electronLead[0],m->RecPFJetsAK5,0.4);
@@ -1557,16 +1561,35 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Closest jet pt: " << ClosestJet_Leading.pt << std::endl;
 		if(examineThisEvent) std::cout << " Electron Lead pt: " << electronLead[0].pt << std::endl;
 		if(examineThisEvent) std::cout << " max pt: " << maxPt_Lead << std::endl;
-		if(examineThisEvent) std::cout << " kNN evaluator WJets " << kNNEval->getWJetsLeadingElectron(electronLead[0].pt,maxPt_Lead,count_Jets) << std::endl;
-		if(examineThisEvent) std::cout << " kNN evaluator QCD " << kNNEval->getQCDLeadingElectron(electronLead[0].pt,maxPt_Lead,count_Jets) << std::endl;
+		
 		LT = electronLead[0].pt + electronSubLead[0].pt + tauH[0].pt;
+
                 if( isF1P2P3 ){
 			h_visMass_F1P2P3->Fill(PairMass(electronSubLead[0],tauH[0]));
-			h_LT_F1P2P3->Fill(PairMass(electronSubLead[0],tauH[0]));
+			h_LT_F1P2P3->Fill( LT );
+                        //branch assignment
+			o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+			o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+			o_pt_jet_eW = ClosestJet_Leading.pt; o_njets = count_Jets; o_maxPt_eW = maxPt_Lead;
+			o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+                        o_weight = final_weight;
+                        o_id_iso_eleW = 0;
+                        o_id_iso_eleH = 1;
+                        o_selected = 1;
 		}
                 if( isF1P2F3 ){
 			h_visMass_F1P2F3->Fill(PairMass(electronSubLead[0],tauH[0]));
-			h_LT_F1P2F3->Fill(PairMass(electronSubLead[0],tauH[0]));
+			h_LT_F1P2F3->Fill( LT );
+                        //branch assignment
+			o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+			o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+			o_pt_jet_eW = ClosestJet_Leading.pt; o_njets = count_Jets; o_maxPt_eW = maxPt_Lead;
+			o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+                        o_weight = final_weight;
+                        o_id_iso_eleW = 0;
+                        o_id_iso_eleH = 1;
+                        o_selected = 1;
+                        o_isF3 = 1;
 		}
         }
         if( isP1F2P3 || isP1F2F3 ){
@@ -1577,16 +1600,35 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Closest jet pt: " << ClosestJet_SubLeading.pt << std::endl;
 		if(examineThisEvent) std::cout << " Electron SubLead pt: " << electronSubLead[0].pt << std::endl;
 		if(examineThisEvent) std::cout << " max pt: " << maxPt_SubLead << std::endl;
-		//if(examineThisEvent) std::cout << " kNN evaluator WJets " << kNNEval->getWJetsSubleadingElectron(electronSubLead[0].pt,maxPt_SubLead,count_Jets) << std::endl;
-		//if(examineThisEvent) std::cout << " kNN evaluator QCD " << kNNEval->getQCDSubleadingElectron(electronSubLead[0].pt,maxPt_SubLead,count_Jets) << std::endl;
+		
 		LT = electronLead[0].pt + electronSubLead[0].pt + tauH[0].pt;
+
                 if( isP1F2P3 ){
 			h_visMass_P1F2P3->Fill(PairMass(electronSubLead[0],tauH[0]));
-			h_LT_P1F2P3->Fill(PairMass(electronSubLead[0],tauH[0]));
+			h_LT_P1F2P3->Fill( LT );
+                        //branch assignment
+			o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+			o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+			o_pt_jet_eH = ClosestJet_SubLeading.pt; o_njets = count_Jets; o_maxPt_eH = maxPt_SubLead;
+			o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+                        o_weight = final_weight;
+                        o_id_iso_eleW = 1;
+                        o_id_iso_eleH = 0;
+                        o_selected = 1;
 		}
                 if( isP1F2F3 ){
 			h_visMass_P1F2F3->Fill(PairMass(electronSubLead[0],tauH[0]));
-			h_LT_P1F2F3->Fill(PairMass(electronSubLead[0],tauH[0]));
+			h_LT_P1F2F3->Fill( LT );
+                        //branch assignment
+			o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+			o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+			o_pt_jet_eH = ClosestJet_SubLeading.pt; o_njets = count_Jets; o_maxPt_eH = maxPt_SubLead;
+			o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+                        o_weight = final_weight;
+                        o_id_iso_eleW = 1;
+                        o_id_iso_eleH = 0;
+                        o_selected = 1;
+                        o_isF3 = 1;
 		}
         }
         if( isF1F2P3 || isF1F2F3){
@@ -1600,18 +1642,37 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(examineThisEvent) std::cout << " Closest Lead jet pt: " << ClosestJet_Leading.pt << " Closest SubLead jet pt: " << ClosestJet_SubLeading.pt << std::endl;
 		if(examineThisEvent) std::cout << " Electron Lead pt: " << electronLead[0].pt << " Electron SubLead pt: " << electronSubLead[0].pt << std::endl;
 		if(examineThisEvent) std::cout << " max lead pt: " << maxPt_Lead << " max sublead pt: " << maxPt_SubLead << std::endl;
-		//if(examineThisEvent) std::cout << " kNN evaluator WJets " << kNNEval->getWJetsLeadingElectron(electronLead[0].pt,maxPt_Lead,count_Jets) << std::endl;
-		//if(examineThisEvent) std::cout << " kNN evaluator QCD " << kNNEval->getQCDLeadingElectron(electronLead[0].pt,maxPt_Lead,count_Jets) << std::endl;
-		//if(examineThisEvent) std::cout << " kNN evaluator WJets " << kNNEval->getWJetsSubleadingElectron(electronSubLead[0].pt,maxPt_SubLead,count_Jets) << std::endl;
-		//if(examineThisEvent) std::cout << " kNN evaluator QCD " << kNNEval->getQCDSubleadingElectron(electronSubLead[0].pt,maxPt_SubLead,count_Jets) << std::endl;
+		
 		LT = electronLead[0].pt + electronSubLead[0].pt + tauH[0].pt;
+
                 if( isF1F2P3 ){
 			h_visMass_F1F2P3->Fill(PairMass(electronSubLead[0],tauH[0]));
-			h_LT_F1F2P3->Fill(PairMass(electronSubLead[0],tauH[0]));
+			h_LT_F1F2P3->Fill( LT );
+                        //branch assignment
+			o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+			o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+			o_pt_jet_eW = ClosestJet_Leading.pt; o_njets = count_Jets; o_maxPt_eW = maxPt_Lead;
+			o_pt_jet_eH = ClosestJet_SubLeading.pt; o_maxPt_eH = maxPt_SubLead;
+			o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+                        o_weight = final_weight;
+                        o_id_iso_eleW = 0;
+                        o_id_iso_eleH = 0;
+                        o_selected = 1;
 		}
                 if( isF1F2F3 ){
 			h_visMass_F1F2F3->Fill(PairMass(electronSubLead[0],tauH[0]));
-			h_LT_F1F2F3->Fill(PairMass(electronSubLead[0],tauH[0]));
+			h_LT_F1F2F3->Fill( LT );
+                        //branch assignment
+			o_run = m->runNumber; o_lumi = m->lumiNumber; o_event = m->eventNumber;          
+			o_pt_eW = electronLead[0].pt; o_pt_eH = electronSubLead[0].pt; o_pt_tH = tauH[0].pt;
+			o_pt_jet_eW = ClosestJet_Leading.pt; o_maxPt_eW = maxPt_Lead;
+			o_pt_jet_eH = ClosestJet_SubLeading.pt; o_njets = count_Jets; o_maxPt_eH = maxPt_SubLead;
+			o_mass = PairMass(electronSubLead[0],tauH[0]); o_LT = LT;
+                        o_weight = final_weight;
+                        o_id_iso_eleW = 0;
+                        o_id_iso_eleH = 0;
+                        o_selected = 1;
+                        o_isF3 = 1;
 		}
 	}
 
@@ -1626,34 +1687,24 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		bool belowEvent = false;
 
 		if(LT < LTValue_eet){
-			//h_finalVisMass_below130->Fill(PairMass(electronH_sig[0],tau_H[0]));
+			//h_visMass_low->Fill(PairMass(electronH_sig[0],tau_H[0]));
 			belowEvent = true;
 		}
 		if(LT > LTValue_eet){
-			//h_finalVisMass_above130->Fill(PairMass(electronH_sig[0],tau_H[0]));
+			//h_visMass_high->Fill(PairMass(electronH_sig[0],tau_H[0]));
 			aboveEvent = true;
 	        }
 
-
-       /////////////////// USEFUL PLOTS !!!!
-        //		if(isSimulation && !IgnoreSF){
-	//		double eleW_SF = (Cor_ID_Iso_Ele_Loose_2012_53X(electronLead[0])) * (Corr_Trg_Ele_2012_53X(electronLead[0])); 
-	//		double eleH_SF = (Cor_ID_Iso_Ele_Tight_2012_53X(electronSubLead[0])) * (Corr_Trg_Ele_2012_53X(electronSubLead[0]));
-	//		double final_weight = PUWeight * eleW_SF * eleH_SF;
-	//
-	//              h_visMass->Fill( PairMass(electronSubLead[0],tauH[0]) ); 
-	//              h_visMass_w->Fill( PairMass(electronSubLead[0],tauH[0]), final_weight); 
-	//              h_LT->Fill( LT ); 
-	//              h_LT_w->Fill( LT, final_weight); 
-	//	}
-       /////////////////// 
-
-	if(examineThisEvent) {
-		if(belowEvent)
-			std::cout << " LT =  " << LT << std::endl;
-		if(aboveEvent)
-			std::cout << " LT =  " << LT << std::endl;
-	}
+	if(examineThisEvent){ 
+			if(isP1P2P3) std::cout << " LT_P1P2P3 =  " << LT << std::endl;
+			if(isF1P2P3) std::cout << " LT_F1P2P3 =  " << LT << std::endl;
+			if(isP1F2P3) std::cout << " LT_P1F2P3 =  " << LT << std::endl;
+			if(isP1P2F3) std::cout << " LT_P1P2F3 =  " << LT << std::endl;
+			if(isP1F2F3) std::cout << " LT_P1F2F3 =  " << LT << std::endl;
+			if(isF1F2P3) std::cout << " LT_F1F2P3 =  " << LT << std::endl;
+			if(isF1P2F3) std::cout << " LT_F1P2F3 =  " << LT << std::endl;
+			if(isF1F2F3) std::cout << " LT_F1F2F3 =  " << LT << std::endl;
+        }
 
         if(isP1P2P3) 
 		eventList_P1P2P3 << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ; 
