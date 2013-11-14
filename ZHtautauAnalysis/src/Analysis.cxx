@@ -3731,6 +3731,20 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			
 			// a bit od hack...
 			
+	
+			
+			o_pass=true;
+			o_event_weight=weight;
+			o_type=event_type;
+			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
+			o_px_H1=Hcand_signal[0].px;o_px_H2=Hcand_signal[1].px;
+			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
+			o_py_H1=Hcand_signal[0].py;o_py_H2=Hcand_signal[1].py;
+			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
+			o_pz_H1=Hcand_signal[0].pz;o_pz_H2=Hcand_signal[1].pz;
+			o_M_Z1=Zcand[0].mass;o_M_Z2=Zcand[1].mass;
+			o_M_H1=Hcand_signal[0].mass;o_M_H2=Hcand_signal[1].mass;
+	
 			if(o_run==202504 && o_event==650927814)
 			{
 				std::cout << "U vsech kurev, nasel jsem ho! The type is " << EventTypeName(event_type) << std::endl;
@@ -3744,18 +3758,6 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				std::cout << " PF MET(X,Y)= " << PFMet.front().et*TMath::Cos(Met.front().phi) << " " << PFMet.front().et*TMath::Sin(Met.front().phi) << std::endl;
 				std::cout << " PF MET covariance = " << m->MET_sigMatrix_00 << " " << m->MET_sigMatrix_01 << " " << m->MET_sigMatrix_10 << " " << m->MET_sigMatrix_11 << std::endl;
 			}
-			
-			o_pass=true;
-			o_event_weight=weight;
-			o_type=event_type;
-			o_px_Z1=Zcand[0].px;o_px_Z2=Zcand[1].px;
-			o_px_H1=Hcand_signal[0].px;o_px_H2=Hcand_signal[1].px;
-			o_py_Z1=Zcand[0].py;o_py_Z2=Zcand[1].py;
-			o_py_H1=Hcand_signal[0].py;o_py_H2=Hcand_signal[1].py;
-			o_pz_Z1=Zcand[0].pz;o_pz_Z2=Zcand[1].pz;
-			o_pz_H1=Hcand_signal[0].pz;o_pz_H2=Hcand_signal[1].pz;
-			o_M_Z1=Zcand[0].mass;o_M_Z2=Zcand[1].mass;
-			o_M_H1=Hcand_signal[0].mass;o_M_H2=Hcand_signal[1].mass;
 			
 			//~ 
 			switch(event_type){
