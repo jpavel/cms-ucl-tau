@@ -2,6 +2,7 @@
 
 // Local include(s):
 #include "../include/PostAnalysis.h"
+#include <iomanip>
 
 ClassImp( PostAnalysis );
 
@@ -48,6 +49,7 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	
 	h_svCorrelation						 = Book(TH2D("h_svCorrelation","Mass correlation;ULB mass [GeV];UCL mass [GeV]",300,0.,300.,300,0.,300.));
     h_svDifference						 = Book(TH1D("h_svDifference","Mass difference;#Delta M[GeV]",100,-50.,50.));
+    h_svDifferenceSig					 = Book(TH1D("h_svDifferenceSig","Mass difference;#Delta M/#sigma M",120,-3.0,3.0));
 	h_svDifference_MET					 = Book(TH2D("h_svDifference_MET","Mass difference;#Delta MET; #Delta M[GeV]",100,-0.003,0.003,100,-20,20));
 	h_svDifference_METphi				 = Book(TH2D("h_svDifference_METphi","Mass difference;#Delta METphi; #Delta M[GeV]",100,-1.0,0.1,100,-20,20));
 	
@@ -68,7 +70,8 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_covMET21Diff						 = Book(TH1D("h_covMET21Diff","covMET21 difference;rel. #Delta covMET21",200,-0.1,0.1));
 	h_covMET22Diff						 = Book(TH1D("h_covMET22Diff","covMET22 difference;rel. #Delta covMET22",200,-0.1,0.1));
 	
-	
+	h_elMass						= Book(TH1D("h_elMass","Difference between input electron and PDG mass;#Delta M [GeV]",100,-0.1,0.1));
+	h_muMass						= Book(TH1D("h_muMass","Difference between input muon and PDG mass;#Delta M [GeV]",100,-0.1,0.1));
 	
 	// old histograms
 	
@@ -401,18 +404,18 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					 }
 				if(foundEv){
 					double Svdiff=sync_SVmass-in_svMass;
-					if(fabs(Svdiff>5.0)){ 
-						std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
+					if(fabs(Svdiff/in_svMass_unc)>0.5){ 
+						std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(10) <<Svdiff/in_svMass_unc << ":" << in_run2 << " " << in_event2 << " " << in_svMass << " " 
 				 << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_M_H1 
 				 << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_M_H2 
 				 << " " << in_MET_x << " " << in_MET_y << " " 
 				 << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
 				 << std::endl;
-						std::cout << 
+						std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(10) <<
 							"Abdollah   "  << in_type2 << " " << sync_SVmass << " " 
 						 << sync_l3Px << " " << sync_l3Py << " " << sync_l3Pz << " " << sync_l3M 
 						 << " " << sync_l4Px << " " << sync_l4Py << " " << sync_l4Pz << " " << sync_l4M
-						 << " " << sync_met*cos(sync_metPhi) << " " << sync_met*sin(sync_metPhi) << " " 
+						 << " " << sync_met << " " << sync_metPhi << " " 
 						 << sync_covMet11 << " " << sync_covMet21 << " " << sync_covMet12 << " " << sync_covMet22
 						 << std::endl;
 					 }
@@ -451,7 +454,7 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					double cov21Diff = ((double)sync_covMet21 - (double)in_covMET_10)/(double)in_covMET_10;
 					double cov22Diff = ((double)sync_covMet22 - (double)in_covMET_11)/(double)in_covMET_11;
 					
-					if(fabs(Svdiff>5.0)) std::cout << pxDiff << " " << pyDiff << " " << pzDiff << " " << MDiff
+					if(fabs(Svdiff/in_svMass_unc)>0.5) std::cout << pxDiff << " " << pyDiff << " " << pzDiff << " " << MDiff
 					<< " " << pxDiff2 << " " << pyDiff2 << " " << pzDiff2 << " " << MDiff2
 					<< " " << metDiff << " " << metPhiDiff << " " << metPhiDiffABS << " "
 					<< cov11Diff << " " << cov21Diff << " " << cov12Diff << " " << cov22Diff << std::endl;
@@ -473,11 +476,26 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hist("h_covMET21Diff")->Fill(cov12Diff);
 					Hist("h_covMET22Diff")->Fill(cov22Diff);
 					
-	
+					if(in_type2==2 || in_type2==3 || in_type2==6 || in_type2==7){ 
+						double ElMassDifference = double(in_M_H1) - 0.511e-3;
+						Hist("h_elMass")->Fill(ElMassDifference);
+					}
 					
+					if(in_type2==1 || in_type2==5){ 
+						double MuMassDifference = double(in_M_H1) - 105.66e-3;
+						Hist("h_muMass")->Fill(MuMassDifference);
+					}
+					
+					if(in_type2==2 || in_type2==6){ 
+						double MuMassDifference = double(in_M_H2) - 105.66e-3;
+						Hist("h_muMass")->Fill(MuMassDifference);
+					}
 					
 					Hist("h_svCorrelation")->Fill(sync_SVmass,in_svMass);
 					Hist("h_svDifference")->Fill(Svdiff);
+					std::cout << in_svMass_unc << std::endl;
+					Hist("h_svDifferenceSig")->Fill(Svdiff/in_svMass_unc);
+					
 					Hist("h_svDifference_MET")->Fill(metDiffABS,Svdiff);
 					Hist("h_svDifference_METphi")->Fill(metPhiDiffABS,Svdiff);
 					

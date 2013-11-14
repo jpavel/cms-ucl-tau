@@ -143,9 +143,9 @@ int stack_upgrade() {
   "GG2L2L",
   "GG4L"};
   
-  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary_v26/";
+  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary_v31/";
   
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_v26";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_v31";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/pdf");
  
@@ -435,8 +435,8 @@ for(int iFile = 0; iFile < signal_names.size(); iFile++)
 	 if(iHist>1) h_1d_data[0]->Add(h_1d_data[iHist]);				 
   }
   
-  std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput_v26/2012.root",
-		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput_v26/2012.root");
+  std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput_v31/2012.root",
+		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput_v31/2012.root");
   //getting histograms for the background
   
   for(int iBG=0; iBG < BGcounts->size(); iBG++)
@@ -599,7 +599,7 @@ TString lumist="19.7 fb^{-1}";
   TString outputROOTDir = "/home/jpavel/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/LimitInput/";
  
   
-  TFile out(outputROOTDir+"vhtt_llLL.inputsBrumaire-sm-8TeV.root","RECREATE");
+  TFile out(outputROOTDir+"vhtt_llLL.inputsArmistice-sm-8TeV.root","RECREATE");
   TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
   TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
   TString nameES="_CMS_scale_t_";

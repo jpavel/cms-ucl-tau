@@ -3752,8 +3752,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 2://MMME
 					o_pdg_Z1=13*Zcand[0].charge;
 					o_pdg_Z2=13*Zcand[1].charge;
-					o_pdg_H1=13*Hcand_signal[0].charge;
-					o_pdg_H2=11*Hcand_signal[1].charge;
+					o_pdg_H1=11*Hcand_signal[0].charge;
+					o_pdg_H2=13*Hcand_signal[1].charge;
 					break;
 				case 3://MMET
 					o_pdg_Z1=13*Zcand[0].charge;
@@ -3776,8 +3776,8 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				case 6://EEME
 					o_pdg_Z1=11*Zcand[0].charge;
 					o_pdg_Z2=11*Zcand[1].charge;
-					o_pdg_H1=13*Hcand_signal[0].charge;
-					o_pdg_H2=11*Hcand_signal[1].charge;
+					o_pdg_H1=11*Hcand_signal[0].charge;
+					o_pdg_H2=13*Hcand_signal[1].charge;
 					break;
 				case 7://EEET
 					o_pdg_Z1=11*Zcand[0].charge;

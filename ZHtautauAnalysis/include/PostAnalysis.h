@@ -190,6 +190,7 @@ private:
     
     TH2* h_svCorrelation;
     TH1* h_svDifference;
+    TH1* h_svDifferenceSig;
     TH2* h_svDifference_MET;
     TH2* h_svDifference_METphi;
     
@@ -211,6 +212,9 @@ private:
 	TH1 * h_covMET12Diff;
 	TH1 * h_covMET21Diff;
 	TH1 * h_covMET22Diff;
+	
+	TH1 * h_elMass;
+	TH1 * h_muMass;
 	
 	
 	std::vector<TH1*>  h_H_svMass_types;
