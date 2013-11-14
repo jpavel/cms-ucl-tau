@@ -3729,6 +3729,22 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			o_lumi=m->lumiNumber;
 			o_event=m->eventNumber;
 			
+			// a bit od hack...
+			
+			if(o_run==202504 && o_event==650927814)
+			{
+				std::cout << "U vsech kurev, nasel jsem ho! The type is " << EventTypeName(event_type) << std::endl;
+				std::cout << " Z1(X,Y,Z,M)= " << o_px_Z1 << " " << o_py_Z1 << " " << o_pz_Z1 << " " << o_M_Z1 << std::endl;
+				std::cout << " Z2(X,Y,Z,M)= " << o_px_Z2 << " " << o_py_Z2 << " " << o_pz_Z2 << " " << o_M_Z2 << std::endl;
+				std::cout << " H1(X,Y,Z,M)= " << o_px_H1 << " " << o_py_H1 << " " << o_pz_H1 << " " << o_M_H1 << std::endl;
+				std::cout << " H2(X,Y,Z,M)= " << o_px_H2 << " " << o_py_H2 << " " << o_pz_H2 << " " << o_M_H2 << std::endl;
+				std::cout << " MVA MET(X,Y)= " << Met.front().et*TMath::Cos(Met.front().phi) << " " << Met.front().et*TMath::Sin(Met.front().phi) << std::endl;
+				std::cout << " MVA MET covariance = " << m->MVAMet_sigMatrix_00 << " " << m->MVAMet_sigMatrix_01 << " " << m->MVAMet_sigMatrix_10 << " " << m->MVAMet_sigMatrix_11 << std::endl;
+				vector<myobject> PFMet = m->RecPFMet;
+				std::cout << " PF MET(X,Y)= " << PFMet.front().et*TMath::Cos(Met.front().phi) << " " << PFMet.front().et*TMath::Sin(Met.front().phi) << std::endl;
+				std::cout << " PF MET covariance = " << m->MET_sigMatrix_00 << " " << m->MET_sigMatrix_01 << " " << m->MET_sigMatrix_10 << " " << m->MET_sigMatrix_11 << std::endl;
+			}
+			
 			o_pass=true;
 			o_event_weight=weight;
 			o_type=event_type;
@@ -3749,7 +3765,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					o_pdg_H1=13*Hcand_signal[0].charge;
 					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
-				case 2://MMME
+				case 2://MMEM
 					o_pdg_Z1=13*Zcand[0].charge;
 					o_pdg_Z2=13*Zcand[1].charge;
 					o_pdg_H1=11*Hcand_signal[0].charge;
@@ -3773,7 +3789,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					o_pdg_H1=13*Hcand_signal[0].charge;
 					o_pdg_H2=15*Hcand_signal[1].charge;
 					break;
-				case 6://EEME
+				case 6://EEEM
 					o_pdg_Z1=11*Zcand[0].charge;
 					o_pdg_Z2=11*Zcand[1].charge;
 					o_pdg_H1=11*Hcand_signal[0].charge;
@@ -3964,9 +3980,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
 					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
-				case 2://MMME
-					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
-					o_FR_pdg_H2.push_back(11*Hcand_FR[i+1].charge);
+				case 2://MMEM
+					o_FR_pdg_H1.push_back(11*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(13*Hcand_FR[i+1].charge);
 					break;
 				case 3://MMET
 					o_FR_pdg_H1.push_back(11*Hcand_FR[i].charge);
@@ -3980,9 +3996,9 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
 					o_FR_pdg_H2.push_back(15*Hcand_FR[i+1].charge);
 					break;
-				case 6://EEME
-					o_FR_pdg_H1.push_back(13*Hcand_FR[i].charge);
-					o_FR_pdg_H2.push_back(11*Hcand_FR[i+1].charge);
+				case 6://EEEM
+					o_FR_pdg_H1.push_back(11*Hcand_FR[i].charge);
+					o_FR_pdg_H2.push_back(13*Hcand_FR[i+1].charge);
 					break;
 				case 7://EEET
 					o_FR_pdg_H1.push_back(11*Hcand_FR[i].charge);
