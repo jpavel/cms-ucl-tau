@@ -1,0 +1,61 @@
+0) Copy the content of $ROOTSYS/tmva to cms-ucl-tau/ZHtautauAnalysis/macros/TMVA_2/tmva/ directory (the one in which is the file you are now reading)
+   -> If your ROOT does not have tmva subdir, download it (instructions in README_INSTALL file)
+   -> do "source setup.sh" to set the paths correctly. You should see TMVA welcome message when you start root. 
+1) provide input trees with events from the Wjets (QCD) control regions. One tree will contain events where probe passed and one where probe failed. 
+   -> If you don't have separate tree, you can use macro ConvertSFrameOutput.C to split your tree into signal (passing probe) and backround tree (failing probe)
+2) Edit WH_kNN_Classification.C
+   a) check the name of input variables around l. 123:
+----
+factory->AddVariable( "pt_eH", 'D' );
+factory->AddVariable( "max(pt_jet_eH,pt_eH)", 'D' );
+factory->AddVariable( "njets", 'I' );
+----
+
+   b) Check that the names of input trees are correct around l.152
+----
+TTree *inputTree     = (TTree*)input->Get("FakeTreeSig");
+TTree *background = (TTree*)input->Get("FakeTreeBG");
+----
+
+3) Run in root to produce the weight files.
+   -> .L WH_kNN_Classification.C
+   -> TMVAClassification("<path to your file>")
+
+
+4) Provide files with events in f1, f2 or f1f2 control regions.
+
+5) Edit WH_kNN_ClassificationApplication.C
+   a) check the name of input variables around l. 70. They must be EXACTLY the same and in the same order as used in previous stage (training)
+----
+reader->AddVariable( "pt_eH", &var1 );
+reader->AddVariable( "max(pt_jet_eH,pt_eH)", &var2 );
+reader->AddVariable( "njets",                &var3 );
+---
+   b) Check the name of input tree with events from fake rate application control regions (loose-not-tight sidebands) around l. 137
+---
+TTree* theTree = (TTree*)input->Get("FakeTreeData");
+----
+  c) Check that the variables you read from DataTree are correct. You can connect to more variables if you want to e.g. calculate fake rate for case with 2 fake leptons. Definition around l. 141. Connect also to whatever variable you want to plot.
+---
+theTree->SetBranchAddress( "pt_eH", &pt_eH );
+theTree->SetBranchAddress( "pt_jet_eH", &pt_jet_eH );
+theTree->SetBranchAddress( "njets", &njets );
+theTree->SetBranchAddress( "mass", &mass );
+----
+  d) Check that filling of evaluator input varibles (var1-3 are inputs for Reader which you fill with the values from observed data control regions) is correct (l.161)
+---
+var1 = pt_eH;
+var2 = max(pt_eH,pt_jet_eH);
+var3 = njets;
+----
+  e) optionally, you can add more evaluations per event - simpy add lines where you fill var1-3 with different values (e.g. for second lepton) and then again the line with ->EvaluateMVA
+---
+double kNN_out=reader->EvaluateMVA( "KNN method"           );
+----
+  f) Check the operation with kNN output on l. 174
+
+6) Run in root:
+   -> .L WH_kNN_ClassificationApplication.C
+   -> TMVAClassificationApplication("<path to your file with tree made from events in f1,f2,f1f2 control regions>")
+
+7) Enjoy the histogram in TMVAapp.root (it best served cold with a bit of lime)
