@@ -1,0 +1,9 @@
+# get correct version of ROOT+TMVA
+git clone http://root.cern.ch/git/root.git MyRoot
+cd MyRoot/
+git checkout v5-34-05
+# copy the TMVA directory
+cp -r tmva/ ~/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/TMVA/
+cd ~/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/TMVA/test
+#setup the environment
+source setup.sh

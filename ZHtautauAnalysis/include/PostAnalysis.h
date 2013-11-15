@@ -191,6 +191,8 @@ private:
     TH2* h_svCorrelation;
     TH1* h_svDifference;
     TH1* h_svDifferenceSig;
+    TH1* h_svDifferenceRel;
+	TH1* h_svDifferenceAssym;
     TH2* h_svDifference_MET;
     TH2* h_svDifference_METphi;
     

@@ -50,6 +50,9 @@ void PostAnalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	h_svCorrelation						 = Book(TH2D("h_svCorrelation","Mass correlation;ULB mass [GeV];UCL mass [GeV]",300,0.,300.,300,0.,300.));
     h_svDifference						 = Book(TH1D("h_svDifference","Mass difference;#Delta M[GeV]",100,-50.,50.));
     h_svDifferenceSig					 = Book(TH1D("h_svDifferenceSig","Mass difference;#Delta M/#sigma M",120,-3.0,3.0));
+    h_svDifferenceRel					 = Book(TH1D("h_svDifferenceRel","Mass relative difference;#Delta M/M",160,-2.0,2.0));
+	h_svDifferenceAssym					 = Book(TH1D("h_svDifferenceAssym","Mass assymetry; 2#DeltaM/(M_{UCL}+M_{ULB})",160,-2.0,2.0));
+    
 	h_svDifference_MET					 = Book(TH2D("h_svDifference_MET","Mass difference;#Delta MET; #Delta M[GeV]",100,-0.003,0.003,100,-20,20));
 	h_svDifference_METphi				 = Book(TH2D("h_svDifference_METphi","Mass difference;#Delta METphi; #Delta M[GeV]",100,-1.0,0.1,100,-20,20));
 	
@@ -495,6 +498,8 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 					Hist("h_svDifference")->Fill(Svdiff);
 					std::cout << in_svMass_unc << std::endl;
 					Hist("h_svDifferenceSig")->Fill(Svdiff/in_svMass_unc);
+					Hist("h_svDifferenceRel")->Fill(Svdiff/in_svMass);
+					Hist("h_svDifferenceAssym")->Fill(2*Svdiff/(sync_SVmass+in_svMass));
 					
 					Hist("h_svDifference_MET")->Fill(metDiffABS,Svdiff);
 					Hist("h_svDifference_METphi")->Fill(metPhiDiffABS,Svdiff);

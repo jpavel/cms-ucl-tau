@@ -9,6 +9,7 @@ ZHtautauAnalysis/config/*/Analysis*.root
 ZHtautauAnalysis/config/2012.root
 ZHtautauAnalysis/config/*.txt
 ZHtautauAnalysis/config/*.csv
+ZHtautauAnalysis/config/Summer13Analysis/*.root
 config/input.xml
 config/jobTempOutput*
 macros/Filter/*.txt
@@ -76,6 +77,16 @@ ZHtautauAnalysis/config/*/*.txt
 ZHtautauAnalysis/macros/plots/*/*.root
 ZHtautauAnalysis/macros/plots/*/*.pdf
 ZHtautauAnalysis/macros/plots/*/*.ps
+ZHtautauAnalysis/macros/plots/Comparison/*/
+ZHtautauAnalysis/macros/plots/Comparison/*.tgz
+ZHtautauAnalysis/macros/plots/Comparison/*.zip
+
+
 
 *jobTempOutput*
 *.list
+
+ZHtautauAnalysis/macros/TMVA_2/tmva/test/*.C
+ZHtautauAnalysis/macros/TMVA_2/tmva/test/*.cxx
+ZHtautauAnalysis/macros/TMVA_2/tmva/test/*
+ZHtautauAnalysis/macros/TMVA_2/tmva/*
