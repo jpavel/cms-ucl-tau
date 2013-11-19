@@ -81,8 +81,8 @@ void WHfake::BeginInputData( const SInputData& ) throw( SError ) {
 	syncOutTree->Branch("o_event", &o_event,"o_event/L");
 	syncOutTree->Branch("o_lumi", &o_lumi),"o_lumi/i";
 	syncOutTree->Branch( "o_weight", &o_weight,"o_weight/D");
-	syncOutTree->Branch( "o_id_iso_leadE", &o_id_iso_leadE,"o_id_iso_leadE/D");
-	syncOutTree->Branch( "o_id_iso_subLeadE", &o_id_iso_subLeadE,"o_id_iso_subLeadE/D");
+	syncOutTree->Branch( "o_id_iso_leadE", &o_id_iso_leadE,"o_id_iso_leadE/i");
+	syncOutTree->Branch( "o_id_iso_subLeadE", &o_id_iso_subLeadE,"o_id_iso_subLeadE/i");
 	syncOutTree->Branch( "o_pt_leadE", &o_pt_leadE,"o_pt_leadE/D");
 	syncOutTree->Branch( "o_pt_subLeadE", &o_pt_subLeadE,"o_pt_subLeadE/D");
 	syncOutTree->Branch( "o_pt_tH", &o_pt_tH,"o_pt_tH/D");
@@ -777,64 +777,30 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         nJets.clear();
         for(uint ipair=0; ipair < pair.size(); ipair++){
                 int count_Jets = 0;
+                bool haveBjet = false;
+                bool haveTagJet = false;
                 for (uint i = 0; i < jet.size(); i++) {
                         double jetPt = jet[i].pt;
                         double jetEta = jet[i].eta;
-                        double jetPhi = jet[i].phi;
                         double PUjetID = jet[i].puJetIdLoose;
+                        double bTag = jet[i].bDiscriminatiors_CSV;
                         double dR1,dR2;
                         dR1=deltaR(jet.at(i),pair[ipair].first);
                         dR2=deltaR(jet.at(i),pair[ipair].second);
-                        if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "PU jet ID" << std::endl;
+                        if(examineThisEvent) std::cout << "jet pt " << jetPt << "PU jet ID" << std::endl;
 
-                        if(jetPt > 20. && fabs(jetEta) < 2.4 && PUjetID){
-                                if(dR1 > 0.4 && dR2 > 0.4) 
-					count_Jets++;
-                                }
-                        }
-		if( count_Jets >= 1 ){
-			nJets.push_back(count_Jets);
-		}else{
+                        if(jetPt < 20.)continue;
+                        if(!PUjetID) continue;
+			if(dR1 < 0.4 && dR2 < 0.4) continue; 
+                        if(jetEta<2.3) haveTagJet = true;
+                        if(jetEta < 2.4 && bTag > bTagValue) haveBjet = true;
+                        count_Jets++;
+		}
+                if(haveBjet || !haveTagJet){
                         pair.erase(pair.begin()+ipair);
                         ipair=ipair-1;
 		}
 	}
-
-	if( pair.size()==0 )
-		return;
-
-	for(uint ipair=0; ipair < pair.size(); ipair++){
-		bool bTagVeto = false;
-		for (uint i = 0; i < jet.size() && !bTagVeto; i++) {
-			double jetPt = jet[i].pt;
-			double jetEta = jet[i].eta;
-			double jetPhi = jet[i].phi;
-                        double bTag = jet[i].bDiscriminatiors_CSV;
-                        double PUjetID = jet[i].puJetIdLoose;
-                        double dR1,dR2;
-                        dR1=deltaR(jet.at(i),pair[ipair].first);
-                        dR2=deltaR(jet.at(i),pair[ipair].second);
-                        if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "btag " << bTag << "PU jet ID" << std::endl;
-
-                        if(jetPt > 20. && fabs(jetEta) < 2.4 && PUjetID && bTag > bTagValue){
-                                        if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
-                                        if(examineThisEvent) std::cout << " distances are " << dR1 << " " << dR2 << std::endl;
-                                        bool overlap = false;
-                                        if(dR1 < 0.4 || dR2 < 0.4){
-                                                overlap = true;
-                                        }
-                                        bTagVeto = !overlap;
-                        }
-                }
-
-                if(examineThisEvent) std::cout << " nJets.size() " << nJets.size() << " - value " << nJets[ipair] <<  std::endl;
-                if(bTagVeto){
-                        if(examineThisEvent) std::cout << " b-jet found! " << std::endl;
-                        pair.erase(pair.begin()+ipair);
-                        nJets.erase(nJets.begin()+ipair);
-                        ipair=ipair-1;
-                }
-        }
 
 	if( pair.size()==0 )
 		return;
@@ -849,7 +815,9 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(Tmass(m,pair[ipair].first) < 30.) continue;
 
 		if(60 > PairMass(pair[ipair].first,pair[ipair].second) || PairMass(pair[ipair].first,pair[ipair].second) > 120){ 
-	
+                      
+                        o_weight = PUWeight;	
+
 			bool etaR = fabs(((pair[ipair].second).eta)) < 1.479;
 			bool relIsoLoose_subLead = RelIso(pair[ipair].second) < 0.20;
 			bool relIsoTight_subLead = RelIso(pair[ipair].second) < 0.15;
