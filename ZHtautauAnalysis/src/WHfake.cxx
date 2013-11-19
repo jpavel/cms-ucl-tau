@@ -60,25 +60,6 @@ void WHfake::EndCycle() throw( SError ) {
 
 void WHfake::BeginInputData( const SInputData& ) throw( SError ) {
 	
-	// ntuple definition
-	DeclareVariable(o_selected,"selected");
-	DeclareVariable(o_run,"run");
-	DeclareVariable(o_lumi,"lumi");
-	DeclareVariable(o_event,"event");
-        DeclareVariable(o_weight,"weight");
-	DeclareVariable(o_id_iso_eleW,"id_iso_eleW");
-	DeclareVariable(o_id_iso_eleH,"id_iso_eleH");
-        DeclareVariable(o_pt_eW,"pt_eW");
-        DeclareVariable(o_pt_eH,"pt_eH");
-        DeclareVariable(o_pt_tH,"pt_tH");
-        DeclareVariable(o_pt_jet_eW,"pt_jet_eW");
-        DeclareVariable(o_pt_jet_eH,"pt_jet_eH");
-        DeclareVariable(o_njets,"njets");
-        DeclareVariable(o_maxPt_eW,"maxPt_eW");
-        DeclareVariable(o_maxPt_eH,"maxPt_eH");
-        DeclareVariable(o_mass,"mass");
-        DeclareVariable(o_LT,"LT");
-
 	// histogram booking
         Double_t bins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 130, 300 };
 
@@ -92,8 +73,28 @@ void WHfake::BeginInputData( const SInputData& ) throw( SError ) {
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
-	//eventList_wjets.open("eventList_wjets.list");
-    
+	eventList_wjets.open("eventList_wjets.list");
+   
+	syncOutTree = new TTree("UCL_tree","UCL_tree");
+	syncOutTree->Branch("o_selected", &o_selected, "o_selected/i");
+	syncOutTree->Branch("o_run", &o_run,"o_run/i");
+	syncOutTree->Branch("o_event", &o_event,"o_event/L");
+	syncOutTree->Branch("o_lumi", &o_lumi),"o_lumi/i";
+	syncOutTree->Branch( "o_weight", &o_weight,"o_weight/D");
+	syncOutTree->Branch( "o_id_iso_leadE", &o_id_iso_leadE,"o_id_iso_leadE/D");
+	syncOutTree->Branch( "o_id_iso_subLeadE", &o_id_iso_subLeadE,"o_id_iso_subLeadE/D");
+	syncOutTree->Branch( "o_pt_leadE", &o_pt_leadE,"o_pt_leadE/D");
+	syncOutTree->Branch( "o_pt_subLeadE", &o_pt_subLeadE,"o_pt_subLeadE/D");
+	syncOutTree->Branch( "o_pt_tH", &o_pt_tH,"o_pt_tH/D");
+	syncOutTree->Branch( "o_pt_jet_leadE", &o_pt_jet_leadE,"o_pt_jet_leadE/D");
+	syncOutTree->Branch( "o_pt_jet_subLeadE", &o_pt_jet_subLeadE,"o_pt_jet_subLeadE/D");
+	syncOutTree->Branch( "o_njets", &o_njets,"o_njets/i");
+	syncOutTree->Branch( "o_maxPt_leadE", &o_maxPt_leadE,"o_maxPt_leadE/D");
+	syncOutTree->Branch( "o_maxPt_subLeadE", &o_maxPt_subLeadE,"o_maxPt_subLeadE/D");
+	syncOutTree->Branch( "o_mass", &o_mass,"o_mass/D");
+	syncOutTree->Branch( "o_LT", &o_LT,"o_LT/D");
+
+
 	//sync
 
 	//std::ifstream myfile;
@@ -133,7 +134,12 @@ void WHfake::EndInputData( const SInputData& ) throw( SError ) {
         log2.open("total.txt");
         log2 << *m_allEvents << std::endl;
         log2.close();
-	eventList_P1P2P3.close();
+	eventList_wjets.close();
+
+	syncOut = new TFile("output_tree.root","RECREATE");
+	syncOutTree->Write();
+	syncOut->Close();
+
 
    return;
 
@@ -279,10 +285,8 @@ bool WHfake::isLooseMu(myobject mu){
                 }else return false;
 }
 
-
-
-
-std::vector<myobject> WHfake::SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_ = 5., double muEta_ = 2.4){
+std::vector<myobject> WHfake::SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_ = 5., double muEta_ = 2.4){
+//std::vector<myobject> WHfake::SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_ = 5., double muEta_ = 2.4){
 
 	std::vector<myobject> outMu_;
 	outMu_.clear();
@@ -294,7 +298,7 @@ std::vector<myobject> WHfake::SelectGoodMuVector(std::vector<myobject> _muon, st
 		bool pfID = PFMuonID(_muon[i]);
 		bool pixelHits = (_muon[i].intrkLayerpixel >=1);
 
-		double max = 0.4;
+		/*double max = 0.4;
 		double minDist = 1.0;
 		int index = -1;
 		for(uint j = 0; j< _jets.size(); j++)
@@ -309,9 +313,9 @@ std::vector<myobject> WHfake::SelectGoodMuVector(std::vector<myobject> _muon, st
 		}
 		bool bTag=true;
 		if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
-
+		 */
 		bool dZ = fabs(_muon[i].dz_PV) < 0.2;
-		if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && bTag && dZ ){
+		if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && dZ ){
 			outMu_.push_back(_muon[i]);
 		}
 	}
@@ -422,6 +426,24 @@ bool WHfake::LooseEleId(myobject o){
 	return LooseEleId(o.pt, o.eta_SC,o.Id_mvaNonTrg);
 }
 
+myobject WHfake::ClosestInCollection(myobject o1, std::vector<myobject> collection, double max=0.5)
+{
+        int index = -1;
+        double minDist = 999.;
+        for(uint i = 0; i< collection.size(); i++)
+        {
+                double dR = deltaR(o1,collection[i]);
+                if(collection[i].pt < 12.) continue;
+                if(dR< max && dR < minDist)
+                {
+                        index=i;
+                        minDist=dR;
+                }
+        }
+        if(index>=0) return collection[index];
+        else return o1;
+}
+
 void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
         o_selected = 0;           
@@ -429,16 +451,16 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         o_lumi = 0;          
         o_event = 0;
         o_weight = 0;
-        o_id_iso_eleW = 0;
-        o_id_iso_eleH = 0;
-        o_pt_eW = 0;
-        o_pt_eH = 0;
+        o_id_iso_leadE = 0;
+        o_id_iso_subLeadE = 0;
+        o_pt_leadE = 0;
+        o_pt_subLeadE = 0;
         o_pt_tH = 0;
-        o_pt_jet_eW = 0;
-        o_pt_jet_eH = 0;
+        o_pt_jet_leadE = 0;
+        o_pt_jet_subLeadE = 0;
         o_njets = 0;
-        o_maxPt_eW = 0;
-        o_maxPt_eH = 0;
+        o_maxPt_leadE = 0;
+        o_maxPt_subLeadE = 0;
         o_mass = 0;
         o_LT = 0;
         
@@ -524,9 +546,10 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> jet = m->RecPFJetsAK5;
 
 	if(examineThisEvent) std::cout << muon.size() << " preselected muons " << std::endl;
-	std::vector<myobject> vetoMuon = SelectGoodMuVector(muon,jet,examineThisEvent);
+	std::vector<myobject> vetoMuon = SelectGoodMuVector(muon,examineThisEvent);
+	//std::vector<myobject> vetoMuon = SelectGoodMuVector(muon,jet,examineThisEvent);
 	if(examineThisEvent) std::cout << vetoMuon.size() << " selected muons --> good for VETO!" << std::endl;
-	m_logger << DEBUG << " veto muon " << SLogger::endmsg;
+	//m_logger << DEBUG << " veto muon " << SLogger::endmsg;
 
 	if(examineThisEvent) std::cout << electron.size() << " preselected electrons " << std::endl;
 	std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent);
@@ -536,8 +559,8 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons (NO ID APPLIED) --> good for SIGNAL or FAKE candidates!" << std::endl;
 
 	//overlap cleaning: selected muons and selected electrons (with loose id) 
-	CrossCleanWithMu(&genericElectron,vetoMuon,examineThisEvent,maxDeltaR);
-	if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons after the MU-ELE x-Cleaning" << std::endl;
+	//CrossCleanWithMu(&genericElectron,vetoMuon,examineThisEvent,maxDeltaR);
+	//if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons after the MU-ELE x-Cleaning" << std::endl;
 
 	//overlap cleaning: selected electrons (with loose id) and taus 
 	if(examineThisEvent) std::cout << tau.size() << " preselected taus " << std::endl;
@@ -577,8 +600,8 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 				std::cout << "pt " << (genericElectron.at(i)).pt << " ctfSc - ScPix - CtfCC - cv " << isGsfCtfScPixCC << " - " << isGsfScPixCC << " - " << isGsfCtfCC << " - " << conversionVeto << endl;
 			}
 			goodElectron.push_back(genericElectron.at(i));
-			genericElectron.erase(genericElectron.begin()+i);
-			i = i-1;
+			//genericElectron.erase(genericElectron.begin()+i);
+			//i = i-1;
 		} 
 	m_logger << DEBUG << " inside good ele for " << SLogger::endmsg;
 	}
@@ -590,7 +613,6 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if( goodElectron.size() < 2 )
 		return;
 
-        std::vector<myobject> goodTau;
         goodTau.clear();
 
         for (uint i = 0; i < tau.size(); i++) {
@@ -603,114 +625,240 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                 if (tauPt > 20. && fabs(tauEta) < 2.3 && DecayMode && fabs(tauDZ) < 0.2){
                         if(examineThisEvent) std::cout << " -> Selected (NO ISO APPLIED)!" << std::endl;
                         goodTau.push_back(tau.at(i));
-                        tau.erase(tau.begin()+i);
-                        i=i-1;
                 }
        }
 
-
-	std::vector<myobject> tag;
 	tag.clear();
-	std::vector<myobject> probe;
 	probe.clear();
 
 	for(uint i = 0; i < goodElectron.size(); ++i)
 	{
+                bool isTag = false;
+                bool isProbe = false;
 		bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
 		bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.15;
 		bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.10;
+                bool isoLoose_W = etaR && relIsoLoose_W;
+                bool isoTight_W = !etaR && relIsoTight_W;
+		bool pt10 = goodElectron[i].pt > 10.;
 		bool pt20 = goodElectron[i].pt > 20.;
 		bool tightEleID = TightEleId(goodElectron.at(i));
 
-		if(!pt20) continue;
-		if(!tightEleID) continue;
-		if(!(etaR&&relIsoLoose_W) || !(!etaR&&relIsoTight_W)) continue;
-                
-                o_id_iso_eleW = 1;
+		if(examineThisEvent) cout << "ele " << i << " pt/tightEle/eta/iso: " << goodElectron[i].pt<<"/"<<tightEleID<<"/"<<fabs((goodElectron.at(i).eta))<<"/"<<RelIso(goodElectron.at(i))<<  endl;
+		//cout << "ele " << i << " pt/tightEle/eta/iso: " << goodElectron[i].pt<<"/"<<tightEleID<<"/"<<fabs((goodElectron.at(i).eta))<<"/"<<RelIso(goodElectron.at(i))<<  endl;
+		if( pt20 && tightEleID && (isoLoose_W || isoTight_W) ) isTag = true;
+		//if( pt20 && tightEleID && (isoLoose_W || isoTight_W) ) isTag = true;
+		if( pt10 ) isProbe = true;
+ 
+		if( isTag ) {
+			if(examineThisEvent) cout << "good as tag!" << endl;
+			tag.push_back( goodElectron[i] );}               
+                if( isProbe ){
+			if(examineThisEvent) cout << "good as probe!" << endl;
+			probe.push_back( goodElectron[i] );}               
+	}
+               
+        if( (tag.size() + probe.size()) < 2 )
+		return;
 
-		// Got a tag, depending on isolation this defines either W+Jets or QCD regino
-		for(uint j = 0; j < goodElectron.size() && i!=j; ++j)
-		{
+        //cout << "good electron size: " << goodElectron.size() << endl;
+        if(examineThisEvent) cout << "good electron size: " << goodElectron.size() << endl;
+        if(examineThisEvent) cout << "tag size: " << tag.size() << endl;
+        if(examineThisEvent) cout << "probe size: " << probe.size() << endl;
+
+	pair.clear();
+	for(uint i=0; i<tag.size(); i++){
+		if(examineThisEvent) cout << "tag trigger object " << tag[i].hasTrgObject_loose << endl;
+		if(examineThisEvent) cout << "tag pt " << tag[i].pt << endl;
+                if( !tag[i].hasTrgObject_loose ) continue;
+		for(uint j=0; j<probe.size(); j++){
+			std::pair<myobject,myobject> tmpPair;
+
+			if(examineThisEvent) cout << "probe trigger object " << probe[j].hasTrgObject_loose << endl;
+			if(examineThisEvent) cout << "probe pt " << probe[j].pt << endl;
+			if(examineThisEvent) cout << "charge " << tag[i].charge*probe[j].charge << endl;
+			if(examineThisEvent) cout << "mass " << PairMass(tag[i],probe[j]) << endl;
+
+			if(deltaR(tag[i], probe[j]) < 0.5) continue;
+			if( !probe[j].hasTrgObject_loose ) continue;
+			if(tag[i].charge*probe[j].charge < 0) continue;
+			if(probe[j].pt > tag[i].pt) continue;
+			//if(deltaR(probe[j],tag[i]) < 0.5) continue;
+                        //if(PairMass(tag[i],probe[j]) < 20. ) continue;
+			//cout << "GOOD!" << endl;
+			tmpPair=std::make_pair(tag[i],probe[j]);
+			pair.push_back(tmpPair);
+		}
+	}
+        if(examineThisEvent) cout << "pair size: " << pair.size() << endl;
+        //cout << "probe size: " << probe.size() << endl;
+	// Count the number of good muons
+        if(pair.size()==0)
+		return;
+ 
+
+	//cout << "number of veto muons: " << vetoMuon.size() << endl;
+	for(uint ipair=0; ipair < pair.size(); ipair++){
+		bool haveMuon = false;
+		for(uint l = 0; l < vetoMuon.size(); ++l){
+			bool pt10_m = vetoMuon[l].pt > 10.;
+			bool iso = RelIso(vetoMuon[l]) < 0.15;
+			bool dR1 = deltaR(vetoMuon[l],pair[ipair].first) < 0.4;
+			bool dR2 = deltaR(vetoMuon[l],pair[ipair].second) < 0.4;
+
+			//cout << "pt/dr1/dr2 " <<  vetoMuon[l].pt<<"/"<<dR1<<"/"<<dR2 << endl;
+			if(!pt10_m) continue;
+			if(!iso) continue;
+			if(!dR1 && !dR2){
+				haveMuon = true;
+                                break;
+			}
+		}
+                if( haveMuon ){
+			pair.erase(pair.begin()+ipair);
+                        ipair = ipair - 1;}
+                else
+			if(examineThisEvent) cout << "No additional muons! --> Check Additional electrons" << endl;
+      
+	}
+
+        if( pair.size()==0 )
+		return;
+
+	for(uint ipair=0; ipair < pair.size(); ipair++){
+		bool haveElectron = false;
+		for(uint i = 0; i < goodElectron.size(); i++){ 
+                        if(examineThisEvent) cout << "goodElectronPt/tagPt/probePt: " << goodElectron[i].pt<<"/"<<(pair[ipair].first).pt<<"/"<<(pair[ipair].second).pt << endl;
+			bool dR1 = deltaR(goodElectron[i],pair[ipair].first)<0.4;
+			bool dR2 = deltaR(goodElectron[i],pair[ipair].second)<0.4;
+                        if(examineThisEvent) cout << "dR1/dR2: " << dR1<<"/"<<dR2 << endl;
 			bool pt10 = goodElectron[i].pt > 10.;
 
-			if(!pt10) continue;
-			if(goodElectron[i].charge*goodElectron[j].charge < 0) continue;
-			if(goodElectron[j].pt > goodElectron[i].pt) continue;
-			if(TMath::Max(goodElectron[i].pt, goodElectron[j].pt) < 20.) continue;
-			if(deltaR(goodElectron[i], goodElectron[j]) < 0.5) continue;
-
-			// Veto construction
-			tag.push_back(goodElectron[i]); //tag
-			probe.push_back(goodElectron[j]); //probe
-
-			// Count the number of good muons
-			unsigned int nGoodMuons = 0;
-			for(unsigned int l = 0; l < vetoMuon.size(); ++l){
-				bool pt10_m = vetoMuon[l].pt > 10.;
-                                bool dR1 = deltaR(vetoMuon[l],tag[0])<0.4;
-                                bool dR2 = deltaR(vetoMuon[l],probe[0])<0.4;
-				if(!pt10_m)
-					if(!dR1 && !dR2)
-						++nGoodMuons;
+			if( !pt10 ) continue;
+			if( !dR1 && !dR2 ){
+				haveElectron = true;
+				break;
 			}
-			if(nGoodMuons > 0) continue;
+		}
 
-			// 3rd electron rejection
-			bool haveElectron = false;
-			for(unsigned int l = 0; l < goodElectron.size(); ++l) if(l != i && l != j){
-				bool etaR = fabs((goodElectron.at(i).eta)) < 1.479;
-				bool relIsoLoose_W = RelIso(goodElectron.at(i)) < 0.15;
-				bool relIsoTight_W = RelIso(goodElectron.at(i)) < 0.10;
-				bool pt20 = goodElectron[i].pt > 20.;
-				bool tightEleID = TightEleId(goodElectron.at(i));
-                                bool dR1 = deltaR(goodElectron[l],tag[0])<0.4;
-                                bool dR2 = deltaR(goodElectron[l],probe[0])<0.4;
-				if( pt10 ) //&& tightEleID && ( (etaR&&relIsoLoose_W) || (!etaR&&relIsoTight_W) ) )
-					if(!dR1 && !dR2)
-						haveElectron = true;
+                if(haveElectron){
+			pair.erase(pair.begin()+ipair);
+                        ipair = ipair - 1;}
+                else
+			if(examineThisEvent) cout << "No additional electrons! --> Check Additional taus" << endl;
+	}
+		//cout << "after the check! check the taus " << endl;
+		// Count the number of good taus
+        if( pair.size()==0 )
+		return;
+
+	for(uint ipair=0; ipair < pair.size(); ipair++){
+		bool haveTau = false;
+		for(uint l = 0; l < goodTau.size(); ++l){
+			bool dR1_ = deltaR(goodTau[l],pair[ipair].first)<0.4;
+			bool dR2_ = deltaR(goodTau[l],pair[ipair].second)<0.4;
+			if( !dR1_ && !dR2_ ){
+				haveTau = true;
+				break;
 			}
-			if(haveElectron) continue;
+		}
+                if(haveTau){
+			pair.erase(pair.begin()+ipair);
+                        ipair = ipair - 1;}
+                else
+			if(examineThisEvent) cout << "No additional taus! --> Check b-jet" << endl;
+	}
+        
+	if( pair.size()==0 )
+		return;
+		// Jet counting
+        nJets.clear();
+        for(uint ipair=0; ipair < pair.size(); ipair++){
+                int count_Jets = 0;
+                bool bTagVeto = false;
+                for (uint i = 0; i < jet.size() && !bTagVeto; i++) {
+                        double jetPt = jet[i].pt;
+                        double jetEta = jet[i].eta;
+                        double jetPhi = jet[i].phi;
+                        double bTag = jet[i].bDiscriminatiors_CSV;
+                        double PUjetID = jet[i].puJetIdLoose;
+                        double dR1,dR2;
+                        dR1=deltaR(jet.at(i),pair[ipair].first);
+                        dR2=deltaR(jet.at(i),pair[ipair].second);
+                        if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "btag " << bTag << "PU jet ID" << std::endl;
 
-			// Count the number of good taus
-			unsigned int nGoodTaus = 0;
-			for(unsigned int l = 0; l < goodTau.size(); ++l){
-                                bool dR1 = deltaR(goodTau[l],tag[0])<0.4;
-                                bool dR2 = deltaR(goodTau[l],probe[0])<0.4;
-				if(!dR1 && !dR2)
-					++nGoodTaus;
+                        if(jetPt > 20. && fabs(jetEta) < 2.4 && PUjetID){
+                                if(dR1 > 0.4 && dR2 > 0.4) count_Jets++;
+                                if(bTag > bTagValue){
+                                        if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
+                                        if(examineThisEvent) std::cout << " distances are " << dR1 << " " << dR2 << std::endl;
+                                        bool overlap = false;
+                                        if(dR1 < 0.4 || dR2 < 0.4){
+                                                overlap = true;
+                                        }
+                                        bTagVeto = !overlap;
+                                }
+                        }
+                }
+                nJets.push_back(count_Jets);
+
+                if(examineThisEvent) std::cout << " nJets.size() " << nJets.size() << " - value " << nJets[ipair] <<  std::endl;
+                if(bTagVeto){
+                        if(examineThisEvent) std::cout << " b-jet found! " << std::endl;
+                        pair.erase(pair.begin()+ipair);
+                        nJets.erase(nJets.begin()+ipair);
+                        ipair=ipair-1;
+                }
+        }
+
+	if( pair.size()==0 )
+		return;
+
+	closestJet_subLead.clear();
+
+	for(uint ipair=0; ipair < pair.size(); ipair++){
+		if(examineThisEvent) cout << "Iso of tag " << RelIso(pair[ipair].first) << endl;
+		if(examineThisEvent) cout << "Tmass with tag " << Tmass(m,pair[ipair].first) << endl;
+		if(examineThisEvent) cout << "Tmass with probe " << Tmass(m,pair[ipair].second) << endl;
+
+		if(Tmass(m,pair[ipair].first) < 30.) continue;
+
+		if(60 > PairMass(pair[ipair].first,pair[ipair].second) || PairMass(pair[ipair].first,pair[ipair].second) > 120){ 
+	
+			bool etaR = fabs(((pair[ipair].second).eta)) < 1.479;
+			bool relIsoLoose_subLead = RelIso(pair[ipair].second) < 0.20;
+			bool relIsoTight_subLead = RelIso(pair[ipair].second) < 0.15;
+			bool isoLoose_subLead = etaR && relIsoLoose_subLead;
+			bool isoTight_subLead = !etaR && relIsoTight_subLead;
+			bool looseEleID = LooseEleId( pair[ipair].second);
+
+			if(examineThisEvent) cout << "GOOD! selection finished! Now let's fill the tree... " << endl;
+
+			o_pt_subLeadE = (pair[ipair].second).pt;
+			if( looseEleID && (isoLoose_subLead || isoTight_subLead))
+				o_id_iso_subLeadE = 1;
+			else
+				o_id_iso_subLeadE = 0;
+
+			closestJet_subLead.push_back(ClosestInCollection(pair[ipair].second,m->RecPFJetsAK5,0.5));
+
+			o_njets = nJets[ipair];
+			if(closestJet_subLead.size()==1){
+				o_pt_jet_subLeadE = closestJet_subLead[0].pt;
+				if(closestJet_subLead[0].pt > (pair[ipair].second).pt)
+					o_maxPt_subLeadE = closestJet_subLead[0].pt;
+				else
+					o_maxPt_subLeadE = (pair[ipair].second).pt;
+				closestJet_subLead.clear();
 			}
-			if(nGoodTaus > 0) continue;
-
-			// Jet counting
-			unsigned int nJets20 = 0;
-			bool haveTagJet = false;
-			bool haveBJet = false;
-			for(unsigned int l = 0; l < jet.size(); ++l)
-			{
-				double jetPt = jet[l].pt;
-				double jetEta = jet[l].eta;
-				double bTag = jet[l].bDiscriminatiors_CSV;
-				double PUjetID = jet[l].puJetIdLoose;
-				if(jetPt < 20) continue;
-				if(jetEta > 2.4) continue;
-				if(!PUjetID) continue;
-				if(deltaR(jet[l], tag[0])<0.4) continue;
-				if(deltaR(jet[l], probe[0])<0.4) continue;
-				haveTagJet = true;
-				if(jetEta > 2.3) continue;
-				if(bTag < bTagValue) continue;
-				haveBJet = true;
-				++nJets20;
+			else{
+				o_pt_jet_subLeadE = -1;
+				o_maxPt_subLeadE = (pair[ipair].second).pt;
 			}
-
-			if(haveBJet) continue;
-			if(!haveTagJet) continue;
-
-			if(Tmass(m,tag[0]) > 30. && (60 > PairMass(tag[0], probe[0])  || PairMass(tag[0], probe[0]) > 120) )
-				if(examineThisEvent) cout << "ciao" << endl;
-
-		}//first good electron
-	}//second good electron
+			eventList_wjets << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ;
+			syncOutTree->Fill();
+		}
+	}//loop of the pairs
 } 
 
 

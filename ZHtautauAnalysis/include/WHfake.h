@@ -74,12 +74,14 @@ public:
    double RelIso(myobject mu, bool verb);
    double Tmass(myevent *m, myobject mu);
    bool PFMuonID(myobject mu);
-   std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
+   std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, bool verb, double muPt_, double muEta_);
+   //std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
    std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_);
    bool LooseEleId(float pt, float eta, double value);
    bool LooseEleId(myobject o);
    bool TightEleId(float pt, float eta, double value);
    bool TightEleId(myobject o);
+   myobject ClosestInCollection(myobject o1, std::vector<myobject> collection, double max);
    void CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso, bool _looseMuId);
    void CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myobject> _input, bool verb, double _maxDeltaR);
    bool isGoodMu(myobject mu);
@@ -94,7 +96,13 @@ private:
 	// input variables
 	
 	myevent *m;
-	
+
+	std::vector<myobject> tag;
+	std::vector<myobject> probe;
+	std::vector<myobject> goodTau;
+        std::vector<std::pair<myobject,myobject> > pair;
+        std::vector<int> nJets;
+        std::vector<myobject> closestJet_subLead;	
 	// histograms
 
 	TH1* h_visMass_P1P2P3;
@@ -140,28 +148,29 @@ private:
     std::string syncFileName;
     bool doSync;
     
+    TFile* syncOut;
+    TTree* syncOutTree;
 	
 	 // bookkeeping variables
     
     ofstream lumi;
-    ofstream eventList_P1P2P3;
+    ofstream eventList_wjets;
    
     int o_selected;
     int o_run;
     int o_lumi;
     int o_event;
     double o_weight;
-    int o_id_iso_eleW;
-    int o_id_iso_eleH;
-    int o_isF3;
-    double o_pt_eW;
-    double o_pt_eH;
+    int o_id_iso_leadE;
+    int o_id_iso_subLeadE;
+    double o_pt_leadE;
+    double o_pt_subLeadE;
     double o_pt_tH;
-    double o_pt_jet_eW;
-    double o_pt_jet_eH;
+    double o_pt_jet_leadE;
+    double o_pt_jet_subLeadE;
     int o_njets;
-    double o_maxPt_eW;
-    double o_maxPt_eH;
+    double o_maxPt_leadE;
+    double o_maxPt_subLeadE;
     double o_mass;
     double o_LT;
 

@@ -20,7 +20,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
+#include <utility>
 // my classes
 #include "myevent.h"
 #include "TLorentzVector.h"
@@ -104,60 +104,10 @@ private:
 	myevent *m;
 	
 	// histograms
+	TFile* syncOut;
+	TTree* syncOutTree;
 
-	TH1* h_visMass_P1P2P3;
-	TH1* h_visMass_F1P2P3;
-	TH1* h_visMass_P1F2P3;
-	TH1* h_visMass_P1P2F3;
-	TH1* h_visMass_F1F2F3;
-        TH1* h_visMass_P1F2F3;
-	TH1* h_visMass_F1F2P3;
-	TH1* h_visMass_F1P2F3;
-
-	TH1* h_LT_P1P2P3;
-	TH1* h_LT_F1P2P3;
-	TH1* h_LT_P1F2P3;
-	TH1* h_LT_P1P2F3;
-	TH1* h_LT_F1F2F3;
-	TH1* h_LT_P1F2F3;
-	TH1* h_LT_F1F2P3;
-        TH1* h_LT_F1P2F3;
-
-	TH1* h_visMass_w;
-	TH1* h_LT_w;
-	TH1* h_PU_weight;
-	TH1* h_count;
-	TH1* h_count_mmt;
-	TH1* h_count_eet;
-	TH1* h_nPU_raw;
-	TH1* h_nPU_reweight;
-        TH1* h_cut_flow_mmt;
-        TH1* h_cut_flow_eet;
-        TH1* h_dZ_PV_muon;
-        TH1* h_dZ_PV_tau;
-        TH1* h_muW_beforeVetoes_pt;
-        TH1* h_muW_beforeVetoes_eta;
-        TH1* h_muW_beforeVetoes_phi;
-        TH1* h_muW_afterVetoes_pt;
-        TH1* h_muW_afterVetoes_eta;
-        TH1* h_muW_afterVetoes_phi;
-        //mu H plot
-        TH1* h_muH_beforeVetoes_pt;
-        TH1* h_muH_beforeVetoes_eta;
-        TH1* h_muH_beforeVetoes_phi;
-        TH1* h_muH_afterVetoes_pt;
-        TH1* h_muH_afterVetoes_eta;
-        TH1* h_muH_afterVetoes_phi;
-        //tau H plot
-        TH1* h_tauH_beforeVetoes_pt;
-        TH1* h_tauH_beforeVetoes_eta;
-        TH1* h_tauH_beforeVetoes_phi;
-        TH1* h_tauH_afterVetoes_pt;
-        TH1* h_tauH_afterVetoes_eta;
-        TH1* h_tauH_afterVetoes_phi;
-        //final vis mass plot
-        TH1* h_finalVisMass_below130;
-        TH1* h_finalVisMass_above130;
+	//TH1* h_visMass_P1P2P3;
         // syncronisation
 	
 	//helpers
@@ -166,6 +116,7 @@ private:
 	// properties
 	std::string InTreeName;
 	double maxDeltaR;
+	double jetPt_btag;
 	
 	std::string doubEle;
 	std::string doubEle2;
@@ -215,25 +166,49 @@ private:
     ofstream eventList_F1P2F3;
     ofstream eventList_F1F2P3;
     ofstream eventList_F1F2F3;
-   
-    int o_selected;
+  
+    //int o_selected;
     int o_run;
     int o_lumi;
-    int o_event;
+    long o_event;
     double o_weight;
-    int o_id_iso_eleW;
-    int o_id_iso_eleH;
+    int o_id_iso_leadE;
+    int o_id_iso_subLeadE;
     int o_isF3;
-    double o_pt_eW;
-    double o_pt_eH;
+    double o_pt_leadE;
+    double o_pt_subLeadE;
     double o_pt_tH;
-    double o_pt_jet_eW;
-    double o_pt_jet_eH;
+    double o_pt_jet_leadE;
+    double o_pt_jet_subLeadE;
     int o_njets;
-    double o_maxPt_eW;
-    double o_maxPt_eH;
+    double o_maxPt_leadE;
+    double o_maxPt_subLeadE;
     double o_mass;
     double o_LT;
+
+    std::vector<myobject> electronW_sig;
+    std::vector<myobject> electronH_sig;
+    std::vector<myobject> electronW_fake;
+    std::vector<myobject> electronH_fake;
+
+    std::vector<std::pair<myobject,myobject> > p1p2;
+    std::vector<std::pair<myobject,myobject> > p1f2;
+    std::vector<std::pair<myobject,myobject> > f1p2;
+    std::vector<std::pair<myobject,myobject> > f1f2;
+	
+    std::vector<std::pair<myobject,myobject> > allPair;
+    std::vector<string> pair_cat;
+    
+    std::vector<std::vector<myobject> > triplets;
+    std::vector<std::string> triplets_cat;
+    std::string cat;
+
+    std::vector<int> nJets;
+    std::vector<myobject> electronLead;
+    std::vector<myobject> electronSubLead;
+    std::vector<myobject> tauH;
+    std::vector<myobject> closestJet_Lead;
+    std::vector<myobject> closestJet_SubLead;   
 
     //MVAEvaluator *kNNEval; 
     ifstream sync_eventList;
