@@ -702,13 +702,10 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint ipair=0; ipair < pair.size(); ipair++){
 		bool haveMuon = false;
 		for(uint l = 0; l < vetoMuon.size(); ++l){
-			bool pt10_m = vetoMuon[l].pt > 10.;
 			bool iso = RelIso(vetoMuon[l]) < 0.15;
 			bool dR1 = deltaR(vetoMuon[l],pair[ipair].first) < 0.4;
 			bool dR2 = deltaR(vetoMuon[l],pair[ipair].second) < 0.4;
 
-			//cout << "pt/dr1/dr2 " <<  vetoMuon[l].pt<<"/"<<dR1<<"/"<<dR2 << endl;
-			if(!pt10_m) continue;
 			if(!iso) continue;
 			if(!dR1 && !dR2){
 				haveMuon = true;
@@ -784,22 +781,22 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                         double jetEta = jet[i].eta;
                         double PUjetID = jet[i].puJetIdLoose;
                         double bTag = jet[i].bDiscriminatiors_CSV;
-                        double dR1,dR2;
-                        dR1=deltaR(jet.at(i),pair[ipair].first);
-                        dR2=deltaR(jet.at(i),pair[ipair].second);
+                        bool dR1=deltaR(jet.at(i),pair[ipair].first)<0.4;
+                        bool dR2=deltaR(jet.at(i),pair[ipair].second)<0.4;
                         if(examineThisEvent) std::cout << "jet pt " << jetPt << "PU jet ID" << std::endl;
 
                         if(jetPt < 20.)continue;
                         if(!PUjetID) continue;
-			if(dR1 < 0.4 && dR2 < 0.4) continue; 
+			if(dR1 || dR2) continue; 
                         if(jetEta<2.3) haveTagJet = true;
                         if(jetEta < 2.4 && bTag > bTagValue) haveBjet = true;
                         count_Jets++;
 		}
-                if(haveBjet || !haveTagJet){
+                if((haveBjet || !haveTagJet) && count_Jets<1){
                         pair.erase(pair.begin()+ipair);
                         ipair=ipair-1;
-		}
+		}else
+			nJets.push_back(count_Jets);
 	}
 
 	if( pair.size()==0 )
