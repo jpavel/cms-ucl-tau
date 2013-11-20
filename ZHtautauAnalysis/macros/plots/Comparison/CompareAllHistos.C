@@ -67,7 +67,7 @@ int CompareAllHistos(TString input1 = "Abdollah.root", TString input2 = "mine.ro
    TIter next(gDirectory->GetListOfKeys());
    TKey* key;
   	
-  while ( key = (TKey*)next()){
+  while ( (key = (TKey*)next())){
 	std::cout << key->GetName() << std::endl;
 	
 	TH1D* hist = (TH1D*)f[0]->Get(dirNames[iDir]+"/"+key->GetName());

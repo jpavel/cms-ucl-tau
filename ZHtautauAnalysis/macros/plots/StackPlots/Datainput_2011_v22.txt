@@ -1,0 +1,4 @@
+DoubleElectron_Run2011A-16Jan2012-v1_v2_2011 2092
+DoubleElectron_Run2011B-16Jan2012-v1_v2_2011 2714
+DoubleMu_Run2011A-16Jan2012-v1_v2_2011 2110
+DoubleMu_Run2011B-16Jan2012-v1_v2_2011 2714
