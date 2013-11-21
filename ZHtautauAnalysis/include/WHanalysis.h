@@ -70,16 +70,13 @@ public:
    double deltaR(double eta1, double phi1, double eta2, double phi2);
    double deltaR(myobject o1, myobject o2);
    myobject ClosestInCollection(myobject o1, std::vector<myobject> collection, double max);
-   double DistanceToClosestInCollection(myobject o1, std::vector<myobject> collection);
    double PairMass(myobject Hcand1, myobject Hcand2);	
    double PairPt(myobject Hcand1, myobject Hcand2);	
    double RelIso(myobject mu, bool verb);
    double Tmass(myevent *m, myobject mu);
    bool PFMuonID(myobject mu);
-     bool CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb);
-   bool CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal);
-   std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_, double muEta_);
-   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_, double elEta_);
+   std::vector<myobject> SelectGoodMuVector(std::vector<myobject> _muon, double muPt_, double muEta_);
+   std::vector<myobject> SelectGoodElVector(std::vector<myobject> _electron, double elPt_, double elEta_);
    bool AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdElectron_sig(std::vector<myobject> genericElectron, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
    bool AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, myobject Hcand2, myobject Wcand, bool verbose=false);
@@ -87,12 +84,8 @@ public:
    bool LooseEleId(myobject o);
    bool TightEleId(float pt, float eta, double value);
    bool TightEleId(myobject o);
-   void CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso, bool _looseMuId);
-   void CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myobject> _input, bool verb, double _maxDeltaR);
    bool isGoodMu(myobject mu);
-   bool isLooseMu(myobject mu);
    bool isGoodEl(myobject el);
-
 
 private:
    //

@@ -91,8 +91,8 @@ void WHanalysis::BeginInputData( const SInputData& ) throw( SError ) {
 	syncOutTree->Branch("o_event", &o_event,"o_event/L");
 	syncOutTree->Branch("o_lumi", &o_lumi),"o_lumi/i";
 	syncOutTree->Branch( "o_weight", &o_weight,"o_weight/D");
-	syncOutTree->Branch( "o_id_iso_leadE", &o_id_iso_leadE,"o_id_iso_leadE/D");
-	syncOutTree->Branch( "o_id_iso_subLeadE", &o_id_iso_subLeadE,"o_id_iso_subLeadE/D");
+	syncOutTree->Branch( "o_id_iso_leadE", &o_id_iso_leadE,"o_id_iso_leadE/i");
+	syncOutTree->Branch( "o_id_iso_subLeadE", &o_id_iso_subLeadE,"o_id_iso_subLeadE/i");
 	syncOutTree->Branch( "o_isF3", &o_isF3,"o_isF3/i");
 	syncOutTree->Branch( "o_pt_leadE", &o_pt_leadE,"o_pt_leadE/D");
 	syncOutTree->Branch( "o_pt_subLeadE", &o_pt_subLeadE,"o_pt_subLeadE/D");
@@ -277,20 +277,6 @@ myobject WHanalysis::ClosestInCollection(myobject o1, std::vector<myobject> coll
 	else return o1;
 }
 
-double WHanalysis::DistanceToClosestInCollection(myobject o1, std::vector<myobject> collection)
-{
-	double minDist = 999.;
-	for(uint i = 0; i< collection.size(); i++)
-	{
-		double dR = deltaR(o1,collection[i]);
-		if(dR < minDist)
-		{
-			minDist=dR;
-		}
-	}
-	return minDist;
-}
-
 double WHanalysis::Tmass(myevent *m, myobject mu) {
 
 	vector<myobject> Met = m->RecPFMet;
@@ -317,135 +303,28 @@ double WHanalysis::PairPt(myobject Hcand1, myobject Hcand2){
 	return H_sum.Pt();
 }
 
-std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, std::vector<myobject> _jets, bool verb, double muPt_ = 5., double muEta_ = 2.4){
+std::vector<myobject> WHanalysis::SelectGoodMuVector(std::vector<myobject> _muon, double muPt_ = 5., double muEta_ = 2.4){
 
 	std::vector<myobject> outMu_;
 	outMu_.clear();
 	for (uint i = 0; i < _muon.size(); i++) {
-		double muPt = _muon[i].pt;
-		double muEta = _muon[i].eta;
-		bool muGlobal = _muon[i].isGlobalMuon;
-		bool muTracker = _muon[i].isTrackerMuon;
-		bool pfID = PFMuonID(_muon[i]);
-		bool pixelHits = (_muon[i].intrkLayerpixel >=1);
-
-		double max = 0.4;
-		double minDist = 1.0;
-		int index = -1;
-		for(uint j = 0; j< _jets.size(); j++)
-		{
-			if(_jets[j].pt < 12.) continue;
-			double dR = deltaR(_muon[i],_jets[j]);
-			if(dR< max && dR < minDist)
-			{
-				index=j;
-				minDist=dR;
-			}
-		}
-		bool bTag=true;
-		if(index>-1){ bTag = _jets[index].bDiscriminatiors_CSV < 0.8;}
-
-		bool dZ = fabs(_muon[i].dz_PV) < 0.2;
-		//if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
-		//	<< muEta << " pixelHits " << _muon[i].intrkLayerpixel << " btag " << bTag << " dz " << fabs(_muon[i].dz_PV) << std::endl;
-
-		if ((muGlobal || muTracker) && muPt > muPt_ && fabs(muEta) < muEta_ && pixelHits && bTag && dZ ){
-			//if(verb) std::cout << " pre-muon " << i << " pt eta etaSC: " << muPt << " " 
-			//	<< muEta << std::endl;
+		if (isGoodMu(_muon[i]))
 			outMu_.push_back(_muon[i]);
-		}else{
-			//if(verb) std::cout << " pre-_muon no. " << i << " has been rejected because of global|tracker pt eta:" <<
-			//	muGlobal << muTracker << " " << muPt << " " << muEta << std::endl; 
-		}
 	}
 	return outMu_;
 }
 
 
-std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, bool verb, double elPt_ =10., double elEta_ = 2.5){
+std::vector<myobject> WHanalysis::SelectGoodElVector(std::vector<myobject> _electron, double elPt_ =10., double elEta_ = 2.5){
 
 	std::vector<myobject> outEl_;
 	outEl_.clear();
 	for (uint i = 0; i < _electron.size(); i++) {
 
-		double elPt = _electron[i].pt;
-		double elEta = _electron[i].eta_SC;
-
-		bool dZ = fabs(_electron[i].dz_PV) < 0.2;
-
-		if(verb) cout << "ele n* " << i+1 << " pt " << elPt << " eta " << fabs(elEta) << " mva " << _electron[i].Id_mvaNonTrg << " dZ " << dZ << endl; 
-		if ( elPt > elPt_ && fabs(elEta) < elEta_ && dZ )
-		{
+		if (isGoodEl(_electron[i]))
 			outEl_.push_back(_electron[i]);
-		}else{
-			if(verb){ 
-				cout << "ele n* " << i+1 << " failed: pt " << elPt << " eta " << fabs(elEta) << " mva " << _electron[i].Id_mvaNonTrg << " dZ " << dZ << endl; 
-			}
-		}
 	}
 	return outEl_;
-}
-
-void WHanalysis::CrossCleanWithMu(std::vector<myobject>* _input, std::vector<myobject> _muon, bool verb, double _maxDeltaR, double _muIso = 0.3, bool _looseMuId = true){
-
-	for(int i = 0; i < int(_input->size()); i++)
-	{
-		if(verb) std::cout << "Looping over input object no. " << i << " out of " << _input->size() << std::endl;
-		bool removed = false;
-
-		for(uint j = 0; j < _muon.size() && !removed; j++)
-		{
-			if(verb) std::cout << "Looping over mu no. " << j << " out of " << _muon.size() << " " << 
-				deltaR(_input->at(i),_muon[j]) << std::endl;
-			if(verb) std::cout << " > Pt is " << _muon[j].pt << " iso is " << RelIso(_muon[j]) << " ID is " << isLooseMu(_muon[j]) << std::endl;
-			bool ID = _looseMuId? isLooseMu(_muon[j]) : true;
-			if(deltaR(_input->at(i),_muon[j])< _maxDeltaR && RelIso(_muon[j]) < _muIso && ID) 
-			{	_input->erase(_input->begin()+i); i--; removed = true;}
-			if(verb) std::cout << "input removed ? " << removed << std::endl;
-		}
-
-	}
-}
-
-void WHanalysis::CrossCleanWithEle(std::vector<myobject>* _ele, std::vector<myobject> _input, bool verb, double _maxDeltaR){
-
-	for(int i = 0; i < int(_input.size()); i++)
-	{
-		bool removed = false;
-
-		for(uint j = 0; j < _ele->size() && !removed; j++)
-		{
-			if(deltaR(_input.at(i),_ele->at(j))< _maxDeltaR && RelIso(_ele->at(j)) < 0.3) 
-			{      if(verb) cout << "I'm erasing tau with pt " << (_input.at(i)).pt << endl;	
-				_input.erase(_input.begin()+i); i--; removed = true;}
-		}
-	}
-}
-
-bool WHanalysis::CheckOverlapLooseElectron(myobject tau, std::vector<myobject> elCollection, double maxR, double isoVal, bool verb){
-
-	if(verb) std::cout << "Looking for extra electron!" << std::endl;
-	bool overlap = false;
-	for(uint j = 0; j < elCollection.size() && !overlap; j++)
-	{
-		if(verb) std::cout << "Checking ele no. " << j << "/" << elCollection.size() << " pt iso ID: " << elCollection[j].pt << " " << RelIso(elCollection[j])
-			<< " " << elCollection[j].numLostHitEleInner << ": dR = " << deltaR(tau, elCollection[j]) << std::endl;
-		if(deltaR(tau,elCollection[j])< maxR && RelIso(elCollection[j]) < isoVal && isGoodEl(elCollection[j]) && elCollection[j].numLostHitEleInner <2 ) 
-			overlap = true;
-	}
-	if(verb) std::cout << "extra loose electron returns " << overlap << std::endl; 
-	return overlap;	
-}
-
-bool WHanalysis::CheckOverlapLooseMuon(myobject tau, std::vector<myobject> muCollection, double maxR, double isoVal){
-
-	bool overlap = false;
-	for(uint j = 0; j < muCollection.size() && !overlap; j++)
-	{
-		if(deltaR(tau,muCollection[j])< maxR && RelIso(muCollection[j]) < isoVal &&  isLooseMu(muCollection[j])) 
-			overlap = true;
-	}
-	return overlap;	
 }
 
 bool WHanalysis::isGoodMu(myobject mu){
@@ -454,27 +333,10 @@ bool WHanalysis::isGoodMu(myobject mu){
 	double eMuta = mu.eta;
 	bool muGlobal = mu.isGlobalMuon;
 	bool muTracker = mu.isTrackerMuon;
-	double relIso = RelIso(mu);
+	bool dZ = fabs(mu.dz_PV) < 0.2;
 
-	bool pfID = PFMuonID(mu);
-
-	if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4 && pfID)
-	{
-		return true;
-	}else return false;
-}
-
-bool WHanalysis::isLooseMu(myobject mu){
-
-	double muPt = mu.pt;
-	double eMuta = mu.eta;
-	bool muGlobal = mu.isGlobalMuon;
-	bool muTracker = mu.isTrackerMuon;
-	double relIso = RelIso(mu);
-
-	bool pfID = mu.isPFMuon;
-
-	if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4 && pfID)
+	if (muPt > 10. && fabs(eMuta) < 2.4 && dZ)
+	//if (muGlobal && muTracker && muPt > 10. && fabs(eMuta) < 2.4 && dZ)
 	{
 		return true;
 	}else return false;
@@ -484,11 +346,9 @@ bool WHanalysis::isGoodEl(myobject el){
 
 	double elPt = el.pt;
 	double elEta = el.eta_SC;
-	int missingHits = el.numLostHitEleInner;
-	//               bool elID = TightEleId(elPt,elEta,el.Id_mvaNonTrg);
-	double relIso = RelIso(el);
+	bool dZ = fabs(el.dz_PV) < 0.2;
 
-	if (elPt > 10. && fabs(elEta) < 2.5  && missingHits <=1)
+	if (elPt > 10. && fabs(elEta) < 2.5 && dZ)
 	{
 		return true;
 	}else return false;
@@ -555,7 +415,7 @@ bool WHanalysis::AdMuon_sig(std::vector<myobject> genericMuon, myobject Hcand1, 
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
-		if(RelIso(genericMuon[i]) < 0.15 && PFMuonID(genericMuon[i]) && fabs((genericMuon[i]).dz_PV) < 0.2 && (dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4))
+		if(RelIso(genericMuon[i]) < 0.15 && PFMuonID(genericMuon[i]) && (dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4))
 			Ad_muon=true;
 	}
 	return Ad_muon;
@@ -571,16 +431,16 @@ bool WHanalysis::AdElectron_sig(std::vector<myobject> genericElectron, myobject 
 		if(deltaR(genericElectron[i],Hcand1)==0) continue;
 		if(deltaR(genericElectron[i],Wcand)==0) continue;
 
-		double dR1= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi); 
-		double dR2= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi); 
-		double dR3= deltaR(genericElectron[i].eta,genericElectron[i].phi,Wcand.eta,Wcand.phi); 
+		double dR1= deltaR(genericElectron[i].eta,genericElectron[i].phi,Wcand.eta,Wcand.phi); 
+		double dR2= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand1.eta,Hcand1.phi); 
+		double dR3= deltaR(genericElectron[i].eta,genericElectron[i].phi,Hcand2.eta,Hcand2.phi); 
 
 		if(verbose) std::cout << " Ele cand no. " << i << std::endl;
 		if(verbose) std::cout << " Isolation is " << RelIso(genericElectron[i]) << std::endl;
 		if(verbose) std::cout << " Distance to 1st H candidate is " << dR1 << std::endl;
 		if(verbose) std::cout << " Distance to 2nd H candidate is " << dR2 << std::endl;
 		if(verbose) std::cout << " Distance to W candidate is " << dR3 << std::endl;
-		if(RelIso(genericElectron[i]) < 0.30 && (dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4))
+		if(RelIso(genericElectron[i]) < 0.30 && LooseEleId(genericElectron[i]) && (dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4))
 			Ad_electron=true;
 	}
 	return Ad_electron;
@@ -621,9 +481,6 @@ bool WHanalysis::AdTau_sig(std::vector<myobject> genericTau, myobject Hcand1, my
 
 void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
       
-        //if(m->eventNumber!=1971379)
-	//	return;
-
 	// bookkepping part
 	++m_allEvents;
 	if(m->runNumber!=current_run || m->lumiNumber!=current_lumi){
@@ -707,40 +564,12 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	std::vector<myobject> jet = m->RecPFJetsAK5;
 
 	if(examineThisEvent) std::cout << muon.size() << " preselected muons " << std::endl;
-	std::vector<myobject> vetoMuon = SelectGoodMuVector(muon,jet,examineThisEvent);
+	std::vector<myobject> vetoMuon = SelectGoodMuVector(muon,examineThisEvent);
 	if(examineThisEvent) std::cout << vetoMuon.size() << " selected muons --> good for VETO!" << std::endl;
-	m_logger << DEBUG << " veto muon " << SLogger::endmsg;
 
 	if(examineThisEvent) std::cout << electron.size() << " preselected electrons " << std::endl;
 	std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent);
 	if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons (NO ID APPLIED)" << std::endl;
-	m_logger << DEBUG << " generic electron " << SLogger::endmsg;
-
-	std::vector<myobject> vetoElectron;
-	vetoElectron.clear();
-	for(uint i=0; i < genericElectron.size(); i++){
-		if( LooseEleId( genericElectron[i] ) ){
-			vetoElectron.push_back(genericElectron[i]);
-		}     
-	}
-
-	if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons (NO ID APPLIED) --> good for SIGNAL or FAKE candidates!" << std::endl;
-	if(examineThisEvent) std::cout << vetoElectron.size() << " veto electrons (LOOSE ID APPLIED) --> good for VETO! " << std::endl;
-	m_logger << DEBUG << " veto electron " << SLogger::endmsg;
-
-	//overlap cleaning: selected muons and selected electrons (with loose id) 
-	//CrossCleanWithMu(&genericElectron,vetoMuon,examineThisEvent,maxDeltaR);
-	//if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons after the MU-ELE x-Cleaning" << std::endl;
-	//CrossCleanWithMu(&vetoElectron,vetoMuon,examineThisEvent,maxDeltaR);
-	//if(examineThisEvent) std::cout << vetoElectron.size() << " veto electrons after the MU-ELE x-Cleaning" << std::endl;
-	//m_logger << DEBUG << " cross cleaning mu 2 " << SLogger::endmsg;
-
-	//overlap cleaning: selected electrons (with loose id) and taus 
-	if(examineThisEvent) std::cout << tau.size() << " preselected taus " << std::endl;
-	CrossCleanWithEle(&vetoElectron,tau,examineThisEvent,0.4);
-	if(examineThisEvent) std::cout << tau.size() << " preselected taus after the ELE-TAU x-Cleaning" << std::endl;
-	m_logger << DEBUG << " cross cleaning tau " << SLogger::endmsg;
-
 
 	//select good electron 
 	std::vector<myobject> goodElectron;
@@ -790,7 +619,6 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	if( goodElectron.size() < 2 )
 		return;
-	m_logger << DEBUG << " i*************** GOODODOODOOD " << SLogger::endmsg;
 
 	electronW_sig.clear();
 	electronH_sig.clear();
@@ -1180,7 +1008,7 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent) std::cout << "how many triplets? " << triplets.size() << std::endl;
 
 	for(uint itrip=0; itrip < triplets.size(); itrip++){ 
-		if(AdElectron_sig(vetoElectron,triplets[itrip].at(1),triplets[itrip].at(0),triplets[itrip].at(2),examineThisEvent)){
+		if(AdElectron_sig(genericElectron,triplets[itrip].at(1),triplets[itrip].at(0),triplets[itrip].at(2),examineThisEvent)){
 			triplets.erase(triplets.begin()+itrip);
 			triplets_cat.erase(triplets_cat.begin()+itrip);
 			itrip=itrip-1;
@@ -1208,7 +1036,8 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint itrip=0; itrip < triplets.size(); itrip++){ 
 		int count_Jets = 0;
 		bool bTagVeto = false;
-		for (uint i = 0; i < jet.size() && !bTagVeto; i++) {
+		for (uint i = 0; i < jet.size(); i++) {
+		//for (uint i = 0; i < jet.size() && !bTagVeto; i++) {
 			double jetPt = jet[i].pt;
 			double jetEta = jet[i].eta;
 			double jetPhi = jet[i].phi;
@@ -1220,28 +1049,18 @@ void WHanalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			dR3=deltaR(jet.at(i),triplets[itrip].at(2));
 			if(examineThisEvent) std::cout << "jet pt " << jetPt << "jet eta " << jetEta << "btag " << bTag << "PU jet ID" << std::endl;
 
-			if(jetPt > 20. && fabs(jetEta) < 2.4 && PUjetID){
-				if(dR1 > 0.4 && dR2 > 0.4 && dR3 > 0.4) count_Jets++;
-				if(bTag > bTagValue){
-					if(examineThisEvent) std::cout << "candidate b-jet" << std::endl;
-					if(examineThisEvent) std::cout << " distances are " << dR1 << " " << dR2 << " " << dR3 << std::endl;
-					bool overlap = false;
-					if(dR1 < 0.4 || dR2 < 0.4 || dR3 < 0.4){
-						overlap = true;
-					}
-					bTagVeto = !overlap;
-				}
-			}
-		}
-                nJets.push_back(count_Jets);
-		if(examineThisEvent) std::cout << " nJets.size() " << nJets.size() << " - value " << nJets[itrip] <<  std::endl;
-		if(bTagVeto){
-			if(examineThisEvent) std::cout << " b-jet found! " << std::endl;
-			triplets.erase(triplets.begin()+itrip);
+                        if(jetPt < 20.)continue;
+                        if(!PUjetID) continue;
+                        if(dR1<0.4 || dR2<0.4 || dR3<0.4) continue;
+                        if(jetEta < 2.4 && bTag > bTagValue) bTagVeto = true;
+                        count_Jets++;
+                }
+                if(bTagVeto){
+                        triplets.erase(triplets.begin()+itrip);
 			triplets_cat.erase(triplets_cat.begin()+itrip);
-			nJets.erase(nJets.begin()+itrip);
-			itrip=itrip-1;
-		}
+                        itrip=itrip-1;
+                }else
+                        nJets.push_back(count_Jets);
 	}
 
 	if( triplets.size() == 0 ) return;

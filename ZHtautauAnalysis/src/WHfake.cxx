@@ -76,7 +76,7 @@ void WHfake::BeginInputData( const SInputData& ) throw( SError ) {
 	eventList_wjets.open("eventList_wjets.list");
    
 	syncOutTree = new TTree("UCL_tree","UCL_tree");
-	syncOutTree->Branch("o_selected", &o_selected, "o_selected/i");
+	//syncOutTree->Branch("o_selected", &o_selected, "o_selected/i");
 	syncOutTree->Branch("o_run", &o_run,"o_run/i");
 	syncOutTree->Branch("o_event", &o_event,"o_event/L");
 	syncOutTree->Branch("o_lumi", &o_lumi),"o_lumi/i";
@@ -330,7 +330,8 @@ std::vector<myobject> WHfake::SelectGoodElVector(std::vector<myobject> _electron
 	for (uint i = 0; i < _electron.size(); i++) {
 	
 			double elPt = _electron[i].pt;
-			double elEta = _electron[i].eta_SC;
+			double elEta = _electron[i].eta;
+			//double elEta = _electron[i].eta_SC;
 
 			bool dZ = fabs(_electron[i].dz_PV) < 0.2;
 
@@ -553,9 +554,6 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	if(examineThisEvent) std::cout << electron.size() << " preselected electrons " << std::endl;
 	std::vector<myobject> genericElectron = SelectGoodElVector(electron,examineThisEvent);
-	if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons (NO ID APPLIED)" << std::endl;
-	m_logger << DEBUG << " generic electron " << SLogger::endmsg;
-	
 	if(examineThisEvent) std::cout << genericElectron.size() << " generic electrons (NO ID APPLIED) --> good for SIGNAL or FAKE candidates!" << std::endl;
 
 	//overlap cleaning: selected muons and selected electrons (with loose id) 
@@ -597,7 +595,7 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 		if( eleHit == 0 && bTag && isGsfCtfScPixCC && isGsfScPixCC && isGsfCtfCC && conversionVeto ){
 			if(examineThisEvent){
-				std::cout << "pt " << (genericElectron.at(i)).pt << " ctfSc - ScPix - CtfCC - cv " << isGsfCtfScPixCC << " - " << isGsfScPixCC << " - " << isGsfCtfCC << " - " << conversionVeto << endl;
+				std::cout << "pt " << (genericElectron.at(i)).pt << " eta " << genericElectron[i].eta << " ctfSc - ScPix - CtfCC - cv " << isGsfCtfScPixCC << " - " << isGsfScPixCC << " - " << isGsfCtfCC << " - " << conversionVeto << " bTag " << bTag << endl;
 			}
 			goodElectron.push_back(genericElectron.at(i));
 			//genericElectron.erase(genericElectron.begin()+i);
@@ -702,12 +700,12 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint ipair=0; ipair < pair.size(); ipair++){
 		bool haveMuon = false;
 		for(uint l = 0; l < vetoMuon.size(); ++l){
-			bool iso = RelIso(vetoMuon[l]) < 0.15;
-			bool dR1 = deltaR(vetoMuon[l],pair[ipair].first) < 0.4;
-			bool dR2 = deltaR(vetoMuon[l],pair[ipair].second) < 0.4;
+			double iso = RelIso(vetoMuon[l]) ;
+			double dR1 = deltaR(vetoMuon[l],pair[ipair].first);
+			double dR2 = deltaR(vetoMuon[l],pair[ipair].second);
 
-			if(!iso) continue;
-			if(!dR1 && !dR2){
+			if(iso>0.15) continue;
+			if(dR1>0.4 && dR2>0.4){
 				haveMuon = true;
                                 break;
 			}
@@ -725,15 +723,20 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
 	for(uint ipair=0; ipair < pair.size(); ipair++){
 		bool haveElectron = false;
-		for(uint i = 0; i < goodElectron.size(); i++){ 
+		for(uint i = 0; i < genericElectron.size(); i++){ 
+		//for(uint i = 0; i < goodElectron.size(); i++){ 
                         if(examineThisEvent) cout << "goodElectronPt/tagPt/probePt: " << goodElectron[i].pt<<"/"<<(pair[ipair].first).pt<<"/"<<(pair[ipair].second).pt << endl;
-			bool dR1 = deltaR(goodElectron[i],pair[ipair].first)<0.4;
-			bool dR2 = deltaR(goodElectron[i],pair[ipair].second)<0.4;
+			double dR1 = deltaR(genericElectron[i],pair[ipair].first);
+			double dR2 = deltaR(genericElectron[i],pair[ipair].second);
+			//bool dR1 = deltaR(goodElectron[i],pair[ipair].first)<0.4;
+			//bool dR2 = deltaR(goodElectron[i],pair[ipair].second)<0.4;
                         if(examineThisEvent) cout << "dR1/dR2: " << dR1<<"/"<<dR2 << endl;
-			bool pt10 = goodElectron[i].pt > 10.;
+			double pt10 = genericElectron[i].pt;
+			double iso = RelIso(genericElectron[i]);
 
-			if( !pt10 ) continue;
-			if( !dR1 && !dR2 ){
+			if( pt10<10. ) continue;
+			if( iso>0.3 ) continue;
+			if( dR1>0.4 && dR2>0.4 ){
 				haveElectron = true;
 				break;
 			}
@@ -753,9 +756,9 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	for(uint ipair=0; ipair < pair.size(); ipair++){
 		bool haveTau = false;
 		for(uint l = 0; l < goodTau.size(); ++l){
-			bool dR1_ = deltaR(goodTau[l],pair[ipair].first)<0.4;
-			bool dR2_ = deltaR(goodTau[l],pair[ipair].second)<0.4;
-			if( !dR1_ && !dR2_ ){
+			double dR1_ = deltaR(goodTau[l],pair[ipair].first);
+			double dR2_ = deltaR(goodTau[l],pair[ipair].second);
+			if( dR1_>0.4 && dR2_>0.4 ){
 				haveTau = true;
 				break;
 			}
@@ -775,7 +778,7 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
         for(uint ipair=0; ipair < pair.size(); ipair++){
                 int count_Jets = 0;
                 bool haveBjet = false;
-                bool haveTagJet = false;
+                //bool haveTagJet = false;
                 for (uint i = 0; i < jet.size(); i++) {
                         double jetPt = jet[i].pt;
                         double jetEta = jet[i].eta;
@@ -783,16 +786,17 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
                         double bTag = jet[i].bDiscriminatiors_CSV;
                         bool dR1=deltaR(jet.at(i),pair[ipair].first)<0.4;
                         bool dR2=deltaR(jet.at(i),pair[ipair].second)<0.4;
-                        if(examineThisEvent) std::cout << "jet pt " << jetPt << "PU jet ID" << std::endl;
+                        if(examineThisEvent) std::cout << "jet pt " << jetPt << " PU jet ID " << PUjetID << " dR1 " << dR1 << " dR2 "<< dR2 << std::endl;
+                        if(examineThisEvent) std::cout << "jet eta " << jetEta << " bTag " << bTag << std::endl;
 
-                        if(jetPt < 20.)continue;
+                        if(jetPt < 20.) continue;
                         if(!PUjetID) continue;
 			if(dR1 || dR2) continue; 
-                        if(jetEta<2.3) haveTagJet = true;
+                        //if(jetEta<2.3) haveTagJet = true;
                         if(jetEta < 2.4 && bTag > bTagValue) haveBjet = true;
                         count_Jets++;
 		}
-                if((haveBjet || !haveTagJet) && count_Jets<1){
+                if(haveBjet || count_Jets<1){
                         pair.erase(pair.begin()+ipair);
                         ipair=ipair-1;
 		}else
