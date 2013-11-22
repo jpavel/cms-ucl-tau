@@ -407,6 +407,7 @@ private:
    
     bool isSimulation;
     bool is2011;
+    bool useObservedPU;
    
     bool is2012_53;
    

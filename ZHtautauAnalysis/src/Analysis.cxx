@@ -31,6 +31,7 @@ Analysis::Analysis()
 		
 		DeclareProperty("isSimulation",isSimulation);
 		DeclareProperty("is2011",is2011);
+		DeclareProperty("useObservedPU",useObservedPU);
 		
 		DeclareProperty("is2012_53",is2012_53);
 	
@@ -1843,6 +1844,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	double PUWeight = 1.0;
 	double nPU = 0.0;
 	nPU = m->PUInfo_true;
+	if(useObservedPU) nPU=m->PUInfo;
 	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
 		if(IgnorePUW) PUWeight = 1.0;
@@ -3618,7 +3620,11 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	}
 	double weight = PUWeight*corrZlep1*corrZlep2*corrHlep1*corrHlep2;
 	
-	
+	if(examineThisEvent){
+		std::cout << "****** WEIGHT INFO *****" << std::endl;
+		std::cout << " Event number/Lumi/Run = " << m->eventNumber << "/" << m->lumiNumber << "/" << m->runNumber << std::endl;
+		std::cout << " True PU in event:" << nPU << std::endl;
+	}
 
 	if(examineThisEvent) std::cout << " After efficiency" << std::endl;
 	
