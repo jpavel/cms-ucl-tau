@@ -1844,7 +1844,7 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	double PUWeight = 1.0;
 	double nPU = 0.0;
 	nPU = m->PUInfo_true;
-	if(useObservedPU) nPU=m->PUInfo;
+	if(useObservedPU) nPU=m->PUInfo_true;
 	if(isSimulation){	
 		PUWeight = LumiWeights_->weight( nPU );
 		if(IgnorePUW) PUWeight = 1.0;
@@ -3623,7 +3623,16 @@ void Analysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 	if(examineThisEvent){
 		std::cout << "****** WEIGHT INFO *****" << std::endl;
 		std::cout << " Event number/Lumi/Run = " << m->eventNumber << "/" << m->lumiNumber << "/" << m->runNumber << std::endl;
+		std::cout << " The event is of type " << EventTypeName(Hcand_type_signal[0]) << std::endl;
 		std::cout << " True PU in event:" << nPU << std::endl;
+		std::cout << " PU weight: " << PUWeight << std::endl;
+		std::cout << " The Z legs are (pt/eta):" << Zcand[0].pt << "/" << Zcand[0].eta << " and " << Zcand[1].pt << "/" << Zcand[1].eta << std::endl;
+		std::cout << " MC/Data correction for Z legs are " << corrZlep1 << " " << corrZlep2 << std::endl;
+		std::cout << " The H legs are (pt/eta):" << Hcand[0].pt << "/" << Hcand[0].eta << " and " << Hcand[1].pt << "/" << Hcand[1].eta << std::endl;
+		std::cout << " MC/Data correction for H legs are " << corrHlep1 << " " << corrHlep2 << std::endl;
+		std::cout << " The total weight is " << weight << std::endl;
+		
+		
 	}
 
 	if(examineThisEvent) std::cout << " After efficiency" << std::endl;

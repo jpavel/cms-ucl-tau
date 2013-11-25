@@ -143,9 +143,9 @@ int stack_upgrade() {
   "GG2L2L",
   "GG4L"};
   
-  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary2011_v4/";
+  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary2011_v3/";
   
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2011_v4";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2011_v3";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/pdf");
  
@@ -437,7 +437,7 @@ for(int iFile = 0; iFile < signal_names.size(); iFile++)
   
   std::vector<double>* BGcounts = EstimateBackground("/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput2011_v2/2011.root",
 		"/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/AnalysisOutput2011_v2/2011.root");
-		 //getting histograms for the background
+  //getting histograms for the background
   
   for(int iBG=0; iBG < BGcounts->size(); iBG++)
   {
@@ -544,7 +544,7 @@ h_1d_data[0]->Draw();
 	  //~ leg->AddEntry(h_1d[iFile][4],"Z+jets","f");
 	  //~ leg->AddEntry(signal[iFile],"ZH(125)","f");
 //~ 
-TString lumist="4.9 fb^{-1}";
+TString lumist="4.8 fb^{-1}";
   TPaveText *ll = new TPaveText(0.25, 0.95, 0.95, 0.99, "NDC");
   ll->SetTextSize(0.03);
   ll->SetTextFont(62);
@@ -554,7 +554,7 @@ TString lumist="4.9 fb^{-1}";
   ll->SetTextAlign(12); // align left
   TString text = PaveText[iHist];
   ll->AddText(0.01,0.5,text);
-  text = "#sqrt{s} = 7 TeV  L = ";
+  text = "#sqrt{s} = 8 TeV  L = ";
   text = text + lumist;
   //  ll->SetTextAlign(32); // align right
   ll->AddText(0.5, 0.5, text);
@@ -599,7 +599,7 @@ TString lumist="4.9 fb^{-1}";
   TString outputROOTDir = "/home/jpavel/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/LimitInput/";
  
   
-  TFile out(outputROOTDir+"vhtt_llLL.inputsNov25-sm-7TeV.root","RECREATE");
+  TFile out(outputROOTDir+"vhtt_llLL.inputsNov21-sm-7TeV.root","RECREATE");
   TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
   TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
   TString nameES="_CMS_scale_t_";
@@ -658,33 +658,47 @@ TString lumist="4.9 fb^{-1}";
 		hist_Zjets->Write();
 	
 	// MC backgrounds
-	for(int iFile=0; iFile < bg_titles.size(); iFile++)
+	for(int iFile=0; iFile < (bg_titles.size() -1 ); iFile++)
 	{
 		if(!bg_save[iFile]) continue;
 		TH1D* hist = new TH1D(bg_titles[iFile],"",15,0,300);
 		for(int iBin = 1; iBin <= (*(h_1d_bg[iFile]))[iDir+1]->GetNbinsX(); iBin++)
 		{
 			
-			hist->SetBinContent(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinContent(iBin));
-			hist->SetBinError(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinError(iBin));
+			if(iFile!= (bg_titles.size() -2)){
+				 hist->SetBinContent(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinContent(iBin));
+				 hist->SetBinError(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinError(iBin) );
+			 }
+			else{
+				hist->SetBinContent(iBin,(*(h_1d_bg[iFile]))[iDir+1]->GetBinContent(iBin)+(*(h_1d_bg[iFile+1]))[iDir+1]->GetBinContent(iBin));
+				hist->SetBinError(iBin,sqrt(pow(((*(h_1d_bg[iFile]))[iDir+1]->GetBinError(iBin)),2)+pow(((*(h_1d_bg[iFile+1]))[iDir+1]->GetBinError(iBin)),2) ) );
+			}
 		}
 		hist->Write();
 		
 		TH1D* hist_Up = new TH1D(bg_titles[iFile]+nameES+upNames[iDir]+nameUp,"",15,0,300);
 		for(int iBin = 1; iBin <= (*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
 		{
-			
-			hist_Up->SetBinContent(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinContent(iBin));
-			hist_Up->SetBinError(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinError(iBin));
+			if(iFile!= (bg_titles.size() -2)){
+				hist_Up->SetBinContent(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinContent(iBin));
+				hist_Up->SetBinError(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinError(iBin));
+			}else{
+				hist_Up->SetBinContent(iBin,(*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinContent(iBin)+(*(h_1d_bg_ESplus[iFile+1]))[iDir+1]->GetBinContent(iBin));
+				hist_Up->SetBinError(iBin,sqrt(pow(((*(h_1d_bg_ESplus[iFile]))[iDir+1]->GetBinError(iBin)),2)+pow(((*(h_1d_bg_ESplus[iFile+1]))[iDir+1]->GetBinError(iBin)),2) ) );
+			}
 		}
 		hist_Up->Write();
 		
 		TH1D* hist_Down = new TH1D(bg_titles[iFile]+nameES+upNames[iDir]+nameDown,"",15,0,300);
 		for(int iBin = 1; iBin <= (*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetNbinsX(); iBin++)
 		{
-			
-			hist_Down->SetBinContent(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinContent(iBin));
-			hist_Down->SetBinError(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinError(iBin));
+			if(iFile!= (bg_titles.size() -2)){
+				hist_Down->SetBinContent(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinContent(iBin));
+				hist_Down->SetBinError(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinError(iBin));
+			}else{
+				hist_Down->SetBinContent(iBin,(*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinContent(iBin)+(*(h_1d_bg_ESminus[iFile+1]))[iDir+1]->GetBinContent(iBin));
+				hist_Down->SetBinError(iBin,sqrt(pow(((*(h_1d_bg_ESminus[iFile]))[iDir+1]->GetBinError(iBin)),2)+pow(((*(h_1d_bg_ESminus[iFile+1]))[iDir+1]->GetBinError(iBin)),2) ) );
+			}
 		}
 		hist_Down->Write();
 		

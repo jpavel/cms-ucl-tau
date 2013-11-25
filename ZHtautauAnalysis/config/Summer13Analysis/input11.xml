@@ -1,0 +1,20 @@
+<!--
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_10_1_13l.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_1_1_Lqw.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_2_1_QVj.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_3_1_L5Z.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_4_1_9kk.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_5_1_OEZ.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_6_1_1mp.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_7_1_ptI.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_8_1_m4e.root" Lumi="1.0" /> 
+ <In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ZH_HToTauTau_M-125_lepdecay_8TeV-pythia6-tauola/output_Ntuples_9_1_6DB.root" Lumi="1.0" /> 
+-->
+<In FileName="output_Ntuples_1_1_0fe.root" Lumi="1.0" /> 
+<!--
+<In FileName="/home/jpavel/ntuples/CMS/analysis/ZHtautau/PostMoriond/v3/ggZZ2l2l/output_Ntuples_1_2_bN8.root" Lumi="1.0" /> 
+-->
+
+<!--
+<In FileName="../../../SW_FakeRate/ZHtautauAnalysis/config/Sync.root" Lumi="1.0" />
+-->
