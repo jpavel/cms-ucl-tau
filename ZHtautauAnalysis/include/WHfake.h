@@ -103,6 +103,7 @@ private:
         std::vector<std::pair<myobject,myobject> > pair;
         std::vector<int> nJets;
         std::vector<myobject> closestJet_subLead;	
+        std::vector<myobject> closestJet_lead;	
 	// histograms
 
 	TH1* h_visMass_P1P2P3;
@@ -148,31 +149,35 @@ private:
     std::string syncFileName;
     bool doSync;
     
-    TFile* syncOut;
-    TTree* syncOutTree;
+    TFile* syncOut_lead;
+    TFile* syncOut_subLead;
+    TTree* syncOutTree_lead;
+    TTree* syncOutTree_subLead;
 	
 	 // bookkeeping variables
     
     ofstream lumi;
-    ofstream eventList_wjets;
+    ofstream eventList_wjets_lead;
+    ofstream eventList_wjets_subLead;
    
-    int o_selected;
-    int o_run;
-    int o_lumi;
-    int o_event;
-    double o_weight;
-    int o_id_iso_leadE;
-    int o_id_iso_subLeadE;
-    double o_pt_leadE;
-    double o_pt_subLeadE;
-    double o_pt_tH;
-    double o_pt_jet_leadE;
-    double o_pt_jet_subLeadE;
-    int o_njets;
-    double o_maxPt_leadE;
-    double o_maxPt_subLeadE;
-    double o_mass;
-    double o_LT;
+    int o_run_lead;
+    int o_run_subLead;
+    int o_lumi_lead;
+    int o_lumi_subLead;
+    long o_event_lead;
+    long o_event_subLead;
+    double o_weight_lead;
+    double o_weight_subLead;
+    int o_id_iso_lead;
+    int o_id_iso_subLead;
+    double o_pt_lead;
+    double o_pt_subLead;
+    double o_pt_jet_lead;
+    double o_pt_jet_subLead;
+    int o_njets_lead;
+    int o_njets_subLead;
+    double o_maxPt_lead;
+    double o_maxPt_subLead;
 
     //MVAEvaluator *kNNEval; 
     ifstream sync_eventList;

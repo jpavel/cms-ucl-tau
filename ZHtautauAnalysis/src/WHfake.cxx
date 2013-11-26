@@ -73,27 +73,30 @@ void WHfake::BeginInputData( const SInputData& ) throw( SError ) {
 	//bookkeeping
 	lumi.open("lumi.csv");
 	current_run=current_lumi=-999;
-	eventList_wjets.open("eventList_wjets.list");
+	eventList_wjets_lead.open("eventList_wjets_lead.list");
+	eventList_wjets_subLead.open("eventList_wjets_subLead.list");
    
-	syncOutTree = new TTree("UCL_tree","UCL_tree");
-	//syncOutTree->Branch("o_selected", &o_selected, "o_selected/i");
-	syncOutTree->Branch("o_run", &o_run,"o_run/i");
-	syncOutTree->Branch("o_event", &o_event,"o_event/L");
-	syncOutTree->Branch("o_lumi", &o_lumi),"o_lumi/i";
-	syncOutTree->Branch( "o_weight", &o_weight,"o_weight/D");
-	syncOutTree->Branch( "o_id_iso_leadE", &o_id_iso_leadE,"o_id_iso_leadE/i");
-	syncOutTree->Branch( "o_id_iso_subLeadE", &o_id_iso_subLeadE,"o_id_iso_subLeadE/i");
-	syncOutTree->Branch( "o_pt_leadE", &o_pt_leadE,"o_pt_leadE/D");
-	syncOutTree->Branch( "o_pt_subLeadE", &o_pt_subLeadE,"o_pt_subLeadE/D");
-	syncOutTree->Branch( "o_pt_tH", &o_pt_tH,"o_pt_tH/D");
-	syncOutTree->Branch( "o_pt_jet_leadE", &o_pt_jet_leadE,"o_pt_jet_leadE/D");
-	syncOutTree->Branch( "o_pt_jet_subLeadE", &o_pt_jet_subLeadE,"o_pt_jet_subLeadE/D");
-	syncOutTree->Branch( "o_njets", &o_njets,"o_njets/i");
-	syncOutTree->Branch( "o_maxPt_leadE", &o_maxPt_leadE,"o_maxPt_leadE/D");
-	syncOutTree->Branch( "o_maxPt_subLeadE", &o_maxPt_subLeadE,"o_maxPt_subLeadE/D");
-	syncOutTree->Branch( "o_mass", &o_mass,"o_mass/D");
-	syncOutTree->Branch( "o_LT", &o_LT,"o_LT/D");
+	syncOutTree_subLead = new TTree("UCL_tree","UCL_tree");
+	syncOutTree_subLead->Branch("o_run", &o_run_subLead,"o_run/i");
+	syncOutTree_subLead->Branch("o_event", &o_event_subLead,"o_event/L");
+	syncOutTree_subLead->Branch("o_lumi", &o_lumi_subLead,"o_lumi/i");
+	syncOutTree_subLead->Branch( "o_weight", &o_weight_subLead,"o_weight/D");
+	syncOutTree_subLead->Branch( "o_id_iso", &o_id_iso_subLead,"o_id_iso/i");
+	syncOutTree_subLead->Branch( "o_pt", &o_pt_subLead,"o_pt/D");
+	syncOutTree_subLead->Branch( "o_pt_jet", &o_pt_jet_subLead,"o_pt_jet/D");
+	syncOutTree_subLead->Branch( "o_njets", &o_njets_subLead,"o_njets/i");
+	syncOutTree_subLead->Branch( "o_maxPt", &o_maxPt_subLead,"o_maxPt/D");
 
+	syncOutTree_lead = new TTree("UCL_tree","UCL_tree");
+	syncOutTree_lead->Branch("o_run", &o_run_lead,"o_run/i");
+	syncOutTree_lead->Branch("o_event", &o_event_lead,"o_event/L");
+	syncOutTree_lead->Branch("o_lumi", &o_lumi_lead,"o_lumi/i");
+	syncOutTree_lead->Branch( "o_weight", &o_weight_lead,"o_weight/D");
+	syncOutTree_lead->Branch( "o_id_iso", &o_id_iso_lead,"o_id_iso/i");
+	syncOutTree_lead->Branch( "o_pt", &o_pt_lead,"o_pt/D");
+	syncOutTree_lead->Branch( "o_pt_jet", &o_pt_jet_lead,"o_pt_jet/D");
+	syncOutTree_lead->Branch( "o_njets", &o_njets_lead,"o_njets/i");
+	syncOutTree_lead->Branch( "o_maxPt", &o_maxPt_lead,"o_maxPt/D");
 
 	//sync
 
@@ -134,11 +137,15 @@ void WHfake::EndInputData( const SInputData& ) throw( SError ) {
         log2.open("total.txt");
         log2 << *m_allEvents << std::endl;
         log2.close();
-	eventList_wjets.close();
+	eventList_wjets_lead.close();
+	eventList_wjets_subLead.close();
 
-	syncOut = new TFile("output_tree.root","RECREATE");
-	syncOutTree->Write();
-	syncOut->Close();
+	syncOut_lead = new TFile("output_tree_lead.root","RECREATE");
+	syncOutTree_lead->Write();
+	syncOut_lead->Close();
+	syncOut_subLead = new TFile("output_tree_subLead.root","RECREATE");
+	syncOutTree_subLead->Write();
+	syncOut_subLead->Close();
 
 
    return;
@@ -447,27 +454,24 @@ myobject WHfake::ClosestInCollection(myobject o1, std::vector<myobject> collecti
 
 void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 
-        o_selected = 0;           
-        o_run = 0;           
-        o_lumi = 0;          
-        o_event = 0;
-        o_weight = 0;
-        o_id_iso_leadE = 0;
-        o_id_iso_subLeadE = 0;
-        o_pt_leadE = 0;
-        o_pt_subLeadE = 0;
-        o_pt_tH = 0;
-        o_pt_jet_leadE = 0;
-        o_pt_jet_subLeadE = 0;
-        o_njets = 0;
-        o_maxPt_leadE = 0;
-        o_maxPt_subLeadE = 0;
-        o_mass = 0;
-        o_LT = 0;
-        
-        o_run = m->runNumber;           
-        o_lumi = m->lumiNumber;          
-        o_event = m->eventNumber;
+        o_run_lead = 0;           
+        o_run_subLead = 0;           
+        o_lumi_lead = 0;          
+        o_lumi_subLead = 0;          
+        o_event_lead = 0;
+        o_event_subLead = 0;
+        o_weight_lead = 0;
+        o_weight_subLead = 0;
+        o_id_iso_lead = 0;
+        o_id_iso_subLead = 0;
+        o_pt_lead = 0;
+        o_pt_subLead = 0;
+        o_pt_jet_lead = 0;
+        o_pt_jet_subLead = 0;
+        o_njets_lead = 0;
+        o_njets_subLead = 0;
+        o_maxPt_lead = 0;
+        o_maxPt_subLead = 0;
 
 	// bookkepping part
 	++m_allEvents;
@@ -807,6 +811,7 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		return;
 
 	closestJet_subLead.clear();
+	closestJet_lead.clear();
 
 	for(uint ipair=0; ipair < pair.size(); ipair++){
 		if(examineThisEvent) cout << "Iso of tag " << RelIso(pair[ipair].first) << endl;
@@ -816,42 +821,86 @@ void WHfake::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 		if(Tmass(m,pair[ipair].first) < 30.) continue;
 
 		if(60 > PairMass(pair[ipair].first,pair[ipair].second) || PairMass(pair[ipair].first,pair[ipair].second) > 120){ 
-                      
-                        o_weight = PUWeight;	
 
 			bool etaR = fabs(((pair[ipair].second).eta)) < 1.479;
 			bool relIsoLoose_subLead = RelIso(pair[ipair].second) < 0.20;
 			bool relIsoTight_subLead = RelIso(pair[ipair].second) < 0.15;
+			bool relIsoLoose_lead = RelIso(pair[ipair].second) < 0.15;
+			bool relIsoTight_lead = RelIso(pair[ipair].second) < 0.10;
 			bool isoLoose_subLead = etaR && relIsoLoose_subLead;
 			bool isoTight_subLead = !etaR && relIsoTight_subLead;
+			bool isoLoose_lead = etaR && relIsoLoose_lead;
+			bool isoTight_lead = !etaR && relIsoTight_lead;
 			bool looseEleID = LooseEleId( pair[ipair].second);
+			bool tightEleID = TightEleId( pair[ipair].second);
 
-			if(examineThisEvent) cout << "GOOD! selection finished! Now let's fill the tree... " << endl;
+			o_run_subLead = m->runNumber;           
+			o_lumi_subLead = m->lumiNumber;          
+			o_event_subLead = m->eventNumber;
+			o_weight_subLead = PUWeight;	
+			o_run_lead = m->runNumber;           
+			o_lumi_lead = m->lumiNumber;          
+			o_event_lead = m->eventNumber;
+			o_weight_lead = PUWeight;
 
-			o_pt_subLeadE = (pair[ipair].second).pt;
-			if( looseEleID && (isoLoose_subLead || isoTight_subLead))
-				o_id_iso_subLeadE = 1;
-			else
-				o_id_iso_subLeadE = 0;
+			if( looseEleID && (isoLoose_subLead || isoTight_subLead)){
+				o_id_iso_subLead = 1;
+				o_pt_subLead = (pair[ipair].second).pt;
+				o_njets_subLead = -1;
+				o_pt_jet_subLead = -1;
+				o_maxPt_subLead = -1;
+			}else{
+				o_id_iso_subLead = 0;
+				o_pt_subLead = (pair[ipair].second).pt;
 
-			closestJet_subLead.push_back(ClosestInCollection(pair[ipair].second,m->RecPFJetsAK5,0.5));
+				closestJet_subLead.push_back(ClosestInCollection(pair[ipair].second,m->RecPFJetsAK5,0.5));
 
-			o_njets = nJets[ipair];
-			if(closestJet_subLead.size()==1){
-				o_pt_jet_subLeadE = closestJet_subLead[0].pt;
-				if(closestJet_subLead[0].pt > (pair[ipair].second).pt)
-					o_maxPt_subLeadE = closestJet_subLead[0].pt;
-				else
-					o_maxPt_subLeadE = (pair[ipair].second).pt;
-				closestJet_subLead.clear();
+				o_njets_subLead = nJets[ipair];
+
+				if(closestJet_subLead.size()==1){
+					o_pt_jet_subLead = closestJet_subLead[0].pt;
+					if(closestJet_subLead[0].pt > (pair[ipair].second).pt)
+						o_maxPt_subLead = closestJet_subLead[0].pt;
+					else
+						o_maxPt_subLead = (pair[ipair].second).pt;
+					closestJet_subLead.clear();
+				}
+				else{
+					o_pt_jet_subLead = -1;
+					o_maxPt_subLead = (pair[ipair].second).pt;
+				}
 			}
-			else{
-				o_pt_jet_subLeadE = -1;
-				o_maxPt_subLeadE = (pair[ipair].second).pt;
+			eventList_wjets_subLead << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ;
+			syncOutTree_subLead->Fill();
+
+			if( tightEleID && (isoLoose_lead || isoTight_lead)){
+				o_id_iso_lead = 1;
+				o_pt_lead = (pair[ipair].second).pt;
+				o_njets_lead = -1;
+				o_pt_jet_lead = -1;
+				o_maxPt_lead = -1;
+			}else{
+				o_id_iso_lead = 0;
+				o_pt_lead = (pair[ipair].second).pt;
+				closestJet_lead.push_back(ClosestInCollection(pair[ipair].second,m->RecPFJetsAK5,0.5));
+
+				o_njets_lead = nJets[ipair];
+				if(closestJet_lead.size()==1){
+					o_pt_jet_lead = closestJet_lead[0].pt;
+					if(closestJet_lead[0].pt > (pair[ipair].second).pt)
+						o_maxPt_lead = closestJet_lead[0].pt;
+					else
+						o_maxPt_lead = (pair[ipair].second).pt;
+					closestJet_lead.clear();
+				}
+				else{
+					o_pt_jet_lead = -1;
+					o_maxPt_lead = (pair[ipair].second).pt;
+				}
 			}
-			eventList_wjets << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ;
-			syncOutTree->Fill();
-		}
+			eventList_wjets_lead << m->runNumber << ":" << m->lumiNumber << ":" << m->eventNumber << endl ;
+			syncOutTree_lead->Fill();
+		}//mass condition
 	}//loop of the pairs
 } 
 
