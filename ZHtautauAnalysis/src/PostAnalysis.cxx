@@ -390,12 +390,14 @@ void PostAnalysis::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
 			if(in_pass2){
 				 h_H_svMass_types[in_type2-1]->Fill(in_svMass,in_event_weight2);
 				 Hist("h_svMass")->Fill(in_svMass,in_event_weight2);
-				 //~ std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
-				 //~ << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_M_H1 
-				 //~ << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_M_H2 
-				 //~ << " " << in_MET_x << " " << in_MET_y << " " 
-				 //~ << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
-				 //~ << std::endl;
+				 if(in_type2==7){
+					 std::cout << in_run2 << " " << in_event2 << " " << in_svMass << " " 
+					 << in_px_H1 << " " << in_py_H1 << " " << in_pz_H1 << " " << in_M_H1 
+					 << " " << in_px_H2 << " " << in_py_H2 << " " << in_pz_H2 << " " << in_M_H2 
+					 << " " << in_MET_x << " " << in_MET_y << " " 
+					 << in_covMET_00 << " " << in_covMET_01 << " " << in_covMET_10 << " " << in_covMET_11
+					 << std::endl;
+				 }
 				 if(UseAbdollahTree){
 				 bool foundEv = false;
 					 for(uint iEv=0; iEv < syncTree->GetEntries() && !foundEv; iEv++)

@@ -143,9 +143,9 @@ int stack_upgrade() {
   "GG2L2L",
   "GG4L"};
   
-  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary2011_v4/";
+  TString inputDir = "/home/jpavel/analysis/CMS/histograms/PostMoriod/20130918/MySummary2011_v5/";
   
-  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2011_v4";
+  TString outputDir = "/home/jpavel/analysis/CMS/Plots/Stack/PostMoriond/20130918_2011_v5";
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/png");
   gROOT->ProcessLine(".!mkdir -p "+outputDir+"/pdf");
  
@@ -599,7 +599,7 @@ TString lumist="4.9 fb^{-1}";
   TString outputROOTDir = "/home/jpavel/analysis/CMS/SW/cms-ucl-tau/ZHtautauAnalysis/macros/LimitInput/";
  
   
-  TFile out(outputROOTDir+"vhtt_llLL.inputsNov25-sm-7TeV.root","RECREATE");
+  TFile out(outputROOTDir+"vhtt_llLL.inputsNov26-sm-7TeV.root","RECREATE");
   TString dirNames[8] = { "mmtt_zh","mmet_zh","mmmt_zh","mmme_zh","eett_zh","eemt_zh","eeet_zh","eeem_zh"};
   TString upNames[8] = { "lltt","llet","llmt","llem","lltt","llmt","llet","llem"};
   TString nameES="_CMS_scale_t_";
